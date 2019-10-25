@@ -5,7 +5,7 @@
 	"container": {
 		"locale": "en"
 	},
-	"copy-from-recipe": {
+	"copy-from-package": {
 		"config/": "%CONFIG_DIR%/"
 	}
 }
