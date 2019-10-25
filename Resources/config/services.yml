@@ -1,0 +1,15 @@
+services:
+    rapsys_air.twig.file_get_contents:
+        class: Rapsys\AirBundle\Twig\FileGetContentsExtension
+        tags: [ twig.extension ]
+    rapsys_air.twig.base64:
+        class: Rapsys\AirBundle\Twig\Base64Extension
+        tags: [ twig.extension ]
+    rapsys_air.twig.bb2html:
+        class: Rapsys\AirBundle\Twig\Bb2htmlExtension
+        tags: [ twig.extension ]
+    Rapsys\AirBundle\DataFixtures\AirFixtures:
+        tags: [ doctrine.fixture.orm ]
+#    rapsys_air.example:
+#        class: Rapsys\AirBundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]

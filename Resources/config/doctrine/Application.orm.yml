@@ -1,0 +1,27 @@
+Rapsys\AirBundle\Entity\Application:
+    type: entity
+    repositoryClass: Rapsys\AirBundle\Repository\ApplicationRepository
+    table: applications
+    id:
+        id:
+            type: integer
+            generator: 
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    manyToOne:
+        session:
+            targetEntity: Rapsys\AirBundle\Entity\Session
+            inversedBy: applications
+        user:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            inversedBy: applications
+    oneToMany:
+        votes:
+            targetEntity: Rapsys\AirBundle\Entity\Vote
+            mappedBy: application

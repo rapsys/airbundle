@@ -1,0 +1,32 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block content %}
+	<section id="form">
+		<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
+		<div>
+			{{ form_start(form) }}
+
+				<header>{{ form_errors(form) }}</header>
+
+				<section>
+					{{ form_row(form.mail) }}
+
+					{{ form_row(form.password) }}
+
+					{% if error %}
+						<div class="error">
+							<ul><li><a href="{{ path('rapsys_user_recover') }}">{% trans %}To recover your account click here{% endtrans %}</a></li></ul>
+						</div>
+					{% endif %}
+				</section>
+
+				{{ form_row(form.submit) }}
+
+				{# Render CSRF token etc .#}
+				<footer style="display:none">
+					{{ form_rest(form) }}
+				</footer>
+
+			{{ form_end(form) }}
+		</div>
+	</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block content %}
+	<section id="form">
+		<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+		{% if sent %}
+			<p>{% trans %}Your password is updated and an account recover message has been sent{% endtrans %}</p>
+		{% elseif notfound %}
+			<p>{% trans %}Unable to find account{% endtrans %}</p>
+		{% else %}
+			<div>
+				{{ form_start(form) }}
+
+					<header>{{ form_errors(form) }}</header>
+
+					<section>
+						{{ form_row(form.password) }}
+					</section>
+
+					{{ form_row(form.submit) }}
+
+					{# Render CSRF token etc .#}
+					<footer style="display:none">
+						{{ form_rest(form) }}
+					</footer>
+
+				{{ form_end(form) }}
+			</div>
+		{% endif %}
+	</section>
+{% endblock %}

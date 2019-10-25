@@ -1,0 +1,24 @@
+Rapsys\AirBundle\Entity\Slot:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\SlotRepository
+    table: slots
+    id:
+        id:
+            type: integer
+            generator: 
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        begin:
+            type: time
+        end:
+            type: time
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    oneToMany:
+        sessions:
+            targetEntity: Rapsys\AirBundle\Entity\Session
+            mappedBy: slot

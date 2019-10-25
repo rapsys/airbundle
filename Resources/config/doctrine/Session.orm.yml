@@ -1,0 +1,41 @@
+Rapsys\AirBundle\Entity\Session:
+    type: entity
+    repositoryClass: Rapsys\AirBundle\Repository\SessionRepository
+    table: sessions
+    id:
+        id:
+            type: integer
+            generator: 
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        date:
+            type: date
+        begin:
+            type: time
+            nullable: true
+        end:
+            type: time
+            nullable: true
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    oneToOne:
+        application:
+            targetEntity: Rapsys\AirBundle\Entity\Application
+    manyToOne:
+        location:
+            targetEntity: Rapsys\AirBundle\Entity\Location
+            inversedBy: sessions
+        slot:
+            targetEntity: Rapsys\AirBundle\Entity\Slot
+            inversedBy: sessions
+    oneToMany:
+        applications:
+            targetEntity: Rapsys\AirBundle\Entity\Application
+            mappedBy: session
+    uniqueConstraints:
+        date_location_slot:
+            columns: [ date, location_id, slot_id ]

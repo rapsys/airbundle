@@ -1,0 +1,8 @@
+Rapsys\AirBundle\Entity\Group:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\GroupRepository
+    table: groups
+    manyToMany:
+        users:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            mappedBy: groups

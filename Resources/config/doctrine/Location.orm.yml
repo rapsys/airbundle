@@ -1,0 +1,69 @@
+Rapsys\AirBundle\Entity\Location:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\LocationRepository
+    table: locations
+    id:
+        id:
+            type: integer
+            generator: 
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        title:
+            type: string
+            length: 24
+        address:
+            type: string
+            length: 32
+        zipcode:
+            type: string
+            length: 5
+        city:
+            type: string
+            length: 64
+        latitude:
+            type: decimal
+            precision: 8
+            scale: 6
+        longitude:
+            type: decimal
+            precision: 9
+            scale: 6
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    oneToMany:
+        sessions:
+            targetEntity: Rapsys\AirBundle\Entity\Session
+            mappedBy: location
+
+#        manyToOne:
+#                title:
+#                        targetEntity: Rapsys\UserBundle\Entity\Title
+#                        inversedBy: users
+#        manyToMany:
+#                groups:
+#                        targetEntity: Rapsys\UserBundle\Entity\Group
+#                        inversedBy: users
+#                        joinTable:
+#                                name: groups_users
+#
+#        manyToOne:
+#                site:
+#                        targetEntity: Rapsys\BlogBundle\Entity\Site
+#                        inversedBy: articles
+#                author:
+#                        targetEntity: Rapsys\BlogBundle\Entity\Author
+#                        inversedBy: articles
+#        manyToMany:
+#                keywords:
+#                        targetEntity: Rapsys\BlogBundle\Entity\Keyword
+#                        inversedBy: articles
+#                        joinTable:
+#                                name: articles_keywords
+#        oneToMany:
+#                article_translations:
+#                        targetEntity: Rapsys\BlogBundle\Entity\ArticleTranslation
+#                        mappedBy: article

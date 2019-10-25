@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg4570"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="openair.logo.svg">
+  <title
+     id="title5131">Open Air Logo</title>
+  <defs
+     id="defs4564">
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5174"
+       id="radialGradient5140"
+       cx="3.5708413"
+       cy="290.94611"
+       fx="3.5708413"
+       fy="290.94611"
+       r="3.5708413"
+       gradientTransform="matrix(0.96030384,0.85677319,-2.1146358,1.886651,616.04931,-259.20651)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5174">
+      <stop
+         id="stop5166"
+         offset="0"
+         style="stop-color:#00c3f9;stop-opacity:0" />
+      <stop
+         style="stop-color:#00c3f9;stop-opacity:0.33"
+         offset="0.40000001"
+         id="stop5168" />
+      <stop
+         id="stop5172"
+         offset="1"
+         style="stop-color:#00c3f9;stop-opacity:1;" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="15.839192"
+     inkscape:cx="19.689661"
+     inkscape:cy="10.360728"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1537"
+     inkscape:window-x="-4"
+     inkscape:window-y="-4"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4567">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Open Air Logo</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       inkscape:connector-curvature="0"
+       id="path5017"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:url(#radialGradient5140);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.11197994;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+       d="m 4.2394596,289.42973 c -0.7893188,-7.7e-4 -1.6132823,0.29881 -2.1442353,0.89641 -0.5268689,0.5976 -0.790304,1.41203 -0.790304,2.44326 0,1.02758 0.2634351,1.84019 0.790304,2.43778 0.530953,0.5976 1.2456986,0.89641 2.1442353,0.89641 0.8985367,0 1.6091981,-0.29881 2.1319828,-0.89641 0.5268689,-0.59759 0.790304,-1.4102 0.790304,-2.43778 0,-1.03123 -0.2634351,-1.84566 -0.790304,-2.44326 -0.5227847,-0.5976 -1.3463617,-0.89563 -2.1319828,-0.89641 z m 0,-0.8964 c 1.2824569,0 2.3076057,0.38444 3.0754463,1.1533 0.7678406,0.76523 1.1517608,1.7928 1.1517608,3.08277 0,1.2863 -0.3839202,2.3139 -1.1517608,3.08275 C 6.5470653,296.61738 5.5219165,297 4.2394596,297 2.9529184,297 1.9236856,296.61738 1.1517607,295.85215 0.38392027,295.08693 0,294.05936 0,292.7694 c 0,-1.28997 0.38392027,-2.31754 1.1517607,-3.08277 0.7719249,-0.76886 1.8011577,-1.1533 3.0876989,-1.1533 z"
+       sodipodi:nodetypes="acscscscascscscscs"
+       inkscape:export-xdpi="100.34"
+       inkscape:export-ydpi="100.34" />
+  </g>
+</svg>

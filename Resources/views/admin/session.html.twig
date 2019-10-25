@@ -1,0 +1,31 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block content %}
+<section id="dashboard">
+	<h2>{{ section }}</h2>
+	<div class="panel">
+		<div class="grid">
+			<dl class="cell">
+				<dt><h3>{% trans %}Location{% endtrans %}</h3></dt>
+				<dd>{{ session.location.getTitle() }}</dd>
+			</dl>
+			<dl class="cell">
+				<dt><h3>{% trans %}Date{% endtrans %}</h3></dt>
+				<dd>{{ session.date.format('Y-m-d') }}</dd>
+			</dl>
+			<dl class="cell">
+				<dt><h3>{% trans %}Slot{% endtrans %}</h3></dt>
+				<dd>{{ session.slot.getTitle() }}</dd>
+			</dl>
+			<dl class="cell">
+				<dt><h3>{% trans %}Application{% endtrans %}</h3></dt>
+				{% if session.application is null %}
+					<dd>{% trans %}None{% endtrans %}</dd>
+				{% else %}
+					<dd>{{ session.application.getTitle() }}</dd>
+				{% endif %}
+			</dl>
+		</div>
+	</div>
+	{{ dump(session) }}
+</section>
+{% endblock %}

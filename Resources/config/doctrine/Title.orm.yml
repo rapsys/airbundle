@@ -1,0 +1,8 @@
+Rapsys\AirBundle\Entity\Title:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\TitleRepository
+    table: titles
+    oneToMany:
+        users:
+            targetEntity: User
+            mappedBy: title

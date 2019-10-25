@@ -1,0 +1,27 @@
+Rapsys\AirBundle\Entity\User:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\UserRepository
+    table: users
+    oneToMany:
+        votes:
+            targetEntity: Rapsys\AirBundle\Entity\Vote
+            mappedBy: user
+        applications:
+            targetEntity: Rapsys\AirBundle\Entity\Application
+            mappedBy: user
+#    manyToMany:
+#        groups:
+#            targetEntity: Group
+#            inversedBy: users
+#            joinTable:
+#                name: groups_users
+    associationOverride:
+        groups:
+            joinTable:
+                name: groups_users
+                joinColumns:
+                    id:
+                        name: user_id
+                inverseJoinColumns:
+                    id:
+                        name: group_id

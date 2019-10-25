@@ -1,0 +1,42 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block content %}
+	<section id="form">
+		<h2>{{ title|trans }}</h2>
+		{% if sent %}
+			<p>{% trans %}Your account has been created{% endtrans %}</p>
+		{% else %}
+			<div>
+				{{ form_start(form) }}
+
+					<header>{{ form_errors(form) }}</header>
+
+					<section>
+						{{ form_row(form.mail) }}
+
+						{{ form_row(form.password.first) }}
+
+						{{ form_row(form.password.second) }}
+					</section>
+
+					<section>
+						{{ form_row(form.title) }}
+
+						{{ form_row(form.forename) }}
+
+						{{ form_row(form.surname) }}
+
+						{{ form_row(form.pseudonym) }}
+					</section>
+
+					{{ form_row(form.submit) }}
+
+					{# Render CSRF token etc .#}
+					<footer style="display:none">
+						{{ form_rest(form) }}
+					</footer>
+
+				{{ form_end(form) }}
+			</div>
+		{% endif %}
+	</section>
+{% endblock %}
