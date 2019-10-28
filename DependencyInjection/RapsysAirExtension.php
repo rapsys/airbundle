@@ -17,8 +17,8 @@ class RapsysAirExtension extends Extension {
 	 * {@inheritdoc}
 	 */
 	public function load(array $configs, ContainerBuilder $container) {
-		$loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-		$loader->load('services.yml');
+		$loader = new Loader\YamlFileLoader($container, new FileLocator('config/packages'));
+		$loader->load($this->getAlias().'.yaml');
 
 		$configuration = new Configuration();
 		$config = $this->processConfiguration($configuration, $configs);
