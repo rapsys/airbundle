@@ -22,6 +22,7 @@
         "symfony/routing": "*",
         "symfony/security": "*",
         "symfony/translation": "*",
+        "symfony/twig-bundle": "*",
         "doctrine/data-fixtures": "*",
         "twig/extensions": "^1.5"
     },
