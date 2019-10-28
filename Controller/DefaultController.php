@@ -2,7 +2,7 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Rapsys\AirBundle\Entity\Session;
