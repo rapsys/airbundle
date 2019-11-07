@@ -2,23 +2,38 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+#use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Psr\Container\ContainerInterface;
+use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Application;
 use Symfony\Component\Form\FormError;
 
-class DefaultController extends Controller {
-	public function contactAction(Request $request) {
-		//Get translator
-		$trans = $this->get('translator');
+#class DefaultController extends Controller {
+class DefaultController extends AbstractController {
+	//Container instance
+	protected $container;
 
+	//Translator instance
+	protected $translator;
+
+	public function __construct(ContainerInterface $container, Translator $translator) {
+		//Set the container
+		$this->container = $container;
+
+		//Set the translator
+		$this->translator = $translator;
+	}
+
+	public function contactAction(Request $request) {
 		//Set section
-		$section = $trans->trans('Contact');
+		$section = $this->translator->trans('Contact');
 
 		//Set title
-		$title = $section.' - '.$trans->trans($this->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -37,22 +52,29 @@ class DefaultController extends Controller {
 				$data = $form->getData();
 
 				//Get contact name
-				$contactName = $this->getParameter('rapsys_air.contact_name');
+				$contactName = $this->container->getParameter('rapsys_air.contact_name');
 
 				//Get contact mail
-				$contactMail = $this->getParameter('rapsys_air.contact_mail');
+				$contactMail = $this->container->getParameter('rapsys_air.contact_mail');
 
 				//Get logo
-				$logo = $this->getParameter('rapsys_air.logo');
+				$logo = $this->container->getParameter('rapsys_air.logo');
 
 				//Get title
-				$title = $trans->trans($this->getParameter('rapsys_air.title'));
+				$title = $this->translator->trans($this->container->getParameter('rapsys_air.title'));
 
 				//Get subtitle
-				$subtitle = $trans->trans('Hi,').' '.$contactName;
+				$subtitle = $this->translator->trans('Hi,').' '.$contactName;
 
-				$message = \Swift_Message::newInstance()
-					->setSubject($data['subject'])
+				//Create sendmail transport
+				$transport = new \Swift_SendmailTransport();
+
+				//Create mailer using transport
+				$mailer = new \Swift_Mailer($transport);
+
+				//Create the message
+				($message = new \Swift_Message($data['subject']))
+					#->setSubject($data['subject'])
 					->setFrom([$data['mail'] => $data['name']])
 					->setTo([$contactMail => $contactName])
 					->setBody($data['message'])
@@ -71,8 +93,9 @@ class DefaultController extends Controller {
 						),
 						'text/html'
 					);
-				//Send message
-				if ($this->get('mailer')->send($message)) {
+
+				//Send the message
+				if ($mailer->send($message)) {
 					//Redirect to cleanup the form
 					return $this->redirectToRoute('rapsys_air_contact', ['sent' => 1]);
 				}
@@ -84,29 +107,26 @@ class DefaultController extends Controller {
 	}
 
 	public function indexAction() {
-		//Get translator
-		$trans = $this->get('translator');
-
 		//Set section
-		$section = $trans->trans('Index');
+		$section = $this->translator->trans('Index');
 
 		//Set title
-		$title = $section.' - '.$trans->trans($this->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
 
+		//Render template
 		return $this->render('@RapsysAir/page/index.html.twig', ['title' => $title, 'section' => $section]);
 	}
 
 	public function adminAction(Request $request) {
+		//Prevent non-admin to access here
+		//TODO: maybe check if user is connected 1st ?
 		$this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'Unable to access this page!');
 
-		//Get translator
-		$trans = $this->get('translator');
-
 		//Set section
-		$section = $trans->trans('Admin');
+		$section = $this->translator->trans('Admin');
 
 		//Set title
-		$title = $section.' - '.$trans->trans($this->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -158,7 +178,7 @@ class DefaultController extends Controller {
 					$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $this->getUser());
 
 					//Add error message to mail field
-					$form->get('slot')->addError(new FormError($trans->trans('Application already exists')));
+					$form->get('slot')->addError(new FormError($this->translator->trans('Application already exists')));
 				//Catch no application cases
 				//XXX: combine these catch when php 7.1 is available
 				} catch (\Doctrine\ORM\NoResultException $e) {
@@ -181,7 +201,7 @@ class DefaultController extends Controller {
 					$manager->flush();
 
 					//Add notice in flash message
-					$this->addFlash('notice', $trans->trans('Application request the %date% for %location% on the slot %slot% saved', ['%location%' => $data['location']->getTitle(), '%slot%' => $data['slot']->getTitle(), '%date%' => $data['date']->format('Y-m-d')]));
+					$this->addFlash('notice', $this->translator->trans('Application request the %date% for %location% on the slot %slot% saved', ['%location%' => $data['location']->getTitle(), '%slot%' => $data['slot']->getTitle(), '%date%' => $data['date']->format('Y-m-d')]));
 
 					//Redirect to cleanup the form
 					return $this->redirectToRoute('rapsys_air_admin');
@@ -276,14 +296,11 @@ class DefaultController extends Controller {
 		var_dump($calendar);
 		exit;*/
 
-		//Get translator
-		$trans = $this->get('translator');
-
 		//Set section
-		$section = $trans->trans('Session %id%', ['%id%' => $id]);
+		$section = $this->translator->trans('Session %id%', ['%id%' => $id]);
 
 		//Set title
-		$title = $section.' - '.$trans->trans($this->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
