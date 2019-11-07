@@ -28,6 +28,7 @@ class DefaultController extends AbstractController {
 		$this->translator = $translator;
 	}
 
+	//FIXME: we need to change the $this->container->getParameter($alias.'.xyz') to $this->container->getParameter($alias)['xyz']
 	public function contactAction(Request $request) {
 		//Set section
 		$section = $this->translator->trans('Contact');
