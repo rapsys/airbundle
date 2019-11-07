@@ -11,7 +11,6 @@ use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Application;
 use Symfony\Component\Form\FormError;
 
-#class DefaultController extends Controller {
 class DefaultController extends AbstractController {
 	//Config array
 	protected $config;
@@ -21,7 +20,7 @@ class DefaultController extends AbstractController {
 
 	public function __construct(ContainerInterface $container, Translator $translator) {
 		//Retrieve config
-		$this->config = $container->getParameter('rapsys_air');
+		$this->config = $container->getParameter($this->getAlias());
 
 		//Set the translator
 		$this->translator = $translator;
@@ -317,5 +316,12 @@ class DefaultController extends AbstractController {
 		$session = $doctrine->getRepository(Session::class)->findOneById($id);
 
 		return $this->render('@RapsysAir/admin/session.html.twig', ['title' => $title, 'section' => $section, /*'form' => $form->createView(),*/ 'session' => $session]);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getAlias() {
+		return 'rapsys_air';
 	}
 }
