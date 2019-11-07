@@ -3,9 +3,7 @@
 namespace Rapsys\AirBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -17,24 +15,20 @@ class RapsysAirExtension extends Extension {
 	 * {@inheritdoc}
 	 */
 	public function load(array $configs, ContainerBuilder $container) {
-		$loader = new Loader\YamlFileLoader($container, new FileLocator('config/packages'));
-		$loader->load($this->getAlias().'.yaml');
+		//Load configuration
+		$configuration = $this->getConfiguration($configs, $container);
 
-		$configuration = new Configuration();
+		//Process the configuration to get merged config
 		$config = $this->processConfiguration($configuration, $configs);
 
-		//Set default config in parameter
-		if (!$container->hasParameter($alias = $this->getAlias())) {
-			$container->setParameter($alias, $config[$alias]);
-		} else {
-			$config[$alias] = $container->getParameter($alias);
+		//Detect when no user configuration is provided
+		if ($configs === [[]]) {
+			//Prepend default config
+			$container->prependExtensionConfig($this->getAlias(), $config);
 		}
 
-		//Transform the one level tree in flat parameters
-		foreach($config[$alias] as $k => $v) {
-			//Set is as parameters
-			$container->setParameter($alias.'.'.$k, $v);
-		}
+		//Save configuration in parameters
+		$container->setParameter($this->getAlias(), $config);
 	}
 
 	/**
