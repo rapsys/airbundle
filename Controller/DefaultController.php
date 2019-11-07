@@ -2,9 +2,8 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-#use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,27 +13,26 @@ use Symfony\Component\Form\FormError;
 
 #class DefaultController extends Controller {
 class DefaultController extends AbstractController {
-	//Container instance
-	protected $container;
+	//Config array
+	protected $config;
 
 	//Translator instance
 	protected $translator;
 
 	public function __construct(ContainerInterface $container, Translator $translator) {
-		//Set the container
-		$this->container = $container;
+		//Retrieve config
+		$this->config = $container->getParameter('rapsys_air');
 
 		//Set the translator
 		$this->translator = $translator;
 	}
 
-	//FIXME: we need to change the $this->container->getParameter($alias.'.xyz') to $this->container->getParameter($alias)['xyz']
 	public function contactAction(Request $request) {
 		//Set section
 		$section = $this->translator->trans('Contact');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->config['title']);
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -53,16 +51,16 @@ class DefaultController extends AbstractController {
 				$data = $form->getData();
 
 				//Get contact name
-				$contactName = $this->container->getParameter('rapsys_air.contact_name');
+				$contactName = $this->config['contact_name'];
 
 				//Get contact mail
-				$contactMail = $this->container->getParameter('rapsys_air.contact_mail');
+				$contactMail = $this->config['contact_mail'];
 
 				//Get logo
-				$logo = $this->container->getParameter('rapsys_air.logo');
+				$logo = $this->config['logo'];
 
 				//Get title
-				$title = $this->translator->trans($this->container->getParameter('rapsys_air.title'));
+				$title = $this->translator->trans($this->config['title']);
 
 				//Get subtitle
 				$subtitle = $this->translator->trans('Hi,').' '.$contactName;
@@ -112,7 +110,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Index');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->config['title']);
 
 		//Render template
 		return $this->render('@RapsysAir/page/index.html.twig', ['title' => $title, 'section' => $section]);
@@ -127,7 +125,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Admin');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->config['title']);
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -301,7 +299,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Session %id%', ['%id%' => $id]);
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->container->getParameter('rapsys_air.title'));
+		$title = $section.' - '.$this->translator->trans($this->config['title']);
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
