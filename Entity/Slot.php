@@ -20,7 +20,7 @@ class Slot
     /**
      * @var \DateTime
      */
-    private $end;
+    private $length;
 
     /**
      * @var \DateTime
@@ -80,27 +80,27 @@ class Slot
     }
 
     /**
-     * Set end
+     * Set length
      *
-     * @param \DateTime $end
+     * @param \DateTime $length
      *
      * @return Slot
      */
-    public function setEnd($end)
+    public function setLength($length)
     {
-        $this->end = $end;
+        $this->length = $length;
 
         return $this;
     }
 
     /**
-     * Get end
+     * Get length
      *
      * @return \DateTime
      */
-    public function getEnd()
+    public function getLength()
     {
-        return $this->end;
+        return $this->length;
     }
 
     /**
@@ -186,6 +186,7 @@ class Slot
     }
 
     public function getTitle() {
-	    return $this->begin->format('H:i').'-'.$this->end->format('H:i');
+	    //TODO: replace that with computed time
+	    return $this->begin->format('H:i').'+'.$this->length->format('H:i');
     }
 }
