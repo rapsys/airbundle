@@ -2,14 +2,18 @@
 
 namespace Rapsys\AirBundle\Controller;
 
+use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Session;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\Translation\Translator;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Application;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\NamedAddress;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController {
 	//Config array
@@ -18,7 +22,7 @@ class DefaultController extends AbstractController {
 	//Translator instance
 	protected $translator;
 
-	public function __construct(ContainerInterface $container, Translator $translator) {
+	public function __construct(ContainerInterface $container, TranslatorInterface $translator) {
 		//Retrieve config
 		$this->config = $container->getParameter($this->getAlias());
 
@@ -26,12 +30,12 @@ class DefaultController extends AbstractController {
 		$this->translator = $translator;
 	}
 
-	public function contactAction(Request $request) {
+	public function contact(Request $request, MailerInterface $mailer) {
 		//Set section
 		$section = $this->translator->trans('Contact');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['title']);
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -49,53 +53,50 @@ class DefaultController extends AbstractController {
 				//Get data
 				$data = $form->getData();
 
-				//Get contact name
-				$contactName = $this->config['contact_name'];
+				//Create message
+				$message = (new TemplatedEmail())
+					//Set sender
+					->from(new NamedAddress($data['mail'], $data['name']))
+					//Set recipient
+					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
+					->to(new NamedAddress($this->config['contact']['mail'], $this->config['contact']['name']))
+					//Set subject
+					->subject($data['subject'])
 
-				//Get contact mail
-				$contactMail = $this->config['contact_mail'];
+					//Set path to twig templates
+					->htmlTemplate('@RapsysAir/mail/contact.html.twig')
+					->textTemplate('@RapsysAir/mail/contact.text.twig')
 
-				//Get logo
-				$logo = $this->config['logo'];
-
-				//Get title
-				$title = $this->translator->trans($this->config['title']);
-
-				//Get subtitle
-				$subtitle = $this->translator->trans('Hi,').' '.$contactName;
-
-				//Create sendmail transport
-				$transport = new \Swift_SendmailTransport();
-
-				//Create mailer using transport
-				$mailer = new \Swift_Mailer($transport);
-
-				//Create the message
-				($message = new \Swift_Message($data['subject']))
-					#->setSubject($data['subject'])
-					->setFrom([$data['mail'] => $data['name']])
-					->setTo([$contactMail => $contactName])
-					->setBody($data['message'])
-					->addPart(
-						$this->renderView(
-							'@RapsysAir/mail/generic.html.twig',
-							[
-								'logo' => $logo,
-								'title' => $title,
-								'subtitle' => $subtitle,
-								'home' => $this->get('router')->generate('rapsys_air_homepage', [], UrlGeneratorInterface::ABSOLUTE_URL),
-								'subject' => $data['subject'],
-								'contact_name' => $contactName,
-								'message' => strip_tags($data['message'])
-							]
-						),
-						'text/html'
+					//Set context
+					->context(
+						[
+							'site_logo' => $this->config['site']['logo'],
+							'site_title' => $this->config['site']['title'],
+							'site_url' => $this->get('router')->generate('rapsys_air_homepage', [], UrlGeneratorInterface::ABSOLUTE_URL),
+							'copy_long' => $this->config['copy']['long'],
+							'copy_short' => $this->config['copy']['short'],
+							'subject' => $data['subject'],
+							'message' => strip_tags($data['message']),
+						]
 					);
 
-				//Send the message
-				if ($mailer->send($message)) {
-					//Redirect to cleanup the form
-					return $this->redirectToRoute('rapsys_air_contact', ['sent' => 1]);
+				//Try sending message
+				//XXX: mail delivery may silently fail
+				try {
+					//Send message
+					$mailer->send($message);
+
+					//Redirect on the same route with sent=1 to cleanup form
+					return $this->redirectToRoute($request->get('_route'), ['sent' => 1]+$request->get('_route_params'));
+				//Catch obvious transport exception
+				} catch(TransportExceptionInterface $e) {
+					if ($message = $e->getMessage()) {
+						//Add error message mail unreachable
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->config['contact']['mail'], '%message%' => $this->translator->trans($message)])));
+					} else {
+						//Add error message mail unreachable
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->config['contact']['mail']])));
+					}
 				}
 			}
 		}
@@ -104,28 +105,30 @@ class DefaultController extends AbstractController {
 		return $this->render('@RapsysAir/form/contact.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]);
 	}
 
-	public function indexAction() {
+	public function index() {
 		//Set section
 		$section = $this->translator->trans('Index');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['title']);
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 		//Render template
 		return $this->render('@RapsysAir/page/index.html.twig', ['title' => $title, 'section' => $section]);
 	}
 
-	public function adminAction(Request $request) {
+	public function admin(Request $request) {
 		//Prevent non-admin to access here
-		//TODO: maybe check if user is connected 1st ?
-		$this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'Unable to access this page!');
+		$this->denyAccessUnlessGranted('ROLE_GUEST', null, 'Unable to access this page without ROLE_GUEST!');
 
 		//Set section
 		$section = $this->translator->trans('Admin');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['title']);
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
+		header('Content-Type: text/plain');
+		var_dump('TODO');
+		exit;
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
 		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
@@ -289,7 +292,7 @@ class DefaultController extends AbstractController {
 		return $this->render('@RapsysAir/admin/index.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'calendar' => $calendar]);
 	}
 
-	public function sessionAction(Request $request, $id) {
+	public function session(Request $request, $id) {
 		/*header('Content-Type: text/plain');
 		var_dump($calendar);
 		exit;*/
@@ -298,7 +301,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Session %id%', ['%id%' => $id]);
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['title']);
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
