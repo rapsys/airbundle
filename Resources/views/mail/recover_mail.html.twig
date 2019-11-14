@@ -1,0 +1,16 @@
+{% extends '@RapsysAir/mail/body.html.twig' %}
+{% block title %}{{ subject }}{% endblock %}
+{% block content %}
+	<table class="content">
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome back to %site_title%'|trans({'%site_title%': site_title|trans})}) }}</h2>
+				<p>{{ 'Thanks so much for rejoining %site_title%, the space reservation program.'|trans({'%site_title%': site_title|trans}) }}</p>
+				<p>{% trans %}Your account password has been changed, to recover your account you can follow this link: {% endtrans %}</p>
+				<p><a href="{{ recover_url }}">{{ recover_url }}</a></p>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+{% endblock %}

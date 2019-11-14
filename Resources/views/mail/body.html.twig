@@ -1,0 +1,30 @@
+{% extends '@RapsysAir/mail/base.html.twig' %}
+{% block stylesheets %}
+	<meta name="viewport" content="width=device-width" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<style type="text/css">
+		body {background:white;color:#066}
+		a {text-decoration:none;color:#066}
+		a:hover {text-decoration:underline}
+		table {width: 100%;border-radius: .5rem}
+		table.header {border:.1rem solid #00c3f9;text-align:center}
+		table.content {background:white;border:.1rem solid #00c3f9;margin:.5rem 0}
+		table.footer {border:.1rem solid #00c3f9;text-align:center;font-weight:bold}
+		table.footer summary:after {display:none}
+		table.footer summary::-webkit-details-marker {display:none}
+	</style>
+{% endblock %}
+{% block body %}
+	<table class="header">
+		<tr>
+			<td><a href="{{ site_url }}"><img src="{{ email.image(site_logo) }}" alt="{{ site_title|trans }}" /></a></td>
+			<td><h1><a href="{{ site_url }}">{{ site_title|trans }}</a></h1></td>
+		</tr>
+	</table>
+        {% block content %}{% endblock %}
+	<table class="footer">
+		<tr>
+			<td>{{ copy_long|trans }} - {{ copy_short|trans }}</td>
+		</tr>
+	</table>
+{% endblock %}

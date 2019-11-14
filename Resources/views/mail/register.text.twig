@@ -1,0 +1,9 @@
+{{ subject }}
+{% for i in range(1, subject|length) %}={% endfor %}
+
+
+*{{ 'Thanks so much for joining %site_title%, the space reservation program.'|trans({'%site_title%': site_title|trans}) }}*
+
+--
+
+{{ copy_long }} - {{ copy_short }}

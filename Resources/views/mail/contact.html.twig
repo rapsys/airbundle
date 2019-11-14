@@ -1,43 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-	<meta name="viewport" content="width=device-width" />
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>{{ subject }}</title>
-	<style>
-		body {background:white;color:#066}
-		a {text-decoration:none;color:#066}
-		a:hover {text-decoration:underline}
-		table {width: 100%;border-radius: .5rem}
-		table.head {border:.1rem solid #00c3f9;text-align:center}
-		table.body {background:white;border:.1rem solid #00c3f9;margin:.5rem 0}
-		table.footer {border:.1rem solid #00c3f9;text-align:center;font-weight:bold}
-		table.footer summary:after {display:none}
-		table.footer summary::-webkit-details-marker {display:none}
-	</style>
-</head>
-<body>
-	<table class="head">
-		<tr>
-			<td><a href="{{ url }}"><img src="data:image/png;base64, {{ logo|file_get_contents|base64_encode }}" alt="{{ title|trans }}" /></a></td>
-			<td><h1><a href="{{ url }}">{{ title|trans }}</a></h1></td>
-		</tr>
-	</table>
-	<table class="body">
+{% extends '@RapsysAir/mail/body.html.twig' %}
+{% block title %}{{ subject }}{% endblock %}
+{% block content %}
+	<table class="content">
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<h2>{% trans %}Hi,{% endtrans %} {{ contact_name }}</h2>
-				<h3>{% trans %}Subject:{% endtrans %} {{ subject }}</h3>
+				<h2>{{ 'Subject: %subject%'|trans({'%subject%': subject}) }}</h2>
 				<p>{{ message|nl2br }}</p>
 			</td>
 			<td>&nbsp;</td>
 		</tr>
 	</table>
-	<table class="footer">
-		<tr>
-			<td>{% trans %}Raphaël Gertz all rights reserved{% endtrans %} - {% trans %}Copyright 2018{% endtrans %}.</td>
-		</tr>
-	</table>
-</body>
-</html>
+{% endblock %}
