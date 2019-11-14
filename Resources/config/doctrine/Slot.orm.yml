@@ -12,7 +12,7 @@ Rapsys\AirBundle\Entity\Slot:
     fields:
         begin:
             type: time
-        end:
+        length:
             type: time
         created:
             type: datetime
