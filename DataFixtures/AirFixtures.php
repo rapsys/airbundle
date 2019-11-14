@@ -27,9 +27,9 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 
 		//Title tree
 		$titleTree = array(
-			'M.' => 'Monsieur',
-			'Mlle' => 'Mademoiselle',
-			'Mme' => 'Madame'
+			'Mr.' => 'Mister',
+			'Mrs.' => 'Madam',
+			'Ms.' => 'Miss'
 		);
 
 		//Create titles
@@ -48,8 +48,10 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//Group tree
 		$groupTree = array(
 			'ROLE_USER',
-			'ROLE_ADMIN',
-			'ROLE_SUPER'
+			'ROLE_GUEST',
+			'ROLE_REGULAR',
+			'ROLE_SENIOR',
+			'ROLE_ADMIN'
 		);
 
 		//Create groups
@@ -69,57 +71,63 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//User tree
 		$userTree = array(
 			array(
-				'short' => 'M.',
-				'group' => 'ROLE_SUPER',
-				'mail' => 'airlibre@rapsys.eu',
+				'short' => 'Mr.',
+				'group' => 'ROLE_ADMIN',
+				'mail' => 'tango@rapsys.eu',
 				'pseudonym' => 'Rapsys',
 				'forename' => 'Raphaël',
 				'surname' => 'Gertz',
+				'phone' => '+33677952829',
 				'password' => 'test'
 			),
 			array(
-				'short' => 'M.',
-				'group' => 'ROLE_ADMIN',
+				'short' => 'Mr.',
+				'group' => 'ROLE_SENIOR',
 				'mail' => 'rannou402@orange.fr',
 				'pseudonym' => 'Mitch',
 				'forename' => 'Michel',
 				'surname' => 'Rannou',
+				'phone' => '+33600000000',
 				'password' => 'test'
 			),
 			array(
-				'short' => 'Mlle',
-				'group' => 'ROLE_ADMIN',
+				'short' => 'Ms.',
+				'group' => 'ROLE_REGULAR',
 				'mail' => 'roxmaps@gmail.com',
 				'pseudonym' => 'Roxana',
 				'forename' => 'Roxana',
 				'surname' => 'Prado',
+				'phone' => '+33600000000',
 				'password' => 'test'
 			),
 			array(
-				'short' => 'M.',
-				'group' => 'ROLE_ADMIN',
+				'short' => 'Mr.',
+				'group' => 'ROLE_REGULAR',
 				'mail' => 'majid.ghedjatti@gmail.com',
 				'pseudonym' => 'El Guerrillero',
 				'forename' => 'Majid',
 				'surname' => 'Ghedjatti',
+				'phone' => '+33600000000',
 				'password' => 'test'
 			),
 			array(
-				'short' => 'M.',
-				'group' => 'ROLE_ADMIN',
+				'short' => 'Mr.',
+				'group' => 'ROLE_SENIOR',
 				'mail' => 'denis.courvoisier@wanadoo.fr',
 				'pseudonym' => 'Sined',
 				'forename' => 'Denis',
 				'surname' => 'Courvoisier',
+				'phone' => '+33600000000',
 				'password' => 'test'
 			),
 			array(
-				'short' => 'M.',
-				'group' => 'ROLE_ADMIN',
+				'short' => 'Mr.',
+				'group' => 'ROLE_REGULAR',
 				'mail' => 'kastango13@gmail.com',
 				'pseudonym' => 'Kastrat',
 				'forename' => 'Kastrat',
 				'surname' => 'Hasaj',
+				'phone' => '+33600000000',
 				'password' => 'test'
 			),
 		);
@@ -132,6 +140,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			$user->setPseudonym($userData['pseudonym']);
 			$user->setForename($userData['forename']);
 			$user->setSurname($userData['surname']);
+			$user->setPhone($userData['phone']);
 			$user->setPassword($encoder->encodePassword($user, $userData['password']));
 			$user->setActive(true);
 			$user->setTitle($titles[$userData['short']]);
@@ -149,29 +158,12 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//Location tree
 		$locationTree = [
 			[
-				'title' => 'Esplanade du Trocadéro',
-				'address' => '1 Avenue Hussein 1er de Jordanie',
-				#75016 pour meteo-france, accuweather supporte 75116
-				'zipcode' => '75116',
-				'city' => 'Paris',
-				'latitude' => 48.8619,
-				'longitude' => 2.2888
-			],
-			[
 				'title' => 'Opéra Garnier',
-				'address' => 'Place de l\'Opéra',
+				'address' => '10 Place de l\'Opéra',
 				'zipcode' => '75009',
 				'city' => 'Paris',
-				'latitude' => 48.871365,
-				'longitude' => 2.332026
-			],
-			[
-				'title' => 'Marché Saint Honoré',
-				'address' => '1 Passage des Jacobins',
-				'zipcode' => '75001',
-				'city' => 'Paris',
-				'latitude' => 48.8668,
-				'longitude' => 2.331659
+				'latitude' => 48.871268,
+				'longitude' => 2.331832
 			],
 			[
 				'title' => 'Jardin Tino-Rossi',
@@ -182,12 +174,29 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'longitude' => 2.360953
 			],
 			[
-				'title' => 'Palais de Tokyo',
-				'address' => '13 Avenue du Président Wilson',
+				'title' => 'Esplanade du Trocadéro',
+				'address' => '1 Avenue Hussein 1er de Jordanie',
+				#75016 pour meteo-france, accuweather supporte 75116
 				'zipcode' => '75116',
 				'city' => 'Paris',
-				'latitude' => 48.864567,
-				'longitude' => 2.296892
+				'latitude' => 48.861888,
+				'longitude' => 2.288853
+			],
+			[
+				'title' => 'Marché Saint Honoré',
+				'address' => '1 Passage des Jacobins',
+				'zipcode' => '75001',
+				'city' => 'Paris',
+				'latitude' => 48.866992,
+				'longitude' => 2.331752
+			],
+			[
+				'title' => 'Palais de Tokyo',
+				'address' => '14 Avenue de New York',
+				'zipcode' => '75116',
+				'city' => 'Paris',
+				'latitude' => 48.863827,
+				'longitude' => 2.297339
 			]
 		];
 
@@ -215,15 +224,15 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		$slotTree = [
 			[
 				'begin' => '14:00:00 UTC',
-				'end' => '19:00:00 UTC'
+				'length' => '05:00:00'
 			],
 			[
 				'begin' => '19:00:00 UTC',
-				'end' => '23:00:00 UTC'
+				'length' => '06:00:00'
 			],
 			[
-				'begin' => '23:00:00 UTC',
-				'end' => '02:00:00 UTC'
+				'begin' => '19:00:00 UTC',
+				'length' => '07:00:00'
 			]
 		];
 
@@ -232,7 +241,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		foreach($slotTree as $slotData) {
 			$slot = new Slot();
 			$slot->setBegin(new \DateTime($slotData['begin']));
-			$slot->setEnd(new \DateTime($slotData['end']));
+			$slot->setLength(new \DateTime($slotData['length']));
 			$slot->setCreated(new \DateTime('now'));
 			$slot->setUpdated(new \DateTime('now'));
 			$manager->persist($slot);
