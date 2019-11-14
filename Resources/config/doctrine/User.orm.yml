@@ -2,6 +2,10 @@ Rapsys\AirBundle\Entity\User:
     type: entity
     #repositoryClass: Rapsys\AirBundle\Repository\UserRepository
     table: users
+    fields:
+        phone:
+            type: string
+            length: 16
     oneToMany:
         votes:
             targetEntity: Rapsys\AirBundle\Entity\Vote
