@@ -1,0 +1,7 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block content %}
+<section id="content">
+	<h2><a href="{{ path('rapsys_air_homepage') }}">{{ section }}</a></h2>
+	<p>{% if message %}{{ message }}{% else %}{% trans %}Access denied{% endtrans %}{% endif %}</p>
+</section>
+{% endblock %}
