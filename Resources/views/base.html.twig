@@ -1,78 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="UTF-8" />
-		<title>{% block title %}{{ title }}{% endblock %}</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		{% block stylesheet %}
-			{% stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' %}
-				<link href="{{ asset_url }}" type="text/css" rel="stylesheet" />
-			{% endstylesheet %}
-		{% endblock %}
-		<!--{% block javascript %}
-			{% javascript '@RapsysAirBundle/Resources/public/js/*.js' %}
-				<script src="{{ asset_url }}"></script>
-			{% endjavascript %}
-		{% endblock %}-->
-		<link rel="icon" type="image/png" href="{{ asset('bundles/rapsysair/png/favicon.png') }}" sizes="192x192" />
-		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('bundles/rapsysair/ico/favicon.ico') }}" />
+		{% block metas %}<meta charset="UTF-8">{% endblock %}
+		<title>{% block title %}Welcome!{% endblock %}</title>
+		{% block stylesheets %}{% endblock %}
 	</head>
-	{% block body %}
-		<body>
-			{% block header %}
-				<header id="header">
-					{% block header_title %}
-						{% block blog_title %}<h1><a href="{{ path('rapsys_air_homepage') }}"><img src="{{ asset('bundles/rapsysair/png/logo.png') }}" alt="{% trans %}Open Air{% endtrans %}" /></a></h1>{% endblock %}
-						{% block header_nav %}
-							<nav>
-								<h2>{% trans %}Navigation{% endtrans %}</h2>
-								<a href="{{ path('rapsys_air_admin') }}">{% trans %}Admin{% endtrans %}</a>
-								<a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a>
-								{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-									<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
-								{% else %}
-									<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
-								{% endif %}
-							</nav>
-						{% endblock %}
-						{% block blog_subtitle %}{% endblock %}
-						{% block blog_tagline %}
-							{% if tags is defined and tags %}
-								<ul>
-									{% for id, tag in tags %}
-										<li><h2><a href="#">Tag</a></h2></li>
-									{% endfor %}
-								</ul>
-							{% endif %}
-						{% endblock %}
-					{% endblock %}
-				</header>
-			{% endblock %}
-
-			{# pass an array argument to get the messages of those types (['warning', 'error']) #}
-			{% for label, messages in app.flashes %}
-				{% if messages %}
-					<div class="flash {{label}}">
-						<ul>
-							{% for message in messages %}
-								<li>{{ message }}</li>
-							{% endfor %}
-						</ul>
-					</div>
-				{% endif %}
-			{% endfor %}
-
-			{% block sidebar %}<aside id="sidebar"></aside>{% endblock %}
-
-			{% block content %}<section id="content"></section>{% endblock %}
-
-			{% block footer %}
-				<footer id="footer">
-					<span>&nbsp;</span>
-					<details><summary>{% trans %}Raphaël Gertz all rights reserved{% endtrans %}</summary><span>{% trans %}Copyright 2018{% endtrans %}.</span></details>
-					<span>&nbsp;</span>
-				</footer>
-			{% endblock %}
-		</body>
-	{% endblock %}
+	<body>
+		{% block body %}{% endblock %}
+		{% block javascripts %}{% endblock %}
+	</body>
 </html>

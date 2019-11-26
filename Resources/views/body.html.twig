@@ -1,0 +1,98 @@
+{% extends '@RapsysAir/base.html.twig' %}
+{% block metas %}
+	<meta charset="UTF-8" />
+{% endblock %}
+{% block stylesheets %}
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site_ico) }}" />
+	<link ref="icon" type="image/svg+xml" href="{{ asset(site_svg) }}" />
+	{% for size, icon in site_png %}
+		{# Apple #}
+		{% if size in [152, 167, 180] %}
+			{% if size == 180 %}
+				<link rel="apple-touch-icon" href="{{ asset(icon) }}" />
+			{% endif %}
+			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
+		{# Windows #}
+		{% elseif size in [70, 150, 310] %}
+			<meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ asset(icon) }}" />
+		{# Others #}
+		{% else %}
+			<link rel="icon" type="image/png" size="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
+		{% endif %}
+	{% endfor %}
+	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
+	{% stylesheet '@rapsys_air_bundle/css/{reset,irishgrover,labelleaurore,screen}.css' %}
+		<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+	{% endstylesheet %}
+{% endblock %}
+{% block javascripts %}
+	{#{% javascript '@RapsysAir/js/*.js' %}
+		<script type="text/javascript" src="{{ asset_url }}"></script>
+	{% endjavascript %}#}
+{% endblock %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+	{% block header %}
+		<header id="header">
+			{% block header_title %}<h1><a href="{{ site_url }}"><img src="{{ asset(site_logo) }}" alt="{{ site_title }}" /></a></h1>{% endblock %}
+			{% block header_nav %}
+				<nav>
+					<h2>{% trans %}Navigation{% endtrans %}</h2>
+					<a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a>
+					<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
+					<a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a>
+					<a href="{{ path('rapsys_air_policy') }}">{% trans %}Policy{% endtrans %}</a>
+					{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+						<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
+					{% else %}
+						<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
+						<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
+					{% endif %}
+				</nav>
+			{% endblock %}
+{#
+			{% block site_subtitle %}{% endblock %}
+			{% block site_tagline %}
+				{% if tags is defined and tags %}
+					<ul>
+						{% for id, tag in tags %}
+							<li><h2><a href="#{{id}}">{{tag}}</a></h2></li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			{% endblock %}
+#}
+		</header>
+	{% endblock %}
+	{% block message %}
+		{# pass an array argument to get the messages of those types (['warning', 'error']) #}
+		{% for label, messages in app.flashes %}
+			{% if messages %}
+				<div class="flash {{label}}">
+					<ul>
+						{% for message in messages %}
+							<li>{{ message }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			{% endif %}
+		{% endfor %}
+	{% endblock %}
+{#
+	{% block sidebar %}<aside id="sidebar"></aside>{% endblock %}
+#}
+	{% block content %}
+		<section id="content">
+			<h2><a href="{{ path('rapsys_air_homepage') }}">{{ section }}</a></h2>
+			<p>{% trans %}Outdoor space reservation system{% endtrans %}</p>
+		</section>
+	{% endblock %}
+	{% block footer %}
+		<footer id="footer">
+			<span>&nbsp;</span>
+			<details><summary>{{ copy_long }}</summary><span>{{ copy_short }}</span></details>
+			<span>&nbsp;</span>
+		</footer>
+	{% endblock %}
+{% endblock %}
