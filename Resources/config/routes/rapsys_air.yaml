@@ -1,0 +1,34 @@
+rapsys_air_index:
+    path: /
+    controller: Rapsys\AirBundle\Controller\DefaultController::index
+    methods: GET
+
+rapsys_air_contact:
+    path: /contact
+    controller: Rapsys\AirBundle\Controller\DefaultController::contact
+    methods: GET|POST
+
+rapsys_air_policy:
+    path: /policy
+    controller: Rapsys\AirBundle\Controller\DefaultController::policy
+    methods: GET
+
+rapsys_air_location:
+    path: /locations
+    controller: Rapsys\AirBundle\Controller\LocationController::index
+    methods: GET
+
+rapsys_air_location_show:
+    path: /location/{id<\d+>}
+    controller: Rapsys\AirBundle\Controller\LocationController::show
+    methods: GET
+
+rapsys_air_user:
+    path: /users
+    controller: Rapsys\AirBundle\Controller\UserController::index
+    methods: GET
+
+rapsys_air_user_show:
+    path: /user/{id<\d+>}
+    controller: Rapsys\AirBundle\Controller\UserController::show
+    methods: GET
