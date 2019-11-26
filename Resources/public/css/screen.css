@@ -21,31 +21,37 @@ a::first-letter {
 /* Default styling */
 h1 {
 	font-size: 2rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.34rem 0;
 }
 
 h2 {
 	font-size: 1.5rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.245rem 0;
 }
 
 h3 {
 	font-size: 1.17rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.17rem 0;
 }
 
 h4 {
 	font-size: 1rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.33rem 0;
 }
 
 h5 {
 	font-size: .83rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.386rem 0;
 }
 
 h6 {
 	font-size: .67rem;
+	font-family: 'La Belle Aurore';
 	margin: 1.561rem 0;
 }
 
@@ -55,6 +61,7 @@ p {
 body {
 	display: flex;
 	flex-flow: column wrap;
+	font-family: 'Irish Grover';
 	color: #066;
 }
 
@@ -212,6 +219,7 @@ ul.error {
 /* Content */
 #form,
 #content,
+#policy,
 #dashboard {
 	border: .1rem solid #00c3f9;
 	border-radius: .5rem;
@@ -230,6 +238,7 @@ section h2 {
 }
 
 /* Form */
+#policy,
 form {
 	display: flex;
 	flex-direction: column;
@@ -238,10 +247,14 @@ form {
 	padding: .5rem;
 }
 
+#policy section,
 form section {
 	margin-bottom: 1rem;
 }
 
+#policy section:only-child,
+#policy section:last-child,
+#policy section:last-of-type,
 form section:only-child,
 form section:last-child,
 form section:last-of-type {
@@ -256,6 +269,7 @@ form section section:last-of-type {
 	margin-bottom: 0;
 }
 
+#policy div,
 form div {
 	display: flex;
 	flex-direction: row;
@@ -263,6 +277,9 @@ form div {
 	margin-bottom: .5rem;
 }
 
+#policy div:only-child,
+#policy div:last-child,
+#policy div:last-of-type,
 form div:only-child,
 form div:last-child,
 form div:last-of-type {
@@ -348,7 +365,7 @@ button.submit {
 	border: .05rem solid #00c3f9;
 	flex-grow: 1;
 	border-radius: .2rem; /* marche pas sur chrome */
-	table-layout: fixed;	
+	table-layout: fixed;
 	width: calc(100% - 12rem);
 	border-collapse: collapse;
 }
@@ -420,6 +437,41 @@ button.submit {
 #dashboard .orphaned {
 	background-color: #fc9;
 }
+
+/* Policy */
+#policy h3 {
+	background-color: #cff;
+	border-bottom: .1rem solid #00c3f9;
+	margin: -.5rem -.5rem .5rem -.5rem;
+	padding: .5rem;
+	padding-bottom: .4rem;
+}
+
+#policy section {
+	display: flex;
+	flex-direction: column;
+	border: .05rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .5rem;
+}
+
+#policy section section {
+	padding: .25rem;
+	padding-bottom: .5rem;
+}
+
+#policy dl {
+	padding-bottom: .5rem;
+}
+
+#policy h4 {
+	background-color: #cff;
+	border-bottom: .1rem solid #00c3f9;
+	margin: -.24rem -.24rem .24rem -.24rem;
+	padding: .24rem;
+	padding-bottom: .3rem;
+}
+
 
 /* Footer */
 #footer {

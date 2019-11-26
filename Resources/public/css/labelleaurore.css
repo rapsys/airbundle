@@ -1,0 +1,6 @@
+@font-face {
+	font-family: 'La Belle Aurore';
+	font-style: normal;
+	font-weight: 400;
+	src: local('La Belle Aurore'), local('LaBelleAurore'), url(/bundles/rapsysair/ttf/labelleaurore.v10.ttf) format('truetype');
+}
