@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="256"
+   height="256"
+   viewBox="0 0 67.733332 67.733335"
+   version="1.1"
+   id="svg889"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="favicon.svg">
+  <defs
+     id="defs883">
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5174"
+       id="radialGradient5202-7"
+       cx="34.65731"
+       cy="290.9346"
+       fx="34.65731"
+       fy="290.9346"
+       r="3.534668"
+       gradientTransform="matrix(9.1714284,0,0,10.009461,-285.43901,-2637.2064)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5174">
+      <stop
+         id="stop5166"
+         offset="0"
+         style="stop-color:#00c3f9;stop-opacity:0" />
+      <stop
+         style="stop-color:#00c3f9;stop-opacity:0.33"
+         offset="0.40000001"
+         id="stop5168" />
+      <stop
+         id="stop5172"
+         offset="1"
+         style="stop-color:#00c3f9;stop-opacity:1;" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5174"
+       id="radialGradient871"
+       cx="34.65731"
+       cy="290.9346"
+       fx="34.65731"
+       fy="290.9346"
+       r="3.534668"
+       gradientTransform="matrix(1.0887912,0,0,1.1882787,-33.886051,-56.354079)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.24748737"
+     inkscape:cx="62.103934"
+     inkscape:cy="479.75061"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:window-width="1321"
+     inkscape:window-height="767"
+     inkscape:window-x="286"
+     inkscape:window-y="286"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata886">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:prohibits
+           rdf:resource="http://creativecommons.org/ns#CommercialUse" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-229.26665)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:97.06428528px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:url(#radialGradient5202-7);fill-opacity:1;stroke:none;stroke-width:2.42660713"
+       x="-0.75831473"
+       y="310.27252"
+       id="text5152-4"
+       inkscape:export-xdpi="100.34"
+       inkscape:export-ydpi="100.34"
+       transform="scale(1.0446886,0.95722304)"><tspan
+         sodipodi:role="line"
+         id="tspan5150-1"
+         x="-0.75831473"
+         y="310.27252"
+         style="fill:url(#radialGradient5202-7);fill-opacity:1;stroke-width:2.42660713">A</tspan></text>
+  </g>
+</svg>
