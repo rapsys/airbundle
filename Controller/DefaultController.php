@@ -125,7 +125,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The index page
 	 */
-	public function index(Request $request) {
+	public function index() {
 		//Set section
 		$section = $this->translator->trans('Index');
 
@@ -139,7 +139,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The policy page
 	 */
-	public function policy(Request $request) {
+	public function policy() {
 		//Set section
 		$section = $this->translator->trans('Policy');
 
