@@ -18,40 +18,47 @@ a::first-letter {
 	color: #00c3f9;
 }
 
+/* Font styling */
+html, body, dd, li, p, td {
+	font-family: 'Droid Sans', sans-serif;
+}
+
+button, code, input, option, pre, select, textarea {
+	font-family: 'Droid Sans Mono', monospace;
+}
+
+dt, h1, h2, h3, h4, h5, h6, label, legend, th, details {
+	font-family: 'Droid Serif', serif;
+}
+
 /* Default styling */
 h1 {
 	font-size: 2rem;
-	font-family: 'La Belle Aurore';
 	margin: 1.34rem 0;
 }
 
 h2 {
 	font-size: 1.5rem;
-	font-family: 'La Belle Aurore';
 	margin: 1.245rem 0;
 }
 
 h3 {
 	font-size: 1.17rem;
-	font-family: 'La Belle Aurore';
 	margin: 1.17rem 0;
 }
 
 h4 {
 	font-size: 1rem;
-	font-family: 'La Belle Aurore';
 	margin: 1.33rem 0;
 }
 
 h5 {
-	font-size: .83rem;
-	font-family: 'La Belle Aurore';
+	font-size: .85rem;
 	margin: 1.386rem 0;
 }
 
 h6 {
 	font-size: .67rem;
-	font-family: 'La Belle Aurore';
 	margin: 1.561rem 0;
 }
 
@@ -61,7 +68,6 @@ p {
 body {
 	display: flex;
 	flex-flow: column wrap;
-	font-family: 'Irish Grover';
 	color: #066;
 }
 
@@ -232,13 +238,30 @@ ul.error {
 section h2 {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
-	margin: -.5rem -.5rem .5rem -.5rem;
+	margin: -.5rem;
+	margin-bottom: .5rem;
 	padding: .5rem;
-	padding-bottom: .4rem;
+	padding-bottom: .5rem;
+}
+
+section h3 {
+	background-color: #cff;
+	border-bottom: .1rem solid #00c3f9;
+	margin: -.45rem;
+	margin-bottom: .45rem;
+	padding: .45rem;
+	padding-bottom: .5rem;
+}
+
+section h4 {
+	background-color: #cff;
+	border-bottom: .1rem solid #00c3f9;
+	margin: -.25rem;
+	margin-bottom: .25rem;
+	padding: .4rem;
 }
 
 /* Form */
-#policy,
 form {
 	display: flex;
 	flex-direction: column;
@@ -247,14 +270,10 @@ form {
 	padding: .5rem;
 }
 
-#policy section,
 form section {
 	margin-bottom: 1rem;
 }
 
-#policy section:only-child,
-#policy section:last-child,
-#policy section:last-of-type,
 form section:only-child,
 form section:last-child,
 form section:last-of-type {
@@ -269,17 +288,13 @@ form section section:last-of-type {
 	margin-bottom: 0;
 }
 
-#policy div,
 form div {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-around;
+	justify-content: center;
 	margin-bottom: .5rem;
 }
 
-#policy div:only-child,
-#policy div:last-child,
-#policy div:last-of-type,
 form div:only-child,
 form div:last-child,
 form div:last-of-type {
@@ -295,9 +310,9 @@ form section section div.error {
 }
 
 label {
-	min-width: 5rem;
-	font-size: .9rem;
-	padding: .2rem 0;
+	min-width: 10rem;
+	font-size: .85rem;
+	padding: .2rem 1rem .2rem 0;
 	text-align: right;
 	white-space: nowrap;
 }
@@ -439,13 +454,25 @@ button.submit {
 }
 
 /* Policy */
-#policy h3 {
+#policy {
+	display: flex;
+	flex-direction: column;
+	/*border: .1rem solid #00c3f9;
+	border-radius: .5rem;
+	margin: .5rem;
+	margin-top: 0;
+	overflow: hidden;
+	padding: .5rem;*/
+}
+
+
+/*#policy h4 {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
-	margin: -.5rem -.5rem .5rem -.5rem;
-	padding: .5rem;
-	padding-bottom: .4rem;
-}
+	margin: -.24rem -.24rem .24rem -.24rem;
+	padding: .24rem;
+	padding-bottom: .3rem;
+}*/
 
 #policy section {
 	display: flex;
@@ -453,25 +480,85 @@ button.submit {
 	border: .05rem solid #00c3f9;
 	border-radius: .2rem;
 	padding: .5rem;
+	margin-bottom: 1rem;
 }
 
 #policy section section {
 	padding: .25rem;
 	padding-bottom: .5rem;
+	margin-bottom: .5rem;
 }
+
+#policy section:only-child,
+#policy section:last-child,
+#policy section:last-of-type {
+	margin-bottom: .5rem;
+}
+
+#policy section section:only-child,
+#policy section section:last-child,
+#policy section section:last-of-type {
+	margin-bottom: 0;
+}
+
+/*#policy div {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin-bottom: .5rem;
+}
+
+#policy div:only-child,
+#policy div:last-child,
+#policy div:last-of-type {
+	margin-bottom: 0;
+}*/
+/*
+ * XXX: TODO:
+ * see https://developer.mozilla.org/fr/docs/Web/HTML/Element/dl
+ * see https://www.w3.org/Style/Examples/007/fonts.fr.html
+ * see https://fonts.googleapis.com/css?family=Droid+Sans:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i|Droid+Sans+Mono:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i|Droid+Serif:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i
+ * see https://fonts.google.com/?query=droi
+ * see https://fonts.google.com/specimen/Inconsolata
+ * see https://fonts.google.com/specimen/Tangerine%20light,light+italic+regular+semi-bold+bold+extra-bold
+ * see https://fonts.google.com/?selection.family=Roboto:100i
+ * see https://developers.google.com/fonts/docs/getting_started
+ */
 
 #policy dl {
-	padding-bottom: .5rem;
+	/*display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	padding-bottom: .5rem;*/
+	padding: .25rem;
+	margin-bottom: .5rem;
 }
 
-#policy h4 {
-	background-color: #cff;
-	border-bottom: .1rem solid #00c3f9;
-	margin: -.24rem -.24rem .24rem -.24rem;
-	padding: .24rem;
-	padding-bottom: .3rem;
+#policy dt {
+	font-size: .9rem;
+	font-weight: bold;
+	padding-bottom: .2rem;
 }
 
+#policy dd {
+	font-size: .9rem;
+	margin-left: 1.5rem;
+}
+
+#policy dd:before {
+}
+
+#policy dl:only-child,
+#policy dl:last-child,
+#policy dl:last-of-type,
+#policy dt:only-child,
+#policy dt:last-child,
+#policy dt:last-of-type,
+#policy dd:only-child,
+#policy dd:last-child,
+#policy dd:last-of-type {
+	margin-bottom: 0;
+}
 
 /* Footer */
 #footer {
