@@ -1,0 +1,58 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+<section id="dashboard">
+TODO:
+	<h2>{% trans %}Dashboard{% endtrans %}</h2>
+	<div class="panel">
+		{% if calendar is defined and calendar %}
+			<table class="grid">
+				<tbody>
+					<tr>
+						{% for date, day in calendar %}
+							<td class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
+								<h3>{{ day.title }}</h3>
+								{% if day.sessions is not empty %}
+									<ul>
+										{% for session in day.sessions %}
+											<li class="{{ ['session']|merge(session.class)|join(' ') }}">
+												<a href="{{ path('rapsys_air_session', {'id': session.id}) }}" title="{{ session.title }}">{{ session.title }}</a>
+											</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</td>
+							{% if loop.index % 7 == 0 and not loop.last %}
+								</tr>
+								<tr>
+							{% endif %}
+						{% endfor %}
+					</tr>
+				</tbody>
+			</table>
+		{% endif %}
+		<div>
+		{{ form_start(form) }}
+
+			<header>{{ form_errors(form) }}</header>
+
+			<section>
+				{{ form_row(form.location) }}
+
+				{{ form_row(form.date) }}
+
+				{{ form_row(form.slot) }}
+			</section>
+
+			{{ form_row(form.submit) }}
+
+			{# Render CSRF token etc .#}
+			<footer style="display:none">
+				{{ form_rest(form) }}
+			</footer>
+
+		{{ form_end(form) }}
+		</div>
+	</div>
+	{# dump(calendar) #}
+</section>
+{% endblock %}

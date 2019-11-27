@@ -1,0 +1,87 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="policy">
+		<h2><a href="{{ path('rapsys_air_index') }}">{{ section }}</a></h2>
+		<section>
+			<h3>Guest</h3>
+			<section class="panel">
+				<h4>Prerequisite</h4>
+				<dl class="grid">
+					<dt>Who</dt>
+					<dd>Anyone</dd>
+				</dl>
+				<dl class="grid">
+					<dt>Residence</dt>
+					<dd>Anywhere</dt>
+				</dl>
+				<dl class="grid">
+					<dt>Skill</dt>
+					<dd>Basic tango ballroom organisation</dd>
+					<dd>Basic tango music programming</dd>
+					<dd>Basic french communication</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>Hardware</h4>
+				<dl>
+					<dt>Music</dt>
+					<dd></dd>
+				</dl>
+				<p>
+					Matériel à prévoir :
+					- Une sono de 200W (Ibiza 8) ou suppérieure
+					- Un lecteur avec 4h d'autonomie (téléphone/baladeur)
+					- Câble
+					- Flacon de talc
+					- Corde
+					- Balais selon le lieu
+
+					Préparation à remplir :
+					- Une liste de lecture de 4h déconnectée
+					- Assister un dj pour une soirée sur place
+					- Répétition générale à la maison
+
+					Les limitations :
+					- première soirée sur low spot en semaine
+					- représentation unique à Opéra en semaine
+				</p>
+			</section>
+		</section>
+		<section>
+		<h3>Regular</h3>
+		<p>
+			Les conditions à remplir :
+			- Une sono de 250W (Ibiza 10) ou suppérieure
+			- Un lecteur avec 6h d'autonomie (téléphone/baladeur)
+			- Câble
+			- Flacon de talc
+			- Corde avec fanions
+			- Balais
+
+			Préparation à remplir :
+			- Une liste de lecture de 6h déconnectée
+			- Un renouvellement une fois par mois de la liste de lecture
+			- Avoir assisté un dj pour une soirée sur place
+			- Avoir fait une répétition générale à la maison
+
+			Les limitations :
+			- première soirée sur low spot
+			- représentation à Opéra en semaine
+		</p>
+		</section>
+		<section>
+		<h3>Senior</h3>
+		<p>
+
+			- Une playlist hors ligne (mise à jour tous les mois)
+			- Un système de lecture de musique (
+			- Une sono de 200W (Ibiza 8) ou suppérieure
+
+			Les limitations :
+			- répétition sur un low spot préalable
+			- représentation unique à Opéra
+		</p>
+		</section>
+		<p>{{ 'Welcome to the outdoor space reservation system'|trans }}</p>
+	</section>
+{% endblock %}
