@@ -39,7 +39,8 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		$container->setParameter($this->getAlias(), $config);
 
 		//Store flattened array in parameters
-		foreach($this->flatten($config, $this->getAlias()) as $k => $v) {
+		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
+		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
 	}
@@ -64,19 +65,21 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 	 * @param $path		The current key path
 	 * @param $depth	The maxmium depth
 	 * @param $sep		The separator string
+	 * @param $skip		The skipped paths array
 	 */
-	protected function flatten($array, $path = '', $depth = 10, $sep = '.') {
+	protected function flatten($array, $path = '', $depth = 10, $sep = '.', $skip = []) {
 		//Init res
 		$res = array();
 
-		//Pass through non hashed or empty array
-		if ($depth && is_array($array) && ($array === [] || array_keys($array) === range(0, count($array) - 1))) {
-			$res[$path] = $array;
-		//Flatten hashed array
-		} elseif ($depth && is_array($array)) {
+		//Detect numerical only array
+		//count(array_filter($array, function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY)) == 0
+		//array_reduce(array_keys($array), function($c, $k) { return $c += !is_numeric($k); }, 0)
+
+		//Flatten hashed array until depth reach zero
+		if ($depth && is_array($array) && $array !== [] && !in_array($path, $skip)) {
 			foreach($array as $k => $v) {
 				$sub = $path ? $path.$sep.$k:$k;
-				$res += $this->flatten($v, $sub, $depth - 1, $sep);
+				$res += $this->flatten($v, $sub, $depth - 1, $sep, $skip);
 			}
 		//Pass scalar value directly
 		} else {
