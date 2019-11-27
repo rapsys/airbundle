@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\NamedAddress;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -78,10 +78,10 @@ class DefaultController extends AbstractController {
 				//Create message
 				$message = (new TemplatedEmail())
 					//Set sender
-					->from(new NamedAddress($data['mail'], $data['name']))
+					->from(new Address($data['mail'], $data['name']))
 					//Set recipient
 					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
-					->to(new NamedAddress($this->config['contact']['mail'], $this->config['contact']['name']))
+					->to(new Address($this->config['contact']['mail'], $this->config['contact']['name']))
 					//Set subject
 					->subject($data['subject'])
 
