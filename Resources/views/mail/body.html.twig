@@ -1,4 +1,4 @@
-{% extends '@RapsysAir/mail/base.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -17,14 +17,14 @@
 {% block body %}
 	<table class="header">
 		<tr>
-			<td><a href="{{ site_url }}"><img src="{{ email.image(site_logo) }}" alt="{{ site_title|trans }}" /></a></td>
-			<td><h1><a href="{{ site_url }}">{{ site_title|trans }}</a></h1></td>
+			<td><a href="{{ site_url|escape('html_attr') }}"><img src="{{ email.image(site_logo) }}" alt="{{ site_title|escape('html_attr') }}" /></a></td>
+			<td><h1><a href="{{ site_url|escape('html_attr') }}">{{ site_title }}</a></h1></td>
 		</tr>
 	</table>
         {% block content %}{% endblock %}
 	<table class="footer">
 		<tr>
-			<td>{{ copy_long|trans }} - {{ copy_short|trans }}</td>
+			<td>{{ copy_long }} - {{ copy_short }}</td>
 		</tr>
 	</table>
 {% endblock %}

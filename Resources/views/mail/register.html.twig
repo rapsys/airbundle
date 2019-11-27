@@ -5,9 +5,9 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome to %site_title%'|trans({'%site_title%': site_title|trans})}) }}</h2>
+				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome to %site_title%'|trans({'%site_title%': site_title})|raw}) }}</h2>
 				<h3>{{ 'Hi %recipient_name%,'|trans({'%recipient_name%': recipient_name}) }}</h3>
-				<p>{{ 'Thanks so much for joining %site_title%, the space reservation program.'|trans({'%site_title%': site_title|trans}) }}</p>
+				<p>{{ 'Thanks so much for joining %site_title%, the space reservation program.'|trans({'%site_title%': site_title}) }}</p>
 			</td>
 			<td>&nbsp;</td>
 		</tr>
