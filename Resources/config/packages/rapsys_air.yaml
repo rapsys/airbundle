@@ -118,9 +118,9 @@ doctrine:
 security:
     #Set encoders
     encoders:
-        Rapsys\AirBundle\Entity\User: plaintext
-        #Rapsys\AirBundle\Entity\User:
-        #    algorithm: 'bcrypt'
+        #Rapsys\AirBundle\Entity\User: plaintext
+        Rapsys\AirBundle\Entity\User:
+            algorithm: 'bcrypt'
 
     #Set providers
     providers:
