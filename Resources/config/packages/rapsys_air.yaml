@@ -221,7 +221,7 @@ services:
     #Replace default package
     #XXX: set base path to /bundles/<bundlealias> and disable versioning
     assets._default_package:
-        class: 'Rapsys\PackBundle\Asset\PathPackage'
+        class: 'Rapsys\PackBundle\Asset\PackPackage'
         arguments: [ '/bundles/%%s', '@assets.empty_version_strategy', '@assets.context' ]
 #       arguments: [ '/', '@assets.static_version_strategy', '@assets.context' ]
 #   #Set version strategy
