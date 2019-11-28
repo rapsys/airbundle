@@ -186,7 +186,7 @@ security:
 #        version_format: '%%s?v=%%s'
 #
 #        packages:
-#            pack_package:
+#            pack:
 #                base_path: '/bundles/%%s'
 
 #Service configuration
@@ -218,12 +218,10 @@ services:
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         tags: [ 'doctrine.fixture.orm' ]
-    #Replace default package
-    #XXX: set base path to /bundles/<bundlealias> and disable versioning
-    assets._default_package:
-        class: 'Rapsys\PackBundle\Asset\PackPackage'
-        arguments: [ '/bundles/%%s', '@assets.empty_version_strategy', '@assets.context' ]
-#       arguments: [ '/', '@assets.static_version_strategy', '@assets.context' ]
+    #Replace assets packages
+    assets.packages:
+        class: Symfony\Component\Asset\Packages
+        arguments: [ '@assets.pack_package' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
