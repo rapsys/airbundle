@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\Slot:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\SlotRepository
+    repositoryClass: Rapsys\AirBundle\Repository\SlotRepository
     table: slots
     id:
         id:
@@ -10,10 +10,9 @@ Rapsys\AirBundle\Entity\Slot:
             options:
                 unsigned: true
     fields:
-        begin:
-            type: time
-        length:
-            type: time
+        title:
+            type: string
+            length: 16
         created:
             type: datetime
         updated:
