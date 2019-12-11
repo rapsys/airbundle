@@ -47,7 +47,7 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface {
 				}
 
 				//Remove route and controller from route defaults
-				unset($route['_route'], $route['_controller']);
+				unset($route['_route'], $route['_controller'], $route['_canonical_route']);
 
 				//Generate url
 				$url = $this->router->generate($name, $route);
@@ -71,7 +71,7 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface {
 				}
 
 				//Remove route and controller from route defaults
-				unset($route['_route'], $route['_controller']);
+				unset($route['_route'], $route['_controller'], $route['_canonical_route']);
 
 				//Generate url
 				$url = $this->router->generate($name, $route);
@@ -97,7 +97,7 @@ class LogoutSuccessHandler implements LogoutSuccessHandlerInterface {
 				$defaults = $route->getDefaults();
 
 				//Remove route and controller from route defaults
-				unset($defaults['_route'], $defaults['_controller']);
+				unset($defaults['_route'], $defaults['_controller'], $defaults['_canonical_route']);
 
 				//Generate url
 				$url = $this->router->generate($name, $defaults);
