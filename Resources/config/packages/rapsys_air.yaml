@@ -19,7 +19,7 @@ rapsys_user:
     #Route replacement
     route:
         index:
-            name: 'rapsys_air_index'
+            name: 'rapsys_air'
     #Contact replacement
     contact:
         name: '%rapsys_air.contact.name%'
@@ -151,8 +151,9 @@ security:
 
             #Set form login
             #XXX: https://symfony.com/doc/current/security/form_login_setup.html
+            #TODO: https://symfony.com/doc/current/security/guard_authentication.html
             form_login:
-                use_referer: false
+                use_referer: true
                 login_path: rapsys_user_login
                 check_path: rapsys_user_login
                 username_parameter: 'login[mail]'
@@ -160,8 +161,10 @@ security:
 
             #Set logout route
             logout:
-                path: /logout
-                target: /
+                path: rapsys_user_logout
+                #XXX: see https://symfony.com/doc/current/security.html#logging-out
+                success_handler: Rapsys\AirBundle\Security\LogoutSuccessHandler
+                #target: /
 
             #Set custom access denied handler
             access_denied_handler: Rapsys\AirBundle\Security\AccessDeniedHandler
@@ -173,10 +176,12 @@ security:
         ROLE_SENIOR: [ 'ROLE_USER', 'ROLE_GUEST', 'ROLE_REGULAR' ]
         ROLE_ADMIN: [ 'ROLE_USER', 'ROLE_GUEST', 'ROLE_REGULAR', 'ROLE_SENIOR' ]
 
-##Framework configuration
-#XXX: don't use that shit, it breaks assets._default_package url generation
+#Framework configuration
 #framework:
+#    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
+#
 #    #Assets configuration
+#    XXX: don't use that shit, it breaks assets._default_package url generation
 #    assets:
 #        #Set default base path
 #        #base_path: '/bundles/%%s'
@@ -206,33 +211,51 @@ services:
         tags: [ 'twig.extension' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
-        arguments: [ '@service_container', '@translator', '@router' ]
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register location controller
     Rapsys\AirBundle\Controller\LocationController:
-        arguments: [ '@service_container', '@translator', '@router' ]
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
+    #Register application controller
+    Rapsys\AirBundle\Controller\ApplicationController:
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
+    #Register user controller
+    Rapsys\AirBundle\Controller\UserController:
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
+    #Register error controller
+    Rapsys\AirBundle\Controller\ErrorController:
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register access denied handler
     Rapsys\AirBundle\Security\AccessDeniedHandler:
-        arguments: [ '@service_container', '@translator', '@twig' ]
+        arguments: [ '@service_container', '@twig', '@router', '@translator' ]
+    #Register logout success handler
+    Rapsys\AirBundle\Security\LogoutSuccessHandler:
+        arguments: [ '@router' ]
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         tags: [ 'doctrine.fixture.orm' ]
     #Replace assets packages
     assets.packages:
-        class: Symfony\Component\Asset\Packages
-        arguments: [ '@assets.pack_package' ]
+        class: 'Symfony\Component\Asset\Packages'
+        arguments: [ '@rapsys.pack_package' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
 #       arguments: [ 'x', '%%s?v=%%s' ]
+    Rapsys\AirBundle\Form\ApplicationType:
+        arguments: [ '@doctrine', '@translator' ]
+        tags: [ 'form.type' ]
 
 #Twig Configuration
 twig:
-#   #Enforce debug
-#   debug: true
-#   auto_reload: ~
-#   cache: false
+    #Enforce debug
+    debug: true
+    auto_reload: ~
+    cache: false
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
     form_theme: [ '@RapsysAir/form/form_div_layout.html.twig' ]
@@ -241,3 +264,5 @@ twig:
         #Required by email.image(site_logo) directive
         #XXX: Allow twig to resolve @RapsysAir/png/logo.png in vendor/rapsys/airbundle/Resources/public/png/logo.png
         '%kernel.project_dir%/vendor/rapsys/airbundle/Resources/public': 'RapsysAir'
+    #Override default exception controller
+    #exception_controller: Rapsys\AirBundle\Controller\ErrorController::preview
