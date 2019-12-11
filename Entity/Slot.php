@@ -5,188 +5,151 @@ namespace Rapsys\AirBundle\Entity;
 /**
  * Slot
  */
-class Slot
-{
-    /**
-     * @var integer
-     */
-    private $id;
+class Slot {
+	/**
+	 * @var integer
+	 */
+	private $id;
 
-    /**
-     * @var \DateTime
-     */
-    private $begin;
+	/**
+	 * @var string
+	 */
+	protected $title;
 
-    /**
-     * @var \DateTime
-     */
-    private $length;
+	/**
+	 * @var \DateTime
+	 */
+	private $created;
 
-    /**
-     * @var \DateTime
-     */
-    private $created;
+	/**
+	 * @var \DateTime
+	 */
+	private $updated;
 
-    /**
-     * @var \DateTime
-     */
-    private $updated;
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $sessions;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $sessions;
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
+	}
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+	/**
+	 * Get id
+	 *
+	 * @return integer
+	 */
+	public function getId() {
+		return $this->id;
+	}
 
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * Set title
+	 *
+	 * @param string $title
+	 *
+	 * @return Title
+	 */
+	public function setTitle($title) {
+		$this->title = $title;
 
-    /**
-     * Set begin
-     *
-     * @param \DateTime $begin
-     *
-     * @return Slot
-     */
-    public function setBegin($begin)
-    {
-        $this->begin = $begin;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * Get title
+	 *
+	 * @return string
+	 */
+	public function getTitle(): string {
+		return $this->title;
+	}
 
-    /**
-     * Get begin
-     *
-     * @return \DateTime
-     */
-    public function getBegin()
-    {
-        return $this->begin;
-    }
+	/**
+	 * Set created
+	 *
+	 * @param \DateTime $created
+	 *
+	 * @return Slot
+	 */
+	public function setCreated($created) {
+		$this->created = $created;
 
-    /**
-     * Set length
-     *
-     * @param \DateTime $length
-     *
-     * @return Slot
-     */
-    public function setLength($length)
-    {
-        $this->length = $length;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * Get created
+	 *
+	 * @return \DateTime
+	 */
+	public function getCreated() {
+		return $this->created;
+	}
 
-    /**
-     * Get length
-     *
-     * @return \DateTime
-     */
-    public function getLength()
-    {
-        return $this->length;
-    }
+	/**
+	 * Set updated
+	 *
+	 * @param \DateTime $updated
+	 *
+	 * @return Slot
+	 */
+	public function setUpdated($updated) {
+		$this->updated = $updated;
 
-    /**
-     * Set created
-     *
-     * @param \DateTime $created
-     *
-     * @return Slot
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * Get updated
+	 *
+	 * @return \DateTime
+	 */
+	public function getUpdated() {
+		return $this->updated;
+	}
 
-    /**
-     * Get created
-     *
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
+	/**
+	 * Add session
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 *
+	 * @return Slot
+	 */
+	public function addSession(\Rapsys\AirBundle\Entity\Session $session) {
+		$this->sessions[] = $session;
 
-    /**
-     * Set updated
-     *
-     * @param \DateTime $updated
-     *
-     * @return Slot
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * Remove session
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 */
+	public function removeSession(\Rapsys\AirBundle\Entity\Session $session) {
+		$this->sessions->removeElement($session);
+	}
 
-    /**
-     * Get updated
-     *
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
+	/**
+	 * Get sessions
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSessions() {
+		return $this->sessions;
+	}
 
-    /**
-     * Add session
-     *
-     * @param \Rapsys\AirBundle\Entity\Session $session
-     *
-     * @return Slot
-     */
-    public function addSession(\Rapsys\AirBundle\Entity\Session $session)
-    {
-        $this->sessions[] = $session;
-
-        return $this;
-    }
-
-    /**
-     * Remove session
-     *
-     * @param \Rapsys\AirBundle\Entity\Session $session
-     */
-    public function removeSession(\Rapsys\AirBundle\Entity\Session $session)
-    {
-        $this->sessions->removeElement($session);
-    }
-
-    /**
-     * Get sessions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSessions()
-    {
-        return $this->sessions;
-    }
-
-    public function getTitle() {
-	    //TODO: replace that with computed time
-	    return $this->begin->format('H:i').'+'.$this->length->format('H:i');
-    }
+	/**
+	 * Returns a string representation of the slot
+	 *
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->title;
+	}
 }
