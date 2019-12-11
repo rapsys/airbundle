@@ -31,7 +31,7 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	 *
 	 * @param $period The date period
 	 */
-	public function findByDatePeriod($period) {
+	public function findAllByDatePeriod($period) {
 		//Fetch sessions
 		$ret = $this->getEntityManager()
 			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE s.date BETWEEN :begin AND :end')
