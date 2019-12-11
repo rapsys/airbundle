@@ -2,31 +2,40 @@
 {% block content %}
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
-		<div>
-			{{ form_start(form) }}
-
-				<header>{{ form_errors(form) }}</header>
-
+		<section>
+			{{ form_start(login) }}
 				<section>
-					{{ form_row(form.mail) }}
+					{{ form_row(login.mail) }}
 
-					{{ form_row(form.password) }}
-
-					{% if error %}
-						<div class="error">
-							<ul><li><a href="{{ path('rapsys_user_recover') }}">{% trans %}To recover your account click here{% endtrans %}</a></li></ul>
-						</div>
-					{% endif %}
+					{{ form_row(login.password) }}
 				</section>
 
-				{{ form_row(form.submit) }}
+				{{ form_row(login.submit) }}
 
 				{# Render CSRF token etc .#}
 				<footer style="display:none">
-					{{ form_rest(form) }}
+					{{ form_rest(login) }}
 				</footer>
+			{{ form_end(login) }}
+		</section>
+		{% if recover is defined %}
+			<section>
+				<h3>Recover</h3>
+				{{ form_start(recover) }}
 
-			{{ form_end(form) }}
-		</div>
+					<section>
+						{{ form_row(recover.mail) }}
+
+						{{ form_row(recover.submit) }}
+					</section>
+
+					{# Render CSRF token etc .#}
+					<footer style="display:none">
+						{{ form_rest(recover) }}
+					</footer>
+
+				{{ form_end(recover) }}
+			</section>
+		{% endif %}
 	</section>
 {% endblock %}
