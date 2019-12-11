@@ -15,6 +15,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
+use Rapsys\UserBundle\Utils\Slugger;
 
 class DefaultController extends AbstractController {
 	//Config array
@@ -23,15 +24,32 @@ class DefaultController extends AbstractController {
 	//Context array
 	protected $context;
 
+	//Router instance
+	protected $router;
+
+	//Slugger instance
+	protected $slugger;
+
 	//Translator instance
 	protected $translator;
 
 	/**
 	 * Inject container and translator interface
+	 *
+	 * @param ContainerInterface $container The container instance
+	 * @param RouterInterface $router The router instance
+	 * @param Slugger $slugger The slugger instance
+	 * @param TranslatorInterface $translator The translator instance
 	 */
-	public function __construct(ContainerInterface $container, TranslatorInterface $translator, RouterInterface $router) {
+	public function __construct(ContainerInterface $container, RouterInterface $router, Slugger $slugger, TranslatorInterface $translator) {
 		//Retrieve config
 		$this->config = $container->getParameter($this->getAlias());
+
+		//Set the router
+		$this->router = $router;
+
+		//Set the slugger
+		$this->slugger = $slugger;
 
 		//Set the translator
 		$this->translator = $translator;
@@ -45,12 +63,19 @@ class DefaultController extends AbstractController {
 			'site_png' => $this->config['site']['png'],
 			'site_svg' => $this->config['site']['svg'],
 			'site_title' => $translator->trans($this->config['site']['title']),
-			'site_url' => $router->generate('rapsys_air_index')
+			'site_url' => $router->generate($this->config['site']['url'])
 		];
 	}
 
 	/**
 	 * The contact page
+	 *
+	 * @desc Send a contact mail to configured contact
+	 *
+	 * @param Request $request The request instance
+	 * @param MailerInterface $mailer The mailer instance
+	 *
+	 * @return Response The rendered view or redirection
 	 */
 	public function contact(Request $request, MailerInterface $mailer) {
 		//Set section
@@ -124,6 +149,10 @@ class DefaultController extends AbstractController {
 
 	/**
 	 * The index page
+	 *
+	 * @desc Welcome the user
+	 *
+	 * @return Response The rendered view
 	 */
 	public function index() {
 		//Set section
@@ -137,17 +166,21 @@ class DefaultController extends AbstractController {
 	}
 
 	/**
-	 * The policy page
+	 * The regulation page
+	 *
+	 * @desc Display the regulation policy
+	 *
+	 * @return Response The rendered view
 	 */
-	public function policy() {
+	public function regulation() {
 		//Set section
-		$section = $this->translator->trans('Policy');
+		$section = $this->translator->trans('Regulation');
 
 		//Set title
 		$title = $section.' - '.$this->context['site_title'];
 
 		//Render template
-		return $this->render('@RapsysAir/default/policy.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		return $this->render('@RapsysAir/default/regulation.html.twig', ['title' => $title, 'section' => $section]+$this->context);
 	}
 
 	/**
