@@ -5,300 +5,313 @@ namespace Rapsys\AirBundle\Entity;
 /**
  * Location
  */
-class Location
-{
-    /**
-     * @var integer
-     */
-    private $id;
+class Location {
+	/**
+	 * @var integer
+	 */
+	private $id;
 
-    /**
-     * @var string
-     */
-    private $title;
+	/**
+	 * @var string
+	 */
+	private $title;
 
-    /**
-     * @var string
-     */
-    private $address;
+	/**
+	 * @var string
+	 */
+	private $short;
 
-    /**
-     * @var string
-     */
-    private $zipcode;
+	/**
+	 * @var string
+	 */
+	private $address;
 
-    /**
-     * @var string
-     */
-    private $city;
+	/**
+	 * @var string
+	 */
+	private $zipcode;
 
-    /**
-     * @var string
-     */
-    private $latitude;
+	/**
+	 * @var string
+	 */
+	private $city;
 
-    /**
-     * @var string
-     */
-    private $longitude;
+	/**
+	 * @var string
+	 */
+	private $latitude;
 
-    /**
-     * @var \DateTime
-     */
-    private $created;
+	/**
+	 * @var string
+	 */
+	private $longitude;
 
-    /**
-     * @var \DateTime
-     */
-    private $updated;
+	/**
+	 * @var \DateTime
+	 */
+	private $created;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $sessions;
+	/**
+	 * @var \DateTime
+	 */
+	private $updated;
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $sessions;
 
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
+	}
 
-    /**
-     * Set title
-     *
-     * @param string $title
-     *
-     * @return Location
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
+	/**
+	 * Get id
+	 *
+	 * @return integer
+	 */
+	public function getId() {
+		return $this->id;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set title
+	 *
+	 * @param string $title
+	 *
+	 * @return Location
+	 */
+	public function setTitle($title) {
+		$this->title = $title;
 
-    /**
-     * Get title
-     *
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
+		return $this;
+	}
 
-    /**
-     * Set address
-     *
-     * @param string $address
-     *
-     * @return Location
-     */
-    public function setAddress($address)
-    {
-        $this->address = $address;
+	/**
+	 * Get title
+	 *
+	 * @return string
+	 */
+	public function getTitle() {
+		return $this->title;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set short
+	 *
+	 * @param string $short
+	 *
+	 * @return Location
+	 */
+	public function setShort($short) {
+		$this->short = $short;
 
-    /**
-     * Get address
-     *
-     * @return string
-     */
-    public function getAddress()
-    {
-        return $this->address;
-    }
+		return $this;
+	}
 
-    /**
-     * Set zipcode
-     *
-     * @param string $zipcode
-     *
-     * @return Location
-     */
-    public function setZipcode($zipcode)
-    {
-        $this->zipcode = $zipcode;
+	/**
+	 * Get short
+	 *
+	 * @return string
+	 */
+	public function getShort() {
+		return $this->short;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set address
+	 *
+	 * @param string $address
+	 *
+	 * @return Location
+	 */
+	public function setAddress($address) {
+		$this->address = $address;
 
-    /**
-     * Get zipcode
-     *
-     * @return string
-     */
-    public function getZipcode()
-    {
-        return $this->zipcode;
-    }
+		return $this;
+	}
 
-    /**
-     * Set city
-     *
-     * @param string $city
-     *
-     * @return Location
-     */
-    public function setCity($city)
-    {
-        $this->city = $city;
+	/**
+	 * Get address
+	 *
+	 * @return string
+	 */
+	public function getAddress() {
+		return $this->address;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set zipcode
+	 *
+	 * @param string $zipcode
+	 *
+	 * @return Location
+	 */
+	public function setZipcode($zipcode) {
+		$this->zipcode = $zipcode;
 
-    /**
-     * Get city
-     *
-     * @return string
-     */
-    public function getCity()
-    {
-        return $this->city;
-    }
+		return $this;
+	}
 
-    /**
-     * Set latitude
-     *
-     * @param string $latitude
-     *
-     * @return Location
-     */
-    public function setLatitude($latitude)
-    {
-        $this->latitude = $latitude;
+	/**
+	 * Get zipcode
+	 *
+	 * @return string
+	 */
+	public function getZipcode() {
+		return $this->zipcode;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set city
+	 *
+	 * @param string $city
+	 *
+	 * @return Location
+	 */
+	public function setCity($city) {
+		$this->city = $city;
 
-    /**
-     * Get latitude
-     *
-     * @return string
-     */
-    public function getLatitude()
-    {
-        return $this->latitude;
-    }
+		return $this;
+	}
 
-    /**
-     * Set longitude
-     *
-     * @param string $longitude
-     *
-     * @return Location
-     */
-    public function setLongitude($longitude)
-    {
-        $this->longitude = $longitude;
+	/**
+	 * Get city
+	 *
+	 * @return string
+	 */
+	public function getCity() {
+		return $this->city;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set latitude
+	 *
+	 * @param string $latitude
+	 *
+	 * @return Location
+	 */
+	public function setLatitude($latitude) {
+		$this->latitude = $latitude;
 
-    /**
-     * Get longitude
-     *
-     * @return string
-     */
-    public function getLongitude()
-    {
-        return $this->longitude;
-    }
+		return $this;
+	}
 
-    /**
-     * Set created
-     *
-     * @param \DateTime $created
-     *
-     * @return Location
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
+	/**
+	 * Get latitude
+	 *
+	 * @return string
+	 */
+	public function getLatitude() {
+		return $this->latitude;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set longitude
+	 *
+	 * @param string $longitude
+	 *
+	 * @return Location
+	 */
+	public function setLongitude($longitude) {
+		$this->longitude = $longitude;
 
-    /**
-     * Get created
-     *
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
+		return $this;
+	}
 
-    /**
-     * Set updated
-     *
-     * @param \DateTime $updated
-     *
-     * @return Location
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
+	/**
+	 * Get longitude
+	 *
+	 * @return string
+	 */
+	public function getLongitude() {
+		return $this->longitude;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set created
+	 *
+	 * @param \DateTime $created
+	 *
+	 * @return Location
+	 */
+	public function setCreated($created) {
+		$this->created = $created;
 
-    /**
-     * Get updated
-     *
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
+		return $this;
+	}
 
-    /**
-     * Add session
-     *
-     * @param \Rapsys\AirBundle\Entity\Session $session
-     *
-     * @return Location
-     */
-    public function addSession(\Rapsys\AirBundle\Entity\Session $session)
-    {
-        $this->sessions[] = $session;
+	/**
+	 * Get created
+	 *
+	 * @return \DateTime
+	 */
+	public function getCreated() {
+		return $this->created;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set updated
+	 *
+	 * @param \DateTime $updated
+	 *
+	 * @return Location
+	 */
+	public function setUpdated($updated) {
+		$this->updated = $updated;
 
-    /**
-     * Remove session
-     *
-     * @param \Rapsys\AirBundle\Entity\Session $session
-     */
-    public function removeSession(\Rapsys\AirBundle\Entity\Session $session)
-    {
-        $this->sessions->removeElement($session);
-    }
+		return $this;
+	}
 
-    /**
-     * Get sessions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSessions()
-    {
-        return $this->sessions;
-    }
+	/**
+	 * Get updated
+	 *
+	 * @return \DateTime
+	 */
+	public function getUpdated() {
+		return $this->updated;
+	}
+
+	/**
+	 * Add session
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 *
+	 * @return Location
+	 */
+	public function addSession(\Rapsys\AirBundle\Entity\Session $session) {
+		$this->sessions[] = $session;
+
+		return $this;
+	}
+
+	/**
+	 * Remove session
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 */
+	public function removeSession(\Rapsys\AirBundle\Entity\Session $session) {
+		$this->sessions->removeElement($session);
+	}
+
+	/**
+	 * Get sessions
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSessions() {
+		return $this->sessions;
+	}
+
+	/**
+	 * Returns a string representation of the location
+	 *
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->title;
+	}
 }
-
