@@ -22,14 +22,18 @@
 		{% endif %}
 	{% endfor %}
 	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
-	{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,screen}.css' %}
-		<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
-	{% endstylesheet %}
+	{% stopwatch 'stylesheet' %}
+		{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,screen}.css' %}
+			<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+		{% endstylesheet %}
+	{% endstopwatch %}
 {% endblock %}
 {% block javascripts %}
-	{#{% javascript '@RapsysAir/js/*.js' %}
-		<script type="text/javascript" src="{{ asset_url }}"></script>
-	{% endjavascript %}#}
+	{% stopwatch 'javascript' %}
+		{#{% javascript '@RapsysAir/js/*.js' %}
+			<script type="text/javascript" src="{{ asset_url }}"></script>
+		{% endjavascript %}#}
+	{% endstopwatch %}
 {% endblock %}
 {% block title %}{{ title }}{% endblock %}
 {% block body %}
@@ -42,7 +46,7 @@
 					<a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a>
 					<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
 					<a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a>
-					<a href="{{ path('rapsys_air_policy') }}">{% trans %}Policy{% endtrans %}</a>
+					<a href="{{ path('rapsys_air_regulation') }}">{% trans %}Regulation{% endtrans %}</a>
 					{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 						<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
 					{% else %}
