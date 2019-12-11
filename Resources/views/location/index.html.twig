@@ -1,9 +1,8 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 <section id="dashboard">
-TODO:
 	<h2>{% trans %}Dashboard{% endtrans %}</h2>
-	<div class="panel">
+	<section class="panel">
 		{% if calendar is defined and calendar %}
 			<table class="grid">
 				<tbody>
@@ -30,29 +29,17 @@ TODO:
 				</tbody>
 			</table>
 		{% endif %}
-		<div>
-		{{ form_start(form) }}
-
-			<header>{{ form_errors(form) }}</header>
-
+		{# Display application or login form #}
+		{% if is_granted('ROLE_GUEST') %}
 			<section>
-				{{ form_row(form.location) }}
-
-				{{ form_row(form.date) }}
-
-				{{ form_row(form.slot) }}
+				{{ include('@RapsysAir/form/_application.html.twig') }}
 			</section>
-
-			{{ form_row(form.submit) }}
-
-			{# Render CSRF token etc .#}
-			<footer style="display:none">
-				{{ form_rest(form) }}
-			</footer>
-
-		{{ form_end(form) }}
-		</div>
-	</div>
+		{% elseif not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+			<section>
+				{{ include('@RapsysAir/form/_login.html.twig') }}
+			</section>
+		{% endif %}
+	</section>
 	{# dump(calendar) #}
 </section>
 {% endblock %}
