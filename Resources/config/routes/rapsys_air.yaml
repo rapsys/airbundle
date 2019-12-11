@@ -1,34 +1,64 @@
-rapsys_air_index:
-    path: /
+#https://symfony.com/doc/current/routing.html#localized-routes-i18n
+#SCRUD: index, add, edit, delete, view
+rapsys_air:
+    path:
+        en: '/'
+        fr: '/fr'
     controller: Rapsys\AirBundle\Controller\DefaultController::index
     methods: GET
 
 rapsys_air_contact:
-    path: /contact
+    path:
+        en: '/contact'
+        fr: '/fr/contact'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
-rapsys_air_policy:
-    path: /policy
-    controller: Rapsys\AirBundle\Controller\DefaultController::policy
+rapsys_air_regulation:
+    path:
+        en: '/regulation'
+        fr: '/fr/reglement'
+    controller: Rapsys\AirBundle\Controller\DefaultController::regulation
     methods: GET
 
 rapsys_air_location:
-    path: /locations
+    path:
+        en: '/location'
+        fr: '/fr/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::index
     methods: GET
 
-rapsys_air_location_show:
-    path: /location/{id<\d+>}
-    controller: Rapsys\AirBundle\Controller\LocationController::show
+rapsys_air_location_view:
+    path:
+        en: '/location/{id<\d+>}'
+        fr: '/fr/emplacement/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
+rapsys_air_application_add:
+    path:
+        en: '/application'
+        fr: '/fr/reservation'
+    controller: Rapsys\AirBundle\Controller\ApplicationController::add
+    methods: POST
+
+rapsys_air_application_edit:
+    path:
+        en: '/application/{id<\d+>}'
+        fr: '/fr/reservation/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\ApplicationController::edit
+    methods: POST
+
 rapsys_air_user:
-    path: /users
+    path:
+        en: '/user'
+        fr: '/fr/utilisateur'
     controller: Rapsys\AirBundle\Controller\UserController::index
     methods: GET
 
-rapsys_air_user_show:
-    path: /user/{id<\d+>}
-    controller: Rapsys\AirBundle\Controller\UserController::show
+rapsys_air_user_view:
+    path:
+        en: '/user/{id<\d+>}'
+        fr: '/fr/utilisateur/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\UserController::view
     methods: GET
