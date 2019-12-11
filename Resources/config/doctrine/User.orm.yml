@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\User:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\UserRepository
+    repositoryClass: Rapsys\AirBundle\Repository\UserRepository
     table: users
     fields:
         phone:
