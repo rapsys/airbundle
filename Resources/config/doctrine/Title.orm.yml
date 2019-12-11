@@ -1,7 +1,11 @@
 Rapsys\AirBundle\Entity\Title:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\TitleRepository
+    repositoryClass: Rapsys\AirBundle\Repository\TitleRepository
     table: titles
+    fields:
+        short:
+            type: string
+            length: 16
     oneToMany:
         users:
             targetEntity: User
