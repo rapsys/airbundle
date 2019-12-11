@@ -25,13 +25,6 @@ class User extends BaseUser {
 	private $applications;
 
 	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		parent::__construct();
-	}
-
-	/**
 	 * Set phone
 	 *
 	 * @param string $phone
@@ -113,16 +106,5 @@ class User extends BaseUser {
 	 */
 	public function getApplications() {
 		return $this->applications;
-	}
-
-	/**
-	 * Get roles
-	 *
-	 * @return array
-	 */
-	public function getRoles() {
-		//Return roles array
-		//XXX: [ ROLE_USER, ROLE_XXX, ... ]
-		return parent::getRoles();
 	}
 }
