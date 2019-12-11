@@ -3,22 +3,67 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Rapsys\AirBundle\Entity\Slot;
 
 class LocationController extends DefaultController {
-
+	/**
+	 * List all locations
+	 *
+	 * @desc Display all sessions by location with an application or login form
+	 *
+	 * @param Request $request The request instance
+	 *
+	 * @return Response The rendered view
+	 */
 	public function index(Request $request = null) {
-		$title = 'title';
-		$section = 'section';
+		//Set section
+		$section = $this->translator->trans('Locations');
+
+		//Set title
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+
+		//Init context
+		$context = [];
+
+		//Create application form for role_guest
+		if ($this->isGranted('ROLE_GUEST')) {
+			//Create ApplicationType form
+			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+				//Set the action
+				'action' => $this->generateUrl('rapsys_air_application_add'),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ],
+				//Set admin
+				'admin' => $this->isGranted('ROLE_ADMIN'),
+				//Set default user to current
+				'user' => $this->getUser()->getId(),
+				//Set default slot to evening
+				//XXX: default to Evening (3)
+				'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById(3),
+				//Set shorted return url
+				'return' => $this->slugger->short(json_encode(['_route' => $request->get('_route'), '_route_params' => $request->get('_route_params')]))
+			]);
+
+			//Add form to context
+			$context['application'] = $application->createView();
+		//Create login form for anonymous
+		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Create ApplicationType form
+			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
+				//Set the action
+				'action' => $this->generateUrl('rapsys_user_login'),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ]
+			]);
+
+			//Add form to context
+			$context['login'] = $login->createView();
+		}
+
 		$calendar = 'toto';
-		//Create the form according to the FormType created previously.
-		//And give the proper parameters
-		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
-			// To set the action use $this->generateUrl('route_identifier')
-			'action' => $this->generateUrl('rapsys_air_location'),
-			'method' => 'POST',
-			'attr' => [ 'class' => 'form_col' ]
-		]);
-		return $this->render('@RapsysAir/location/index.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'calendar' => $calendar]+$this->context);
+
+		//Render the view
+		return $this->render('@RapsysAir/location/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar]+$context+$this->context);
 	}
 
 	public function show(Request $request, $id) {
@@ -129,7 +174,7 @@ class LocationController extends DefaultController {
 		);
 
 		//Fetch sessions
-		$sessions = $doctrine->getRepository(Session::class)->findByDatePeriod($period);
+		$sessions = $doctrine->getRepository(Session::class)->findAllByDatePeriod($period);
 
 		//Init calendar
 		$calendar = [];
