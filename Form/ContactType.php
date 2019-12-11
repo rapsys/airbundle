@@ -17,11 +17,12 @@ class ContactType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
-		return $builder->add('name', TextType::class, array('attr' => array('placeholder' => 'Your name'), 'constraints' => array(new NotBlank(array('message' => 'Please provide your name')))))
-			->add('subject', TextType::class, array('attr' => array('placeholder' => 'Subject'), 'constraints' => array(new NotBlank(array('message' => 'Please provide your subject')))))
-			->add('mail', EmailType::class, array('attr' => array('placeholder' => 'Your mail address'), 'constraints' => array(new NotBlank(array('message' => 'Please provide a valid mail')), new Email(array('message' => 'Your mail doesn\'t seems to be valid')))))
-			->add('message', TextareaType::class, array('attr' => array('placeholder' => 'Your message here', 'cols' => 50, 'rows' => 15), 'constraints' => array(new NotBlank(array('message' => 'Please provide your message')))))
-			->add('submit', SubmitType::class, array('label' => 'Send', 'attr' => array('class' => 'submit')));
+		return $builder
+			->add('name', TextType::class, ['attr' => ['placeholder' => 'Your name'], 'constraints' => [new NotBlank(['message' => 'Please provide your name'])]])
+			->add('subject', TextType::class, ['attr' => ['placeholder' => 'Subject'], 'constraints' => [new NotBlank(['message' => 'Please provide your subject'])]])
+			->add('mail', EmailType::class, ['attr' => ['placeholder' => 'Your mail'], 'constraints' => [new NotBlank(['message' => 'Please provide a valid mail']), new Email(['message' => 'Your mail doesn\'t seems to be valid'])]])
+			->add('message', TextareaType::class, ['attr' => ['placeholder' => 'Your message', 'cols' => 50, 'rows' => 15], 'constraints' => [new NotBlank(['message' => 'Please provide your message'])]])
+			->add('submit', SubmitType::class, ['label' => 'Send', 'attr' => ['class' => 'submit']]);
 	}
 
 	/**
