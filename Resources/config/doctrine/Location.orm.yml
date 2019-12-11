@@ -12,7 +12,10 @@ Rapsys\AirBundle\Entity\Location:
     fields:
         title:
             type: string
-            length: 24
+            length: 32
+        short:
+            type: string
+            length: 16
         address:
             type: string
             length: 32
