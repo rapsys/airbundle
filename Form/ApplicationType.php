@@ -59,10 +59,11 @@ class ApplicationType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'return' => '', 'slot' => 3, 'user' => 0]);
+		//XXX: 1 should be the first user
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'return' => '', 'slot' => null, 'user' => 1]);
 		$resolver->setAllowedTypes('admin', 'boolean');
 		$resolver->setAllowedTypes('return', 'string');
-		$resolver->setAllowedTypes('slot', Slot::class);
+		$resolver->setAllowedTypes('slot', [Slot::class, 'null']);
 		$resolver->setAllowedTypes('user', 'integer');
 	}
 
