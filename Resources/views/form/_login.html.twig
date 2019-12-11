@@ -1,0 +1,16 @@
+{{ form_start(login) }}
+
+	<section>
+		{{ form_row(login.mail) }}
+
+		{{ form_row(login.password) }}
+	</section>
+
+	{{ form_row(login.submit) }}
+
+	{# Render CSRF token etc .#}
+	<footer style="display:none">
+		{{ form_rest(login) }}
+	</footer>
+
+{{ form_end(login) }}
