@@ -46,12 +46,13 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		}
 
 		//Group tree
+		//XXX: ROLE_XXX is required by
 		$groupTree = array(
-			'ROLE_USER',
-			'ROLE_GUEST',
-			'ROLE_REGULAR',
-			'ROLE_SENIOR',
-			'ROLE_ADMIN'
+			'User',
+			'Guest',
+			'Regular',
+			'Senior',
+			'Admin'
 		);
 
 		//Create groups
@@ -72,7 +73,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		$userTree = array(
 			array(
 				'short' => 'Mr.',
-				'group' => 'ROLE_ADMIN',
+				'group' => 'Admin',
 				'mail' => 'tango@rapsys.eu',
 				'pseudonym' => 'Rapsys',
 				'forename' => 'Raphaël',
@@ -82,7 +83,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			),
 			array(
 				'short' => 'Mr.',
-				'group' => 'ROLE_SENIOR',
+				'group' => 'Senior',
 				'mail' => 'rannou402@orange.fr',
 				'pseudonym' => 'Mitch',
 				'forename' => 'Michel',
@@ -92,7 +93,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			),
 			array(
 				'short' => 'Ms.',
-				'group' => 'ROLE_REGULAR',
+				'group' => 'Regular',
 				'mail' => 'roxmaps@gmail.com',
 				'pseudonym' => 'Roxana',
 				'forename' => 'Roxana',
@@ -102,7 +103,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			),
 			array(
 				'short' => 'Mr.',
-				'group' => 'ROLE_REGULAR',
+				'group' => 'Regular',
 				'mail' => 'majid.ghedjatti@gmail.com',
 				'pseudonym' => 'El Guerrillero',
 				'forename' => 'Majid',
@@ -112,7 +113,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			),
 			array(
 				'short' => 'Mr.',
-				'group' => 'ROLE_SENIOR',
+				'group' => 'Senior',
 				'mail' => 'denis.courvoisier@wanadoo.fr',
 				'pseudonym' => 'Sined',
 				'forename' => 'Denis',
@@ -122,7 +123,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			),
 			array(
 				'short' => 'Mr.',
-				'group' => 'ROLE_REGULAR',
+				'group' => 'Regular',
 				'mail' => 'kastango13@gmail.com',
 				'pseudonym' => 'Kastrat',
 				'forename' => 'Kastrat',
@@ -158,23 +159,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//Location tree
 		$locationTree = [
 			[
-				'title' => 'Opéra Garnier',
-				'address' => '10 Place de l\'Opéra',
-				'zipcode' => '75009',
-				'city' => 'Paris',
-				'latitude' => 48.871268,
-				'longitude' => 2.331832
-			],
-			[
-				'title' => 'Jardin Tino-Rossi',
-				'address' => '2 Quai Saint-Bernard',
-				'zipcode' => '75005',
-				'city' => 'Paris',
-				'latitude' => 48.847736,
-				'longitude' => 2.360953
-			],
-			[
-				'title' => 'Esplanade du Trocadéro',
+				'title' => 'Trocadero esplanade',
+				'short' => 'Trocadero',
 				'address' => '1 Avenue Hussein 1er de Jordanie',
 				#75016 pour meteo-france, accuweather supporte 75116
 				'zipcode' => '75116',
@@ -183,7 +169,44 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'longitude' => 2.288853
 			],
 			[
-				'title' => 'Marché Saint Honoré',
+				'title' => 'Orleans gallery',
+				'short' => 'Orleans',
+				'address' => '8 Galerie du Jardin',
+				'zipcode' => '75001',
+				'city' => 'Paris',
+				'latitude' => 48.863885,
+				'longitude' => 2.337387
+			],
+			[
+				'title' => 'Colette square',
+				'short' => 'Colette',
+				'address' => 'Galerie du Théâtre Français',
+				'zipcode' => '75001',
+				'city' => 'Paris',
+				'latitude' => 48.863219,
+				'longitude' => 2.335847
+			],
+			[
+				'title' => 'Tino-Rossi garden',
+				'short' => 'Docks',
+				'address' => '2 Quai Saint-Bernard',
+				'zipcode' => '75005',
+				'city' => 'Paris',
+				'latitude' => 48.847736,
+				'longitude' => 2.360953
+			],
+			[
+				'title' => 'Drawings\' garden',
+				'short' => 'Villette',
+				'address' => 'Allée du Belvédère',
+				'zipcode' => '75019',
+				'city' => 'Paris',
+				'latitude' => 48.892503,
+				'longitude' => 2.389300
+			],
+			[
+				'title' => 'Saint-Honore market',
+				'short' => 'St-Honore',
 				'address' => '1 Passage des Jacobins',
 				'zipcode' => '75001',
 				'city' => 'Paris',
@@ -191,7 +214,26 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'longitude' => 2.331752
 			],
 			[
-				'title' => 'Palais de Tokyo',
+				'title' => 'Orsay museum',
+				'short' => 'Orsay',
+				'address' => '1 rue de la Légion d\'Honneur',
+				'zipcode' => '75007',
+				'city' => 'Paris',
+				'latitude' => 48.860418,
+				'longitude' => 2.325815
+			],
+			[
+				'title' => 'Opera Garnier',
+				'short' => 'Opera',
+				'address' => '10 Place de l\'Opéra',
+				'zipcode' => '75009',
+				'city' => 'Paris',
+				'latitude' => 48.871268,
+				'longitude' => 2.331832
+			],
+			[
+				'title' => 'Tokyo palace',
+				'short' => 'Tokyo',
 				'address' => '14 Avenue de New York',
 				'zipcode' => '75116',
 				'city' => 'Paris',
@@ -205,6 +247,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		foreach($locationTree as $locationData) {
 			$location = new Location();
 			$location->setTitle($locationData['title']);
+			$location->setShort($locationData['short']);
 			$location->setAddress($locationData['address']);
 			$location->setZipcode($locationData['zipcode']);
 			$location->setCity($locationData['city']);
@@ -222,26 +265,17 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 
 		//Slot tree
 		$slotTree = [
-			[
-				'begin' => '14:00:00 UTC',
-				'length' => '05:00:00'
-			],
-			[
-				'begin' => '19:00:00 UTC',
-				'length' => '06:00:00'
-			],
-			[
-				'begin' => '19:00:00 UTC',
-				'length' => '07:00:00'
-			]
+			'Morning',
+			'Afternoon',
+			'Evening',
+			'After'
 		];
 
 		//Create slots
 		$slots = array();
 		foreach($slotTree as $slotData) {
 			$slot = new Slot();
-			$slot->setBegin(new \DateTime($slotData['begin']));
-			$slot->setLength(new \DateTime($slotData['length']));
+			$slot->setTitle($slotData);
 			$slot->setCreated(new \DateTime('now'));
 			$slot->setUpdated(new \DateTime('now'));
 			$manager->persist($slot);
