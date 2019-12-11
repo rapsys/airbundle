@@ -137,6 +137,8 @@ body {
 /* Message */
 .notice::before,
 .notice::after,
+.warning::before,
+.warning::after,
 .error::before,
 .error::after {
 	content: "⚠";
@@ -146,6 +148,7 @@ body {
 }
 
 .notice,
+.warning,
 .error {
 	display: flex;
 	flex-direction: row;
@@ -173,11 +176,26 @@ body {
 	color: #3333c3;
 }
 
+.warning::before,
+.warning::after {
+	/*XXX: see https://www.fileformat.info/info/unicode/char/2139/fontsupport.htm
+	 * DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
+	content: "?";
+	/*content: "⌘";*/
+}
+
+.warning {
+	border-color: #c39333;
+	background-color: #f9c333;
+	color: #936333;
+}
+
 .flash {
 	margin: 0 .5rem .5rem;
 }
 
 p.notice,
+p.warning,
 p.error {
 	margin-bottom: .5rem;
 }
