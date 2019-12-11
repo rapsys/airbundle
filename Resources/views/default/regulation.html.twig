@@ -1,0 +1,391 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="regulation">
+		<h2><a href="{{ path('rapsys_air_regulation') }}">{{ section }}</a></h2>
+		{#XXX: use https://www.londonschool.com/level-scale/#}
+		<section>
+			<h3>{% trans %}Guest{% endtrans %}</h3>
+			<section>
+				<h4>{% trans %}Prerequisite{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Who{% endtrans %}</dt>
+					<dd>{% trans %}Anyone{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Residence{% endtrans %}</dt>
+					<dd>{% trans %}Anyplace{% endtrans %}</dt>
+				</dl>
+				<dl>
+					<dt>{% trans %}Skill{% endtrans %}</dt>
+					<dd>{% trans %}Elementary tango ballroom organisation{% endtrans %}</dd>
+					<dd>{% trans %}Elementary tango music programming{% endtrans %}</dd>
+					<dd>{% trans %}Elementary french communication{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Music{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Hardware{% endtrans %}</dt>
+					<dd>{% trans %}Autonomous enclosure 200W RMS (Ibiza Sound Port 8 or superior){% endtrans %}</dd>
+					<dd>{% trans %}Autonomous music player (with Bluetooth, Jack, MiniJack or RCA connectivity){% endtrans %}</dd>
+					<dd>{% trans %}Enclosure and music player with 4h of autonomy{% endtrans %}</dd>
+					<dd>{% trans %}Required cable to connect both{% endtrans %}</dd>
+					<dd>{% trans %}Talcum powder bottle{% endtrans %}</dd>
+					<dd>{% trans %}Rope with strings{% endtrans %}</dd>
+					<dd>{% trans %}Broom and/or squeegee depending on location{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Playlist{% endtrans %}</dt>
+					<dd>{% trans %}Duration of 4h (or superior){% endtrans %}</dd>
+					<dd>{% trans %}Completely offline (neither deezer nor spotify){% endtrans %}</dd>
+					<dd>{% trans %}Cortina every 2 to 4 songs{% endtrans %}</dd>
+					<dd>{% trans %}Mostly danceable songs{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Preparation{% endtrans %}</dt>
+					<dd>{% trans %}Personnal rehearsal at home{% endtrans %}</dd>
+					<dd>{% trans %}Personnal rehearsal outdoor{% endtrans %}</dd>
+					<dd>{% trans %}Assit at location an organizer{% endtrans %}</dd>
+					<dd>{% trans %}Attended once since start until end{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Locations{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Trocadero{% endtrans %}</dt>
+					<dd>{% trans %}Limited to once per season{% endtrans %}</dd>
+					<dd>{% trans %}Limited to week day{% endtrans %}</dd>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Opera Garnier{% endtrans %}</dt>
+					<dd>{% trans %}Limited to once per season{% endtrans %}</dd>
+					<dd>{% trans %}Limited to week day{% endtrans %}</dd>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tino-Rossi garden{% endtrans %}</dt>
+					<dd>{% trans %}Limited to once per season{% endtrans %}</dd>
+					<dd>{% trans %}Limited to week day{% endtrans %}</dd>
+					<dd>{% trans %}Since 19h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Teach class the first hour{% endtrans %}</dd>
+				</dl>
+			</section>
+		</section>
+		<section>
+			<h3>{% trans %}Regular{% endtrans %}</h3>
+			<section>
+				<h4>{% trans %}Prerequisite{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Who{% endtrans %}</dt>
+					<dd>{% trans %}Anyone{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Residence{% endtrans %}</dt>
+					<dd>{% trans %}Parisian region{% endtrans %}</dt>
+				</dl>
+				<dl>
+					<dt>{% trans %}Skill{% endtrans %}</dt>
+					<dd>{% trans %}Intermediate tango ballroom organisation{% endtrans %}</dd>
+					<dd>{% trans %}Intermediate tango music programming{% endtrans %}</dd>
+					<dd>{% trans %}Intermediate french communication{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Music{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Hardware{% endtrans %}</dt>
+					<dd>{% trans %}Autonomous enclosure 200W RMS (Ibiza Sound Port 8 or superior){% endtrans %}</dd>
+					<dd>{% trans %}Autonomous music player (with Bluetooth, Jack, MiniJack or RCA connectivity){% endtrans %}</dd>
+					<dd>{% trans %}Enclosure and music player with 6h of autonomy{% endtrans %}</dd>
+					<dd>{% trans %}Required cable to connect both{% endtrans %}</dd>
+					<dd>{% trans %}Backup battery{% endtrans %}</dd>
+					<dd>{% trans %}Talcum powder bottle{% endtrans %}</dd>
+					<dd>{% trans %}Rope with strings{% endtrans %}</dd>
+					<dd>{% trans %}Broom and/or squeegee depending on location{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Playlist{% endtrans %}</dt>
+					<dd>{% trans %}Duration of 6h (or superior){% endtrans %}</dd>
+					<dd>{% trans %}Completely offline (neither deezer nor spotify){% endtrans %}</dd>
+					<dd>{% trans %}Cortina every 2 to 4 songs{% endtrans %}</dd>
+					<dd>{% trans %}Majority of danceable songs{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Preparation{% endtrans %}</dt>
+					<dd>{% trans %}Personnal rehearsal at home{% endtrans %}</dd>
+					<dd>{% trans %}Personnal rehearsal outdoor{% endtrans %}</dd>
+					<dd>{% trans %}Assited or organized once at location{% endtrans %}</dd>
+					<dd>{% trans %}Attended once since start until end{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Locations{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Trocadero{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Until 01h30 minimum on friday and saturday{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Opera Garnier{% endtrans %}</dt>
+					<dd>{% trans %}Limited to week day{% endtrans %}</dd>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tino-Rossi garden{% endtrans %}</dt>
+					<dd>{% trans %}Since 14h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 19h00{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tino-Rossi garden{% endtrans %}</dt>
+					<dd>{% trans %}Limited to week day{% endtrans %}</dd>
+					<dd>{% trans %}Since 19h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Teach class the first hour{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Orsay museum{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 maximum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tokyo palace{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 maximum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Saint-Honore market{% endtrans %}</dt>
+					<dd>{% trans %}Limited to saturday and sunday{% endtrans %}</dd>
+					<dd>{% trans %}Since 14h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 19h00{% endtrans %}</dd>
+				</dl>
+			</section>
+		</section>
+		<section>
+			<h3>{% trans %}Senior{% endtrans %}</h3>
+			<section>
+				<h4>{% trans %}Prerequisite{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Who{% endtrans %}</dt>
+					<dd>{% trans %}Anyone{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Residence{% endtrans %}</dt>
+					<dd>{% trans %}Parisian region{% endtrans %}</dt>
+				</dl>
+				<dl>
+					<dt>{% trans %}Skill{% endtrans %}</dt>
+					<dd>{% trans %}Advanced tango ballroom organisation{% endtrans %}</dd>
+					<dd>{% trans %}Advanced tango music programming{% endtrans %}</dd>
+					<dd>{% trans %}Intermediate french communication{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Music{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Hardware{% endtrans %}</dt>
+					<dd>{% trans %}Autonomous enclosure 250W RMS (Ibiza Sound Port 10 or superior){% endtrans %}</dd>
+					<dd>{% trans %}Autonomous music player (with Bluetooth, Jack, MiniJack or RCA connectivity){% endtrans %}</dd>
+					<dd>{% trans %}Enclosure and music player with 8h of autonomy{% endtrans %}</dd>
+					<dd>{% trans %}Required cable to connect both{% endtrans %}</dd>
+					<dd>{% trans %}Backup battery{% endtrans %}</dd>
+					<dd>{% trans %}Talcum powder bottle{% endtrans %}</dd>
+					<dd>{% trans %}Rope with strings{% endtrans %}</dd>
+					<dd>{% trans %}Broom and/or squeegee depending on location{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Playlist{% endtrans %}</dt>
+					<dd>{% trans %}Duration of 8h (or superior){% endtrans %}</dd>
+					<dd>{% trans %}Completely offline (neither deezer nor spotify){% endtrans %}</dd>
+					<dd>{% trans %}Cortina every 3 to 4 songs{% endtrans %}</dd>
+					<dd>{% trans %}Only danceable songs{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Preparation{% endtrans %}</dt>
+					<dd>{% trans %}Personnal rehearsal at home{% endtrans %}</dd>
+					<dd>{% trans %}Personnal rehearsal outdoor{% endtrans %}</dd>
+					<dd>{% trans %}Assited or organized once at location{% endtrans %}</dd>
+					<dd>{% trans %}Attended once since start until end{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Locations{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Trocadero{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Until 01h30 minimum on friday and saturday{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Opera Garnier{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Until 01h30 minimum on friday and saturday{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tino-Rossi garden{% endtrans %}</dt>
+					<dd>{% trans %}Since 14h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 19h00{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tino-Rossi garden{% endtrans %}</dt>
+					<dd>{% trans %}Since 19h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 minimum{% endtrans %}</dd>
+					<dd>{% trans %}Until 01h30 minimum on friday and saturday{% endtrans %}</dd>
+					<dd>{% trans %}Teach class the first hour{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Orsay museum{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 maximum{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Tokyo palace{% endtrans %}</dt>
+					<dd>{% trans %}Since 20h30{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h30 maximum{% endtrans %}</dd>
+					<dd>{% trans %}Until 01h30 minimum on friday and saturday{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Saint-Honore market{% endtrans %}</dt>
+					<dd>{% trans %}Limited to saturday and sunday{% endtrans %}</dd>
+					<dd>{% trans %}Since 14h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 19h00{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Saint-Honore market{% endtrans %}</dt>
+					<dd>{% trans %}Limited to low volume{% endtrans %}</dd>
+					<dd>{% trans %}Since 19h00{% endtrans %}</dd>
+					<dd>{% trans %}Until 00h00{% endtrans %}</dd>
+				</dl>
+			</section>
+		</section>
+		<section>
+			<h3>{% trans %}Penalization{% endtrans %}</h3>
+			<section>
+				<h4>{% trans %}First time{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}No more battery{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for one week{% endtrans %}</dd>
+					<dd>{% trans %}Early account reactivation possible with a new backup battery proof{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing broom (except Opera/Orsay/Tokyo){% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for one week{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing talcum powder{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for one week{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing in action{% endtrans %}</dt>
+					<dt>{% trans %}More than one hour delay{% endtrans %}</dt>
+					<dt>{% trans %}Absence the first hour in cancellation case{% endtrans %}</dt>
+					<dt>{% trans %}Absence of cancellation reporting{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for two weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Do not obey land owner{% endtrans %}</dt>
+					<dt>{% trans %}Do not obey police{% endtrans %}</dt>
+					<dt>{% trans %}Kicked out for music too strong{% endtrans %}</dt>
+					<dt>{% trans %}Sexual assault complaint{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled from two weeks to one month{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Second time{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}No more battery{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for two weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing broom (except Opera/Orsay/Tokyo){% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for two weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing talcum powder{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for two weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing in action{% endtrans %}</dt>
+					<dt>{% trans %}More than one hour delay{% endtrans %}</dt>
+					<dt>{% trans %}Absence the first hour in cancellation case{% endtrans %}</dt>
+					<dt>{% trans %}Absence of cancellation reporting{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for one month{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Do not obey land owner{% endtrans %}</dt>
+					<dt>{% trans %}Do not obey police{% endtrans %}</dt>
+					<dt>{% trans %}Kicked out for music too strong{% endtrans %}</dt>
+					<dt>{% trans %}Sexual assault complaint{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled from one month up to permanent suspension{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Third time{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}No more battery{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for three weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing broom (except Opera/Orsay/Tokyo){% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for three weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing talcum powder{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled for three weeks{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Missing in action{% endtrans %}</dt>
+					<dt>{% trans %}More than one hour delay{% endtrans %}</dt>
+					<dt>{% trans %}Absence the first hour in cancellation case{% endtrans %}</dt>
+					<dt>{% trans %}Absence of cancellation reporting{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled from one month up to permanent suspension{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Do not obey land owner{% endtrans %}</dt>
+					<dt>{% trans %}Do not obey police{% endtrans %}</dt>
+					<dt>{% trans %}Kicked out for music too strong{% endtrans %}</dt>
+					<dt>{% trans %}Sexual assault complaint{% endtrans %}</dt>
+					<dd>{% trans %}All slot canceled and account disabled from two month up to permanent suspension{% endtrans %}</dd>
+				</dl>
+			</section>
+		</section>
+		<section>
+			<h3>{% trans %}Change{% endtrans %}</h3>
+			<section>
+				<h4>{% trans %}Regulation{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Light change{% endtrans %}</dt>
+					<dd>{% trans %}Meeting{% endtrans %}</dd>
+					<dd>{% trans %}Present qualified majority{% endtrans %}</dd>
+					<dd>{% trans %}Managment veto possible{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Medium change{% endtrans %}</dt>
+					<dd>{% trans %}Meeting{% endtrans %}</dd>
+					<dd>{% trans %}Qualified majority{% endtrans %}</dd>
+					<dd>{% trans %}Managment veto possible{% endtrans %}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Change for the next season{% endtrans %}</dt>
+					<dd>{% trans %}Meeting{% endtrans %}</dd>
+					<dd>{% trans %}Qualified double majority{% endtrans %}</dd>
+					<dd>{% trans %}Managment veto possible{% endtrans %}</dd>
+				</dl>
+			</section>
+			<section>
+				<h4>{% trans %}Managment{% endtrans %}</h4>
+				<dl>
+					<dt>{% trans %}Change for the next season{% endtrans %}</dt>
+					<dd>{% trans %}Meeting{% endtrans %}</dd>
+					<dd>{% trans %}Qualified double majority{% endtrans %}</dd>
+				</dl>
+			</section>
+		</section>
+	</section>
+{% endblock %}
