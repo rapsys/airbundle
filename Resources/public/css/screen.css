@@ -20,10 +20,11 @@ a::first-letter {
 
 /* Font styling */
 html, body, dd, li, p, td {
-	font-family: 'Droid Sans', sans-serif;
+	font-family: 'Droid Sans', 'Symbola', 'DejaVu Sans', 'FreeSans', sans-serif;
+	/* DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
 }
 
-button, code, input, option, pre, select, textarea {
+button, code, input, option, optgroup, pre, select, textarea {
 	font-family: 'Droid Sans Mono', monospace;
 }
 
@@ -134,14 +135,18 @@ body {
 }
 
 /* Message */
-div.error::before,
-div.error::after {
+.notice::before,
+.notice::after,
+.error::before,
+.error::after {
 	content: "⚠";
 	line-height: 100%;
 	margin: auto 0;
+	padding: 0 .25rem;
 }
 
-div.error {
+.notice,
+.error {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -154,9 +159,37 @@ div.error {
 	text-align: center;
 }
 
-div.flash {
+.notice::before,
+.notice::after {
+	/*XXX: see https://www.fileformat.info/info/unicode/char/2139/fontsupport.htm
+	 * DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
+	content: "ℹ";
+	/*content: "⌘";*/
+}
+
+.notice {
+	border-color: #3333c3;
+	background-color: #c3c3f9;
+	color: #3333c3;
+}
+
+.flash {
 	margin: 0 .5rem .5rem;
 }
+
+p.notice,
+p.error {
+	margin-bottom: .5rem;
+}
+
+pre.trace {
+	border: .05rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .5rem;
+	margin-bottom: 1rem;
+	font-size: .7rem;
+}
+
 
 /*ul#error::before,
 ul#error::after,
@@ -225,7 +258,7 @@ ul.error {
 /* Content */
 #form,
 #content,
-#policy,
+#regulation,
 #dashboard {
 	border: .1rem solid #00c3f9;
 	border-radius: .5rem;
@@ -233,6 +266,25 @@ ul.error {
 	margin-top: 0;
 	overflow: hidden;
 	padding: .5rem;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Section */
+section {
+	display: flex;
+	flex-direction: column;
+	border: .05rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .5rem;
+	margin-bottom: 1rem;
+	overflow: hidden;
+}
+
+section:only-child,
+section:last-child,
+section:last-of-type {
+	margin-bottom: .5rem;
 }
 
 section h2 {
@@ -247,26 +299,47 @@ section h2 {
 section h3 {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
-	margin: -.45rem;
-	margin-bottom: .45rem;
-	padding: .45rem;
-	padding-bottom: .5rem;
+	margin: -.5rem;
+	margin-bottom: .5rem;
+	padding: .4rem;
 }
 
 section h4 {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
-	margin: -.25rem;
-	margin-bottom: .25rem;
-	padding: .4rem;
+	margin: -.5rem;
+	margin-bottom: .5rem;
+	padding: .3rem;
+}
+
+section section {
+	padding: .5rem;
+	padding-bottom: .5rem;
+	margin-bottom: .5rem;
+}
+
+section section:only-child,
+section section:last-child,
+section section:last-of-type {
+	margin-bottom: 0;
 }
 
 /* Form */
+/*#form div {
+	margin-bottom: .5rem;
+}
+
+#form div:only-child,
+#form div:last-child,
+#form div:last-of-type {
+	margin-bottom: 0;
+}
+
 form {
 	display: flex;
 	flex-direction: column;
-	border: .05rem solid #00c3f9;
-	border-radius: .2rem;
+	/ *border: .05rem solid #00c3f9;
+	border-radius: .2rem;* /
 	padding: .5rem;
 }
 
@@ -279,12 +352,22 @@ form section:last-child,
 form section:last-of-type {
 	margin-bottom: .5rem;
 }
+*/
+
+form section,
+form section:only-child,
+form section:last-child,
+form section:last-of-type {
+	border: none;
+	margin-bottom: .5rem;
+}
 
 form section section,
 form section section:only-child,
 form section section:last-child,
 form section section:last-of-type {
 	width: 50%;
+	padding: 0;
 	margin-bottom: 0;
 }
 
@@ -301,13 +384,20 @@ form div:last-of-type {
 	margin-bottom: 0;
 }
 
-form section div.error {
-	margin: 0 1rem;
+form header div.error {
+	width: calc(50% + 10rem);
+	margin: 0 auto;
 }
 
-form section section div.error {
-	margin: .25rem 0 0 0;
+form section div.error {
+	margin-top: .25rem;
 }
+
+
+/*form section div.error {
+	margin: 0 1rem;
+}*/
+
 
 label {
 	min-width: 10rem;
@@ -320,6 +410,8 @@ label {
 button,
 input,
 select,
+option,
+optgroup,
 textarea {
 	box-sizing: border-box;
 	width: 100%;
@@ -338,31 +430,33 @@ button.submit {
 }
 
 /* Vertical form */
-.form_col {
+form.col {
 	margin-left: .5rem;
 	width: 10rem;
 }
 
-.form_col div {
+form.col div {
 	flex-direction: column;
 }
 
-.form_col div.error {
+form.col div.error {
 	flex-direction: row;
 }
 
-.form_col label {
+form.col label {
 	text-align: center;
+	padding-top: 0;
 }
 
-.form_col section section,
-.form_col section section:only-child,
-.form_col section section:last-child,
-.form_col section section:last-of-type {
+form.col section {
+	padding: 0;
+}
+
+form.col section section {
 	width: auto;
 }
 
-.form_col div.date {
+form.col div.date {
 	flex-direction: row;
 	justify-content: space-between;
 }
@@ -453,64 +547,22 @@ button.submit {
 	background-color: #fc9;
 }
 
-/* Policy */
-#policy {
-	display: flex;
-	flex-direction: column;
-	/*border: .1rem solid #00c3f9;
-	border-radius: .5rem;
-	margin: .5rem;
-	margin-top: 0;
-	overflow: hidden;
-	padding: .5rem;*/
+
+/* Regulation */
+#regulation {
 }
 
 
-/*#policy h4 {
-	background-color: #cff;
-	border-bottom: .1rem solid #00c3f9;
-	margin: -.24rem -.24rem .24rem -.24rem;
-	padding: .24rem;
-	padding-bottom: .3rem;
-}*/
-
-#policy section {
-	display: flex;
-	flex-direction: column;
-	border: .05rem solid #00c3f9;
-	border-radius: .2rem;
-	padding: .5rem;
-	margin-bottom: 1rem;
-}
-
-#policy section section {
-	padding: .25rem;
-	padding-bottom: .5rem;
-	margin-bottom: .5rem;
-}
-
-#policy section:only-child,
-#policy section:last-child,
-#policy section:last-of-type {
-	margin-bottom: .5rem;
-}
-
-#policy section section:only-child,
-#policy section section:last-child,
-#policy section section:last-of-type {
-	margin-bottom: 0;
-}
-
-/*#policy div {
+/*#regulation div {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-around;
 	margin-bottom: .5rem;
 }
 
-#policy div:only-child,
-#policy div:last-child,
-#policy div:last-of-type {
+#regulation div:only-child,
+#regulation div:last-child,
+#regulation div:last-of-type {
 	margin-bottom: 0;
 }*/
 /*
@@ -525,7 +577,7 @@ button.submit {
  * see https://developers.google.com/fonts/docs/getting_started
  */
 
-#policy dl {
+#regulation dl {
 	/*display: flex;
 	flex-direction: row;
 	justify-content: space-around;
@@ -534,29 +586,29 @@ button.submit {
 	margin-bottom: .5rem;
 }
 
-#policy dt {
+#regulation dt {
 	font-size: .9rem;
 	font-weight: bold;
 	padding-bottom: .2rem;
 }
 
-#policy dd {
+#regulation dd {
 	font-size: .9rem;
 	margin-left: 1.5rem;
 }
 
-#policy dd:before {
+#regulation dd:before {
 }
 
-#policy dl:only-child,
-#policy dl:last-child,
-#policy dl:last-of-type,
-#policy dt:only-child,
-#policy dt:last-child,
-#policy dt:last-of-type,
-#policy dd:only-child,
-#policy dd:last-child,
-#policy dd:last-of-type {
+#regulation dl:only-child,
+#regulation dl:last-child,
+#regulation dl:last-of-type,
+#regulation dt:only-child,
+#regulation dt:last-child,
+#regulation dt:last-of-type,
+#regulation dd:only-child,
+#regulation dd:last-child,
+#regulation dd:last-of-type {
 	margin-bottom: 0;
 }
 
@@ -609,4 +661,3 @@ button.submit {
 		margin: .5rem auto 0 auto;
 	}
 }
-
