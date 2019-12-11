@@ -253,9 +253,9 @@ services:
 #Twig Configuration
 twig:
     #Enforce debug
-    debug: true
-    auto_reload: ~
-    cache: false
+    #debug: true
+    #auto_reload: ~
+    #cache: false
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
     form_theme: [ '@RapsysAir/form/form_div_layout.html.twig' ]
