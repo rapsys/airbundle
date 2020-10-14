@@ -10,6 +10,9 @@ Rapsys\AirBundle\Entity\Application:
             options:
                 unsigned: true
     fields:
+#The score computed at attribution time, the sum of all session score divided by proximity in days (1 for sun-thu, 2 for fri-sat, +1 for high temperature, *-1 for bad weather)/abs(DAY(attribution date - session.date))
+#        score:
+#            type: float
         created:
             type: datetime
         updated:

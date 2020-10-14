@@ -15,9 +15,13 @@ Rapsys\AirBundle\Entity\Session:
         begin:
             type: time
             nullable: true
-        end:
+        length:
             type: time
             nullable: true
+#The day score, 1 for sun-thu, 2 for fri-sat, +1 for high temperature, *-1 for bad weather
+#        score:
+#            type: smallint
+#            nullable: true
         created:
             type: datetime
         updated:
