@@ -87,7 +87,6 @@ class DefaultController extends AbstractController {
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
 		$form = $this->createForm('Rapsys\AirBundle\Form\ContactType', null, [
-			// To set the action use $this->generateUrl('route_identifier')
 			'action' => $this->generateUrl('rapsys_air_contact'),
 			'method' => 'POST'
 		]);
