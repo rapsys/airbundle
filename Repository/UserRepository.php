@@ -85,7 +85,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		//Process result
 		foreach($res as $data) {
 			//Get translated group
-			$group = $translator->trans($data['g_title']?:'ROLE_USER');
+			$group = $translator->trans($data['g_title']?:'User');
 			//Get translated title
 			$title = $translator->trans($data['t_short']);
 			//Init group subarray
