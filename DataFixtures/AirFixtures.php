@@ -84,6 +84,16 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			array(
 				'short' => 'Mr.',
 				'group' => 'Senior',
+				'mail' => 'denis.courvoisier@wanadoo.fr',
+				'pseudonym' => 'Sined',
+				'forename' => 'Denis',
+				'surname' => 'Courvoisier',
+				'phone' => '+33600000000',
+				'password' => 'test'
+			),
+			array(
+				'short' => 'Mr.',
+				'group' => 'Senior',
 				'mail' => 'rannou402@orange.fr',
 				'pseudonym' => 'Mitch',
 				'forename' => 'Michel',
@@ -98,36 +108,6 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'pseudonym' => 'Roxana',
 				'forename' => 'Roxana',
 				'surname' => 'Prado',
-				'phone' => '+33600000000',
-				'password' => 'test'
-			),
-			array(
-				'short' => 'Mr.',
-				'group' => 'Regular',
-				'mail' => 'majid.ghedjatti@gmail.com',
-				'pseudonym' => 'El Guerrillero',
-				'forename' => 'Majid',
-				'surname' => 'Ghedjatti',
-				'phone' => '+33600000000',
-				'password' => 'test'
-			),
-			array(
-				'short' => 'Mr.',
-				'group' => 'Senior',
-				'mail' => 'denis.courvoisier@wanadoo.fr',
-				'pseudonym' => 'Sined',
-				'forename' => 'Denis',
-				'surname' => 'Courvoisier',
-				'phone' => '+33600000000',
-				'password' => 'test'
-			),
-			array(
-				'short' => 'Mr.',
-				'group' => 'Regular',
-				'mail' => 'kastango13@gmail.com',
-				'pseudonym' => 'Kastrat',
-				'forename' => 'Kastrat',
-				'surname' => 'Hasaj',
 				'phone' => '+33600000000',
 				'password' => 'test'
 			),
