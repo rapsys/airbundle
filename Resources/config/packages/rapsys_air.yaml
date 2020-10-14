@@ -177,6 +177,15 @@ security:
         ROLE_ADMIN: [ 'ROLE_USER', 'ROLE_GUEST', 'ROLE_REGULAR', 'ROLE_SENIOR' ]
 
 #Framework configuration
+framework:
+    default_locale: 'fr'
+    translator:
+        fallbacks: [ 'fr', 'en' ]
+    session:
+        enabled: true
+        handler_id: ~
+        cookie_secure: 'auto'
+        cookie_samesite: 'lax'
 #framework:
 #    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
 #
@@ -217,6 +226,10 @@ services:
     Rapsys\AirBundle\Controller\LocationController:
         arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
+    #Register session controller
+    Rapsys\AirBundle\Controller\SessionController:
+        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
     #Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
         arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
@@ -229,6 +242,10 @@ services:
     Rapsys\AirBundle\Controller\ErrorController:
         arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
+    #Register locale event subscriber
+    Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
+        arguments: [ '@router', '%rapsys_air.locales%' ]
+        tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Security\AccessDeniedHandler:
         arguments: [ '@service_container', '@twig', '@router', '@translator' ]
@@ -241,7 +258,7 @@ services:
     #Replace assets packages
     assets.packages:
         class: 'Symfony\Component\Asset\Packages'
-        arguments: [ '@rapsys.pack_package' ]
+        arguments: [ '@rapsys.path_package' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
@@ -253,9 +270,9 @@ services:
 #Twig Configuration
 twig:
     #Enforce debug
-    #debug: true
-    #auto_reload: ~
-    #cache: false
+    debug: true
+    auto_reload: ~
+    cache: false
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
     form_theme: [ '@RapsysAir/form/form_div_layout.html.twig' ]
