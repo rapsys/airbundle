@@ -1,7 +1,7 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-<section id="dashboard">
-	<h2>{% trans %}Dashboard{% endtrans %}</h2>
+<section id="location">
+	<h2>{% trans %}Locations{% endtrans %}</h2>
 	<section class="panel">
 		{% if calendar is defined and calendar %}
 			<table class="grid">
@@ -14,7 +14,7 @@
 									<ul>
 										{% for session in day.sessions %}
 											<li class="{{ ['session']|merge(session.class)|join(' ') }}">
-												<a href="{{ path('rapsys_air_session', {'id': session.id}) }}" title="{{ session.title }}">{{ session.title }}</a>
+												<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.title }}">{{ session.title }}</a>
 											</li>
 										{% endfor %}
 									</ul>
@@ -29,16 +29,7 @@
 				</tbody>
 			</table>
 		{% endif %}
-		{# Display application or login form #}
-		{% if is_granted('ROLE_GUEST') %}
-			<section>
-				{{ include('@RapsysAir/form/_application.html.twig') }}
-			</section>
-		{% elseif not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-			<section>
-				{{ include('@RapsysAir/form/_login.html.twig') }}
-			</section>
-		{% endif %}
+		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 	</section>
 	{# dump(calendar) #}
 </section>
