@@ -1,0 +1,82 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+<section id="session">
+	<h2>
+		<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a>
+		<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
+	</h2>
+	<section class="panel">
+		<section class="grid">
+			<div class="row">
+				<dl class="cell">
+					<dt><h3>{% trans %}Location{% endtrans %}</h3></dt>
+					<dd><a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a></dd>
+				</dl>
+				<dl class="cell">
+					<dt><h3>{% trans %}Slot{% endtrans %}</h3></dt>
+					<dd>{{ session.slot.title }}</dd>
+				</dl>
+				<dl class="cell">
+					<dt><h3>{% trans %}Created{% endtrans %}</h3></dt>
+					<dd>{{ session.created.format('Y-m-d H:i:s') }}</dd>
+				</dl>
+				<dl class="cell">
+					<dt><h3>{% trans %}Updated{% endtrans %}</h3></dt>
+					<dd>{{ session.updated.format('Y-m-d H:i:s') }}</dd>
+				</dl>
+			</div>
+			<div class="row">
+				<dl class="cell">
+					<dt><h3>{% trans %}Attributed to{% endtrans %}</h3></dt>
+					{% if session.application is null %}
+						<dd>{% trans %}None{% endtrans %}</dd>
+					{% else %}
+						<dd>{{ session.application.user.title }}</dd>
+					{% endif %}
+				</dl>
+				<dl class="cell">
+					<dt><h3>{% trans %}Begin{% endtrans %}</h3></dt>
+					{% if session.begin is null %}
+						<dd>{% trans %}None{% endtrans %}</dd>
+					{% else %}
+						<dd>{{ session.begin.format('Y-m-d H:i:s') }}</dd>
+					{% endif %}
+				</dl>
+				<dl class="cell">
+					<dt><h3>{% trans %}End{% endtrans %}</h3></dt>
+					{% if session.end is null %}
+						<dd>{% trans %}None{% endtrans %}</dd>
+					{% else %}
+						<dd>{{ session.end.format('Y-m-d H:i:s') }}</dd>
+					{% endif %}
+				</dl>
+			</div>
+			<div class="sub">
+				<h3>{% trans %}Candidates{% endtrans %}</h3>
+				<div class="row">
+					{% if session.applications is null %}
+						{% trans %}None{% endtrans %}
+					{% else %}
+						{% for application in session.applications %}
+							<dl class="cell">
+								<dt><h4><a href="{{ path('rapsys_air_user_view', {'id': application.user.id} ) }}">{{ application.user.title }}</a></h4></dt>
+								<dd>
+									<dl>
+										<dt>{% trans %}Created{% endtrans %}</dt>
+										<dd>{{ application.created.format('Y-m-d H:i:s') }}</dd>
+									</dl>
+									<dl>
+										<dt>{% trans %}Updated{% endtrans %}</dt>
+										<dd>{{ application.updated.format('Y-m-d H:i:s') }}</dd>
+									</dl>
+								</dd>
+							</dl>
+						{% endfor %}
+					{% endif %}
+				</div>
+			</div>
+		</section>
+		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
+	</section>
+</section>
+{% endblock %}
