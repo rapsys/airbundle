@@ -2,63 +2,70 @@
 #SCRUD: index, add, edit, delete, view
 rapsys_air:
     path:
-        en: '/'
-        fr: '/fr'
+        en: '/en'
+        fr: '/'
     controller: Rapsys\AirBundle\Controller\DefaultController::index
     methods: GET
 
 rapsys_air_contact:
     path:
-        en: '/contact'
-        fr: '/fr/contact'
+        en: '/en/contact'
+        fr: '/contact'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
 rapsys_air_regulation:
     path:
-        en: '/regulation'
-        fr: '/fr/reglement'
+        en: '/en/regulation'
+        fr: '/reglement'
     controller: Rapsys\AirBundle\Controller\DefaultController::regulation
     methods: GET
 
 rapsys_air_location:
     path:
-        en: '/location'
-        fr: '/fr/emplacement'
+        en: '/en/location'
+        fr: '/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::index
     methods: GET
 
 rapsys_air_location_view:
     path:
-        en: '/location/{id<\d+>}'
-        fr: '/fr/emplacement/{id<\d+>}'
+        en: '/en/location/{id<\d+>}'
+        fr: '/emplacement/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
 rapsys_air_application_add:
     path:
-        en: '/application'
-        fr: '/fr/reservation'
+        en: '/en/application'
+        fr: '/reservation'
     controller: Rapsys\AirBundle\Controller\ApplicationController::add
     methods: POST
 
 rapsys_air_application_edit:
     path:
-        en: '/application/{id<\d+>}'
-        fr: '/fr/reservation/{id<\d+>}'
+        en: '/en/application/{id<\d+>}'
+        fr: '/reservation/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\ApplicationController::edit
     methods: POST
 
+rapsys_air_session_view:
+    path:
+        en: '/en/session/{id<\d+>}'
+        fr: '/seance/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\SessionController::view
+    methods: GET
+
 rapsys_air_user:
     path:
-        en: '/user'
-        fr: '/fr/utilisateur'
+        en: '/en/user'
+        fr: '/utilisateur'
     controller: Rapsys\AirBundle\Controller\UserController::index
     methods: GET
 
 rapsys_air_user_view:
     path:
-        en: '/user/{id<\d+>}'
-        fr: '/fr/utilisateur/{id<\d+>}'
+        en: '/en/user/{id<\d+>}'
+        fr: '/utilisateur/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\UserController::view
     methods: GET
