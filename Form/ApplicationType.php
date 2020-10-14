@@ -42,7 +42,6 @@ class ApplicationType extends AbstractType {
 			->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Date(['message' => 'Your date doesn\'t seems to be valid'])]])
 			#->add('slot', ChoiceType::class, ['attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choices' => $slots, 'data' => $options['slot']])
 			->add('slot', EntityType::class, ['class' => 'RapsysAirBundle:Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot']])
-			->add('return', HiddenType::class, ['data' => $options['return']])
 			->add('submit', SubmitType::class, ['label' => 'Send', 'attr' => ['class' => 'submit']]);
 
 		//Add extra user field
@@ -60,9 +59,8 @@ class ApplicationType extends AbstractType {
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
 		//XXX: 1 should be the first user
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'return' => '', 'slot' => null, 'user' => 1]);
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'slot' => null, 'user' => 1]);
 		$resolver->setAllowedTypes('admin', 'boolean');
-		$resolver->setAllowedTypes('return', 'string');
 		$resolver->setAllowedTypes('slot', [Slot::class, 'null']);
 		$resolver->setAllowedTypes('user', 'integer');
 	}
