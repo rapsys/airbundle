@@ -1,0 +1,10 @@
+{# Display application or login form #}
+{% if is_granted('ROLE_GUEST') %}
+	<div class="form">
+		{{ include('@RapsysAir/form/_application.html.twig') }}
+	</div>
+{% elseif not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+	<div class="form">
+		{{ include('@RapsysAir/form/_login.html.twig') }}
+	</div>
+{% endif %}
