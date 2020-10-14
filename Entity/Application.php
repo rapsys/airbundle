@@ -21,6 +21,11 @@ class Application {
 	 */
 	private $updated;
 
+
+	//TODO: ajouter un champ score à replir lors de l'attribution d'une session
+	//XXX: champ float avec une bonne capacité en décimale
+
+
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 */

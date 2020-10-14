@@ -24,7 +24,7 @@ class Session {
 	/**
 	 * @var \DateTime
 	 */
-	private $end;
+	private $length;
 
 	/**
 	 * @var \DateTime
@@ -37,9 +37,9 @@ class Session {
 	private $updated;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var \Rapsys\AirBundle\Entity\Application
 	 */
-	private $applications;
+	private $application;
 
 	/**
 	 * @var \Rapsys\AirBundle\Entity\Location
@@ -47,9 +47,14 @@ class Session {
 	private $location;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\Application
+	 * @var \Rapsys\AirBundle\Entity\Slot
 	 */
-	private $application;
+	private $slot;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $applications;
 
 	/**
 	 * Constructor
@@ -112,25 +117,25 @@ class Session {
 	}
 
 	/**
-	 * Set end
+	 * Set length
 	 *
-	 * @param \DateTime $end
+	 * @param \DateTime $length
 	 *
 	 * @return Session
 	 */
-	public function setEnd($end) {
-		$this->end = $end;
+	public function setLength($length) {
+		$this->length = $length;
 
 		return $this;
 	}
 
 	/**
-	 * Get end
+	 * Get length
 	 *
 	 * @return \DateTime
 	 */
-	public function getEnd() {
-		return $this->end;
+	public function getLength() {
+		return $this->length;
 	}
 
 	/**
@@ -229,11 +234,6 @@ class Session {
 	public function getLocation() {
 		return $this->location;
 	}
-	/**
-	 * @var \Rapsys\AirBundle\Entity\Slot
-	 */
-	private $slot;
-
 
 	/**
 	 * Set slot
