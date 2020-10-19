@@ -63,7 +63,13 @@ h6 {
 	margin: 1.561rem 0;
 }
 
-p {
+p,
+dt {
+	font-size: 1rem;
+}
+
+dd {
+	font-size: .9rem;
 }
 
 body {
@@ -277,7 +283,8 @@ ul.error {
 #form,
 #content,
 #regulation,
-#dashboard {
+#location,
+#session {
 	border: .1rem solid #00c3f9;
 	border-radius: .5rem;
 	margin: .5rem;
@@ -438,6 +445,7 @@ textarea {
 	border-radius: .2rem;
 	font-size: .8rem;
 	color: #066;
+	background-color: transparent;
 }
 
 button.submit {
@@ -449,8 +457,6 @@ button.submit {
 
 /* Vertical form */
 form.col {
-	margin-left: .5rem;
-	width: 10rem;
 }
 
 form.col div {
@@ -463,7 +469,7 @@ form.col div.error {
 
 form.col label {
 	text-align: center;
-	padding-top: 0;
+	padding-right: 0;
 }
 
 form.col section {
@@ -485,6 +491,9 @@ form.col div.date {
 	flex-direction: row;
 	flex-wrap: wrap;
 	place-content: space-between;
+	border: 0;
+	margin: 0;
+	padding: 0;
 }
 
 #dashboard .grid {
@@ -493,8 +502,8 @@ form.col div.date {
 	flex-grow: 1;
 	border-radius: .2rem; /* marche pas sur chrome */
 	table-layout: fixed;
-	width: calc(100% - 12rem);
-	border-collapse: collapse;
+	/*width: calc(100% - 12rem);
+	border-collapse: collapse;*/
 }
 
 #dashboard .cell {
@@ -519,24 +528,24 @@ form.col div.date {
 	text-align: center;
 }
 
-#dashboard .seventh {
+#location .seventh {
 	width: calc(100% / 7);
 }
 
-#dashboard .disabled {
+#location .disabled {
 	color: #acc;
 	background-color: #bee;
 }
 
-#dashboard .current {
+#location .current {
 	background-color: #cff;
 }
 
-#dashboard .next {
+#location .next {
 	background-color: #eff;
 }
 
-#dashboard .session {
+#location .session {
 	border-radius: .2rem;
 	border: .1rem solid #00c3f9;
 	font-size: .8rem;
@@ -547,24 +556,119 @@ form.col div.date {
 	text-overflow: ellipsis;
 }
 
-#dashboard .pending {
+#location .pending {
 	background-color: #ccc;
 }
 
-#dashboard .granted {
+#location .granted {
 	background-color: #cff;
 	/*background-color: #33b679;
 	border-color: #33b679;*/
 }
 
-#dashboard .disputed {
+#location .disputed {
 	background-color: #fcc;
 }
 
-#dashboard .orphaned {
+#location .orphaned {
 	background-color: #fc9;
 }
 
+/* Session */
+#session {
+}
+
+#session h2 a::after {
+	content: " >";
+}
+
+#session h2 a:last-child::after {
+	content: none;
+}
+
+#location .panel,
+#session .panel {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	place-content: space-between;
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+#location .grid,
+#session .grid {
+	display: table;
+	line-height: normal;
+	padding: 0;
+	flex-grow: 1;
+	table-layout: fixed;
+	border: 0 none;
+	/*width: calc(100% - 12rem);
+	border-collapse: collapse;*/
+}
+
+#location .grid {
+	width: calc(100% - 12rem);
+	border-collapse: collapse;
+}
+
+#session .row {
+	display: flex;
+	flex-wrap: wrap;
+	margin-bottom: .5rem;
+	border: .1rem solid #00c3f9;
+	border-radius: .2rem;
+}
+
+#location .cell,
+#session .cell {
+	display: table-cell;
+	text-align: left;
+	padding: .5rem;
+	flex-grow: 1;
+	border: 0;
+}
+
+#location .cell {
+	border: .05rem solid #00c3f9;
+	Height: 6rem;
+}
+
+#session .sub {
+	display: flex;
+	flex-direction: column;
+	line-height: normal;
+	margin-bottom: .5rem;
+	margin-top: .5rem;
+	padding: .5rem;
+	border: .1rem solid #00c3f9;
+	border-radius: .2rem;
+}
+
+#session .grid dd dd {
+	text-indent: .5rem;
+}
+
+#location .form,
+#session .form {
+	border: .1rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .5rem;
+	margin-left: .5rem;
+	width: 10rem;
+}
+
+#location .form label,
+#location .form input,
+#location .form button,
+#session .form label,
+#session .form input,
+#session .form button {
+	text-align: center;
+	min-width: 6rem;
+}
 
 /* Regulation */
 #regulation {
@@ -633,7 +737,7 @@ form.col div.date {
 /* Footer */
 #footer {
 	border: .1rem solid #00c3f9;
-	border-radius: .5rem;
+	Border-radius: .5rem;
 	margin: .5rem;
 	margin-top: 0;
 	padding: .5rem;
@@ -657,25 +761,27 @@ form.col div.date {
 }
 
 /* viewport responsive hack */
-@media ( max-width: 650px ) {
+@media ( max-width: 850px ) {
 	#header {
 		flex-wrap: wrap;
 	}
 
-	#dashboard .panel {
+	#location .panel,
+	#session .panel {
 		place-content: center;
 		flex-direction: column;
+		flex-wrap: wrap;
 	}
 
-	#dashboard .grid {
-		width: 100%;
+	#location .grid,
+	#location .form,
+	#session .grid,
+	#session .form {
+		width: auto;
 	}
 
-	#dashboard div.grid {
-		display: grid;
-	}
-
-	.form_col {
+	#location .form,
+	#session .form {
 		margin: .5rem auto 0 auto;
 	}
 }
