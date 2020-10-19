@@ -42,4 +42,23 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 		//Send result
 		return $ret;
 	}
+
+	/**
+	 * Find sessions by location and date period
+	 *
+	 * @param $location The location
+	 * @param $period The date period
+	 */
+	public function findAllByLocationDatePeriod($location, $period) {
+		//Fetch sessions
+		$ret = $this->getEntityManager()
+			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.date BETWEEN :begin AND :end)')
+			->setParameter('location', $location)
+			->setParameter('begin', $period->getStartDate())
+			->setParameter('end', $period->getEndDate())
+			->getResult();
+
+		//Send result
+		return $ret;
+	}
 }
