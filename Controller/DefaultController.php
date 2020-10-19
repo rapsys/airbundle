@@ -3,7 +3,10 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Slot;
+use Rapsys\AirBundle\Entity\User;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,6 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Rapsys\UserBundle\Utils\Slugger;
+
 
 class DefaultController extends AbstractController {
 	//Config array
@@ -149,20 +153,78 @@ class DefaultController extends AbstractController {
 	/**
 	 * The index page
 	 *
-	 * @desc Welcome the user
+	 * @desc Display all granted sessions with an application or login form
+	 *
+	 * @param Request $request The request instance
 	 *
 	 * @return Response The rendered view
 	 */
-	public function index() {
+	public function index(Request $request = null) {
+		//Fetch doctrine
+		$doctrine = $this->getDoctrine();
+
 		//Set section
 		$section = $this->translator->trans('Index');
 
 		//Set title
 		$title = $section.' - '.$this->context['site_title'];
 
-		//Render template
-		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		//Init context
+		$context = [];
+
+		//Create application form for role_guest
+		if ($this->isGranted('ROLE_GUEST')) {
+			//Create ApplicationType form
+			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+				//Set the action
+				'action' => $this->generateUrl('rapsys_air_application_add'),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ],
+				//Set admin
+				'admin' => $this->isGranted('ROLE_ADMIN'),
+				//Set default user to current
+				'user' => $this->getUser()->getId(),
+				//Set default slot to evening
+				//XXX: default to Evening (3)
+				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
+			]);
+
+			//Add form to context
+			$context['application'] = $application->createView();
+		//Create login form for anonymous
+		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Create ApplicationType form
+			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
+				//Set the action
+				'action' => $this->generateUrl('rapsys_user_login'),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ]
+			]);
+
+			//Add form to context
+			$context['login'] = $login->createView();
+		}
+
+		//Compute period
+		$period = new \DatePeriod(
+			//Start from first monday of week
+			new \DateTime('Monday this week'),
+			//Iterate on each day
+			new \DateInterval('P1D'),
+			//End with next sunday and 4 weeks
+			new \DateTime('Monday this week + 5 week')
+		);
+
+		//Fetch calendar
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), true);
+
+		//Fetch locations
+		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period, true);
+
+		//Render the view
+		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
 	}
+
 
 	/**
 	 * The regulation page
