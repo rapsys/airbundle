@@ -1,7 +1,52 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<section id="content">
-		<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
-		<p>{{ 'Welcome to the outdoor space reservation system'|trans }}</p>
+<section id="dashboard">
+	<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
+	<section class="panel">
+		{% if calendar is defined and calendar %}
+			<table class="grid">
+				<tbody>
+					<tr>
+						{% for date, day in calendar %}
+							<td class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
+								<h3>{{ day.title }}</h3>
+								{% if day.sessions is not empty %}
+									<ul>
+										{% for session in day.sessions %}
+											<li class="{{ ['session']|merge(session.class)|join(' ') }}">
+												<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
+											</li>
+										{% endfor %}
+									</ul>
+								{% endif %}
+							</td>
+							{% if loop.index % 7 == 0 and not loop.last %}
+								</tr>
+								<tr>
+							{% endif %}
+						{% endfor %}
+					</tr>
+				</tbody>
+			</table>
+		{% endif %}
+		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 	</section>
+	<section class="panel">
+		{% if locations is defined and locations %}
+			<table class="grid">
+				<tbody>
+					<tr>
+						{% for id, title in locations %}
+							<td class="cell third"><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></td>
+								{% if loop.index % 7 == 0 and not loop.last %}
+									</tr>
+									<tr>
+								{% endif %}
+						{% endfor %}
+					</tr>
+				</tbody>
+			</table>
+		{% endif %}
+	</section>
+</section>
 {% endblock %}
