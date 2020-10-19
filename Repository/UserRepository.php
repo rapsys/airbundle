@@ -100,4 +100,26 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		//Send result
 		return $ret;
 	}
+
+	/**
+	 * Find all user's pseudonym from session applications
+	 *
+	 * @param $session The Session instance
+	 */
+	public function findAllPseudonymBySession($session) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Fetch sessions
+		$ret = $this->getEntityManager()
+			->createQuery('SELECT u.id, u.pseudonym FROM RapsysAirBundle:Application a INNER JOIN RapsysAirBundle:User u WHERE u.id = a.user AND a.session = :session')
+			->setParameter('session', $session)
+			->getResult();
+
+		//Process result
+		$ret = array_column($ret, 'pseudonym', 'id');
+
+		//Send result
+		return $ret;
+	}
 }
