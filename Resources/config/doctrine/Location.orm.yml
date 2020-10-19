@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\Location:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\LocationRepository
+    repositoryClass: Rapsys\AirBundle\Repository\LocationRepository
     table: locations
     id:
         id:
