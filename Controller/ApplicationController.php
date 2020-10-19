@@ -3,6 +3,8 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Form\FormError;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Session;
@@ -105,13 +107,7 @@ class ApplicationController extends DefaultController {
 			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
 			//Add notice in flash message
-			//TODO: set warning about application already exists bla bla bla...
-			#$this->addFlash('notice', $this->translator->trans('Application request the %date% for %location% on the slot %slot% saved', ['%location%' => $data['location']->getTitle(), '%slot%' => $data['slot']->getTitle(), '%date%' => $data['date']->format('Y-m-d')]));
-
-			//Add error message to mail field
-			#$form->get('slot')->addError(new FormError($this->translator->trans('Application already exists')));
-
-			//TODO: redirect anyway on uri with application highlighted
+			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
 		//Catch no application and session without identifier (not persisted&flushed) cases
 		} catch (\Doctrine\ORM\NoResultException|\Doctrine\ORM\ORMInvalidArgumentException $e) {
 			//Create the application
@@ -131,23 +127,11 @@ class ApplicationController extends DefaultController {
 			$manager->persist($application);
 
 			//Flush to get the ids
-			#$manager->flush();
+			$manager->flush();
 
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Application on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
 		}
-		
-		//Try unshort return field
-		if (
-			!empty($data['return']) &&
-			($unshort = $this->slugger->unshort($data['return'])) &&
-			($route = json_decode($unshort, true)) !== null
-		) {
-			$return = $this->generateUrl($route['_route'], ['session' => $session->getId()?:1]+$route['_route_params']);
-		}
-
-		//XXX: Debug
-		header('Content-Type: text/plain');
 
 		//Extract and process referer
 		if ($referer = $request->headers->get('referer')) {
@@ -165,174 +149,38 @@ class ApplicationController extends DefaultController {
 
 			//Try with referer path
 			try {
-				var_dump($this->router);
-				exit;
-				var_dump($path = '/location');
-				var_dump($this->router->match($path));
-				var_dump($path = '/fr/emplacement');
-				exit;
-				var_dump($this->router->match());
-				exit;
-				var_dump($path);
-				var_dump($query);
-				exit;
+				//Save old context
+				$oldContext = $this->router->getContext();
+
+				//Force clean context
+				//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
+				$this->router->setContext(new RequestContext());
+
 				//Retrieve route matching path
 				$route = $this->router->match($path);
-				var_dump($route);
-				exit;
 
-				//Verify that it differ from current one
-				if (($name = $route['_route']) == $logout) {
-					throw new ResourceNotFoundException('Identical referer and logout route');
-				}
+				//Reset context
+				$this->router->setContext($oldContext);
+
+				//Clear old context
+				unset($oldContext);
+
+				//Extract name
+				$name = $route['_route'];
 
 				//Remove route and controller from route defaults
 				unset($route['_route'], $route['_controller']);
 
 				//Generate url
-				$url = $this->router->generate($name, $route);
+				return $this->redirectToRoute($name, ['session' => $session->getId()]+$route);
 			//No route matched
 			} catch(ResourceNotFoundException $e) {
 				//Unset referer to fallback to default route
 				unset($referer);
 			}
 		}
-		var_dump($request->headers->get('referer'));
-		#var_dump($request->get('_route'));
 
-		var_dump($return);
-		exit;
-
-		//Fetch slugger helper
-		$slugger = $this->get('rapsys.slugger');
-
-		var_dump($short = $slugger->short(json_encode(['_route' => $request->get('_route'), '_route_params' => $request->get('_route_params')])));
-		$short[12] = 'T';
-		var_dump($ret = json_decode($slugger->unshort($short), true));
-		var_dump($ret);
-		var_dump($this->generateUrl($ret['_route'], $ret['_route_params']));
-		#var_dump(json_decode($slugger->unshort($data['return'])));
-		#var_dump($application->getId());
-		exit;
-
-		//Init application
-		$application = false;
-
-		//Protect application fetching
-		try {
-			//TODO: handle admin case where we provide a user in extra
-			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $this->getUser());
-
-			//Add error message to mail field
-			$form->get('slot')->addError(new FormError($this->translator->trans('Application already exists')));
-		//Catch no application cases
-		//XXX: combine these catch when php 7.1 is available
-		} catch (\Doctrine\ORM\NoResultException $e) {
-		//Catch invalid argument because session is not already persisted
-		} catch(\Doctrine\ORM\ORMInvalidArgumentException $e) {
-		}
-
-		//Create new application if none found
-		if (!$application) {
-			//Create the application
-			$application = new Application();
-			$application->setSession($session);
-			//TODO: handle admin case where we provide a user in extra
-			$application->setUser($this->getUser());
-			$application->setCreated(new \DateTime('now'));
-			$application->setUpdated(new \DateTime('now'));
-			$manager->persist($application);
-
-			//Flush to get the ids
-			$manager->flush();
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application request the %date% for %location% on the slot %slot% saved', ['%location%' => $data['location']->getTitle(), '%slot%' => $data['slot']->getTitle(), '%date%' => $data['date']->format('Y-m-d')]));
-
-			//Redirect to cleanup the form
-			return $this->redirectToRoute('rapsys_air_admin');
-		}
-	}
-
-	function test(Request $request) {
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime('Monday this week + 5 week')
-		);
-
-		//Fetch sessions
-		$sessions = $doctrine->getRepository(Session::class)->findAllByDatePeriod($period);
-
-		//Init calendar
-		$calendar = [];
-		
-		//Init month
-		$month = null;
-
-		//Iterate on each day
-		foreach($period as $date) {
-			//Init day in calendar
-			$calendar[$Ymd = $date->format('Ymd')] = [
-				'title' => $date->format('d'),
-				'class' => [],
-				'sessions' => []
-			];
-			//Append month for first day of month
-			if ($month != $date->format('m')) {
-				$month = $date->format('m');
-				$calendar[$Ymd]['title'] .= '/'.$month;
-			}
-			//Deal with today
-			if ($date->format('U') == ($today = strtotime('today'))) {
-				$calendar[$Ymd]['title'] .= '/'.$month;
-				$calendar[$Ymd]['current'] = true;
-				$calendar[$Ymd]['class'][] =  'current';
-			}
-			//Disable passed days
-			if ($date->format('U') < $today) {
-				$calendar[$Ymd]['disabled'] = true;
-				$calendar[$Ymd]['class'][] =  'disabled';
-			}
-			//Set next month days
-			if ($date->format('m') > date('m')) {
-				$calendar[$Ymd]['next'] = true;
-				$calendar[$Ymd]['class'][] =  'next';
-			}
-			//Iterate on each session to find the one of the day
-			foreach($sessions as $session) {
-				if (($sessionYmd = $session->getDate()->format('Ymd')) == $Ymd) {
-					//Count number of application
-					$count = count($session->getApplications());
-
-					//Compute classes
-					$class = [];
-					if ($session->getApplication()) {
-						$class[] = 'granted';
-					} elseif ($count == 0) {
-						$class[] = 'orphaned';
-					} elseif ($count > 1) {
-						$class[] = 'disputed';
-					} else {
-						$class[] = 'pending';
-					}
-
-					//Add the session
-					$calendar[$Ymd]['sessions'][$session->getSlot()->getId().$session->getLocation()->getId()] = [
-						'id' => $session->getId(),
-						'title' => ($count > 1?'['.$count.'] ':'').$session->getSlot()->getTitle().' '.$session->getLocation()->getTitle(),
-						'class' => $class
-					];
-				}
-			}
-
-			//Sort sessions
-			ksort($calendar[$Ymd]['sessions']);
-		}
+		//Redirect to cleanup the form
+		return $this->redirectToRoute('rapsys_air', ['session' => $session->getId()]);
 	}
 }
