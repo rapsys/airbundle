@@ -21,13 +21,6 @@ rapsys_air_regulation:
     controller: Rapsys\AirBundle\Controller\DefaultController::regulation
     methods: GET
 
-rapsys_air_location:
-    path:
-        en: '/en/location'
-        fr: '/emplacement'
-    controller: Rapsys\AirBundle\Controller\LocationController::index
-    methods: GET
-
 rapsys_air_location_view:
     path:
         en: '/en/location/{id<\d+>}'
@@ -48,6 +41,13 @@ rapsys_air_application_edit:
         fr: '/reservation/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\ApplicationController::edit
     methods: POST
+
+rapsys_air_session:
+    path:
+        en: '/en/session'
+        fr: '/seance'
+    controller: Rapsys\AirBundle\Controller\SessionController::index
+    methods: GET
 
 rapsys_air_session_view:
     path:
