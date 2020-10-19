@@ -5,7 +5,7 @@
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site_ico) }}" />
-	<link ref="icon" type="image/svg+xml" href="{{ asset(site_svg) }}" />
+	<link rel="icon" type="image/svg+xml" href="{{ asset(site_svg) }}" />
 	{% for size, icon in site_png %}
 		{# Apple #}
 		{% if size in [152, 167, 180] %}
@@ -18,7 +18,7 @@
 			<meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ asset(icon) }}" />
 		{# Others #}
 		{% else %}
-			<link rel="icon" type="image/png" size="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
+			<link rel="icon" type="image/png" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
 		{% endif %}
 	{% endfor %}
 	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
@@ -43,7 +43,7 @@
 			{% block header_nav %}
 				<nav>
 					<h2>{% trans %}Navigation{% endtrans %}</h2>
-					<a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a>
+					<a href="{{ path('rapsys_air_session') }}">{% trans %}Sessions{% endtrans %}</a>
 					<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
 					<a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a>
 					<a href="{{ path('rapsys_air_regulation') }}">{% trans %}Regulation{% endtrans %}</a>
