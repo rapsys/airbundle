@@ -146,6 +146,7 @@
 'Send': 'Envoyer'
 'Senior': 'Sénior'
 'Session': 'Séance'
+'Sessions': 'Séances'
 'Session %id%': 'Séance %id%'
 'Session %id% the %date% for %location% on the slot %slot% saved': 'Séance %id% Réservation le %date% pour %location% sur le créneau %slot% enregistrée'
 'Session on %date% %location% %slot% created': 'Séance le %date% %location% %slot% créée'
