@@ -2,7 +2,6 @@
 {% block content %}
 <section id="session">
 	<h2>
-		<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a>
 		<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
 	</h2>
 	<section class="panel">
@@ -31,7 +30,7 @@
 					{% if session.application is null %}
 						<dd>{% trans %}None{% endtrans %}</dd>
 					{% else %}
-						<dd>{{ session.application.user.title }}</dd>
+						<dd><a href="{{ path('rapsys_air_user_view', {'id': session.application.user.id}) }}">{{ session.application.user.title }}</a></dd>
 					{% endif %}
 				</dl>
 				<dl class="cell">
