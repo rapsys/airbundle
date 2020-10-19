@@ -280,11 +280,13 @@ ul.error {
 }*/
 
 /* Content */
+#dashboard,
 #form,
 #content,
 #regulation,
 #location,
-#session {
+#session,
+#user {
 	border: .1rem solid #00c3f9;
 	border-radius: .5rem;
 	margin: .5rem;
@@ -486,66 +488,131 @@ form.col div.date {
 }
 
 /* Dashboard */
-#dashboard .panel {
+#dashboard .panel,
+#location .panel,
+#session .panel,
+#user .panel {
 	display: flex;
 	flex-direction: row;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	place-content: space-between;
 	border: 0;
-	margin: 0;
+	margin: 0 0 .5rem 0;
 	padding: 0;
 }
 
-#dashboard .grid {
+#dashboard .panel:only-child,
+#dashboard .panel:last-child,
+#dashboard .panel:last-of-type,
+#location .panel:only-child,
+#location .panel:last-child,
+#location .panel:last-of-type,
+#session .panel:only-child,
+#session .panel:last-child,
+#session .panel:last-of-type,
+#user .panel:only-child,
+#user .panel:last-child,
+#user .panel:last-of-type {
+	margin-bottom: 0;
+}
+
+#dashboard .grid,
+#location .grid,
+#session .grid,
+#user .grid {
 	display: table;
-	border: .05rem solid #00c3f9;
+	line-height: normal;
+	padding: 0;
 	flex-grow: 1;
-	border-radius: .2rem; /* marche pas sur chrome */
 	table-layout: fixed;
+	border: 0 none;
 	/*width: calc(100% - 12rem);
 	border-collapse: collapse;*/
+	width: calc(100% - 12rem);
+	border-collapse: collapse;
 }
 
-#dashboard .cell {
+#dashboard .cell,
+#location .cell,
+#session .cell,
+#user .cell {
 	display: table-cell;
 	text-align: left;
+	padding: .5rem;
+	flex-grow: 1;
 	border: .05rem solid #00c3f9;
-	font-size: initial;
-	height: 8rem;
+	height: 6rem;
 }
 
-#dashboard dl.cell {
-	height: 3rem;
+#dashboard .form,
+#location .form,
+#session .form,
+#user .form {
+	border: .1rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .5rem;
+	margin-left: .5rem;
+	width: 10rem;
 }
 
-#dashboard .cell h3 {
-	font-size: 1rem;
-	padding: .25rem;
-	margin: 0;
-}
-
-#dashboard .cell dd {
+#dashboard .form label,
+#dashboard .form input,
+#dashboard .form button,
+#location .form label,
+#location .form input,
+#location .form button,
+#session .form label,
+#session .form input,
+#session .form button,
+#user .form label,
+#user .form input,
+#user .form button {
 	text-align: center;
+	min-width: 6rem;
 }
 
-#location .seventh {
+
+#dashboard .seventh,
+#location .seventh,
+#session .seventh,
+#user .seventh {
 	width: calc(100% / 7);
 }
 
-#location .disabled {
+#dashboard .third,
+#location .third,
+#session .third,
+#user .third {
+	width: calc(100% / 3);
+	height: auto;
+}
+
+#dashboard .disabled,
+#location .disabled,
+#session .disabled,
+#user .disabled {
 	color: #acc;
 	background-color: #bee;
 }
 
-#location .current {
+#dashboard .current,
+#location .current,
+#session .current,
+#user .current {
 	background-color: #cff;
 }
 
-#location .next {
+#dashboard .next,
+#location .next,
+#session .next,
+#user .next {
 	background-color: #eff;
 }
 
-#location .session {
+#dashboard .session,
+#location .session,
+#session .session,
+#user .session {
 	border-radius: .2rem;
 	border: .1rem solid #00c3f9;
 	font-size: .8rem;
@@ -553,25 +620,46 @@ form.col div.date {
 	margin: 0 .1rem .1rem .1rem;
 	overflow-x: hidden;
 	white-space: nowrap;
-	text-overflow: ellipsis;
+	Text-overflow: ellipsis;
 }
 
-#location .pending {
+#dashboard .pending,
+#location .pending,
+#session .pending,
+#user .pending {
 	background-color: #ccc;
 }
 
-#location .granted {
+#dashboard .granted,
+#location .granted,
+#session .granted,
+#user .granted {
 	background-color: #cff;
 	/*background-color: #33b679;
 	border-color: #33b679;*/
 }
 
-#location .disputed {
+#dashboard .disputed,
+#location .disputed,
+#session .disputed,
+#user .disputed {
 	background-color: #fcc;
 }
 
-#location .orphaned {
+#dashboard .orphaned,
+#location .orphaned,
+#session .orphaned,
+#user .orphaned {
 	background-color: #fc9;
+}
+
+#dashboard .highlight,
+#location .highlight,
+#session .highlight,
+#user .highlight {
+	border-color: #3333c3;
+	background-color: #c3c3f9;
+	color: #3333c3;
 }
 
 /* Session */
@@ -586,54 +674,12 @@ form.col div.date {
 	content: none;
 }
 
-#location .panel,
-#session .panel {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	place-content: space-between;
-	border: 0;
-	margin: 0;
-	padding: 0;
-}
-
-#location .grid,
-#session .grid {
-	display: table;
-	line-height: normal;
-	padding: 0;
-	flex-grow: 1;
-	table-layout: fixed;
-	border: 0 none;
-	/*width: calc(100% - 12rem);
-	border-collapse: collapse;*/
-}
-
-#location .grid {
-	width: calc(100% - 12rem);
-	border-collapse: collapse;
-}
-
 #session .row {
 	display: flex;
 	flex-wrap: wrap;
 	margin-bottom: .5rem;
 	border: .1rem solid #00c3f9;
 	border-radius: .2rem;
-}
-
-#location .cell,
-#session .cell {
-	display: table-cell;
-	text-align: left;
-	padding: .5rem;
-	flex-grow: 1;
-	border: 0;
-}
-
-#location .cell {
-	border: .05rem solid #00c3f9;
-	Height: 6rem;
 }
 
 #session .sub {
@@ -649,25 +695,6 @@ form.col div.date {
 
 #session .grid dd dd {
 	text-indent: .5rem;
-}
-
-#location .form,
-#session .form {
-	border: .1rem solid #00c3f9;
-	border-radius: .2rem;
-	padding: .5rem;
-	margin-left: .5rem;
-	width: 10rem;
-}
-
-#location .form label,
-#location .form input,
-#location .form button,
-#session .form label,
-#session .form input,
-#session .form button {
-	text-align: center;
-	min-width: 6rem;
 }
 
 /* Regulation */
@@ -767,21 +794,35 @@ form.col div.date {
 	}
 
 	#location .panel,
-	#session .panel {
+	#session .panel,
+	#user .panel {
 		place-content: center;
 		flex-direction: column;
 		flex-wrap: wrap;
 	}
 
-	#location .grid,
-	#location .form,
-	#session .grid,
-	#session .form {
-		width: auto;
+	#location .panel:only-child,
+	#location .panel:last-child,
+	#location .panel:last-of-type,
+	#session .panel:only-child,
+	#session .panel:last-child,
+	#session .panel:last-of-type,
+	#user .panel:only-child,
+	#user .panel:last-child,
+	#user .panel:last-of-type {
+		margin-bottom: .5rem;
 	}
 
 	#location .form,
-	#session .form {
+	#session .form,
+	#user .form {
+		width: auto;
 		margin: .5rem auto 0 auto;
+	}
+
+	#location .grid,
+	#session .grid,
+	#user .grid {
+		width: calc(100%);
 	}
 }
