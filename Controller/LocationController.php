@@ -78,9 +78,13 @@ class LocationController extends DefaultController {
 		);
 
 		//Fetch calendar
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
+
+		//Fetch locations
+		//XXX: we want to display all active locations anyway
+		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
 
 		//Render the view
-		return $this->render('@RapsysAir/location/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar]+$context+$this->context);
+		return $this->render('@RapsysAir/location/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
 	}
 }
