@@ -1,35 +1,40 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-<section id="user">
+<section id="dashboard">
 	<h2><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ section }}</a></h2>
-	<section class="panel">
+	<div class="panel calendar">
 		{% if calendar is defined and calendar %}
-			<table class="grid">
-				<tbody>
-					<tr>
-						{% for date, day in calendar %}
-							<td class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
-								<h3>{{ day.title }}</h3>
-								{% if day.sessions is not empty %}
-									<ul>
-										{% for session in day.sessions %}
-											<li class="{{ ['session']|merge(session.class)|join(' ') }}">
-												<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
-											</li>
-										{% endfor %}
-									</ul>
-								{% endif %}
-							</td>
-							{% if loop.index % 7 == 0 and not loop.last %}
-								</tr>
-								<tr>
-							{% endif %}
-						{% endfor %}
-					</tr>
-				</tbody>
-			</table>
+			<div class="grid">
+				{% for date, day in calendar %}
+					<section class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
+						<h3>{{ day.title }}</h3>
+						{% if day.sessions is not empty %}
+							<ul>
+								{% for session in day.sessions %}
+									<li class="{{ ['session']|merge(session.class)|join(' ') }}">
+										<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
+									</li>
+								{% endfor %}
+							</ul>
+						{% else %}
+							&nbsp;
+						{% endif %}
+					</section>
+				{% endfor %}
+			</div>
 		{% endif %}
 		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
-	</section>
+	</div>
+	{% if locations is defined and locations %}
+		<div class="panel location">
+			<div class="grid">
+				{% for id, title in locations %}
+					<section class="cell">
+						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
+					</section>
+				{% endfor %}
+			</div>
+		</div>
+	{% endif %}
 </section>
 {% endblock %}
