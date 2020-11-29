@@ -221,27 +221,27 @@ services:
         tags: [ 'twig.extension' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register location controller
     Rapsys\AirBundle\Controller\LocationController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register session controller
     Rapsys\AirBundle\Controller\SessionController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register user controller
     Rapsys\AirBundle\Controller\UserController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
 #    Rapsys\AirBundle\Controller\ErrorController:
-#        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+#        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
 #        tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
     Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
@@ -259,7 +259,7 @@ services:
     #Replace assets packages
     assets.packages:
         class: 'Symfony\Component\Asset\Packages'
-        arguments: [ '@rapsys.path_package' ]
+        arguments: [ '@rapsys_pack.path_package' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
