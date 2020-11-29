@@ -3,9 +3,9 @@
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
 		{% if sent %}
-			<p class="notice">{% trans %}Your password is updated and an account recover message has been sent{% endtrans %}</p>
+			<p class="message notice">{% trans %}Your password is updated and an account recover message has been sent{% endtrans %}</p>
 		{% elseif not found %}
-			<p class="error">{% trans %}Unable to find account{% endtrans %}</p>
+			<p class="message error">{% trans %}Unable to find account{% endtrans %}</p>
 		{% else %}
 			<section>
 				{{ form_start(form) }}
