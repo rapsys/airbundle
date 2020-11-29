@@ -19,23 +19,32 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Rapsys\UserBundle\Utils\Slugger;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerTrait;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 
-class DefaultController extends AbstractController {
-	//Config array
+class DefaultController {
+	use ControllerTrait;
+
+	///Config array
 	protected $config;
 
-	//Context array
+	///Context array
 	protected $context;
 
-	//Router instance
+	///Router instance
 	protected $router;
 
-	//Slugger instance
+	///Slugger instance
 	protected $slugger;
 
-	//Translator instance
+	///Translator instance
 	protected $translator;
+
+	/**
+	 * @var ContainerInterface
+	 */
+	protected $container;
 
 	/**
 	 * Inject container and translator interface
@@ -48,6 +57,9 @@ class DefaultController extends AbstractController {
 	public function __construct(ContainerInterface $container, RouterInterface $router, Slugger $slugger, TranslatorInterface $translator) {
 		//Retrieve config
 		$this->config = $container->getParameter($this->getAlias());
+
+		//Set the container
+		$this->container = $container;
 
 		//Set the router
 		$this->router = $router;
@@ -167,7 +179,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Index');
 
 		//Set title
-		$title = $section.' - '.$this->context['site_title'];
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 		//Init context
 		$context = [];
@@ -216,10 +228,11 @@ class DefaultController extends AbstractController {
 		);
 
 		//Fetch calendar
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), true);
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
 
 		//Fetch locations
-		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period, true);
+		//XXX: we want to display all active locations anyway
+		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
 
 		//Render the view
 		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
@@ -238,7 +251,7 @@ class DefaultController extends AbstractController {
 		$section = $this->translator->trans('Regulation');
 
 		//Set title
-		$title = $section.' - '.$this->context['site_title'];
+		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 		//Render template
 		return $this->render('@RapsysAir/default/regulation.html.twig', ['title' => $title, 'section' => $section]+$this->context);
