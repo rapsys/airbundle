@@ -186,6 +186,7 @@ framework:
         handler_id: ~
         cookie_secure: 'auto'
         cookie_samesite: 'lax'
+    disallow_search_engine_index: false
 #framework:
 #    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
 #
@@ -239,9 +240,9 @@ services:
         arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
-    Rapsys\AirBundle\Controller\ErrorController:
-        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
-        tags: [ 'controller.service_arguments' ]
+#    Rapsys\AirBundle\Controller\ErrorController:
+#        arguments: [ '@service_container', '@router', '@rapsys.slugger', '@translator' ]
+#        tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
     Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
         arguments: [ '@router', '%rapsys_air.locales%' ]
