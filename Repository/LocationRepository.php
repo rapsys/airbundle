@@ -34,4 +34,33 @@ class LocationRepository extends \Doctrine\ORM\EntityRepository {
 		//Send result
 		return $ret;
 	}
+
+	/**
+	 * Fetch translated user location with session by date period
+	 *
+	 * @param $translator The TranslatorInterface instance
+	 * @param $period The date period
+	 * @param $userId The user uid
+	 */
+	public function fetchTranslatedUserLocationByDatePeriod(TranslatorInterface $translator, $period, $userId) {
+		//Fetch sessions
+		$ret = $this->getEntityManager()
+			  ->createQuery('SELECT l.id, l.title FROM RapsysAirBundle:Application a JOIN RapsysAirBundle:Session s JOIN RapsysAirBundle:Location l WHERE a.user = :uid AND a.session = s.id AND s.date BETWEEN :begin AND :end AND s.location = l.id GROUP BY l.id ORDER BY l.id')
+#SELECT l.id, l.title FROM RapsysAirBundle:Session s JOIN RapsysAirBundle:Application a JOIN RapsysAirBundle:Location l WHERE s.date BETWEEN :begin AND :end AND s.id = a.session AND l.id = s.location GROUP BY l.id ORDER BY l.id
+			->setParameter('begin', $period->getStartDate())
+			->setParameter('end', $period->getEndDate())
+			->setParameter('uid', $userId)
+			->getResult();
+
+		//Rekey array
+		$ret = array_column($ret, 'title', 'id');
+
+		//Filter array
+		foreach($ret as $k => $v) {
+			$ret[$k] = $translator->trans($v);
+		}
+
+		//Send result
+		return $ret;
+	}
 }
