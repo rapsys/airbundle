@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\User;
 
 class UserController extends DefaultController {
@@ -82,7 +83,11 @@ class UserController extends DefaultController {
 		//TODO: highlight with current session route parameter
 		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'));
 
+		//Fetch locations
+		//XXX: we want to display all active locations anyway
+		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedUserLocationByDatePeriod($this->translator, $period, $id);
+
 		//Render the view
-		return $this->render('@RapsysAir/user/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar]+$context+$this->context);
+		return $this->render('@RapsysAir/user/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
 	}
 }
