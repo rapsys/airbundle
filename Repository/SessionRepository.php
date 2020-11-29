@@ -156,10 +156,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 				'sessions' => []
 			];
 
-			//Append month for first day of month
+			//Detect month change
 			if ($month != $date->format('m')) {
 				$month = $date->format('m');
-				$calendar[$Ymd]['title'] .= '/'.$month;
+				//Append month for first day of month
+				//XXX: except if today to avoid double add
+				if ($date->format('U') != strtotime('today')) {
+					$calendar[$Ymd]['title'] .= '/'.$month;
+				}
 			}
 			//Deal with today
 			if ($date->format('U') == ($today = strtotime('today'))) {
@@ -316,10 +320,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 				'sessions' => []
 			];
 
-			//Append month for first day of month
+			//Detect month change
 			if ($month != $date->format('m')) {
 				$month = $date->format('m');
-				$calendar[$Ymd]['title'] .= '/'.$month;
+				//Append month for first day of month
+				//XXX: except if today to avoid double add
+				if ($date->format('U') != strtotime('today')) {
+					$calendar[$Ymd]['title'] .= '/'.$month;
+				}
 			}
 			//Deal with today
 			if ($date->format('U') == ($today = strtotime('today'))) {
