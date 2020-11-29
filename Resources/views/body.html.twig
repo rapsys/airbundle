@@ -73,7 +73,7 @@
 		{# pass an array argument to get the messages of those types (['warning', 'error']) #}
 		{% for label, messages in app.flashes %}
 			{% if messages %}
-				<div class="flash {{label}}">
+				<div class="message {{label}}">
 					<ul>
 						{% for message in messages %}
 							<li>{{ message }}</li>
