@@ -20,16 +20,19 @@ a::first-letter {
 
 /* Font styling */
 html, body, dd, li, p, td {
-	font-family: 'Droid Sans', 'Symbola', 'DejaVu Sans', 'FreeSans', sans-serif;
 	/* DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
+	font-family: 'Droid Sans', 'Symbola', 'DejaVu Sans', 'FreeSans', sans-serif;
+	font-display: swap;
 }
 
 button, code, input, option, optgroup, pre, select, textarea {
 	font-family: 'Droid Sans Mono', monospace;
+	font-display: swap;
 }
 
 dt, h1, h2, h3, h4, h5, h6, label, legend, th, details {
 	font-family: 'Droid Serif', serif;
+	font-display: swap;
 }
 
 /* Default styling */
@@ -78,6 +81,121 @@ body {
 	color: #066;
 }
 
+/* Form */
+label {
+	font-size: .8rem;
+	white-space: nowrap;
+}
+
+button,
+input,
+select,
+option,
+optgroup,
+textarea {
+	border: .05rem solid #00c3f9;
+	border-radius: .2rem;
+	font-size: .75rem;
+	color: #066;
+	background-color: transparent;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	line-height: normal;
+	text-align: center;
+}
+
+form header {
+	margin-bottom: .5rem;
+}
+
+form header .message {
+	margin: 0;
+}
+
+form div {
+	margin-bottom: .5rem;
+}
+
+form div:only-child,
+form div:last-child,
+form div:last-of-type {
+	margin-bottom: 0;
+}
+
+form section div {
+	display: flex;
+	flex-direction: row;
+	align-content: space-around;
+	justify-content: center;
+}
+
+form section section {
+	display: flex;
+	flex-direction: column;
+}
+
+form label {
+	width: 12rem;
+	padding: .2rem 1rem .2rem 0;
+	text-align: right;
+}
+
+form input,
+form option,
+form optgroup,
+form select,
+form textarea {
+	width: 24rem;
+	padding: .1rem;
+}
+
+form select {
+	box-sizing: content-box;
+	padding: 0 .1rem .1rem .1rem;
+}
+
+form button {
+	width: 10rem;
+	margin: .5rem auto 0 auto;
+	padding: 0 .1rem .2rem .1rem;
+}
+
+form section .message {
+	margin: .25rem 0 0 0;
+}
+
+/* Vertical form */
+form.col label {
+	width: 8rem;
+	padding: .2rem 0;
+	text-align: center;
+}
+
+form.col input,
+form.col option,
+form.col optgroup,
+form.col select,
+form.col textarea {
+	width: 8rem;
+}
+
+form.col button {
+	width: 8rem;
+}
+
+form.col div {
+	flex-direction: column;
+}
+
+form.col div.date {
+	flex-direction: row;
+	justify-content: space-between;
+}
+
 /* Header */
 #header {
 	border: .1rem solid #00c3f9;
@@ -105,17 +223,6 @@ body {
 	display: flex;
 }
 
-/*#header h2 {
-	order: 1;
-	font-size: 1.5rem;
-	margin: 0;
-	white-space: nowrap;
-}
-
-#header h2:before {
-	content: ">\00a0";
-}*/
-
 #header nav {
 	order: 3;
 	margin-left: auto;
@@ -141,39 +248,39 @@ body {
 }
 
 /* Message */
-.notice::before,
-.notice::after,
-.warning::before,
-.warning::after,
-.error::before,
-.error::after {
-	content: "⚠";
+.message {
+	margin: 0 .5rem .5rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	font-size: .9rem;
+	padding: .2rem;
+	border-radius: .2rem;
+	text-align: center;
+	border: .05rem solid transparent;
+}
+
+.message::before,
+.message::after {
 	line-height: 100%;
 	margin: auto 0;
 	padding: 0 .25rem;
 }
 
-.notice,
-.warning,
-.error {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	border: .05rem solid #c33333;
-	background-color: #f9c3c3;
-	color: #c33333;
-	font-size: .9rem;
-	padding: .2rem;
-	border-radius: .2rem;
-	text-align: center;
+p.message {
+	margin: 0;
 }
 
-.notice::before,
-.notice::after {
-	/*XXX: see https://www.fileformat.info/info/unicode/char/2139/fontsupport.htm
-	 * DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
-	content: "ℹ";
-	/*content: "⌘";*/
+.error {
+	border-color: #c33333;
+	background-color: #f9c3c3;
+	color: #c33333;
+}
+
+.error::before,
+.error::after {
+	/*XXX: display /!\ symbol */
+	content: "⚠";
 }
 
 .notice {
@@ -182,11 +289,13 @@ body {
 	color: #3333c3;
 }
 
-.warning::before,
-.warning::after {
+.notice::before,
+.notice::after {
 	/*XXX: see https://www.fileformat.info/info/unicode/char/2139/fontsupport.htm
 	 * DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
-	content: "?";
+	/*XXX: display i symbol */
+	content: "ℹ";
+	/*XXX: display # symbol */
 	/*content: "⌘";*/
 }
 
@@ -196,97 +305,19 @@ body {
 	color: #936333;
 }
 
-.flash {
-	margin: 0 .5rem .5rem;
+.warning::before,
+.warning::after {
+	/*XXX: see https://www.fileformat.info/info/unicode/char/2139/fontsupport.htm
+	 * DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
+	content: "?";
+	/*XXX: display # symbol */
+	/*content: "⌘";*/
 }
 
-p.notice,
-p.warning,
-p.error {
-	margin-bottom: .5rem;
-}
-
-pre.trace {
-	border: .05rem solid #00c3f9;
-	border-radius: .2rem;
-	padding: .5rem;
-	margin-bottom: 1rem;
-	font-size: .7rem;
-}
-
-
-/*ul#error::before,
-ul#error::after,
-ul.error::before,
-ul.error::after,
-ul#notice::before,
-ul#notice::after {
-	content: "⚠";
-	padding: .1rem .5rem 0 .5rem;
-	position: absolute;
-}
-
-ul#error::before,
-ul#error::after {
-	padding-top: .2rem;
-}
-
-ul#notice::before,
-ul#notice::after {
-	content: "ℹ";
-	padding-top: .3rem;
-}
-
-ul#notice::after,
-ul#error::after {
-	margin-left: 37.8rem;
-}
-
-ul.error::after {
-	margin-left: 34rem;
-}
-
-ul#notice,
-ul#error,
-ul.error {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	box-sizing: border-box;
-	text-align: center;
-	border: .05rem solid #c33333;
-	background-color: #f9c3c3;
-	color: #c33333;
-	font-size: .9rem;
-	padding: .2rem;
-	border-radius: .2rem;
-	width: 40rem;
-	margin: 0 auto .5rem auto;
-}
-
-ul.error {
-	width: 36rem;
-	margin: .2rem 0 0 0;
-}
-
-ul#notice {
-	border: .05rem solid #3333c3;
-	background-color: #c3c3f9;
-	color: #3333c3;
-}
-
-ul.error {
-	margin-top: .2rem;
-}*/
-
-/* Content */
+/* Dashboard */
 #dashboard,
-#form,
-#content,
 #regulation,
-#location,
-#session,
-#user {
+#form {
 	border: .1rem solid #00c3f9;
 	border-radius: .5rem;
 	margin: .5rem;
@@ -297,24 +328,9 @@ ul.error {
 	flex-direction: column;
 }
 
-/* Section */
-section {
-	display: flex;
-	flex-direction: column;
-	border: .05rem solid #00c3f9;
-	border-radius: .2rem;
-	padding: .5rem;
-	margin-bottom: 1rem;
-	overflow: hidden;
-}
-
-section:only-child,
-section:last-child,
-section:last-of-type {
-	margin-bottom: .5rem;
-}
-
-section h2 {
+#dashboard h2,
+#regulation h2,
+#form h2 {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
 	margin: -.5rem;
@@ -323,175 +339,73 @@ section h2 {
 	padding-bottom: .5rem;
 }
 
-section h3 {
+#dashboard h3 {
 	background-color: #cff;
+	margin: 0;
+	margin: -.3rem -.1rem;
+	margin-bottom: .3rem;
+	padding: .3rem;
 	border-bottom: .1rem solid #00c3f9;
-	margin: -.5rem;
-	margin-bottom: .5rem;
-	padding: .4rem;
 }
 
-section h4 {
+#dashboard h4 {
 	background-color: #cff;
+	margin: 0;
+	padding: .3rem;
 	border-bottom: .1rem solid #00c3f9;
+}
+
+#form .recover {
+	border: .1rem solid #00c3f9;
+	border-radius: .3rem;
+	margin-top: 1rem;
+	padding: .5rem;
+}
+
+#form h3 {
+	background-color: #cff;
 	margin: -.5rem;
 	margin-bottom: .5rem;
 	padding: .3rem;
 }
 
-section section {
-	padding: .5rem;
-	padding-bottom: .5rem;
-	margin-bottom: .5rem;
+#form h3,
+#dashboard h3,
+#dashboard h4 {
 }
 
-section section:only-child,
-section section:last-child,
-section section:last-of-type {
-	margin-bottom: 0;
+#dashboard .location h3 {
+	margin: 0;
+	border-bottom: 0;
 }
 
-/* Form */
-/*#form div {
-	margin-bottom: .5rem;
-}
-
-#form div:only-child,
-#form div:last-child,
-#form div:last-of-type {
-	margin-bottom: 0;
-}
-
-form {
-	display: flex;
-	flex-direction: column;
-	/ *border: .05rem solid #00c3f9;
-	border-radius: .2rem;* /
-	padding: .5rem;
-}
-
-form section {
-	margin-bottom: 1rem;
-}
-
-form section:only-child,
-form section:last-child,
-form section:last-of-type {
-	margin-bottom: .5rem;
-}
-*/
-
-form section,
-form section:only-child,
-form section:last-child,
-form section:last-of-type {
-	border: none;
-	margin-bottom: .5rem;
-}
-
-form section section,
-form section section:only-child,
-form section section:last-child,
-form section section:last-of-type {
-	width: 50%;
+#dashboard .location .cell {
 	padding: 0;
-	margin-bottom: 0;
 }
 
-form div {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	margin-bottom: .5rem;
-}
-
-form div:only-child,
-form div:last-child,
-form div:last-of-type {
-	margin-bottom: 0;
-}
-
-form header div.error {
-	width: calc(50% + 10rem);
-	margin: 0 auto;
-}
-
-form section div.error {
-	margin-top: .25rem;
-}
-
-
-/*form section div.error {
-	margin: 0 1rem;
+/*#dashboard .calendar h3 {
+	margin: -.3rem;
+	margin-bottom: .3rem;
 }*/
 
-
-label {
-	min-width: 10rem;
-	font-size: .85rem;
-	padding: .2rem 1rem .2rem 0;
-	text-align: right;
-	white-space: nowrap;
+#dashboard .subgrid .cell {
+	padding: .3rem;
 }
 
-button,
-input,
-select,
-option,
-optgroup,
-textarea {
-	box-sizing: border-box;
-	width: 100%;
+#dashboard .subgrid h4 {
+	margin: -.3rem;
+	margin-bottom: .3rem;
+}
+
+/*#dashboard h4 {
+	background-color: #cff;
+	border-bottom: .1rem solid #00c3f9;
+	margin: -.5rem;
+	margin-bottom: .5rem;
 	padding: .1rem;
-	border: .05rem solid #00c3f9;
-	border-radius: .2rem;
-	font-size: .8rem;
-	color: #066;
-	background-color: transparent;
-}
+}*/
 
-button.submit {
-	width: 25%;
-	min-width: 8rem;
-	margin: 0 auto;
-	padding: .2rem .1rem;
-}
-
-/* Vertical form */
-form.col {
-}
-
-form.col div {
-	flex-direction: column;
-}
-
-form.col div.error {
-	flex-direction: row;
-}
-
-form.col label {
-	text-align: center;
-	padding-right: 0;
-}
-
-form.col section {
-	padding: 0;
-}
-
-form.col section section {
-	width: auto;
-}
-
-form.col div.date {
-	flex-direction: row;
-	justify-content: space-between;
-}
-
-/* Dashboard */
-#dashboard .panel,
-#location .panel,
-#session .panel,
-#user .panel {
+#dashboard .panel {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -503,228 +417,169 @@ form.col div.date {
 
 #dashboard .panel:only-child,
 #dashboard .panel:last-child,
-#dashboard .panel:last-of-type,
-#location .panel:only-child,
-#location .panel:last-child,
-#location .panel:last-of-type,
-#session .panel:only-child,
-#session .panel:last-child,
-#session .panel:last-of-type,
-#user .panel:only-child,
-#user .panel:last-child,
-#user .panel:last-of-type {
+#dashboard .panel:last-of-type {
 	margin-bottom: 0;
 }
 
-#dashboard .grid,
-#location .grid,
-#session .grid,
-#user .grid {
+#dashboard .grid {
+	display: flex;
+	flex-flow: row wrap;
+	border-style: solid;
+	border-color: #00c3f9;
+	border-radius: .2rem;
+	border-width: .1rem 0 0 .1rem;
+	line-height: normal;
+	flex-grow: 1;
+	box-sizing: inherit;
+	box-sizing: border-box;
+	border-collapse: collapse;
+	/*box-sizing: border-box;
 	display: table;
 	line-height: normal;
 	padding: 0;
 	flex-grow: 1;
 	table-layout: fixed;
 	border: 0 none;
+	width: fit-content;
+	border-collapse: collapse;*/
 	/*width: calc(100% - 12rem);
 	border-collapse: collapse;*/
-	width: calc(100% - 12rem);
-	border-collapse: collapse;
+	/*width: calc(100% - 12rem);*/
 }
 
-#dashboard .cell,
-#location .cell,
-#session .cell,
-#user .cell {
-	display: table-cell;
-	text-align: left;
-	padding: .5rem;
-	flex-grow: 1;
-	border: .05rem solid #00c3f9;
-	height: 6rem;
+#dashboard .grid:only-child,
+#dashboard .grid:last-child,
+#dashboard .grid:last-of-type {
+	margin-bottom: 0;
 }
 
-#dashboard .form,
-#location .form,
-#session .form,
-#user .form {
-	border: .1rem solid #00c3f9;
+#dashboard .subgrid {
+	display: flex;
+	flex-flow: row wrap;
+	border-style: solid;
+	border-color: #00c3f9;
+	border-width: .1rem 0 0 .1rem;
 	border-radius: .2rem;
-	padding: .5rem;
-	margin-left: .5rem;
-	width: 10rem;
+	line-height: normal;
+	flex-grow: 1;
+	box-sizing: inherit;
+	box-sizing: border-box;
+	border-collapse: collapse;
+	margin: .5rem;
 }
 
-#dashboard .form label,
-#dashboard .form input,
-#dashboard .form button,
-#location .form label,
-#location .form input,
-#location .form button,
-#session .form label,
-#session .form input,
-#session .form button,
-#user .form label,
-#user .form input,
-#user .form button {
-	text-align: center;
-	min-width: 6rem;
+#dashboard .subgrid:only-child,
+#dashboard .subgrid:last-child,
+#dashboard .subgrid:last-of-type {
+	margin-bottom: 0;
 }
 
+#dashboard .cell {
+	border-color: inherit;
+	border-style: inherit;
+	border-width: 0 .1rem .1rem 0;
+	border-radius: .2rem;
+	flex-grow: inherit;
+	box-sizing: inherit;
+	border-collapse: inherit;
+	font-size: .8rem;
+	padding: .3rem .1rem;
+}
 
-#dashboard .seventh,
-#location .seventh,
-#session .seventh,
-#user .seventh {
+#dashboard .cell:only-child,
+#dashboard .cell:last-child,
+#dashboard .cell:last-of-type {
+	border-radius: inherit;
+}
+
+#dashboard .subgrid .cell {
+	border-radius: 0;
+	border-width: 0 .1rem .1rem 0;
+}
+#dashboard .subgrid .cell:only-child,
+#dashboard .subgrid .cell:last-child,
+#dashboard .subgrid .cell:last-of-type {
+	border-radius: inherit;
+}
+
+#dashboard .fourth {
+	min-height: 5rem;
+	width: calc(100% / 4);
+}
+
+#dashboard .seventh {
+	min-height: 5rem;
 	width: calc(100% / 7);
 }
 
-#dashboard .third,
-#location .third,
-#session .third,
-#user .third {
+#dashboard .third {
+	min-height: 5rem;
 	width: calc(100% / 3);
-	height: auto;
 }
 
-#dashboard .disabled,
-#location .disabled,
-#session .disabled,
-#user .disabled {
+#dashboard .session {
+	border: .1rem solid #00c3f9;
+	border-radius: .2rem;
+	padding: .1rem;
+	margin: .1rem;
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+#dashboard .session:only-child,
+#dashboard .session:last-child,
+#dashboard .session:last-of-type {
+	margin-bottom: 0;
+}
+
+#dashboard .disabled {
 	color: #acc;
 	background-color: #bee;
 }
 
-#dashboard .current,
-#location .current,
-#session .current,
-#user .current {
+#dashboard .current {
 	background-color: #cff;
 }
 
-#dashboard .next,
-#location .next,
-#session .next,
-#user .next {
+#dashboard .next {
 	background-color: #eff;
 }
 
-#dashboard .session,
-#location .session,
-#session .session,
-#user .session {
-	border-radius: .2rem;
-	border: .1rem solid #00c3f9;
-	font-size: .8rem;
-	padding: .2rem;
-	margin: 0 .1rem .1rem .1rem;
-	overflow-x: hidden;
-	white-space: nowrap;
-	Text-overflow: ellipsis;
-}
-
-#dashboard .pending,
-#location .pending,
-#session .pending,
-#user .pending {
+#dashboard .pending {
 	background-color: #ccc;
 }
 
-#dashboard .granted,
-#location .granted,
-#session .granted,
-#user .granted {
+#dashboard .granted {
 	background-color: #cff;
 	/*background-color: #33b679;
 	border-color: #33b679;*/
 }
 
-#dashboard .disputed,
-#location .disputed,
-#session .disputed,
-#user .disputed {
+#dashboard .disputed {
 	background-color: #fcc;
 }
 
-#dashboard .orphaned,
-#location .orphaned,
-#session .orphaned,
-#user .orphaned {
+#dashboard .orphaned {
 	background-color: #fc9;
 }
 
-#dashboard .highlight,
-#location .highlight,
-#session .highlight,
-#user .highlight {
+#dashboard .highlight {
 	border-color: #3333c3;
 	background-color: #c3c3f9;
 	color: #3333c3;
 }
 
-/* Session */
-#session {
-}
-
-#session h2 a::after {
-	content: " >";
-}
-
-#session h2 a:last-child::after {
-	content: none;
-}
-
-#session .row {
-	display: flex;
-	flex-wrap: wrap;
-	margin-bottom: .5rem;
+#dashboard .form {
 	border: .1rem solid #00c3f9;
 	border-radius: .2rem;
-}
-
-#session .sub {
-	display: flex;
-	flex-direction: column;
-	line-height: normal;
-	margin-bottom: .5rem;
-	margin-top: .5rem;
 	padding: .5rem;
-	border: .1rem solid #00c3f9;
-	border-radius: .2rem;
-}
-
-#session .grid dd dd {
-	text-indent: .5rem;
+	margin-left: .5rem;
 }
 
 /* Regulation */
 #regulation {
 }
-
-
-/*#regulation div {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-around;
-	margin-bottom: .5rem;
-}
-
-#regulation div:only-child,
-#regulation div:last-child,
-#regulation div:last-of-type {
-	margin-bottom: 0;
-}*/
-/*
- * XXX: TODO:
- * see https://developer.mozilla.org/fr/docs/Web/HTML/Element/dl
- * see https://www.w3.org/Style/Examples/007/fonts.fr.html
- * see https://fonts.googleapis.com/css?family=Droid+Sans:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i|Droid+Sans+Mono:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i|Droid+Serif:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i
- * see https://fonts.google.com/?query=droi
- * see https://fonts.google.com/specimen/Inconsolata
- * see https://fonts.google.com/specimen/Tangerine%20light,light+italic+regular+semi-bold+bold+extra-bold
- * see https://fonts.google.com/?selection.family=Roboto:100i
- * see https://developers.google.com/fonts/docs/getting_started
- */
 
 #regulation dl {
 	/*display: flex;
@@ -764,7 +619,7 @@ form.col div.date {
 /* Footer */
 #footer {
 	border: .1rem solid #00c3f9;
-	Border-radius: .5rem;
+	border-radius: .5rem;
 	margin: .5rem;
 	margin-top: 0;
 	padding: .5rem;
@@ -793,36 +648,35 @@ form.col div.date {
 		flex-wrap: wrap;
 	}
 
-	#location .panel,
-	#session .panel,
-	#user .panel {
+	#dashboard .calendar {
 		place-content: center;
 		flex-direction: column;
 		flex-wrap: wrap;
 	}
 
-	#location .panel:only-child,
-	#location .panel:last-child,
-	#location .panel:last-of-type,
-	#session .panel:only-child,
-	#session .panel:last-child,
-	#session .panel:last-of-type,
-	#user .panel:only-child,
-	#user .panel:last-child,
-	#user .panel:last-of-type {
+	#dashboard .panel:only-child,
+	#dashboard .panel:last-child,
+	#dashboard .panel:last-of-type {
 		margin-bottom: .5rem;
 	}
 
-	#location .form,
-	#session .form,
-	#user .form {
-		width: auto;
+	#dashboard .form {
 		margin: .5rem auto 0 auto;
 	}
 
-	#location .grid,
-	#session .grid,
-	#user .grid {
-		width: calc(100%);
+	form label {
+		width: 6rem;
+	}
+
+	form input,
+	form option,
+	form optgroup,
+	form select,
+	form textarea {
+		width: 20rem;
+	}
+
+	form button {
+		width: 6rem;
 	}
 }
