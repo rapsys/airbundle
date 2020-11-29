@@ -3,7 +3,7 @@
 	<section id="form">
 		<h2>{{ title|trans }}</h2>
 		{% if sent %}
-			<p class="notice">{% trans %}Your account has been created{% endtrans %}</p>
+			<p class="message notice">{% trans %}Your account has been created{% endtrans %}</p>
 		{% else %}
 			<section>
 				{{ form_start(form) }}
@@ -13,9 +13,7 @@
 						{{ form_row(form.password.first) }}
 
 						{{ form_row(form.password.second) }}
-					</section>
 
-					<section>
 						{{ form_row(form.title) }}
 
 						{{ form_row(form.forename) }}
