@@ -3,7 +3,7 @@
 	<section id="form">
 		<h2><a href="{{ path('rapsys_air_contact') }}">{{ section }}</a></h2>
 		{% if sent %}
-			<p>{% trans %}Your message has been sent{% endtrans %}</p>
+			<p class="message notice">{% trans %}Your message has been sent{% endtrans %}</p>
 		{% else %}
 			<div>
 				{{ form_start(form) }}
