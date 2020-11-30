@@ -16,6 +16,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Slot;
+use Rapsys\AirBundle\Entity\Location;
 
 class ApplicationType extends AbstractType {
 	//Doctrine instance
@@ -38,7 +39,7 @@ class ApplicationType extends AbstractType {
 
 		//Create base form
 		$form = $builder
-			->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])]])
+			->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location']])
 			->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Date(['message' => 'Your date doesn\'t seems to be valid'])]])
 			#->add('slot', ChoiceType::class, ['attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choices' => $slots, 'data' => $options['slot']])
 			->add('slot', EntityType::class, ['class' => 'RapsysAirBundle:Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot']])
@@ -59,8 +60,9 @@ class ApplicationType extends AbstractType {
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
 		//XXX: 1 should be the first user
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'slot' => null, 'user' => 1]);
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'slot' => null, 'location' => null, 'user' => 1]);
 		$resolver->setAllowedTypes('admin', 'boolean');
+		$resolver->setAllowedTypes('location', [Location::class, 'null']);
 		$resolver->setAllowedTypes('slot', [Slot::class, 'null']);
 		$resolver->setAllowedTypes('user', 'integer');
 	}

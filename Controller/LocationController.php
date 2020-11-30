@@ -48,7 +48,9 @@ class LocationController extends DefaultController {
 				'user' => $this->getUser()->getId(),
 				//Set default slot to evening
 				//XXX: default to Evening (3)
-				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
+				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3),
+				//Set default location to current one
+				'location' => $location
 			]);
 
 			//Add form to context
