@@ -84,6 +84,207 @@ class ApplicationController extends DefaultController {
 			$session->setCreated(new \DateTime('now'));
 			$session->setUpdated(new \DateTime('now'));
 
+			//Get short location
+			$short = $data['location']->getShort();
+
+			//Get slot
+			$slot = $data['slot']->getTitle();
+
+			//Set premium
+			$session->setPremium($premium = false);
+
+			//Check if slot is afternoon
+			//XXX: premium is stored only for Afternoon and Evening
+			if ($slot == 'Afternoon') {
+				//Compute premium
+				//XXX: a session is considered premium a day off
+				$session->setPremium($premium = $this->isPremium($data['date']));
+			//Check if slot is evening
+			//XXX: premium is stored only for Afternoon and Evening
+			} elseif ($slot == 'Evening') {
+				//Compute premium
+				//XXX: a session is considered premium the eve of a day off
+				$session->setPremium($premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D'))));
+			//Check if slot is after
+			} elseif ($slot == 'After') {
+				//Compute premium
+				//XXX: a session is considered premium the eve of a day off
+				$premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D')));
+			}
+
+			//Set default length at 6h
+			//XXX: date part will be truncated on save
+			$session->setLength(new \DateTime('06:00:00'));
+
+			//Check if admin
+			if ($this->isGranted('ROLE_ADMIN')) {
+				//Check if morning
+				if ($slot == 'Morning') {
+					//Set begin at 9h
+					$session->setBegin(new \DateTime('09:00:00'));
+
+					//Set length at 5h
+					$session->setLength(new \DateTime('05:00:00'));
+				//Check if afternoon
+				} elseif ($slot == 'Afternoon') {
+					//Set begin at 14h
+					$session->setBegin(new \DateTime('14:00:00'));
+
+					//Set length at 5h
+					$session->setLength(new \DateTime('05:00:00'));
+				//Check if evening
+				} elseif ($slot == 'Evening') {
+					//Set begin at 19h
+					$session->setBegin(new \DateTime('19:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set length at 7h
+						$session->setLength(new \DateTime('07:00:00'));
+					}
+				//Check if after
+				} else {
+					//Set begin at 1h
+					$session->setBegin(new \DateTime('01:00:00'));
+
+					//Set length at 4h
+					$session->setLength(new \DateTime('04:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set begin at 2h
+						$session->setBegin(new \DateTime('02:00:00'));
+
+						//Set length at 3h
+						$session->setLength(new \DateTime('03:00:00'));
+					}
+				}
+			//Docks => 14h -> 19h | 19h -> 01/02h
+			//XXX: remove Garnier from here to switch back to 21h
+			} elseif (in_array($short, ['Docks', 'Garnier']) && in_array($slot, ['Afternoon', 'Evening', 'After'])) {
+				//Check if afternoon
+				if ($slot == 'Afternoon') {
+					//Set begin at 14h
+					$session->setBegin(new \DateTime('14:00:00'));
+
+					//Set length at 5h
+					$session->setLength(new \DateTime('05:00:00'));
+				//Check if evening
+				} elseif ($slot == 'Evening') {
+					//Set begin at 19h
+					$session->setBegin(new \DateTime('19:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set length at 7h
+						$session->setLength(new \DateTime('07:00:00'));
+					}
+				//Check if after
+				} else {
+					//Set begin at 1h
+					$session->setBegin(new \DateTime('01:00:00'));
+
+					//Set length at 4h
+					$session->setLength(new \DateTime('04:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set begin at 2h
+						$session->setBegin(new \DateTime('02:00:00'));
+
+						//Set length at 3h
+						$session->setLength(new \DateTime('03:00:00'));
+					}
+				}
+			//Garnier => 21h -> 01/02h
+			} elseif ($short == 'Garnier' && in_array($slot, ['Evening', 'After'])) {
+				//Check if evening
+				if ($slot == 'Evening') {
+					//Set begin at 21h
+					$session->setBegin(new \DateTime('21:00:00'));
+
+					//Set length at 5h
+					$session->setLength(new \DateTime('05:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set length at 6h
+						$session->setLength(new \DateTime('06:00:00'));
+					}
+				//Check if after
+				} else {
+					//Set begin at 1h
+					$session->setBegin(new \DateTime('01:00:00'));
+
+					//Set length at 4h
+					$session->setLength(new \DateTime('04:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set begin at 2h
+						$session->setBegin(new \DateTime('02:00:00'));
+
+						//Set length at 3h
+						$session->setLength(new \DateTime('03:00:00'));
+					}
+				}
+			//Trocadero|Tokyo|Swan|Honore|Orsay => 19h -> 01/02h
+			} elseif (in_array($short, ['Trocadero', 'Tokyo', 'Swan', 'Honore', 'Orsay']) && in_array($slot, ['Evening', 'After'])) {
+				//Check if evening
+				if ($slot == 'Evening') {
+					//Set begin at 19h
+					$session->setBegin(new \DateTime('19:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set length at 7h
+						$session->setLength(new \DateTime('07:00:00'));
+					}
+				//Check if after
+				} else {
+					//Set begin at 1h
+					$session->setBegin(new \DateTime('01:00:00'));
+
+					//Set length at 4h
+					$session->setLength(new \DateTime('04:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set begin at 2h
+						$session->setBegin(new \DateTime('02:00:00'));
+
+						//Set length at 3h
+						$session->setLength(new \DateTime('03:00:00'));
+					}
+				}
+			//La Villette => 14h -> 19h
+			} elseif ($short == 'Villette' && $slot == 'Afternoon') {
+				//Set begin at 14h
+				$session->setBegin(new \DateTime('14:00:00'));
+
+				//Set length at 5h
+				$session->setLength(new \DateTime('05:00:00'));
+			//Place Colette => 14h -> 21h
+			//TODO: add check here that it's a millegaux account ?
+			} elseif ($short == 'Colette' && $slot == 'Afternoon') {
+				//Set begin at 14h
+				$session->setBegin(new \DateTime('14:00:00'));
+
+				//Set length at 7h
+				$session->setLength(new \DateTime('07:00:00'));
+			//Galerie d'Orléans => 14h -> 18h
+			} elseif ($short == 'Orleans' && $slot == 'Afternoon') {
+				//Set begin at 14h
+				$session->setBegin(new \DateTime('14:00:00'));
+
+				//Set length at 4h
+				$session->setLength(new \DateTime('04:00:00'));
+			//Combination not supported
+			} else {
+				//Add error in flash message
+				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+			}
+
 			//Queue session save
 			$manager->persist($session);
 
@@ -106,7 +307,7 @@ class ApplicationController extends DefaultController {
 			//Retrieve application
 			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
-			//Add notice in flash message
+			//Add warning in flash message
 			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
 		//Catch no application and session without identifier (not persisted&flushed) cases
 		} catch (\Doctrine\ORM\NoResultException|\Doctrine\ORM\ORMInvalidArgumentException $e) {
@@ -182,5 +383,109 @@ class ApplicationController extends DefaultController {
 
 		//Redirect to cleanup the form
 		return $this->redirectToRoute('rapsys_air', ['session' => $session->getId()]);
+	}
+
+	/**
+	 * Compute eastern for selected year
+	 *
+	 * @param int $year The eastern year
+	 *
+	 * @return DateTime The eastern date
+	 */
+	function getEastern($year) {
+		//Set static
+		static $data = null;
+		//Check if already computed
+		if (isset($data[$year])) {
+			//Return computed eastern
+			return $data[$year];
+		//Check if data is null
+		} elseif (is_null($data)) {
+			//Init data array
+			$data = [];
+		}
+		$d = (19 * ($year % 19) + 24) % 30;
+		$e = (2 * ($year % 4) + 4 * ($year % 7) + 6 * $d + 5) % 7;
+
+		$day = 22 + $d + $e;
+		$month = 3;
+
+		if ($day > 31) {
+			$day = $d + $e - 9;
+			$month = 4;
+		} elseif ($d == 29 && $e == 6) {
+			$day = 10;
+			$month = 4;
+		} elseif ($d == 28 && $e == 6) {
+			$day = 18;
+			$month = 4;
+		}
+
+		//Store eastern in data
+		return ($data[$year] = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day)));
+	}
+
+	/**
+	 * Check if date is a premium day
+	 *
+	 * @desc Consider as premium a day off
+	 *
+	 * @param DateTime $date The date to check
+	 * @return bool Whether the date is off or not
+	 */
+	function isPremium($date) {
+		//Get day number
+		$w = $date->format('w');
+
+		//Check if weekend day
+		if ($w == 0 || $w == 6) {
+			//Date is weekend day
+			return true;
+		}
+
+		//Get date day
+		$d = $date->format('d');
+
+		//Get date month
+		$m = $date->format('m');
+
+		//Check if fixed holiday
+		if (
+			//Check if 1st january
+			($d == 1 && $m == 1) ||
+			//Check if 1st may
+			($d == 1 && $m == 5) ||
+			//Check if 8st may
+			($d == 8 && $m == 5) ||
+			//Check if 14st july
+			($d == 14 && $m == 7) ||
+			//Check if 15st august
+			($d == 15 && $m == 8) ||
+			//Check if 1st november
+			($d == 1 && $m == 11) ||
+			//Check if 11st november
+			($d == 11 && $m == 11) ||
+			//Check if 25st december
+			($d == 25 && $m == 12)
+		) {
+			//Date is a fixed holiday
+			return true;
+		}
+
+		//Get eastern
+		$eastern = $this->getEastern($date->format('Y'));
+
+		//Check dynamic holidays
+		if (
+			(clone $eastern)->add(new \DateInterval('P1D')) == $date ||
+			(clone $eastern)->add(new \DateInterval('P39D')) == $date ||
+			(clone $eastern)->add(new \DateInterval('P50D')) == $date
+		) {
+			//Date is a dynamic holiday
+			return true;
+		}
+
+		//Date is not a holiday and week day
+		return false;
 	}
 }
