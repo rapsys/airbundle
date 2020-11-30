@@ -14,8 +14,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 	 */
 	private $container;
 
-	public function setContainer(\Symfony\Component\DependencyInjection\ContainerInterface $container = null)
-	{
+	public function setContainer(\Symfony\Component\DependencyInjection\ContainerInterface $container = null) {
 		$this->container = $container;
 	}
 
@@ -75,7 +74,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'short' => 'Mr.',
 				'group' => 'Admin',
 				'mail' => 'tango@rapsys.eu',
-				'pseudonym' => 'Rapsys',
+				'pseudonym' => 'Milonga Raphaël',
 				'forename' => 'Raphaël',
 				'surname' => 'Gertz',
 				'phone' => '+33677952829',
@@ -85,7 +84,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'short' => 'Mr.',
 				'group' => 'Senior',
 				'mail' => 'denis.courvoisier@wanadoo.fr',
-				'pseudonym' => 'Sined',
+				'pseudonym' => 'DJ Sined',
 				'forename' => 'Denis',
 				'surname' => 'Courvoisier',
 				'phone' => '+33600000000',
@@ -95,13 +94,13 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'short' => 'Mr.',
 				'group' => 'Senior',
 				'mail' => 'rannou402@orange.fr',
-				'pseudonym' => 'Mitch',
+				'pseudonym' => 'Trio Tango',
 				'forename' => 'Michel',
 				'surname' => 'Rannou',
 				'phone' => '+33600000000',
 				'password' => 'test'
 			),
-			array(
+			/*array(
 				'short' => 'Ms.',
 				'group' => 'Regular',
 				'mail' => 'roxmaps@gmail.com',
@@ -110,7 +109,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'surname' => 'Prado',
 				'phone' => '+33600000000',
 				'password' => 'test'
-			),
+			),*/
 		);
 
 		//Create users
@@ -139,32 +138,13 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//Location tree
 		$locationTree = [
 			[
-				'title' => 'Trocadero esplanade',
-				'short' => 'Trocadero',
-				'address' => '1 Avenue Hussein 1er de Jordanie',
-				#75016 pour meteo-france, accuweather supporte 75116
-				'zipcode' => '75116',
+				'title' => 'Opera Garnier',
+				'short' => 'Garnier',
+				'address' => '10 Place de l\'Opéra',
+				'zipcode' => '75009',
 				'city' => 'Paris',
-				'latitude' => 48.861888,
-				'longitude' => 2.288853
-			],
-			[
-				'title' => 'Orleans gallery',
-				'short' => 'Orleans',
-				'address' => '8 Galerie du Jardin',
-				'zipcode' => '75001',
-				'city' => 'Paris',
-				'latitude' => 48.863885,
-				'longitude' => 2.337387
-			],
-			[
-				'title' => 'Colette square',
-				'short' => 'Colette',
-				'address' => 'Galerie du Théâtre Français',
-				'zipcode' => '75001',
-				'city' => 'Paris',
-				'latitude' => 48.863219,
-				'longitude' => 2.335847
+				'latitude' => 48.871268,
+				'longitude' => 2.331832
 			],
 			[
 				'title' => 'Tino-Rossi garden',
@@ -176,22 +156,50 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'longitude' => 2.360953
 			],
 			[
-				'title' => 'Drawings\' garden',
-				'short' => 'Villette',
-				'address' => 'Allée du Belvédère',
-				'zipcode' => '75019',
+				'title' => 'Trocadero esplanade',
+				'short' => 'Trocadero',
+				'address' => '1 Avenue Hussein 1er de Jordanie',
+				#75016 pour meteo-france, accuweather supporte 75116
+				'zipcode' => '75116',
 				'city' => 'Paris',
-				'latitude' => 48.892503,
-				'longitude' => 2.389300
+				'latitude' => 48.861888,
+				'longitude' => 2.288853
 			],
 			[
-				'title' => 'Saint-Honore market',
-				'short' => 'St-Honore',
-				'address' => '1 Passage des Jacobins',
+				'title' => 'Colette square',
+				'short' => 'Colette',
+				'address' => 'Galerie du Théâtre Français',
 				'zipcode' => '75001',
 				'city' => 'Paris',
-				'latitude' => 48.866992,
-				'longitude' => 2.331752
+				'latitude' => 48.863219,
+				'longitude' => 2.335847
+			],
+			[
+				'title' => 'Swan Island',
+				'short' => 'Swan',
+				'address' => 'Allée des Cygnes',
+				'zipcode' => '75015',
+				'city' => 'Paris',
+				'latitude' => 48.849976, #48.849976
+				'longitude' => 2.279603 #2.2796029
+			],
+			[
+				'title' => 'Jussieu esplanade',
+				'short' => 'Jussieu',
+				'address' => '25 rue des Fossés Saint-Bernard',
+				'zipcode' => '75005',
+				'city' => 'Paris',
+				'latitude' => 48.847955, #48.8479548
+				'longitude' => 2.353291 #2.3532907
+			],
+			[
+				'title' => 'Orleans gallery',
+				'short' => 'Orleans',
+				'address' => '8 Galerie du Jardin',
+				'zipcode' => '75001',
+				'city' => 'Paris',
+				'latitude' => 48.863885,
+				'longitude' => 2.337387
 			],
 			[
 				'title' => 'Orsay museum',
@@ -203,13 +211,13 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'longitude' => 2.325815
 			],
 			[
-				'title' => 'Opera Garnier',
-				'short' => 'Opera',
-				'address' => '10 Place de l\'Opéra',
-				'zipcode' => '75009',
+				'title' => 'Saint-Honore market',
+				'short' => 'Honore',
+				'address' => '1 Passage des Jacobins',
+				'zipcode' => '75001',
 				'city' => 'Paris',
-				'latitude' => 48.871268,
-				'longitude' => 2.331832
+				'latitude' => 48.866992,
+				'longitude' => 2.331752
 			],
 			[
 				'title' => 'Tokyo palace',
@@ -219,6 +227,15 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'city' => 'Paris',
 				'latitude' => 48.863827,
 				'longitude' => 2.297339
+			],
+			[
+				'title' => 'Drawings\' garden',
+				'short' => 'Villette',
+				'address' => 'Allée du Belvédère',
+				'zipcode' => '75019',
+				'city' => 'Paris',
+				'latitude' => 48.892503,
+				'longitude' => 2.389300
 			]
 		];
 
