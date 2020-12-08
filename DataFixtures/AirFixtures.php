@@ -136,6 +136,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		$manager->flush();
 
 		//Location tree
+		//XXX: adding a new zipcode here requires matching accuweather uris in Command/WeatherCommand.php
 		$locationTree = [
 			[
 				'title' => 'Opera Garnier',
