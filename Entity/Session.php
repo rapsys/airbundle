@@ -24,7 +24,62 @@ class Session {
 	/**
 	 * @var \DateTime
 	 */
+	private $start = null;
+
+	/**
+	 * @var \DateTime
+	 */
 	private $length;
+
+	/**
+	 * @var \DateTime
+	 */
+	private $stop = null;
+
+	/**
+	 * @var boolean
+	 */
+	private $premium;
+
+	/**
+	 * @var float
+	 */
+	private $rainfall;
+
+	/**
+	 * @var float
+	 */
+	private $rainrisk;
+
+	/**
+	 * @var float
+	 */
+	private $realfeel;
+
+	/**
+	 * @var float
+	 */
+	private $realfeelmin;
+
+	/**
+	 * @var float
+	 */
+	private $realfeelmax;
+
+	/**
+	 * @var integer
+	 */
+	private $temperature;
+
+	/**
+	 * @var integer
+	 */
+	private $temperaturemin;
+
+	/**
+	 * @var integer
+	 */
+	private $temperaturemax;
 
 	/**
 	 * @var \DateTime
@@ -117,6 +172,30 @@ class Session {
 	}
 
 	/**
+	 * Get start
+	 *
+	 * @return \DateTime
+	 */
+	public function getStart() {
+		//Check start
+		if ($this->start !== null) {
+			return $this->start;
+		}
+
+		//Clone date
+		$this->start = clone $this->date;
+
+		//Check if after slot
+		if ($this->slot->getTitle() == 'After') {
+			//Add one day
+			$this->start->add(new \DateInterval('P1D'));
+		}
+
+		//Return date
+		return $this->start->setTime($this->begin->format('H'), $this->begin->format('i'), $this->begin->format('s'));
+	}
+
+	/**
 	 * Set length
 	 *
 	 * @param \DateTime $length
@@ -136,6 +215,222 @@ class Session {
 	 */
 	public function getLength() {
 		return $this->length;
+	}
+
+	/**
+	 * Get stop
+	 *
+	 * @return \DateTime
+	 */
+	public function getStop() {
+		//Check start
+		if ($this->stop !== null) {
+			return $this->stop;
+		}
+
+		//Get start clone
+		$this->stop = clone $this->getStart();
+
+		//Return date
+		return $this->stop->add(new \DateInterval('PT'.$this->length->format('H').'H'.$this->length->format('i').'M'.$this->length->format('s').'S'));
+	}
+
+	/**
+	 * Set premium
+	 *
+	 * @param boolean $premium
+	 *
+	 * @return Session
+	 */
+	public function setPremium($premium) {
+		$this->premium = $premium;
+
+		return $this;
+	}
+
+	/**
+	 * Get premium
+	 *
+	 * @return boolean
+	 */
+	public function getPremium() {
+		return $this->premium;
+	}
+
+	/**
+	 * Set rainfall
+	 *
+	 * @param boolean $rainfall
+	 *
+	 * @return Session
+	 */
+	public function setRainfall($rainfall) {
+		$this->rainfall = $rainfall;
+
+		return $this;
+	}
+
+	/**
+	 * Get rainfall
+	 *
+	 * @return boolean
+	 */
+	public function getRainfall() {
+		return $this->rainfall;
+	}
+
+	/**
+	 * Set rainrisk
+	 *
+	 * @param boolean $rainrisk
+	 *
+	 * @return Session
+	 */
+	public function setRainrisk($rainrisk) {
+		$this->rainrisk = $rainrisk;
+
+		return $this;
+	}
+
+	/**
+	 * Get rainrisk
+	 *
+	 * @return boolean
+	 */
+	public function getRainrisk() {
+		return $this->rainrisk;
+	}
+
+	/**
+	 * Set realfeel
+	 *
+	 * @param integer $realfeel
+	 *
+	 * @return Session
+	 */
+	public function setRealfeel($realfeel) {
+		$this->realfeel = $realfeel;
+
+		return $this;
+	}
+
+	/**
+	 * Get realfeel
+	 *
+	 * @return integer
+	 */
+	public function getRealfeel() {
+		return $this->realfeel;
+	}
+
+	/**
+	 * Set realfeelmin
+	 *
+	 * @param integer $realfeelmin
+	 *
+	 * @return Session
+	 */
+	public function setRealfeelmin($realfeelmin) {
+		$this->realfeelmin = $realfeelmin;
+
+		return $this;
+	}
+
+	/**
+	 * Get realfeelmin
+	 *
+	 * @return integer
+	 */
+	public function getRealfeelmin() {
+		return $this->realfeelmin;
+	}
+
+	/**
+	 * Set realfeelmax
+	 *
+	 * @param integer $realfeelmax
+	 *
+	 * @return Session
+	 */
+	public function setRealfeelmax($realfeelmax) {
+		$this->realfeelmax = $realfeelmax;
+
+		return $this;
+	}
+
+	/**
+	 * Get realfeelmax
+	 *
+	 * @return integer
+	 */
+	public function getRealfeelmax() {
+		return $this->realfeelmax;
+	}
+
+	/**
+	 * Set temperature
+	 *
+	 * @param integer $temperature
+	 *
+	 * @return Session
+	 */
+	public function setTemperature($temperature) {
+		$this->temperature = $temperature;
+
+		return $this;
+	}
+
+	/**
+	 * Get temperature
+	 *
+	 * @return integer
+	 */
+	public function getTemperature() {
+		return $this->temperature;
+	}
+
+	/**
+	 * Set temperaturemin
+	 *
+	 * @param integer $temperaturemin
+	 *
+	 * @return Session
+	 */
+	public function setTemperaturemin($temperaturemin) {
+		$this->temperaturemin = $temperaturemin;
+
+		return $this;
+	}
+
+	/**
+	 * Get temperaturemin
+	 *
+	 * @return integer
+	 */
+	public function getTemperaturemin() {
+		return $this->temperaturemin;
+	}
+
+	/**
+	 * Set temperaturemax
+	 *
+	 * @param integer $temperaturemax
+	 *
+	 * @return Session
+	 */
+	public function setTemperaturemax($temperaturemax) {
+		$this->temperaturemax = $temperaturemax;
+
+		return $this;
+	}
+
+	/**
+	 * Get temperaturemax
+	 *
+	 * @return integer
+	 */
+	public function getTemperaturemax() {
+		return $this->temperaturemax;
 	}
 
 	/**
