@@ -12,6 +12,16 @@ class Application {
 	private $id;
 
 	/**
+	 * @var float
+	 */
+	private $score;
+
+	/**
+	 * @var \DateTime
+	 */
+	private $canceled;
+
+	/**
 	 * @var \DateTime
 	 */
 	private $created;
@@ -20,11 +30,6 @@ class Application {
 	 * @var \DateTime
 	 */
 	private $updated;
-
-
-	//TODO: ajouter un champ score à replir lors de l'attribution d'une session
-	//XXX: champ float avec une bonne capacité en décimale
-
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
@@ -55,6 +60,50 @@ class Application {
 	 */
 	public function getId() {
 		return $this->id;
+	}
+
+	/**
+	 * Set score
+	 *
+	 * @param float $score
+	 *
+	 * @return Application
+	 */
+	public function setScore($score) {
+		$this->score = $score;
+
+		return $this;
+	}
+
+	/**
+	 * Get score
+	 *
+	 * @return float
+	 */
+	public function getScore() {
+		return $this->score;
+	}
+
+	/**
+	 * Set canceled
+	 *
+	 * @param \DateTime $canceled
+	 *
+	 * @return Application
+	 */
+	public function setCanceled($canceled) {
+		$this->canceled = $canceled;
+
+		return $this;
+	}
+
+	/**
+	 * Get canceled
+	 *
+	 * @return \DateTime
+	 */
+	public function getCanceled() {
+		return $this->canceled;
 	}
 
 	/**
