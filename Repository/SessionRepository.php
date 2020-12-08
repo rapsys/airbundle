@@ -3,12 +3,43 @@
 namespace Rapsys\AirBundle\Repository;
 
 use Symfony\Component\Translation\TranslatorInterface;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Query;
 
 /**
  * SessionRepository
  */
 class SessionRepository extends \Doctrine\ORM\EntityRepository {
+	///Set accuweather max number of daily pages
+	const ACCUWEATHER_DAILY = 12;
+
+	///Set accuweather max number of hourly pages
+	const ACCUWEATHER_HOURLY = 3;
+
+	///Set user with bad behaviour delay
+	const BAD_DELAY = 3;
+
+	///Set user with good behaviour delay
+	const GOOD_DELAY = 4;
+
+	///Set glyphs
+	//TODO: document utf-8 codes ?
+	const GLYPHS = [
+		//Slots
+		'Morning' => '🌅', #0001f305
+		'Afternoon' => '☀️', #2600
+		'Evening' => '🌇', #0001f307
+		'After' => '✨', #2728
+		//Weathers
+		'Cleary' => '☀', #2600
+		'Sunny' => '⛅', #26c5
+		'Cloudy' => '☁', #2601
+		'Winty' => '❄️', #2744
+		'Rainy' => '🌂', #0001f302
+		'Stormy' => '☔' #2614
+	];
+
 	/**
 	 * Find session by location, slot and date
 	 *
@@ -17,16 +48,13 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	 * @param $date The datetime
 	 */
 	public function findOneByLocationSlotDate($location, $slot, $date) {
-		//Fetch session
-		$ret = $this->getEntityManager()
+		//Return sessions
+		return $this->getEntityManager()
 			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.slot = :slot AND s.date = :date)')
 			->setParameter('location', $location)
 			->setParameter('slot', $slot)
 			->setParameter('date', $date)
 			->getSingleResult();
-
-		//Send result
-		return $ret;
 	}
 
 	/**
@@ -35,15 +63,12 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	 * @param $period The date period
 	 */
 	public function findAllByDatePeriod($period) {
-		//Fetch sessions
-		$ret = $this->getEntityManager()
+		//Return sessions
+		return $this->getEntityManager()
 			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE s.date BETWEEN :begin AND :end')
 			->setParameter('begin', $period->getStartDate())
 			->setParameter('end', $period->getEndDate())
 			->getResult();
-
-		//Send result
-		return $ret;
 	}
 
 	/**
@@ -53,16 +78,153 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	 * @param $period The date period
 	 */
 	public function findAllByLocationDatePeriod($location, $period) {
-		//Fetch sessions
-		$ret = $this->getEntityManager()
+		//Return sessions
+		return $this->getEntityManager()
 			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.date BETWEEN :begin AND :end)')
 			->setParameter('location', $location)
 			->setParameter('begin', $period->getStartDate())
 			->setParameter('end', $period->getEndDate())
 			->getResult();
+	}
 
-		//Send result
-		return $ret;
+	/**
+	 * Fetch session by id
+	 *
+	 * @param $id The session id
+	 * @return array The session data
+	 */
+	public function fetchOneById($id) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
+		];
+
+		//Set the request
+		//TODO: compute scores ?
+		//TODO: compute delivery date ? (J-3/J-4 ?)
+		$req =<<<SQL
+SELECT
+	s.id,
+	s.date,
+	s.begin,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) AS start,
+	s.length,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) AS stop,
+	s.rainfall,
+	s.rainrisk,
+	s.realfeel,
+	s.realfeelmin,
+	s.realfeelmax,
+	s.temperature,
+	s.temperaturemin,
+	s.temperaturemax,
+	s.created,
+	s.updated,
+	s.location_id AS l_id,
+	l.short AS l_short,
+	l.title AS l_title,
+	l.address AS l_address,
+	l.zipcode AS l_zipcode,
+	l.city AS l_city,
+	l.latitude AS l_latitude,
+	l.longitude AS l_longitude,
+	s.slot_id AS t_id,
+	t.title AS t_title,
+	s.application_id AS a_id,
+	a.user_id AS au_id,
+	au.pseudonym AS au_pseudonym,
+	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\n") AS sa_id,
+	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\n") AS sa_score,
+	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\n") AS sa_created,
+	GROUP_CONCAT(sa.updated ORDER BY sa.user_id SEPARATOR "\n") AS sa_updated,
+	GROUP_CONCAT(IFNULL(sa.canceled, 'NULL') ORDER BY sa.user_id SEPARATOR "\n") AS sa_canceled,
+	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS sau_id,
+	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS sau_pseudonym
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
+LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
+WHERE s.id = :sid
+GROUP BY s.id
+ORDER BY NULL
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		$rsm->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('date', 'date', 'date')
+			->addScalarResult('begin', 'begin', 'time')
+			->addScalarResult('start', 'start', 'datetime')
+			->addScalarResult('length', 'length', 'time')
+			->addScalarResult('stop', 'stop', 'datetime')
+			->addScalarResult('rainfall', 'rainfall', 'float')
+			->addScalarResult('rainrisk', 'rainrisk', 'float')
+			->addScalarResult('realfeel', 'realfeel', 'float')
+			->addScalarResult('realfeelmin', 'realfeelmin', 'float')
+			->addScalarResult('realfeelmax', 'realfeelmax', 'float')
+			->addScalarResult('temperature', 'temperature', 'float')
+			->addScalarResult('temperaturemin', 'temperaturemin', 'float')
+			->addScalarResult('temperaturemax', 'temperaturemax', 'float')
+			->addScalarResult('created', 'created', 'datetime')
+			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('l_id', 'l_id', 'integer')
+			->addScalarResult('l_short', 'l_short', 'string')
+			->addScalarResult('l_title', 'l_title', 'string')
+			->addScalarResult('l_address', 'l_address', 'string')
+			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
+			->addScalarResult('l_city', 'l_city', 'string')
+			->addScalarResult('l_latitude', 'l_latitude', 'float')
+			->addScalarResult('l_longitude', 'l_longitude', 'float')
+			->addScalarResult('t_id', 't_id', 'integer')
+			->addScalarResult('t_title', 't_title', 'string')
+			->addScalarResult('a_id', 'a_id', 'integer')
+			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sa_id', 'sa_id', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sa_score', 'sa_score', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sa_created', 'sa_created', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sa_updated', 'sa_updated', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sa_canceled', 'sa_canceled', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sau_id', 'sau_id', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
+			->addIndexByScalar('id');
+
+		//Return result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('sid', $id)
+			->getOneOrNullResult();
 	}
 
 	/**
@@ -91,11 +253,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
-			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
+			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			"\t" => '',
+			"\n" => ' '
 		];
 
 		//Set the request
-		$req = 'SELECT s.id, s.date, s.location_id AS l_id, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
+		//TODO: change as_u_* in sau_*, a_u_* in au_*, etc, see request up
+		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
 			FROM RapsysAirBundle:Session AS s
 			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
@@ -120,9 +285,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 		//addScalarResult($sqlColName, $resColName, $type = 'string');
 		$rsm->addScalarResult('id', 'id', 'integer')
 			->addScalarResult('date', 'date', 'date')
+			->addScalarResult('rainrisk', 'rainrisk', 'float')
+			->addScalarResult('rainfall', 'rainfall', 'float')
+			->addScalarResult('realfeel', 'realfeel', 'float')
+			->addScalarResult('temperature', 'temperature', 'float')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
+			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('a_u_id', 'a_u_id', 'integer')
@@ -169,17 +339,17 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 			if ($date->format('U') == ($today = strtotime('today'))) {
 				$calendar[$Ymd]['title'] .= '/'.$month;
 				$calendar[$Ymd]['current'] = true;
-				$calendar[$Ymd]['class'][] =  'current';
+				$calendar[$Ymd]['class'][] = 'current';
 			}
 			//Disable passed days
 			if ($date->format('U') < $today) {
 				$calendar[$Ymd]['disabled'] = true;
-				$calendar[$Ymd]['class'][] =  'disabled';
+				$calendar[$Ymd]['class'][] = 'disabled';
 			}
 			//Set next month days
 			if ($date->format('m') > date('m')) {
 				$calendar[$Ymd]['next'] = true;
-				$calendar[$Ymd]['class'][] =  'next';
+				$calendar[$Ymd]['class'][] = 'next';
 			}
 
 			//Iterate on each session to find the one of the day
@@ -205,19 +375,88 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 						$class[] = 'highlight';
 					}
 
+					//Set temperature
+					//XXX: realfeel may be null, temperature should not
+					$temperature = $session['realfeel'] !== null ? $session['realfeel'] : $session['temperature'];
+
+					//Compute weather
+					//XXX: rainfall may be null
+					if ($session['rainrisk'] > 0.50 || $session['rainfall'] > 2) {
+						$weather = self::GLYPHS['Stormy'];
+					} elseif ($session['rainrisk'] > 0.40 || $session['rainfall'] > 1) {
+						$weather = self::GLYPHS['Rainy'];
+					} elseif ($temperature > 24) {
+						$weather = self::GLYPHS['Cleary'];
+					} elseif ($temperature > 17) {
+						$weather = self::GLYPHS['Sunny'];
+					} elseif ($temperature > 10) {
+						$weather = self::GLYPHS['Cloudy'];
+					} elseif ($temperature !== null) {
+						$weather = self::GLYPHS['Winty'];
+					} else {
+						$weather = null;
+					}
+
+					//Init weathertitle
+					$weathertitle = [];
+
+					//Check if realfeel is available
+					if ($session['realfeel'] !== null) {
+						$weathertitle[] = $session['realfeel'].'°R';
+					}
+
+					//Check if temperature is available
+					if ($session['temperature'] !== null) {
+						$weathertitle[] = $session['temperature'].'°C';
+					}
+
+					//Check if rainrisk is available
+					if ($session['rainrisk'] !== null) {
+						$weathertitle[] = ($session['rainrisk']*100).'%';
+					}
+
+					//Check if rainfall is available
+					if ($session['rainfall'] !== null) {
+						$weathertitle[] = $session['rainfall'].'mm';
+					}
+
+					//Set applications
+					$applications = [
+						0 => $translator->trans($session['t_title']).' '.$translator->trans('at '.$session['l_title']).$translator->trans(':')
+					];
+
+					//Fetch pseudonyms from session applications
+					$applications += array_combine(explode("\n", $session['as_u_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['as_u_pseudonym'])));
+
 					//Check that session is not granted
 					if (empty($session['a_id'])) {
-						//Fetch pseudonyms from session applications
-						$applications = array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
+						//With location id and unique application
+						if ($locationId && $count == 1) {
+							//Set unique application pseudonym as title
+							$title = $session['as_u_pseudonym'];
+						//Without location id or multiple application
+						} else {
+							//Set location title with optional count
+							$title = $translator->trans($session['l_title']).($count > 1 ? ' ['.$count.']':'');
+						}
+					//Session is granted
+					} else {
+						//Replace granted application
+						$applications[$session['a_u_id']] = '* '.$session['a_u_pseudonym'];
+						//Set pseudonym with optional location title and count
+						$title = $session['a_u_pseudonym'].($locationId?'':' '.$translator->trans('at '.$session['l_short'])).($count > 1 ? ' ['.$count.']':'');
 					}
 
 					//Add the session
-					//XXX: see if we shouldn't prepend with 0 the slot and location to avoid collision ???
-					$calendar[$Ymd]['sessions'][$session['t_id'].$session['l_id']] = [
+					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
 						'id' => $session['id'],
-						'title' => $translator->trans($session['l_title']).' ('.$translator->trans($session['t_title']).')',
+						'title' => $title,
 						'class' => $class,
-						'applications' => [ 0 => $translator->trans($session['t_title']).' '.$translator->trans('at '.$session['l_title']).($count > 1?' ['.$count.']':'') ]+$applications
+						'slot' => self::GLYPHS[$session['t_title']],
+						'slottitle' => $translator->trans($session['t_title']),
+						'weather' => $weather,
+						'weathertitle' => implode(' ', $weathertitle),
+						'applications' => $applications
 					];
 				}
 			}
@@ -255,20 +494,23 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
-			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
+			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			"\t" => '',
+			"\n" => ' '
 		];
 
 		//Set the request
-		$req = 'SELECT s.id, s.date, s.location_id AS l_id, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
+		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
 			FROM RapsysAirBundle:Session AS s
 			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
+			'.($userId?'JOIN RapsysAirBundle:Application AS sua ON (sua.session_id = s.id)':'').'
 			LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 			LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 			LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 			LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 			WHERE s.date BETWEEN :begin AND :end
-			'.($userId?' AND sa.user_id = :uid':'').'
+			'.($userId?'AND sua.user_id = :uid':'').'
 			GROUP BY s.id
 			ORDER BY NULL';
 
@@ -284,9 +526,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 		//addScalarResult($sqlColName, $resColName, $type = 'string');
 		$rsm->addScalarResult('id', 'id', 'integer')
 			->addScalarResult('date', 'date', 'date')
+			->addScalarResult('rainrisk', 'rainrisk', 'float')
+			->addScalarResult('rainfall', 'rainfall', 'float')
+			->addScalarResult('realfeel', 'realfeel', 'float')
+			->addScalarResult('temperature', 'temperature', 'float')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
+			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('a_u_id', 'a_u_id', 'integer')
@@ -333,17 +580,17 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 			if ($date->format('U') == ($today = strtotime('today'))) {
 				$calendar[$Ymd]['title'] .= '/'.$month;
 				$calendar[$Ymd]['current'] = true;
-				$calendar[$Ymd]['class'][] =  'current';
+				$calendar[$Ymd]['class'][] = 'current';
 			}
 			//Disable passed days
 			if ($date->format('U') < $today) {
 				$calendar[$Ymd]['disabled'] = true;
-				$calendar[$Ymd]['class'][] =  'disabled';
+				$calendar[$Ymd]['class'][] = 'disabled';
 			}
 			//Set next month days
 			if ($date->format('m') > date('m')) {
 				$calendar[$Ymd]['next'] = true;
-				$calendar[$Ymd]['class'][] =  'next';
+				$calendar[$Ymd]['class'][] = 'next';
 			}
 
 			//Iterate on each session to find the one of the day
@@ -373,19 +620,81 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 						$class[] = 'highlight';
 					}
 
+					//Set temperature
+					//XXX: realfeel may be null, temperature should not
+					$temperature = $session['realfeel'] !== null ? $session['realfeel'] : $session['temperature'];
+
+					//Compute weather
+					//XXX: rainfall may be null
+					if ($session['rainrisk'] > 0.50 || $session['rainfall'] > 2) {
+						$weather = self::GLYPHS['Stormy'];
+					} elseif ($session['rainrisk'] > 0.40 || $session['rainfall'] > 1) {
+						$weather = self::GLYPHS['Rainy'];
+					} elseif ($temperature > 24) {
+						$weather = self::GLYPHS['Cleary'];
+					} elseif ($temperature > 17) {
+						$weather = self::GLYPHS['Sunny'];
+					} elseif ($temperature > 10) {
+						$weather = self::GLYPHS['Cloudy'];
+					} elseif ($temperature !== null) {
+						$weather = self::GLYPHS['Winty'];
+					} else {
+						$weather = null;
+					}
+
+					//Init weathertitle
+					$weathertitle = [];
+
+					//Check if realfeel is available
+					if ($session['realfeel'] !== null) {
+						$weathertitle[] = $session['realfeel'].'°R';
+					}
+
+					//Check if temperature is available
+					if ($session['temperature'] !== null) {
+						$weathertitle[] = $session['temperature'].'°C';
+					}
+
+					//Check if rainrisk is available
+					if ($session['rainrisk'] !== null) {
+						$weathertitle[] = ($session['rainrisk']*100).'%';
+					}
+
+					//Check if rainfall is available
+					if ($session['rainfall'] !== null) {
+						$weathertitle[] = $session['rainfall'].'mm';
+					}
+
+					//Set applications
+					$applications = [
+						0 => $translator->trans($session['t_title']).' '.$translator->trans('at '.$session['l_title']).$translator->trans(':')
+					];
+
 					//Check that session is not granted
 					if (empty($session['a_id'])) {
 						//Fetch pseudonyms from session applications
-						$applications = array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
+						$applications += array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
+					//Session is granted
+					} else {
+						//Fetch pseudonyms from session applications
+						$applications += array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
+						//Replace granted application
+						$applications[$session['a_u_id']] = '* '.$session['a_u_pseudonym'];
 					}
 
+					//Set title
+					$title = $translator->trans($session['l_title']).($count > 1 ? ' ['.$count.']':'');
+
 					//Add the session
-					//XXX: see if we shouldn't prepend with 0 the slot and location to avoid collision ???
-					$calendar[$Ymd]['sessions'][$session['t_id'].$session['l_id']] = [
+					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
 						'id' => $session['id'],
-						'title' => $translator->trans($session['l_title']).' ('.$translator->trans($session['t_title']).')',
+						'title' => $title,
 						'class' => $class,
-						'applications' => [ 0 => $translator->trans($session['t_title']).' '.$translator->trans('at '.$session['l_title']).($count > 1?' ['.$count.']':'') ]+$applications
+						'slot' => self::GLYPHS[$session['t_title']],
+						'slottitle' => $translator->trans($session['t_title']),
+						'weather' => $weather,
+						'weathertitle' => implode(' ', $weathertitle),
+						'applications' => $applications
 					];
 				}
 			}
@@ -396,5 +705,346 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 
 		//Send result
 		return $calendar;
+	}
+
+	/**
+	 * Find every session pending application
+	 *
+	 * @return array<Session> The sessions to update
+	 */
+	public function findAllPendingApplication() {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Select all sessions without application attributed with diff(start, now) <= if(diff(start, created) <= GOOD_DELAY day, diff(start, created)*3/4, GOOD_DELAY day)
+		//XXX: consider only unfinished sessions with stop > now
+		//XXX: consider creation enough in the past when we are after 1/4 of the period between creation and start time
+		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
+		$req =<<<SQL
+SELECT s.id
+FROM RapsysAirBundle:Session AS s
+WHERE
+	s.application_id IS NULL AND
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) > NOW() AND
+	TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), NOW()) <= IF(DATEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), s.created) <= :gooddelay, SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), s.created))*3/4), SEC_TO_TIME(:gooddelay*24*3600))
+ORDER BY ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) ASC, s.created ASC
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		$rsm
+			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addFieldResult('s', 'id', 'id')
+			->addIndexBy('s', 'id');
+
+		//Send result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('limit', PHP_INT_MAX)
+			->setParameter('gooddelay', self::GOOD_DELAY)
+			->getResult();
+	}
+
+	/**
+	 * Find all session pending hourly weather
+	 *
+	 * @return array<Session> The sessions to update
+	 */
+	public function findAllPendingHourlyWeather() {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Select all sessions starting and stopping in the next 3 days
+		//XXX: select session starting after now and stopping before date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
+		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
+		$req = <<<SQL
+SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode, o.title
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Slot AS o ON (o.id = s.slot_id)
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+WHERE ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) >= NOW() AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY))
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		$rsm
+			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addFieldResult('s', 'id', 'id')
+			->addFieldResult('s', 'date', 'date')
+			->addFieldResult('s', 'begin', 'begin')
+			->addFieldResult('s', 'length', 'length')
+			->addFieldResult('s', 'rainfall', 'rainfall')
+			->addFieldResult('s', 'rainrisk', 'rainrisk')
+			->addFieldResult('s', 'realfeel', 'realfeel')
+			->addFieldResult('s', 'realfeelmin', 'realfeelmin')
+			->addFieldResult('s', 'realfeelmax', 'realfeelmax')
+			->addFieldResult('s', 'temperature', 'temperature')
+			->addFieldResult('s', 'temperaturemin', 'temperaturemin')
+			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
+			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
+			->addFieldResult('o', 'slot_id', 'id')
+			->addFieldResult('o', 'title', 'title')
+			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
+			->addFieldResult('l', 'location_id', 'id')
+			->addFieldResult('l', 'zipcode', 'zipcode')
+			->addIndexBy('s', 'id');
+
+		//Send result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('accuhourly', self::ACCUWEATHER_HOURLY)
+			->getResult();
+	}
+
+	/**
+	 * Find all session pending daily weather
+	 *
+	 * @return array<Session> The sessions to update
+	 */
+	public function findAllPendingDailyWeather() {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Select all sessions stopping after next 3 days
+		//XXX: select session stopping after or equal date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
+		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
+		$req = <<<SQL
+SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode, o.title
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Slot AS o ON (o.id = s.slot_id)
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+WHERE ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) >= DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY)) AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accudaily DAY))
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		$rsm
+			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addFieldResult('s', 'id', 'id')
+			->addFieldResult('s', 'date', 'date')
+			->addFieldResult('s', 'begin', 'begin')
+			->addFieldResult('s', 'length', 'length')
+			->addFieldResult('s', 'rainfall', 'rainfall')
+			->addFieldResult('s', 'rainrisk', 'rainrisk')
+			->addFieldResult('s', 'realfeel', 'realfeel')
+			->addFieldResult('s', 'realfeelmin', 'realfeelmin')
+			->addFieldResult('s', 'realfeelmax', 'realfeelmax')
+			->addFieldResult('s', 'temperature', 'temperature')
+			->addFieldResult('s', 'temperaturemin', 'temperaturemin')
+			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
+			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
+			->addFieldResult('o', 'slot_id', 'id')
+			->addFieldResult('o', 'title', 'title')
+			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
+			->addFieldResult('l', 'location_id', 'id')
+			->addFieldResult('l', 'zipcode', 'zipcode')
+			->addIndexBy('s', 'id');
+
+		//Send result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('accudaily', self::ACCUWEATHER_DAILY)
+			->setParameter('accuhourly', self::ACCUWEATHER_HOURLY)
+			->getResult();
+	}
+
+	/**
+	 * Fetch session best application by session id
+	 *
+	 * @param int $id The session id
+	 * @return Application|null The application or null
+	 */
+	public function findBestApplicationById($id) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		/**
+		 * Query session applications ranked by score, created and user_id
+		 *
+		 * @xxx User with bad behaviour application are excluded until remaining <= baddelay:
+		 * - with (count(premium = 1)+1)/(count(premium = 0)+1) >= 1
+		 * - with count(sessions) <= 5
+		 * - with average(temperature) >= average(temperature other) + 10
+		 *
+		 * @xxx Magic happen on this line:
+		 * WHERE IF(d.pnp_rate >= 1, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.s_count <= 5, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.tr_rate >= (d.otr_rate + 10), d.remaining <= SEC_TO_TIME(:baddelay), 1)
+		 *
+		 * @todo Limit score on last year only ???
+		 * AND DATEDIFF(s.date, NOW()) <= 365
+		 */
+		$req = <<<SQL
+SELECT d.id, d.score
+FROM (
+	SELECT
+		c.id,
+		c.session_id,
+		c.user_id,
+		c.score,
+		c.remaining,
+		c.created,
+		c.s_count,
+		c.tr_rate,
+		AVG(IF(a4.id IS NOT NULL, s4.temperature/(1+s4.rainfall), NULL)) AS otr_rate,
+		c.pnp_rate
+	FROM (
+		SELECT
+			b.id,
+			b.session_id,
+			b.user_id,
+			b.score,
+			b.remaining,
+			b.created,
+			COUNT(a3.id) AS s_count,
+			AVG(IF(a3.id IS NOT NULL AND s3.temperature IS NOT NULL AND s3.rainfall IS NOT NULL, s3.temperature/(1+s3.rainfall), NULL)) AS tr_rate,
+			(SUM(IF(a3.id IS NOT NULL AND s3.premium = 1, 1, 0))+1)/(SUM(IF(a3.id IS NOT NULL AND s3.premium = 0, 1, 0))+1) AS pnp_rate
+		FROM (
+			SELECT
+				a.id,
+				s.id AS session_id,
+				a.user_id,
+				SUM(IF(a2.id IS NOT NULL, 1/ABS(DATEDIFF(s.date, s2.date)), 0)) AS score,
+				TIMEDIFF(ADDTIME(s.date, s.begin), NOW()) AS remaining,
+				a.created
+			FROM sessions AS s
+			JOIN applications AS a ON (a.session_id = s.id AND a.canceled IS NULL)
+			LEFT JOIN sessions AS s2 ON (s2.id != s.id AND s2.location_id = s.location_id AND s2.slot_id = s.slot_id AND s2.application_id IS NOT NULL)
+			LEFT JOIN applications AS a2 ON (a2.id = s2.application_id AND a2.user_id = a.user_id AND (a2.canceled IS NULL OR TIMESTAMPDIFF(DAY, a2.canceled, ADDTIME(s2.date, s2.begin)) < 1))
+			WHERE s.id = :sid
+			GROUP BY a.id
+			ORDER BY NULL
+			LIMIT 0, :limit
+		) AS b
+		LEFT JOIN sessions AS s3 ON (s3.id != b.session_id AND s3.application_id IS NOT NULL)
+		LEFT JOIN applications AS a3 ON (a3.id = s3.application_id AND a3.user_id = b.user_id AND (a3.canceled IS NULL OR TIMESTAMPDIFF(DAY, a3.canceled, ADDTIME(s3.date, s3.begin)) < 1))
+		GROUP BY b.id
+		ORDER BY NULL
+		LIMIT 0, :limit
+	) AS c
+	LEFT JOIN sessions AS s4 ON (s4.id != c.session_id AND s4.application_id IS NOT NULL AND s4.temperature IS NOT NULL AND s4.rainfall IS NOT NULL)
+	LEFT JOIN applications AS a4 ON (a4.id = s4.application_id AND a4.user_id != c.user_id AND (a4.canceled IS NULL OR TIMESTAMPDIFF(DAY, a4.canceled, ADDTIME(s4.date, s4.begin)) < 1))
+	GROUP BY c.id
+	ORDER BY NULL
+	LIMIT 0, :limit
+) AS d
+WHERE IF(d.pnp_rate >= 1, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.s_count <= 5, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.tr_rate >= (d.otr_rate + 10), d.remaining <= SEC_TO_TIME(:baddelay), 1)
+ORDER BY d.score ASC, d.created ASC, d.user_id ASC
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Set update request
+		$upreq = 'UPDATE RapsysAirBundle:Application SET score = :score, updated = NOW() WHERE id = :id';
+
+		//Replace bundle entity name by table name
+		$upreq = str_replace(array_keys($tables), array_values($tables), $upreq);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		$rsm
+			->addEntityResult('RapsysAirBundle:Application', 'a')
+			->addFieldResult('a', 'id', 'id')
+			->addFieldResult('a', 'score', 'score')
+			->addIndexBy('a', 'id');
+
+		//Get result
+		//XXX: setting limit in subqueries is required to prevent mariadb optimisation
+		$applications = $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('sid', $id)
+			->setParameter('baddelay', self::BAD_DELAY*24*3600)
+			->setParameter('limit', PHP_INT_MAX)
+			//XXX: removed, we update score before returning best candidate
+			//->getOneOrNullResult(Query::HYDRATE_SINGLE_SCALAR);
+			->getResult();
+
+		//Init ret
+		$ret = null;
+
+		//Update score
+		foreach($applications as $application) {
+			//Check if we already saved best candidate
+			if ($ret === null) {
+				//Return first application
+				$ret = $application;
+			}
+
+			//Update application updated field
+			//XXX: updated field is not modified for user with bad behaviour as application is not retrieved until delay is reached
+			$em->getConnection()->executeUpdate($upreq, ['id' => $application->getId(), 'score' => $application->getScore()], ['id' => Type::INTEGER, 'score' => Type::FLOAT]);
+		}
+
+		//Return best ranked application
+		return $ret;
 	}
 }
