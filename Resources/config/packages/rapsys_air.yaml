@@ -16,6 +16,10 @@ rapsys_user:
         group: 'Rapsys\AirBundle\Entity\Group'
         title: 'Rapsys\AirBundle\Entity\Title'
         user: 'Rapsys\AirBundle\Entity\User'
+    #Default replacement
+    default:
+        group: [ 'User' ]
+        title: 'Mister'
     #Route replacement
     route:
         index:
@@ -267,6 +271,12 @@ services:
     Rapsys\AirBundle\Form\ApplicationType:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
+    Rapsys\AirBundle\Command\AttributeCommand:
+        arguments: [ '@doctrine' ]
+        tags: [ 'console.command' ]
+    Rapsys\AirBundle\Command\WeatherCommand:
+        arguments: [ '@doctrine' ]
+        tags: [ 'console.command' ]
 
 #Twig Configuration
 twig:
