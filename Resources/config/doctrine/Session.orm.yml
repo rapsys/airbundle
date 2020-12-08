@@ -18,10 +18,32 @@ Rapsys\AirBundle\Entity\Session:
         length:
             type: time
             nullable: true
-#The day score, 1 for sun-thu, 2 for fri-sat, +1 for high temperature, *-1 for bad weather
-#        score:
-#            type: smallint
-#            nullable: true
+        premium:
+            type: boolean
+        rainfall:
+            type: float
+            nullable: true
+        rainrisk:
+            type: float
+            nullable: true
+        realfeel:
+            type: float
+            nullable: true
+        realfeelmin:
+            type: float
+            nullable: true
+        realfeelmax:
+            type: float
+            nullable: true
+        temperature:
+            type: float
+            nullable: true
+        temperaturemin:
+            type: float
+            nullable: true
+        temperaturemax:
+            type: float
+            nullable: true
         created:
             type: datetime
         updated:
@@ -43,3 +65,6 @@ Rapsys\AirBundle\Entity\Session:
     uniqueConstraints:
         date_location_slot:
             columns: [ date, location_id, slot_id ]
+    indexes:
+        application_date_begin_slot_created:
+            columns: [ application_id, date, begin, slot_id, created ]
