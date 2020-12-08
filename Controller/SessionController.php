@@ -100,16 +100,10 @@ class SessionController extends DefaultController {
 		$doctrine = $this->getDoctrine();
 
 		//Fetch session
-		//TODO: genereate a custom request to fetch everything in a single request ???
-		$session = $doctrine->getRepository(Session::class)->findOneById($id);
-
-		//Fetch session
-		//TODO: genereate a custom request to fetch everything in a single request ???
-		$location = $session->getLocation(); #$doctrine->getRepository(Location::class)->findOneBySession($session);
+		$session = $doctrine->getRepository(Session::class)->fetchOneById($id);
 
 		//Set section
-		//TODO: replace with $session['location']['title']
-		$section = $this->translator->trans($location);
+		$section = $this->translator->trans($session['l_title']);
 
 		//Set title
 		$title = $this->translator->trans('Session %id%', ['%id%' => $id]).' - '.$section.' - '.$this->translator->trans($this->config['site']['title']);
@@ -129,9 +123,10 @@ class SessionController extends DefaultController {
 				'admin' => $this->isGranted('ROLE_ADMIN'),
 				//Set default user to current
 				'user' => $this->getUser()->getId(),
-				//Set default slot to evening
-				//XXX: default to Evening (3)
-				'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById(3)
+				//Set default slot to current
+				'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById($session['t_id']),
+				//Set default location to current
+				'location' => $this->getDoctrine()->getRepository(Location::class)->findOneById($session['l_id']),
 			]);
 
 			//Add form to context
@@ -150,76 +145,94 @@ class SessionController extends DefaultController {
 			$context['login'] = $login->createView();
 		}
 
-		//Extract session date
-		$sessionDate = $session->getDate();
-
-		//Init session begin and end
-		$sessionBegin = $sessionEnd = null;
-
-		//Check session begin and end availability
-		if (($sessionBegin = $session->getBegin()) && ($sessionLength = $session->getLength())) {
-			$sessionBegin = new \DateTime($sessionDate->format('Y-m-d')."\t".$sessionBegin->format('H:i:sP'));
-			#$sessionEnd = (new \DateTime($sessionDate->format('Y-m-d')."\t".$sessionBegin->format('H:i:sP')))->add(new \DateInterval($sessionLength->format('\P\TH\Hi\Ms\S')));
-			$sessionEnd = (clone $sessionBegin)->add(new \DateInterval($sessionLength->format('\P\TH\Hi\Ms\S')));
-		}
-
 		//Add session in context
 		$context['session'] = [
-			'id' => ($sessionId = $session->getId()),
-			'date' => $sessionDate,
-			'begin' => $sessionBegin,
-			'end' => $sessionEnd,
-			#'begin' => new \DateTime($session->getDate()->format('Y-m-d')."\t".$session->getBegin()->format('H:i:sP')),
-			#'end' => (new \DateTime($session->getDate()->format('Y-m-d')."\t".$session->getBegin()->format('H:i:sP')))->add(new \DateInterval($session->getLength()->format('\P\TH\Hi\Ms\S'))),
-			#'length' => $session->getLength(),
-			'created' => $session->getCreated(),
-			'updated' => $session->getUpdated(),
-			'title' => $this->translator->trans('Session %id%', ['%id%' => $sessionId]),
+			'id' => $id,
+			'date' => $session['date'],
+			'begin' => $session['begin'],
+			'start' => $session['start'],
+			'length' => $session['length'],
+			'stop' => $session['stop'],
+			'rainfall' => $session['rainfall'] !== null ? $session['rainfall'].' mm' : $session['rainfall'],
+			'rainrisk' => $session['rainrisk'] !== null ? ($session['rainrisk']*100).' %' : $session['rainrisk'],
+			'realfeel' => $session['realfeel'] !== null ? $session['realfeel'].' °C' : $session['realfeel'],
+			'realfeelmin' => $session['realfeelmin'] !== null ? $session['realfeelmin'].' °C' : $session['realfeelmin'],
+			'realfeelmax' => $session['realfeelmax'] !== null ? $session['realfeelmax'].' °C' : $session['realfeelmax'],
+			'temperature' => $session['temperature'] !== null ? $session['temperature'].' °C' : $session['temperature'],
+			'temperaturemin' => $session['temperaturemin'] !== null ? $session['temperaturemin'].' °C' : $session['temperaturemin'],
+			'temperaturemax' => $session['temperaturemax'] !== null ? $session['temperaturemax'].' °C' : $session['temperaturemax'],
+			'created' => $session['created'],
+			'updated' => $session['updated'],
+			'title' => $this->translator->trans('Session %id%', ['%id%' => $id]),
 			'application' => null,
 			'location' => [
-				'id' => ($location = $session->getLocation())->getId(),
-				'title' => $this->translator->trans($location),
+				'id' => $session['l_id'],
+				'at' => $this->translator->trans('at '.$session['l_title']),
+				'short' => $this->translator->trans($session['l_short']),
+				'title' => $this->translator->trans($session['l_title']),
+				'address' => $session['l_address'],
+				'zipcode' => $session['l_zipcode'],
+				'city' => $session['l_city'],
+				'latitude' => $session['l_latitude'],
+				'longitude' => $session['l_longitude']
 			],
 			'slot' => [
-				'id' => ($slot = $session->getSlot())->getId(),
-				'title' => $this->translator->trans($slot),
+				'id' => $session['t_id'],
+				'title' => $this->translator->trans($session['t_title'])
 			],
-			'applications' => null,
+			'applications' => null
 		];
 
-		if ($application = $session->getApplication()) {
+		//With application
+		if (!empty($session['a_id'])) {
 			$context['session']['application'] = [
 				'user' => [
-					'id' => ($user = $application->getUser())->getId(),
-					'title' => (string) $user->getPseudonym(),
+					'id' => $session['au_id'],
+					'title' => $session['au_pseudonym']
 				],
-				'id' => ($applicationId = $application->getId()),
-				'title' => $this->translator->trans('Application %id%', [ '%id%' => $applicationId ]),
+				'id' => $session['a_id'],
+				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
 			];
 		}
 
-		if ($applications = $session->getApplications()) {
+		//With applications
+		if (!empty($session['sa_id'])) {
+			//Extract applications id
+			$session['sa_id'] = explode("\n", $session['sa_id']);
+			//Extract applications score
+			//XXX: score may be null before grant or for bad behaviour, replace NULL with 'NULL' to avoid silent drop in mysql
+			$session['sa_score'] = array_map(function($v){return $v==='NULL'?null:$v;}, explode("\n", $session['sa_score']));
+			//Extract applications created
+			$session['sa_created'] = array_map(function($v){return new \DateTime($v);}, explode("\n", $session['sa_created']));
+			//Extract applications updated
+			$session['sa_updated'] = array_map(function($v){return new \DateTime($v);}, explode("\n", $session['sa_updated']));
+			//Extract applications canceled
+			//XXX: canceled is null before cancelation, replace NULL with 'NULL' to avoid silent drop in mysql
+			$session['sa_canceled'] = array_map(function($v){return $v==='NULL'?null:$v;}, explode("\n", $session['sa_canceled']));
+
+			//Extract applications user id
+			$session['sau_id'] = explode("\n", $session['sau_id']);
+			//Extract applications user pseudonym
+			$session['sau_pseudonym'] = explode("\n", $session['sau_pseudonym']);
+
+			//Init applications
 			$context['session']['applications'] = [];
-			foreach($applications as $application) {
-				$context['session']['applications'][$applicationId = $application->getId()] = [
+			foreach($session['sa_id'] as $i => $sa_id) {
+				$context['session']['applications'][$sa_id] = [
 					'user' => null,
-					'created' => $application->getCreated(),
-					'updated' => $application->getUpdated(),
+					'score' => $session['sa_score'][$i],
+					'created' => $session['sa_created'][$i],
+					'updated' => $session['sa_updated'][$i],
+					'canceled' => $session['sa_canceled'][$i]
 				];
-				if ($user = $application->getUser()) {
-					$context['session']['applications'][$applicationId]['user'] = [
-						'id' => $user->getId(),
-						'title' => (string) $user->getPseudonym(),
+				if (!empty($session['sau_id'][$i])) {
+					$context['session']['applications'][$sa_id]['user'] = [
+						'id' => $session['sau_id'][$i],
+						'title' => $session['sau_pseudonym'][$i]
 					];
 				}
 			}
 		}
-
-		//Add location in context
-		#$context['location'] = [
-		#	'id' => $location->getId(),
-		#	'title' => $location->getTitle(),
-		#];
 
 		//Render the view
 		return $this->render('@RapsysAir/session/view.html.twig', ['title' => $title, 'section' => $section]+$context+$this->context);
