@@ -19,7 +19,7 @@ section {
 }
 
 body {
-	line-height: 1;
+	line-height: normal;
 }
 
 ol, ul {
