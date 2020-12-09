@@ -1,7 +1,12 @@
 {# Display application or login form #}
 {% if is_granted('ROLE_GUEST') %}
 	<div class="form">
-		{{ include('@RapsysAir/form/_application.html.twig') }}
+		{% if application is defined %}
+			{{ include('@RapsysAir/form/_application.html.twig') }}
+		{% endif %}
+		{% if session_edit is defined %}
+			{{ include('@RapsysAir/form/_session_edit.html.twig') }}
+		{% endif %}
 	</div>
 {% elseif not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 	<div class="form">
