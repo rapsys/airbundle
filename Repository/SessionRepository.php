@@ -88,6 +88,58 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	}
 
 	/**
+	 * Find one session by location and user id within last month
+	 *
+	 * @param $location The location id
+	 * @param $user The user id
+	 */
+	public function findOneWithinLastMonthByLocationUser($location, $user) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Set the request
+		//XXX: give the gooddelay to guest just in case
+		$req =<<<SQL
+SELECT s.id
+FROM RapsysAirBundle:Session s
+JOIN RapsysAirBundle:Application a ON (a.id = s.application_id AND a.user_id = :uid AND (a.canceled IS NULL OR TIMESTAMPDIFF(DAY, a.canceled, ADDTIME(s.date, s.begin)) < 1))
+WHERE s.location_id = :lid AND s.date >= DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 MONTH), INTERVAL :gooddelay DAY)
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		$rsm->addScalarResult('id', 'id', 'integer')
+			->addIndexByScalar('id');
+
+		//Return result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('lid', $location)
+			->setParameter('uid', $user)
+			->setParameter('gooddelay', self::GOOD_DELAY)
+			->getOneOrNullResult();
+	}
+
+	/**
 	 * Fetch session by id
 	 *
 	 * @param $id The session id
@@ -110,7 +162,9 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
-			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
+			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			"\t" => '',
+			"\n" => ' '
 		];
 
 		//Set the request
@@ -132,6 +186,7 @@ SELECT
 	s.temperature,
 	s.temperaturemin,
 	s.temperaturemax,
+	s.locked,
 	s.created,
 	s.updated,
 	s.location_id AS l_id,
@@ -147,13 +202,13 @@ SELECT
 	s.application_id AS a_id,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
-	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\n") AS sa_id,
-	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\n") AS sa_score,
-	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\n") AS sa_created,
-	GROUP_CONCAT(sa.updated ORDER BY sa.user_id SEPARATOR "\n") AS sa_updated,
-	GROUP_CONCAT(IFNULL(sa.canceled, 'NULL') ORDER BY sa.user_id SEPARATOR "\n") AS sa_canceled,
-	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS sau_id,
-	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS sau_pseudonym
+	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
+	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
+	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
+	GROUP_CONCAT(sa.updated ORDER BY sa.user_id SEPARATOR "\\n") AS sa_updated,
+	GROUP_CONCAT(IFNULL(sa.canceled, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_canceled,
+	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
+	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
 FROM RapsysAirBundle:Session AS s
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
@@ -189,6 +244,7 @@ SQL;
 			->addScalarResult('temperature', 'temperature', 'float')
 			->addScalarResult('temperaturemin', 'temperaturemin', 'float')
 			->addScalarResult('temperaturemax', 'temperaturemax', 'float')
+			->addScalarResult('locked', 'locked', 'datetime')
 			->addScalarResult('created', 'created', 'datetime')
 			->addScalarResult('updated', 'updated', 'datetime')
 			->addScalarResult('l_id', 'l_id', 'integer')
@@ -260,7 +316,7 @@ SQL;
 
 		//Set the request
 		//TODO: change as_u_* in sau_*, a_u_* in au_*, etc, see request up
-		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
+		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_pseudonym
 			FROM RapsysAirBundle:Session AS s
 			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
@@ -500,7 +556,7 @@ SQL;
 		];
 
 		//Set the request
-		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\n") AS as_u_id, GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\n") AS as_u_pseudonym
+		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_id, GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_pseudonym
 			FROM RapsysAirBundle:Session AS s
 			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
@@ -730,7 +786,7 @@ SQL;
 
 		//Select all sessions without application attributed with diff(start, now) <= if(diff(start, created) <= GOOD_DELAY day, diff(start, created)*3/4, GOOD_DELAY day)
 		//XXX: consider only unfinished sessions with stop > now
-		//XXX: consider creation enough in the past when we are after 1/4 of the period between creation and start time
+		//XXX: consider as grace time first quarter (1/4) between creation and start time when below gooddelay
 		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
 		$req =<<<SQL
 SELECT s.id
@@ -939,6 +995,8 @@ SQL;
 		 *
 		 * @todo Limit score on last year only ???
 		 * AND DATEDIFF(s.date, NOW()) <= 365
+		 *
+		 * TODO: we may add ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
 		 */
 		$req = <<<SQL
 SELECT d.id, d.score
