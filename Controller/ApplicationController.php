@@ -5,6 +5,8 @@ namespace Rapsys\AirBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Session;
@@ -26,6 +28,11 @@ class ApplicationController extends DefaultController {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
+		//Reject non post requests
+		if (!$request->isMethod('POST')) {
+			throw new \RuntimeException('Request method MUST be POST');
+		}
+
 		//Create ApplicationType form
 		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
 			//Set the action
@@ -41,24 +48,19 @@ class ApplicationController extends DefaultController {
 			'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById(3)
 		]);
 
-		//Reject non post requests
-		if (!$request->isMethod('POST')) {
-			throw new \RuntimeException('Request method MUST be POST');
-		}
-
 		//Refill the fields in case of invalid form
 		$form->handleRequest($request);
 
 		//Handle invalid form
 		if (!$form->isValid()) {
 			//Set section
-			$section = $this->translator->trans('Application Add');
+			$section = $this->translator->trans('Application add');
 
 			//Set title
 			$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
 
 			//Render the view
-			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form]+$this->context);
+			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
 		}
 
 		//Get doctrine
@@ -69,6 +71,15 @@ class ApplicationController extends DefaultController {
 
 		//Get data
 		$data = $form->getData();
+
+		//Count session at location in last month for guest
+		if (!$this->isGranted('ROLE_REGULAR') && !empty($session = $doctrine->getRepository(Session::class)->findOneWithinLastMonthByLocationUser($data['location']->getId(), $this->getUser()->getId()))) {
+			//Add warning in flash message
+			$this->addFlash('warning', $this->translator->trans('Monthly application %location% already exists', ['%location%' => $this->translator->trans('at '.$data['location'])]));
+
+			//Redirect to cleanup the form
+			return $this->redirectToRoute('rapsys_air_session_view', ['id' => $session['id']]);
+		}
 
 		//Protect session fetching
 		try {
@@ -283,6 +294,30 @@ class ApplicationController extends DefaultController {
 			} else {
 				//Add error in flash message
 				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+
+				//Set section
+				$section = $this->translator->trans('Application add');
+
+				//Set title
+				$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+
+				//Render the view
+				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+			}
+
+			//Check if admin
+			if (!$this->isGranted('ROLE_ADMIN') && $session->getStart() < new \DateTime('00:00:00')) {
+				//Add error in flash message
+				$this->addFlash('error', $this->translator->trans('Session in the past on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+
+				//Set section
+				$section = $this->translator->trans('Application add');
+
+				//Set title
+				$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+
+				//Render the view
+				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
 			}
 
 			//Queue session save
@@ -375,7 +410,7 @@ class ApplicationController extends DefaultController {
 				//Generate url
 				return $this->redirectToRoute($name, ['session' => $session->getId()]+$route);
 			//No route matched
-			} catch(ResourceNotFoundException $e) {
+			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
 				//Unset referer to fallback to default route
 				unset($referer);
 			}
