@@ -272,7 +272,7 @@ services:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Form\SessionEditType:
-        arguments: [ '@doctrine', '@translator' ]
+        arguments: [ '@doctrine' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Command\AttributeCommand:
         arguments: [ '@doctrine' ]

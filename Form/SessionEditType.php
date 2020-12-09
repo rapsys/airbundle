@@ -19,15 +19,11 @@ class SessionEditType extends AbstractType {
 	//Doctrine instance
 	private $doctrine;
 
-	//Translator instance
-	protected $translator;
-
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __construct(RegistryInterface $doctrine, TranslatorInterface $translator) {
+	public function __construct(RegistryInterface $doctrine) {
 		$this->doctrine = $doctrine;
-		$this->translator = $translator;
 	}
 
 	/**
@@ -61,7 +57,7 @@ class SessionEditType extends AbstractType {
 		//Is admin or senior owner
 		if (!empty($options['move'])) {
 			//Load locations
-			$locations = $this->doctrine->getRepository(Location::class)->findComplementBySessionId($this->translator, $options['session']);
+			$locations = $this->doctrine->getRepository(Location::class)->findComplementBySessionId($options['session']);
 			$builder
 				//TODO: class senior en orange ???
 				->add('location', ChoiceType::class, ['attr' => ['placeholder' => 'Your location'], 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'choices' => $locations, 'choice_translation_domain' => true])
