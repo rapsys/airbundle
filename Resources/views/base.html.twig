@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html{% if lang is defined and lang %} lang="{{ lang }}"{% endif %}>
+<html{% if app.request.locale is defined and app.request.locale %} lang="{{ app.request.locale }}"{% endif %}>
 	<head>
 		{% block metas %}<meta charset="UTF-8">{% endblock %}
 		<title>{% block title %}Welcome!{% endblock %}</title>
