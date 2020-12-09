@@ -294,16 +294,16 @@
 {%- endblock repeated_row -%}
 
 {%- block form_row -%}
-    <div>
+    <div class="row">
         {{- form_label(form) -}}
-        <section>
+        <div>
             {{- form_widget(form) -}}
             {%- if errors|length > 0 -%}
                 <div class="message error">
                     {{- form_errors(form) -}}
                 </div>
             {%- endif -%}
-        </section>
+        </div>
     </div>
 {%- endblock form_row -%}
 
@@ -338,10 +338,8 @@
         <input type="hidden" name="_method" value="{{ method }}" />
     {%- endif -%}
     {%- if errors|length > 0 -%}
-        <header>
-            <div class="message error">
-                {{- form_errors(form) -}}
-            </div>
+        <header class="message error">
+			{{- form_errors(form) -}}
         </header>
     {%- endif -%}
 {%- endblock form_start -%}

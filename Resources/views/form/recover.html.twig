@@ -5,20 +5,16 @@
 		{% if sent %}
 			<p class="message notice">{% trans %}Your recover account message has been sent{% endtrans %}</p>
 		{% else %}
-			<section>
-				{{ form_start(form) }}
-					<section>
-						{{ form_row(form.mail) }}
-					</section>
+			{{ form_start(form) }}
+				<div>
+					{{ form_row(form.mail) }}
 
 					{{ form_row(form.submit) }}
+				</div>
 
-					{# Render CSRF token etc .#}
-					<footer style="display:none">
-						{{ form_rest(form) }}
-					</footer>
-				{{ form_end(form) }}
-			</section>
+				{# Render CSRF token etc .#}
+				<footer style="display:none">{{ form_rest(form) }}</footer>
+			{{ form_end(form) }}
 		{% endif %}
 	</section>
 {% endblock %}

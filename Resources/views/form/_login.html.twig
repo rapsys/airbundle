@@ -1,16 +1,15 @@
-{{ form_start(login) }}
+<section>
+	<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
+	{{ form_start(login) }}
+		<div>
+			{{ form_row(login.mail) }}
 
-	<section>
-		{{ form_row(login.mail) }}
+			{{ form_row(login.password) }}
 
-		{{ form_row(login.password) }}
-	</section>
+			{{ form_row(login.submit) }}
+		</div>
 
-	{{ form_row(login.submit) }}
-
-	{# Render CSRF token etc .#}
-	<footer style="display:none">
-		{{ form_rest(login) }}
-	</footer>
-
-{{ form_end(login) }}
+		{# Render CSRF token etc .#}
+		<footer style="display:none">{{ form_rest(login) }}</footer>
+	{{ form_end(login) }}
+</section>

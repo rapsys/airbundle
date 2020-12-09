@@ -2,40 +2,33 @@
 {% block content %}
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
-		<section>
-			{{ form_start(login) }}
-				<section>
-					{{ form_row(login.mail) }}
+		{{ form_start(login) }}
+			<section>
+				{{ form_row(login.mail) }}
 
-					{{ form_row(login.password) }}
-				</section>
+				{{ form_row(login.password) }}
 
 				{{ form_row(login.submit) }}
+			</section>
 
-				{# Render CSRF token etc .#}
-				<footer style="display:none">
-					{{ form_rest(login) }}
-				</footer>
-			{{ form_end(login) }}
-		</section>
-		{% if recover is defined %}
-			<section class="recover">
-				<h3>Recover</h3>
-				{{ form_start(recover) }}
+			{# Render CSRF token etc .#}
+			<footer style="display:none">{{ form_rest(login) }}</footer>
+		{{ form_end(login) }}
+	</section>
+	{% if recover is defined %}
+		<section id="recover">
+			<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+			{{ form_start(recover) }}
 
-					<section>
-						{{ form_row(recover.mail) }}
-					</section>
+				<div>
+					{{ form_row(recover.mail) }}
 
 					{{ form_row(recover.submit) }}
+				</div>
 
-					{# Render CSRF token etc .#}
-					<footer style="display:none">
-						{{ form_rest(recover) }}
-					</footer>
-
-				{{ form_end(recover) }}
-			</section>
-		{% endif %}
-	</section>
+				{# Render CSRF token etc .#}
+				<footer style="display:none">{{ form_rest(recover) }}</footer>
+			{{ form_end(recover) }}
+		</section>
+	{% endif %}
 {% endblock %}
