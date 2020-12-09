@@ -84,6 +84,11 @@ class Session {
 	/**
 	 * @var \DateTime
 	 */
+	private $locked;
+
+	/**
+	 * @var \DateTime
+	 */
 	private $created;
 
 	/**
@@ -431,6 +436,28 @@ class Session {
 	 */
 	public function getTemperaturemax() {
 		return $this->temperaturemax;
+	}
+
+	/**
+	 * Set locked
+	 *
+	 * @param \DateTime $locked
+	 *
+	 * @return Session
+	 */
+	public function setLocked($locked) {
+		$this->locked = $locked;
+
+		return $this;
+	}
+
+	/**
+	 * Get locked
+	 *
+	 * @return \DateTime
+	 */
+	public function getLocked() {
+		return $this->locked;
 	}
 
 	/**

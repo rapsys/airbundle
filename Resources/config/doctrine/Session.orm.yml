@@ -44,6 +44,9 @@ Rapsys\AirBundle\Entity\Session:
         temperaturemax:
             type: float
             nullable: true
+        locked:
+            type: datetime
+            nullable: true
         created:
             type: datetime
         updated:
