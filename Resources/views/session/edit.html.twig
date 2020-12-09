@@ -1,0 +1,53 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="form">
+		<h2>
+			<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
+			<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
+		</h2>
+		{% if form.modify is defined or form.raincancel is defined %}
+			{{ form_start(form) }}
+				{% if form.modify is defined %}
+					{% if is_granted('ROLE_REGULAR') %}
+						<div>
+							{{ form_row(form.begin) }}
+
+							{{ form_row(form.length) }}
+
+							{{ form_row(form.modify) }}
+						</div>
+					{% endif %}
+					{% if is_granted('ROLE_SENIOR') %}
+						<div class="dangerous">
+							{{ form_row(form.location) }}
+
+							{{ form_row(form.move) }}
+						</div>
+					{% endif %}
+					<div class="mortal">
+						{% if is_granted('ROLE_ADMIN') %}
+							{{ form_row(form.user) }}
+						{% endif %}
+
+						{{ form_row(form.cancel) }}
+
+						{% if is_granted('ROLE_ADMIN') %}
+							{{ form_row(form.attribute) }}
+
+							{{ form_row(form.autoattribute) }}
+
+							{{ form_row(form.lock) }}
+						{% endif %}
+					</div>
+				{% elseif form.raincancel is defined %}
+					<div>
+						{{ form_row(form.raincancel) }}
+					</div>
+				{% endif %}
+
+				{# render csrf token etc .#}
+				<footer style="display:none">{{ form_rest(form) }}</footer>
+			{{ form_end(form) }}
+		{% endif %}
+	</section>
+{% endblock %}
