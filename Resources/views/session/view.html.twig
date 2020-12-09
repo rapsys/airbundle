@@ -19,6 +19,10 @@
 						{% endif %}
 					</dd>
 				</dl>
+				<dl>
+					<dt>TODO: text organisateur</dt>
+					<dd>TODO: text organisateur</dd>
+				</dl>
 			</section>
 			<section class="cell">
 				<h3>{% trans %}Schedule{% endtrans %}</h3>
@@ -43,6 +47,16 @@
 				<dl>
 					<dt>{% trans %}Length{% endtrans %}</dt>
 					<dd>{{ session.length.format('H:i:s') }}</dd>
+				</dl>
+				<dl>
+					<dt>{% trans %}Locked{% endtrans %}</dt>
+					<dd>
+						{% if session.locked is null %}
+							{% trans %}None{% endtrans %}
+						{% else %}
+							{{ session.locked.format('Y-m-d H:i:s') }}
+						{% endif %}
+					</dd>
 				</dl>
 				<dl>
 					<dt>{% trans %}Created{% endtrans %}</dt>
