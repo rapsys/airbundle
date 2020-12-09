@@ -35,19 +35,19 @@ rapsys_air_application_add:
     controller: Rapsys\AirBundle\Controller\ApplicationController::add
     methods: POST
 
-rapsys_air_application_edit:
-    path:
-        en: '/en/application/{id<\d+>}'
-        fr: '/reservation/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\ApplicationController::edit
-    methods: POST
-
 rapsys_air_session:
     path:
         en: '/en/session'
         fr: '/seance'
     controller: Rapsys\AirBundle\Controller\SessionController::index
     methods: GET
+
+rapsys_air_session_edit:
+    path:
+        en: '/en/session/{id<\d+>}'
+        fr: '/seance/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\SessionController::edit
+    methods: POST
 
 rapsys_air_session_view:
     path:
