@@ -39,7 +39,7 @@
 {% block body %}
 	{% block header %}
 		<header id="header">
-			{% block header_title %}<h1><a href="{{ site_url }}"><img src="{{ asset(site_logo) }}" alt="{{ site_title }}" /></a></h1>{% endblock %}
+			{% block header_title %}<h1><a href="{{ site_url }}" title="{{ site_title }}"><img src="{{ asset(site_logo) }}" alt="{{ site_title }}" width="171" height="32" /></a></h1>{% endblock %}
 			{% block header_nav %}
 				<nav>
 					<h2>{% trans %}Navigation{% endtrans %}</h2>
