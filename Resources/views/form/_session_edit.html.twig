@@ -1,0 +1,49 @@
+{% if session_edit.modify is defined or session_edit.move is defined or session_edit.cancel is defined or session_edit.raincancel is defined %}
+	<section>
+		<h2>{% trans %}Modify{% endtrans %}</h2>
+		{{ form_start(session_edit) }}
+			{% if session_edit.modify is defined %}
+				<div>
+					{{ form_row(session_edit.begin) }}
+
+					{{ form_row(session_edit.length) }}
+
+					{{ form_row(session_edit.modify) }}
+				</div>
+			{% endif %}
+			{% if session_edit.move is defined %}
+				<div class="dangerous">
+					{{ form_row(session_edit.location) }}
+
+					{{ form_row(session_edit.move) }}
+				</div>
+			{% endif %}
+			{% if session_edit.cancel is defined or session_edit.raincancel is defined %}
+				<div class="mortal">
+					{% if is_granted('ROLE_ADMIN') %}
+						{{ form_row(session_edit.user) }}
+					{% endif %}
+
+					{% if session_edit.cancel is defined %}
+						{{ form_row(session_edit.cancel) }}
+					{% endif %}
+
+					{% if session_edit.raincancel is defined %}
+						{{ form_row(session_edit.raincancel) }}
+					{% endif %}
+
+					{% if is_granted('ROLE_ADMIN') %}
+
+						{{ form_row(session_edit.attribute) }}
+
+						{{ form_row(session_edit.autoattribute) }}
+
+						{{ form_row(session_edit.lock) }}
+					{% endif %}
+				</div>
+			{% endif %}
+			{# render csrf token etc .#}
+			<footer style="display:none">{{ form_rest(session_edit) }}</footer>
+		{{ form_end(session_edit) }}
+	</section>
+{% endif %}
