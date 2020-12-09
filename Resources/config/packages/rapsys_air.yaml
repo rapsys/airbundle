@@ -18,7 +18,7 @@ rapsys_user:
         user: 'Rapsys\AirBundle\Entity\User'
     #Default replacement
     default:
-        group: [ 'User' ]
+        group: [ 'Senior' ]
         title: 'Mister'
     #Route replacement
     route:
@@ -269,6 +269,9 @@ services:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
 #       arguments: [ 'x', '%%s?v=%%s' ]
     Rapsys\AirBundle\Form\ApplicationType:
+        arguments: [ '@doctrine', '@translator' ]
+        tags: [ 'form.type' ]
+    Rapsys\AirBundle\Form\SessionEditType:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Command\AttributeCommand:
