@@ -5,46 +5,53 @@
 			<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
 			<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
 		</h2>
-		{% if form.modify is defined or form.raincancel is defined %}
+		{% if form.modify is defined or form.move is defined or form.cancel is defined or form.raincancel is defined or form.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 			{{ form_start(form) }}
 				{% if form.modify is defined %}
-					{% if is_granted('ROLE_REGULAR') %}
-						<div>
-							{{ form_row(form.begin) }}
+					<div>
+						{{ form_row(form.begin) }}
 
-							{{ form_row(form.length) }}
+						{{ form_row(form.length) }}
 
-							{{ form_row(form.modify) }}
-						</div>
-					{% endif %}
-					{% if is_granted('ROLE_SENIOR') %}
-						<div class="dangerous">
-							{{ form_row(form.location) }}
+						{{ form_row(form.modify) }}
+					</div>
+				{% endif %}
+				{% if form.move is defined %}
+					<div class="dangerous">
+						{{ form_row(form.location) }}
 
-							{{ form_row(form.move) }}
-						</div>
-					{% endif %}
+						{{ form_row(form.move) }}
+					</div>
+				{% endif %}
+				{% if form.cancel is defined or form.raincancel is defined or form.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 					<div class="mortal">
 						{% if is_granted('ROLE_ADMIN') %}
 							{{ form_row(form.user) }}
 						{% endif %}
 
-						{{ form_row(form.cancel) }}
+						{% if form.cancel is defined %}
+							{{ form_row(form.cancel) }}
+						{% endif %}
+
+						{% if form.raincancel is defined %}
+							{{ form_row(form.raincancel) }}
+						{% endif %}
+
+						{% if form.forcecancel is defined %}
+							{{ form_row(form.forcecancel) }}
+						{% endif %}
 
 						{% if is_granted('ROLE_ADMIN') %}
-							{{ form_row(form.attribute) }}
+							{% if form.attribute is defined %}
+								{{ form_row(form.attribute) }}
 
-							{{ form_row(form.autoattribute) }}
+								{{ form_row(form.autoattribute) }}
+							{% endif %}
 
 							{{ form_row(form.lock) }}
 						{% endif %}
 					</div>
-				{% elseif form.raincancel is defined %}
-					<div>
-						{{ form_row(form.raincancel) }}
-					</div>
 				{% endif %}
-
 				{# render csrf token etc .#}
 				<footer style="display:none">{{ form_rest(form) }}</footer>
 			{{ form_end(form) }}
