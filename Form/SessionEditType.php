@@ -30,10 +30,14 @@ class SessionEditType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
-		//Is admin or rainfall >= 2
+		//Is admin or user with rainfall >= 2
 		if (!empty($options['raincancel'])) {
 			//Add raincancel item
 			$builder->add('raincancel', SubmitType::class, ['label' => 'Rain cancel', 'attr' => ['class' => 'submit']]);
+		//Is admin
+		} elseif (!empty($options['admin'])) {
+			//Add forcecancel item
+			$builder->add('forcecancel', SubmitType::class, ['label' => 'Force cancel', 'attr' => ['class' => 'submit']]);
 		}
 
 		//Is admin or owner
@@ -50,9 +54,6 @@ class SessionEditType extends AbstractType {
 		if (!empty($options['cancel'])) {
 			$builder->add('cancel', SubmitType::class, ['label' => 'Cancel', 'attr' => ['class' => 'submit']]);
 		}
-
-		//Is admin or session not finished
-		#if (!empty($options['admin']) || $options['stop'] > new \DateTime('now')) {
 
 		//Is admin or senior owner
 		if (!empty($options['move'])) {
@@ -72,9 +73,15 @@ class SessionEditType extends AbstractType {
 			$builder
 				//TODO: class admin en rouge ???
 				->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $users, 'data' => $options['user'], 'choice_translation_domain' => false])
-				->add('attribute', SubmitType::class, ['label' => 'Attribute', 'attr' => ['class' => 'submit']])
-				->add('autoattribute', SubmitType::class, ['label' => 'Auto attribute', 'attr' => ['class' => 'submit']])
 				->add('lock', SubmitType::class, ['label' => 'Lock', 'attr' => ['class' => 'submit']]);
+
+			//Is admin and locked === null
+			if (!empty($options['attribute'])) {
+				//Add attribute fields
+				$builder
+					->add('attribute', SubmitType::class, ['label' => 'Attribute', 'attr' => ['class' => 'submit']])
+					->add('autoattribute', SubmitType::class, ['label' => 'Auto attribute', 'attr' => ['class' => 'submit']]);
+			}
 		}
 
 		//Return form
@@ -85,7 +92,7 @@ class SessionEditType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'user' => null, 'session' => null]);
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null]);
 		$resolver->setAllowedTypes('admin', 'boolean');
 		#TODO: voir si c'est le bon type
 		$resolver->setAllowedTypes('begin', 'datetime');
@@ -94,6 +101,7 @@ class SessionEditType extends AbstractType {
 		$resolver->setAllowedTypes('raincancel', 'boolean');
 		$resolver->setAllowedTypes('modify', 'boolean');
 		$resolver->setAllowedTypes('move', 'boolean');
+		$resolver->setAllowedTypes('attribute', 'boolean');
 		$resolver->setAllowedTypes('user', 'integer');
 		$resolver->setAllowedTypes('session', 'integer');
 	}
