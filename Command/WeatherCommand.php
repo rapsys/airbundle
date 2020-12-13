@@ -33,6 +33,7 @@ class WeatherCommand extends DoctrineCommand {
 		//Hourly uri
 		'hourly' => [
 			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/hourly-weather-forecast/179142_pc?day=',
+			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/hourly-weather-forecast/179145_pc?day=',
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/hourly-weather-forecast/179146_pc?day=',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/hourly-weather-forecast/179148_pc?day=',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/hourly-weather-forecast/179150_pc?day=',
@@ -43,6 +44,7 @@ class WeatherCommand extends DoctrineCommand {
 		//Daily uri
 		'daily' => [
 			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/daily-weather-forecast/179142_pc',
+			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/daily-weather-forecast/179145_pc',
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/daily-weather-forecast/179146_pc',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/daily-weather-forecast/179148_pc',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/daily-weather-forecast/179150_pc',
