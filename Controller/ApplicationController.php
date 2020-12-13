@@ -72,15 +72,6 @@ class ApplicationController extends DefaultController {
 		//Get data
 		$data = $form->getData();
 
-		//Count session at location in last month for guest
-		if (!$this->isGranted('ROLE_REGULAR') && !empty($session = $doctrine->getRepository(Session::class)->findOneWithinLastMonthByLocationUser($data['location']->getId(), $this->getUser()->getId()))) {
-			//Add warning in flash message
-			$this->addFlash('warning', $this->translator->trans('Monthly application %location% already exists', ['%location%' => $this->translator->trans('at '.$data['location'])]));
-
-			//Redirect to cleanup the form
-			return $this->redirectToRoute('rapsys_air_session_view', ['id' => $session['id']]);
-		}
-
 		//Protect session fetching
 		try {
 			//Fetch session
@@ -407,8 +398,18 @@ class ApplicationController extends DefaultController {
 				//Remove route and controller from route defaults
 				unset($route['_route'], $route['_controller']);
 
+				//Check if session view route
+				if ($name == 'rapsys_air_session_view' && !empty($route['id'])) {
+					//Replace id
+					$route['id'] = $session->getId();
+				//Other routes
+				} else {
+					//Set session
+					$route['session'] = $session->getId();
+				}
+
 				//Generate url
-				return $this->redirectToRoute($name, ['session' => $session->getId()]+$route);
+				return $this->redirectToRoute($name, $route);
 			//No route matched
 			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
 				//Unset referer to fallback to default route
