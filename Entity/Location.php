@@ -47,6 +47,11 @@ class Location {
 	private $longitude;
 
 	/**
+	 * @var boolean
+	 */
+	private $hotspot;
+
+	/**
 	 * @var \DateTime
 	 */
 	private $created;
@@ -229,6 +234,28 @@ class Location {
 	 */
 	public function getLongitude() {
 		return $this->longitude;
+	}
+
+	/**
+	 * Set hotspot
+	 *
+	 * @param boolean $hotspot
+	 *
+	 * @return Session
+	 */
+	public function setHotspot($hotspot) {
+		$this->hotspot = $hotspot;
+
+		return $this;
+	}
+
+	/**
+	 * Get hotspot
+	 *
+	 * @return boolean
+	 */
+	public function getHotspot() {
+		return $this->hotspot;
 	}
 
 	/**
