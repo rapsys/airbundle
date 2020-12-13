@@ -69,5 +69,18 @@ Rapsys\AirBundle\Entity\Session:
         date_location_slot:
             columns: [ date, location_id, slot_id ]
     indexes:
-        application_date_begin_slot_created:
-            columns: [ application_id, date, begin, slot_id, created ]
+        #XXX: used in SessionRepository::findAllPendingApplication
+        locked_date_begin_created:
+            columns: [ locked, date, begin, created ]
+        #XXX: used in SessionRepository::findBestApplicationById(s3)
+        application_locked_date_begin_slot_created:
+            columns: [ application_id, locked, date, begin, slot_id, created ]
+#        #XXX: tried for SessionRepository::findBestApplicationById(s2)
+#        location_slot_application_locked_date_begin:
+#            columns: [ location_id, slot_id, application_id, locked, date ]
+#        #XXX: tried for SessionRepository::findBestApplicationById(s3)
+#        application_locked_date:
+#            columns: [ application_id, locked, date ]
+#        #XXX: tried for SessionRepository::findBestApplicationById(s4)
+#        location_application_locked_date:
+#            columns: [ location_id, application_id, locked, date ]
