@@ -145,7 +145,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75009',
 				'city' => 'Paris',
 				'latitude' => 48.871268,
-				'longitude' => 2.331832
+				'longitude' => 2.331832,
+				'hotspot' => true
 			],
 			[
 				'title' => 'Tino-Rossi garden',
@@ -154,7 +155,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75005',
 				'city' => 'Paris',
 				'latitude' => 48.847736,
-				'longitude' => 2.360953
+				'longitude' => 2.360953,
+				'hotspot' => true
 			],
 			[
 				'title' => 'Trocadero esplanade',
@@ -164,7 +166,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75116',
 				'city' => 'Paris',
 				'latitude' => 48.861888,
-				'longitude' => 2.288853
+				'longitude' => 2.288853,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Colette square',
@@ -173,7 +176,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75001',
 				'city' => 'Paris',
 				'latitude' => 48.863219,
-				'longitude' => 2.335847
+				'longitude' => 2.335847,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Swan Island',
@@ -182,7 +186,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75015',
 				'city' => 'Paris',
 				'latitude' => 48.849976, #48.849976
-				'longitude' => 2.279603 #2.2796029
+				'longitude' => 2.279603, #2.2796029,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Jussieu esplanade',
@@ -191,7 +196,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75005',
 				'city' => 'Paris',
 				'latitude' => 48.847955, #48.8479548
-				'longitude' => 2.353291 #2.3532907
+				'longitude' => 2.353291, #2.3532907,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Orleans gallery',
@@ -200,7 +206,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75001',
 				'city' => 'Paris',
 				'latitude' => 48.863885,
-				'longitude' => 2.337387
+				'longitude' => 2.337387,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Orsay museum',
@@ -209,7 +216,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75007',
 				'city' => 'Paris',
 				'latitude' => 48.860418,
-				'longitude' => 2.325815
+				'longitude' => 2.325815,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Saint-Honore market',
@@ -218,7 +226,18 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75001',
 				'city' => 'Paris',
 				'latitude' => 48.866992,
-				'longitude' => 2.331752
+				'longitude' => 2.331752,
+				'hotspot' => false
+			],
+			[
+				'title' => 'Igor Stravinsky place',
+				'short' => 'Stravinsky',
+				'address' => '2 rue Brisemiche',
+				'zipcode' => '75004',
+				'city' => 'Paris',
+				'latitude' => 48.859244,
+				'longitude' => 2.351289,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Tokyo palace',
@@ -227,7 +246,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75116',
 				'city' => 'Paris',
 				'latitude' => 48.863827,
-				'longitude' => 2.297339
+				'longitude' => 2.297339,
+				'hotspot' => false
 			],
 			[
 				'title' => 'Drawings\' garden',
@@ -236,7 +256,8 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'zipcode' => '75019',
 				'city' => 'Paris',
 				'latitude' => 48.892503,
-				'longitude' => 2.389300
+				'longitude' => 2.389300,
+				'hotspot' => false
 			]
 		];
 
@@ -251,6 +272,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			$location->setCity($locationData['city']);
 			$location->setLatitude($locationData['latitude']);
 			$location->setLongitude($locationData['longitude']);
+			$location->setHotspot($locationData['hotspot']);
 			$location->setCreated(new \DateTime('now'));
 			$location->setUpdated(new \DateTime('now'));
 			$manager->persist($location);
