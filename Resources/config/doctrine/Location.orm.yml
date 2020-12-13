@@ -33,6 +33,8 @@ Rapsys\AirBundle\Entity\Location:
             type: decimal
             precision: 9
             scale: 6
+        hotspot:
+            type: boolean
         created:
             type: datetime
         updated:
@@ -41,32 +43,7 @@ Rapsys\AirBundle\Entity\Location:
         sessions:
             targetEntity: Rapsys\AirBundle\Entity\Session
             mappedBy: location
-
-#        manyToOne:
-#                title:
-#                        targetEntity: Rapsys\UserBundle\Entity\Title
-#                        inversedBy: users
-#        manyToMany:
-#                groups:
-#                        targetEntity: Rapsys\UserBundle\Entity\Group
-#                        inversedBy: users
-#                        joinTable:
-#                                name: groups_users
-#
-#        manyToOne:
-#                site:
-#                        targetEntity: Rapsys\BlogBundle\Entity\Site
-#                        inversedBy: articles
-#                author:
-#                        targetEntity: Rapsys\BlogBundle\Entity\Author
-#                        inversedBy: articles
-#        manyToMany:
-#                keywords:
-#                        targetEntity: Rapsys\BlogBundle\Entity\Keyword
-#                        inversedBy: articles
-#                        joinTable:
-#                                name: articles_keywords
-#        oneToMany:
-#                article_translations:
-#                        targetEntity: Rapsys\BlogBundle\Entity\ArticleTranslation
-#                        mappedBy: article
+    indexes:
+        #XXX: used in SessionRepository::(findAllPendingDailyWeather|findAllPendingHourlyWeather)
+        zipcode:
+            columns: [ zipcode ]
