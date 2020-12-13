@@ -1,4 +1,4 @@
-{% if session_edit.modify is defined or session_edit.move is defined or session_edit.cancel is defined or session_edit.raincancel is defined %}
+{% if session_edit.modify is defined or session_edit.move is defined or session_edit.cancel is defined or session_edit.raincancel is defined or session_edit.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 	<section>
 		<h2>{% trans %}Modify{% endtrans %}</h2>
 		{{ form_start(session_edit) }}
@@ -18,7 +18,7 @@
 					{{ form_row(session_edit.move) }}
 				</div>
 			{% endif %}
-			{% if session_edit.cancel is defined or session_edit.raincancel is defined %}
+			{% if session_edit.cancel is defined or session_edit.raincancel is defined or session_edit.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 				<div class="mortal">
 					{% if is_granted('ROLE_ADMIN') %}
 						{{ form_row(session_edit.user) }}
@@ -32,11 +32,16 @@
 						{{ form_row(session_edit.raincancel) }}
 					{% endif %}
 
+					{% if session_edit.forcecancel is defined %}
+						{{ form_row(session_edit.forcecancel) }}
+					{% endif %}
+
 					{% if is_granted('ROLE_ADMIN') %}
+						{% if session_edit.attribute is defined %}
+							{{ form_row(session_edit.attribute) }}
 
-						{{ form_row(session_edit.attribute) }}
-
-						{{ form_row(session_edit.autoattribute) }}
+							{{ form_row(session_edit.autoattribute) }}
+						{% endif %}
 
 						{{ form_row(session_edit.lock) }}
 					{% endif %}
