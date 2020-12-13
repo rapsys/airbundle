@@ -191,7 +191,8 @@ class Session {
 		$this->start = clone $this->date;
 
 		//Check if after slot
-		if ($this->slot->getTitle() == 'After') {
+		//XXX: id=4 <=> title=After
+		if ($this->slot->getId() == 4) {
 			//Add one day
 			$this->start->add(new \DateInterval('P1D'));
 		}
