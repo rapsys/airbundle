@@ -17,11 +17,14 @@ class SessionRepository extends \Doctrine\ORM\EntityRepository {
 	///Set accuweather max number of hourly pages
 	const ACCUWEATHER_HOURLY = 3;
 
-	///Set user with bad behaviour delay
-	const BAD_DELAY = 3;
+	///Set guest delay
+	const GUEST_DELAY = 2;
 
-	///Set user with good behaviour delay
-	const GOOD_DELAY = 4;
+	///Set regular delay
+	const REGULAR_DELAY = 3;
+
+	///Set senior
+	const SENIOR_DELAY = 4;
 
 	///Set glyphs
 	//TODO: document utf-8 codes ?
@@ -135,7 +138,7 @@ SQL;
 			->createNativeQuery($req, $rsm)
 			->setParameter('lid', $location)
 			->setParameter('uid', $user)
-			->setParameter('gooddelay', self::GOOD_DELAY)
+			->setParameter('gooddelay', self::SENIOR_DELAY)
 			->getOneOrNullResult();
 	}
 
@@ -163,6 +166,8 @@ SQL;
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			//Delay
+			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
@@ -175,9 +180,9 @@ SELECT
 	s.id,
 	s.date,
 	s.begin,
-	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) AS start,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
 	s.length,
-	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) AS stop,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
 	s.rainfall,
 	s.rainrisk,
 	s.realfeel,
@@ -764,61 +769,6 @@ SQL;
 	}
 
 	/**
-	 * Find every session pending application
-	 *
-	 * @return array<Session> The sessions to update
-	 */
-	public function findAllPendingApplication() {
-		//Get entity manager
-		$em = $this->getEntityManager();
-
-		//Get quote strategy
-		$qs = $em->getConfiguration()->getQuoteStrategy();
-		$dp = $em->getConnection()->getDatabasePlatform();
-
-		//Get quoted table names
-		//XXX: this allow to make this code table name independent
-		$tables = [
-			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
-			"\t" => '',
-			"\n" => ' '
-		];
-
-		//Select all sessions without application attributed with diff(start, now) <= if(diff(start, created) <= GOOD_DELAY day, diff(start, created)*3/4, GOOD_DELAY day)
-		//XXX: consider only unfinished sessions with stop > now
-		//XXX: consider as grace time first quarter (1/4) between creation and start time when below gooddelay
-		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
-		$req =<<<SQL
-SELECT s.id
-FROM RapsysAirBundle:Session AS s
-WHERE
-	s.application_id IS NULL AND
-	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) > NOW() AND
-	TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), NOW()) <= IF(DATEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), s.created) <= :gooddelay, SEC_TO_TIME(TIME_TO_SEC(TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY), s.created))*3/4), SEC_TO_TIME(:gooddelay*24*3600))
-ORDER BY ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) ASC, s.created ASC
-SQL;
-
-		//Replace bundle entity name by table name
-		$req = str_replace(array_keys($tables), array_values($tables), $req);
-
-		//Get result set mapping instance
-		$rsm = new ResultSetMapping();
-
-		//Declare all fields
-		$rsm
-			->addEntityResult('RapsysAirBundle:Session', 's')
-			->addFieldResult('s', 'id', 'id')
-			->addIndexBy('s', 'id');
-
-		//Send result
-		return $em
-			->createNativeQuery($req, $rsm)
-			->setParameter('limit', PHP_INT_MAX)
-			->setParameter('gooddelay', self::GOOD_DELAY)
-			->getResult();
-	}
-
-	/**
 	 * Find all session pending hourly weather
 	 *
 	 * @return array<Session> The sessions to update
@@ -835,21 +785,22 @@ SQL;
 		//XXX: this allow to make this code table name independent
 		$tables = [
 			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
-			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			//Accuweather
+			':accuhourly' => self::ACCUWEATHER_HOURLY,
+			//Delay
+			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
 
 		//Select all sessions starting and stopping in the next 3 days
 		//XXX: select session starting after now and stopping before date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
-		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
 		$req = <<<SQL
-SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode, o.title
+SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode
 FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Slot AS o ON (o.id = s.slot_id)
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-WHERE ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) >= NOW() AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY))
+WHERE ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) >= NOW() AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY))
 SQL;
 
 		//Replace bundle entity name by table name
@@ -875,7 +826,6 @@ SQL;
 			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
 			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
 			->addFieldResult('o', 'slot_id', 'id')
-			->addFieldResult('o', 'title', 'title')
 			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
 			->addFieldResult('l', 'location_id', 'id')
 			->addFieldResult('l', 'zipcode', 'zipcode')
@@ -884,7 +834,6 @@ SQL;
 		//Send result
 		return $em
 			->createNativeQuery($req, $rsm)
-			->setParameter('accuhourly', self::ACCUWEATHER_HOURLY)
 			->getResult();
 	}
 
@@ -905,21 +854,23 @@ SQL;
 		//XXX: this allow to make this code table name independent
 		$tables = [
 			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
-			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			//Accuweather
+			':accudaily' => self::ACCUWEATHER_DAILY,
+			':accuhourly' => self::ACCUWEATHER_HOURLY,
+			//Delay
+			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
 
 		//Select all sessions stopping after next 3 days
 		//XXX: select session stopping after or equal date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
-		//XXX: we may remove ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
 		$req = <<<SQL
-SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode, o.title
+SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode
 FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Slot AS o ON (o.id = s.slot_id)
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-WHERE ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) >= DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY)) AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = 4, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accudaily DAY))
+WHERE ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) >= DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY)) AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accudaily DAY))
 SQL;
 
 		//Replace bundle entity name by table name
@@ -945,7 +896,6 @@ SQL;
 			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
 			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
 			->addFieldResult('o', 'slot_id', 'id')
-			->addFieldResult('o', 'title', 'title')
 			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
 			->addFieldResult('l', 'location_id', 'id')
 			->addFieldResult('l', 'zipcode', 'zipcode')
@@ -954,8 +904,70 @@ SQL;
 		//Send result
 		return $em
 			->createNativeQuery($req, $rsm)
-			->setParameter('accudaily', self::ACCUWEATHER_DAILY)
-			->setParameter('accuhourly', self::ACCUWEATHER_HOURLY)
+			->getResult();
+	}
+
+	/**
+	 * Find every session pending application
+	 *
+	 * @return array<Session> The sessions to update
+	 */
+	public function findAllPendingApplication() {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			//Delay
+			':regulardelay' => self::REGULAR_DELAY * 24 * 3600,
+			':seniordelay' => self::SENIOR_DELAY * 24 * 3600,
+			//Slot
+			':afterid' => 4,
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Select all sessions not locked without application or canceled application within attribution period
+		//XXX: DIFF(start, now) <= IF(DIFF(start, created) <= SENIOR_DELAY in DAY, DIFF(start, created) * 3 / 4, SENIOR_DELAY)
+		//TODO: remonter les données pour le mail ?
+		$req =<<<SQL
+SELECT s.id
+FROM RapsysAirBundle:Session as s
+LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id AND a.canceled IS NULL)
+JOIN RapsysAirBundle:Application AS a2 ON (a2.session_id = s.id AND a2.canceled IS NULL)
+WHERE s.locked IS NULL AND a.id IS NULL AND
+TIME_TO_SEC(TIMEDIFF(@dt_start := ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), NOW())) <= IF(
+	TIME_TO_SEC(@td_sc := TIMEDIFF(@dt_start, s.created)) <= :seniordelay,
+	ROUND(TIME_TO_SEC(@td_sc) * :regulardelay / :seniordelay),
+	:seniordelay
+)
+GROUP BY s.id
+ORDER BY @dt_start ASC, s.created ASC
+SQL;
+
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		$rsm
+			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addFieldResult('s', 'id', 'id')
+			->addIndexBy('s', 'id');
+
+		//Send result
+		return $em
+			->createNativeQuery($req, $rsm)
 			->getResult();
 	}
 
@@ -977,83 +989,154 @@ SQL;
 		//XXX: this allow to make this code table name independent
 		$tables = [
 			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			//XXX: Set limit used to workaround mariadb subselect optimization
+			':limit' => PHP_INT_MAX,
+			//Delay
+			':guestdelay' => self::GUEST_DELAY * 24 * 3600,
+			':regulardelay' => self::REGULAR_DELAY * 24 * 3600,
+			':seniordelay' => self::SENIOR_DELAY * 24 * 3600,
+			//Group
+			':guestid' => 2,
+			':regularid' => 3,
+			':seniorid' => 4,
+			//Slot
+			':afternoonid' => 2,
+			':eveningid' => 3,
+			':afterid' => 4,
+			//XXX: days since last session after which guest regain normal priority
+			':guestwait' => 30,
+			//XXX: session count until considered at regular delay
+			':scount' => 5,
+			//XXX: pn_ratio over which considered at regular delay
+			':pnratio' => 1,
+			//XXX: tr_ratio diff over which considered at regular delay
+			':trdiff' => 5,
 			"\t" => '',
 			"\n" => ' '
 		];
 
 		/**
-		 * Query session applications ranked by score, created and user_id
+		 * Query session applications ranked by location score, global score, created and user_id
 		 *
-		 * @xxx User with bad behaviour application are excluded until remaining <= baddelay:
-		 * - with (count(premium = 1)+1)/(count(premium = 0)+1) >= 1
-		 * - with count(sessions) <= 5
-		 * - with average(temperature) >= average(temperature other) + 10
+		 * @xxx guest (or less) with application on location within 30 day are only considered within guestdelay
 		 *
-		 * @xxx Magic happen on this line:
-		 * WHERE IF(d.pnp_rate >= 1, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.s_count <= 5, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.tr_rate >= (d.otr_rate + 10), d.remaining <= SEC_TO_TIME(:baddelay), 1)
+		 * @xxx regular (or less) premium application on hotspot are only considered within regulardelay
 		 *
-		 * @todo Limit score on last year only ???
-		 * AND DATEDIFF(s.date, NOW()) <= 365
+		 * @xxx senior (or less) with 5 or less session on location are only considered within seniordelay
 		 *
-		 * TODO: we may add ADDDATE(start, INTERVAL IF(s.slot_id = 4, 1, 0) DAY) used for after specificity
+		 * @xxx senior (or less) with l_pn_ratio >= 1 are only considered within seniordelay
+		 *
+		 * @xxx senior (or less) with l_tr_ratio >= (o_tr_ratio + 5) are only considered within seniordelay
+		 *
+		 * @xxx only consider session within one year (may be unaccurate by the day with after session)
+		 *
+		 * @xxx rainfall may not be accessible for previous session and other session at d-4 (only at d-2)
+		 *
+		 * @todo ??? feedback the data to inform the rejected users ???
 		 */
 		$req = <<<SQL
-SELECT d.id, d.score
+SELECT e.id, e.l_score AS score
 FROM (
 	SELECT
-		c.id,
-		c.session_id,
-		c.user_id,
-		c.score,
-		c.remaining,
-		c.created,
-		c.s_count,
-		c.tr_rate,
-		AVG(IF(a4.id IS NOT NULL, s4.temperature/(1+s4.rainfall), NULL)) AS otr_rate,
-		c.pnp_rate
+		d.id,
+		d.user_id,
+		d.l_count,
+		d.l_score,
+		d.l_tr_ratio,
+		d.l_pn_ratio,
+		d.l_previous,
+		d.g_score,
+		d.o_tr_ratio,
+		MAX(gu.group_id) AS group_id,
+		d.remaining,
+		d.premium,
+		d.hotspot,
+		d.created
 	FROM (
 		SELECT
-			b.id,
-			b.session_id,
-			b.user_id,
-			b.score,
-			b.remaining,
-			b.created,
-			COUNT(a3.id) AS s_count,
-			AVG(IF(a3.id IS NOT NULL AND s3.temperature IS NOT NULL AND s3.rainfall IS NOT NULL, s3.temperature/(1+s3.rainfall), NULL)) AS tr_rate,
-			(SUM(IF(a3.id IS NOT NULL AND s3.premium = 1, 1, 0))+1)/(SUM(IF(a3.id IS NOT NULL AND s3.premium = 0, 1, 0))+1) AS pnp_rate
+			c.id,
+			c.user_id,
+			c.l_count,
+			c.l_score,
+			c.l_tr_ratio,
+			c.l_pn_ratio,
+			c.l_previous,
+			c.g_score,
+			AVG(IF(a4.id IS NOT NULL AND s4.temperature IS NOT NULL AND s4.rainfall IS NOT NULL, s4.temperature/(1+s4.rainfall), NULL)) AS o_tr_ratio,
+			c.remaining,
+			c.premium,
+			c.hotspot,
+			c.created
 		FROM (
 			SELECT
-				a.id,
-				s.id AS session_id,
-				a.user_id,
-				SUM(IF(a2.id IS NOT NULL, 1/ABS(DATEDIFF(s.date, s2.date)), 0)) AS score,
-				TIMEDIFF(ADDTIME(s.date, s.begin), NOW()) AS remaining,
-				a.created
-			FROM sessions AS s
-			JOIN applications AS a ON (a.session_id = s.id AND a.canceled IS NULL)
-			LEFT JOIN sessions AS s2 ON (s2.id != s.id AND s2.location_id = s.location_id AND s2.slot_id = s.slot_id AND s2.application_id IS NOT NULL)
-			LEFT JOIN applications AS a2 ON (a2.id = s2.application_id AND a2.user_id = a.user_id AND (a2.canceled IS NULL OR TIMESTAMPDIFF(DAY, a2.canceled, ADDTIME(s2.date, s2.begin)) < 1))
-			WHERE s.id = :sid
-			GROUP BY a.id
+				b.id,
+				b.user_id,
+				b.session_id,
+				b.date,
+				b.location_id,
+				b.l_count,
+				b.l_score,
+				b.l_tr_ratio,
+				b.l_pn_ratio,
+				b.l_previous,
+				SUM(IF(a3.id IS NOT NULL, 1/ABS(DATEDIFF(ADDDATE(b.date, INTERVAL IF(b.slot_id = :afterid, 1, 0) DAY), ADDDATE(s3.date, INTERVAL IF(s3.slot_id = :afterid, 1, 0) DAY))), 0)) AS g_score,
+				b.remaining,
+				b.premium,
+				b.hotspot,
+				b.created
+			FROM (
+				SELECT
+					a.id,
+					a.user_id,
+					s.id AS session_id,
+					s.date AS date,
+					s.slot_id,
+					s.location_id,
+					COUNT(a2.id) AS l_count,
+					SUM(IF(a2.id IS NOT NULL, 1/ABS(DATEDIFF(ADDDATE(s.date, INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), ADDDATE(s2.date, INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY))), 0)) AS l_score,
+					AVG(IF(a2.id IS NOT NULL AND s2.temperature IS NOT NULL AND s2.rainfall IS NOT NULL, s2.temperature/(1+s2.rainfall), NULL)) AS l_tr_ratio,
+					(SUM(IF(a2.id IS NOT NULL AND s2.premium = 1, 1, 0))+1)/(SUM(IF(a2.id IS NOT NULL AND s2.premium = 0, 1, 0))+1) AS l_pn_ratio,
+					MIN(IF(a2.id IS NOT NULL, DATEDIFF(ADDDATE(s.date, INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), ADDDATE(s2.date, INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY)), NULL)) AS l_previous,
+					TIME_TO_SEC(TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), NOW())) AS remaining,
+					s.premium,
+					l.hotspot,
+					a.created
+				FROM RapsysAirBundle:Session AS s
+				JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+				JOIN RapsysAirBundle:Application AS a ON (a.session_id = s.id AND a.canceled IS NULL)
+				LEFT JOIN RapsysAirBundle:Session AS s2 ON (s2.id != s.id AND s2.location_id = s.location_id AND s2.slot_id IN (:afternoonid, :eveningid) AND s2.application_id IS NOT NULL AND s2.locked IS NULL AND s2.date > s.date - INTERVAL 1 YEAR)
+				LEFT JOIN RapsysAirBundle:Application AS a2 ON (a2.id = s2.application_id AND a2.user_id = a.user_id AND (a2.canceled IS NULL OR TIMESTAMPDIFF(DAY, a2.canceled, ADDDATE(ADDTIME(s2.date, s2.begin), INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY)) < 1))
+				WHERE s.id = :sid
+				GROUP BY a.id
+				ORDER BY NULL
+				LIMIT 0, :limit
+			) AS b
+			LEFT JOIN RapsysAirBundle:Session AS s3 ON (s3.id != b.session_id AND s3.application_id IS NOT NULL AND s3.locked IS NULL AND s3.date > b.date - INTERVAL 1 YEAR)
+			LEFT JOIN RapsysAirBundle:Application AS a3 ON (a3.id = s3.application_id AND a3.user_id = b.user_id AND (a3.canceled IS NULL OR TIMESTAMPDIFF(DAY, a3.canceled, ADDDATE(ADDTIME(s3.date, s3.begin), INTERVAL IF(s3.slot_id = :afterid, 1, 0) DAY)) < 1))
+			GROUP BY b.id
 			ORDER BY NULL
 			LIMIT 0, :limit
-		) AS b
-		LEFT JOIN sessions AS s3 ON (s3.id != b.session_id AND s3.application_id IS NOT NULL)
-		LEFT JOIN applications AS a3 ON (a3.id = s3.application_id AND a3.user_id = b.user_id AND (a3.canceled IS NULL OR TIMESTAMPDIFF(DAY, a3.canceled, ADDTIME(s3.date, s3.begin)) < 1))
-		GROUP BY b.id
+		) AS c
+		LEFT JOIN RapsysAirBundle:Session AS s4 ON (s4.id != c.session_id AND s4.location_id = c.location_id AND s4.application_id IS NOT NULL AND s4.locked IS NULL AND s4.date > c.date - INTERVAL 1 YEAR)
+		LEFT JOIN RapsysAirBundle:Application AS a4 ON (a4.id = s4.application_id AND a4.user_id != c.user_id AND (a4.canceled IS NULL OR TIMESTAMPDIFF(DAY, a4.canceled, ADDDATE(ADDTIME(s4.date, s4.begin), INTERVAL IF(s4.slot_id = :afterid, 1, 0) DAY)) < 1))
+		GROUP BY c.id
 		ORDER BY NULL
 		LIMIT 0, :limit
-	) AS c
-	LEFT JOIN sessions AS s4 ON (s4.id != c.session_id AND s4.application_id IS NOT NULL AND s4.temperature IS NOT NULL AND s4.rainfall IS NOT NULL)
-	LEFT JOIN applications AS a4 ON (a4.id = s4.application_id AND a4.user_id != c.user_id AND (a4.canceled IS NULL OR TIMESTAMPDIFF(DAY, a4.canceled, ADDTIME(s4.date, s4.begin)) < 1))
-	GROUP BY c.id
-	ORDER BY NULL
+	) AS d
+	LEFT JOIN RapsysAirBundle:GroupUser AS gu ON (gu.user_id = d.user_id)
+	GROUP BY d.id
 	LIMIT 0, :limit
-) AS d
-WHERE IF(d.pnp_rate >= 1, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.s_count <= 5, d.remaining <= SEC_TO_TIME(:baddelay), 1) AND IF(d.tr_rate >= (d.otr_rate + 10), d.remaining <= SEC_TO_TIME(:baddelay), 1)
-ORDER BY d.score ASC, d.created ASC, d.user_id ASC
+) AS e
+WHERE
+	IF(e.group_id <= :guestid AND e.l_previous <= :guestwait, e.remaining <= :guestdelay, 1) AND
+	IF(e.group_id <= :regularid AND e.premium = 1 AND e.hotspot = 1, e.remaining <= :regulardelay, 1) AND
+	IF(e.group_id <= :seniorid AND e.l_count <= :scount, e.remaining <= :regulardelay, 1) AND
+	IF(e.group_id <= :seniorid AND e.l_pn_ratio >= :pnratio, e.remaining <= :regulardelay, 1) AND
+	IF(e.group_id <= :seniorid AND e.l_tr_ratio >= (e.o_tr_ratio + :trdiff), e.remaining <= :regulardelay, 1)
+ORDER BY e.l_score ASC, e.g_score ASC, e.created ASC, e.user_id ASC
 SQL;
 
 		//Replace bundle entity name by table name
@@ -1080,8 +1163,6 @@ SQL;
 		$applications = $em
 			->createNativeQuery($req, $rsm)
 			->setParameter('sid', $id)
-			->setParameter('baddelay', self::BAD_DELAY*24*3600)
-			->setParameter('limit', PHP_INT_MAX)
 			//XXX: removed, we update score before returning best candidate
 			//->getOneOrNullResult(Query::HYDRATE_SINGLE_SCALAR);
 			->getResult();
