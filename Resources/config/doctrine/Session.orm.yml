@@ -75,6 +75,9 @@ Rapsys\AirBundle\Entity\Session:
         #XXX: used in SessionRepository::findBestApplicationById(s3)
         application_locked_date_begin_slot_created:
             columns: [ application_id, locked, date, begin, slot_id, created ]
+        #XXX: candidated in findAllPendingDailyWeather and findAllPendingHourlyWeather
+        location_date_begin_length_slot:
+            columns: [ location_id, date, begin, length, slot_id ]
 #        #XXX: tried for SessionRepository::findBestApplicationById(s2)
 #        location_slot_application_locked_date_begin:
 #            columns: [ location_id, slot_id, application_id, locked, date ]
