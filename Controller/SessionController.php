@@ -70,13 +70,15 @@ class SessionController extends DefaultController {
 			//Set length
 			'length' => $session['length'],
 			//Set raincancel
-			'raincancel' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['rainfall'] >= 2,
+			'raincancel' => ($this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id']) && $session['rainfall'] >= 2,
 			//Set cancel
 			'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $session['sau_id'])),
 			//Set modify
 			'modify' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
 			//Set move
 			'move' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
+			//Set attribute
+			'attribute' => $this->isGranted('ROLE_ADMIN') && $session['locked'] === null,
 			//Set session
 			'session' => $session['id']
 		]);
@@ -127,49 +129,53 @@ class SessionController extends DefaultController {
 		//Set datetime
 		$datetime = new \DateTime('now');
 
-		//With raincancel
-		if ($form->has('raincancel') && $form->get('raincancel')->isClicked()) {
-			//Check rainfall
-			if ($this->isGranted('ROLE_ADMIN') || $session->getRainfall() >= 2) {
-				//Check that application is attributed
-				if (!empty($application = $session->getApplication())) {
-					//Get application
-					$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $application->getUser());
+		//Set canceled time at start minus one day
+		$canceled = (clone $session->getStart())->sub(new \DateInterval('P1D'));
 
-					//Set canceled time at start minus one day
-					$canceled = (clone $session->getStart())->sub(new \DateInterval('P1D'));
+		//Set action
+		$action = [
+			'raincancel' => $form->has('raincancel') && $form->get('raincancel')->isClicked(),
+			'modify' => $form->has('modify') && $form->get('modify')->isClicked(),
+			'move' => $form->has('move') && $form->get('move')->isClicked(),
+			'cancel' => $form->has('cancel') && $form->get('cancel')->isClicked(),
+			'forcecancel' => $form->has('forcecancel') && $form->get('forcecancel')->isClicked(),
+			'attribute' => $form->has('attribute') && $form->get('attribute')->isClicked(),
+			'autoattribute' => $form->has('autoattribute') && $form->get('autoattribute')->isClicked(),
+			'lock' => $form->has('lock') && $form->get('lock')->isClicked(),
+		];
 
-					//Cancel application
-					$application->setCanceled($canceled);
+		//With raincancel and application and (rainfall or admin)
+		if ($action['raincancel'] && ($application = $session->getApplication()) && ($session->getRainfall() >= 2 || $this->isGranted('ROLE_ADMIN'))) {
+			//Cancel application at start minus one day
+			$application->setCanceled($canceled);
 
-					//Update time
-					$application->setUpdated($datetime);
+			//Update time
+			$application->setUpdated($datetime);
 
-					//Queue application save
-					$manager->persist($application);
-
-					//Add notice in flash message
-					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-					//Update time
-					$session->setUpdated($datetime);
-
-					//Queue session save
-					$manager->persist($session);
-
-					//Add notice in flash message
-					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-				//Not attributed
-				} else {
-					//Add notice in flash message
-					$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
-				}
-			//Not enough rainfall
-			} else {
-				//Add notice in flash message
-				$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
+			//Insufficient rainfall
+			//XXX: is admin
+			if ($session->getRainfall() < 2) {
+				//Set score
+				//XXX: magic cheat score 42
+				$application->setScore(42);
 			}
+
+			//Queue application save
+			$manager->persist($application);
+
+			//Add notice in flash message
+			$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+
+			//Update time
+			$session->setUpdated($datetime);
+
+			//Queue session save
+			$manager->persist($session);
+
+			//Add notice in flash message
+			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
 		//With modify
-		} elseif ($form->has('modify') && $form->get('modify')->isClicked()) {
+		} elseif ($action['modify']) {
 			//Set begin
 			$session->setBegin($data['begin']);
 
@@ -185,7 +191,7 @@ class SessionController extends DefaultController {
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
 		//With move
-		} elseif ($form->has('move') && $form->get('move')->isClicked()) {
+		} elseif ($action['move']) {
 			//Set location
 			$session->setLocation($doctrine->getRepository(Location::class)->findOneById($data['location']));
 
@@ -197,8 +203,8 @@ class SessionController extends DefaultController {
 
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//With cancel
-		} elseif ($form->has('cancel') && $form->get('cancel')->isClicked()) {
+		//With cancel or forcecancel
+		} elseif ($action['cancel'] || $action['forcecancel']) {
 			//Get application
 			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
@@ -207,8 +213,13 @@ class SessionController extends DefaultController {
 				//Cancel application
 				$application->setCanceled($datetime);
 
-				//Check if application is session application
-				if ($session->getApplication() == $application) {
+				//Check if application is session application and (canceled 24h before start or forcecancel (as admin))
+				#if ($session->getApplication() == $application && ($datetime < $canceled || $action['forcecancel'])) {
+				if ($session->getApplication() == $application && $action['forcecancel']) {
+					//Set score
+					//XXX: magic cheat score 42
+					$application->setScore(42);
+
 					//Unattribute session
 					$session->setApplication(null);
 
@@ -236,7 +247,7 @@ class SessionController extends DefaultController {
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
 		//With attribute
-		} elseif ($form->has('attribute') && $form->get('attribute')->isClicked()) {
+		} elseif ($action['attribute']) {
 			//Get application
 			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
@@ -271,7 +282,7 @@ class SessionController extends DefaultController {
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
 		//With autoattribute
-		} elseif ($form->has('autoattribute') && $form->get('autoattribute')->isClicked()) {
+		} elseif ($action['autoattribute']) {
 			//Get best application
 			//XXX: best application may not issue result while grace time or bad behaviour
 			if (!empty($application = $doctrine->getRepository(Session::class)->findBestApplicationById($id))) {
@@ -285,14 +296,14 @@ class SessionController extends DefaultController {
 				$manager->persist($session);
 
 				//Add notice in flash message
-				$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				$this->addFlash('notice', $this->translator->trans('Session %id% auto attributed', ['%id%' => $id]));
 			//No application
 			} else {
 				//Add notice in flash message
-				$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
+				$this->addFlash('warning', $this->translator->trans('Session %id% not auto attributed', ['%id%' => $id]));
 			}
 		//With lock
-		} elseif ($form->has('lock') && $form->get('lock')->isClicked()) {
+		} elseif ($action['lock']) {
 			//Already locked
 			if ($session->getLocked() !== null) {
 				//Set uncanceled
@@ -302,25 +313,11 @@ class SessionController extends DefaultController {
 				$session->setLocked(null);
 			//Not locked
 			} else {
-				//Set canceled time at start minus one day
-				$canceled = (clone $session->getStart())->sub(new \DateInterval('P1D'));
-
-				//Unattribute session
-				$session->setApplication(null);
-
-				//Lock session
-				$session->setLocked($datetime);
-			}
-
-			//Get applications
-			$applications = $doctrine->getRepository(Application::class)->findBySession($session);
-
-			//Not empty
-			if (!empty($applications)) {
-				//Iterate on each applications
-				foreach($applications as $application) {
-					//Cancel application
-					$application->setCanceled($canceled);
+				//Get application
+				if ($application = $session->getApplication()) {
+					//Set score
+					//XXX: magic cheat score 42
+					$application->setScore(42);
 
 					//Update time
 					$application->setUpdated($datetime);
@@ -331,7 +328,34 @@ class SessionController extends DefaultController {
 					//Add notice in flash message
 					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
 				}
+
+				//Unattribute session
+				$session->setApplication(null);
+
+				//Lock session
+				$session->setLocked($datetime);
 			}
+
+#			//Get applications
+#			$applications = $doctrine->getRepository(Application::class)->findBySession($session);
+#
+#			//Not empty
+#			if (!empty($applications)) {
+#				//Iterate on each applications
+#				foreach($applications as $application) {
+#					//Cancel application
+#					$application->setCanceled($canceled);
+#
+#					//Update time
+#					$application->setUpdated($datetime);
+#
+#					//Queue application save
+#					$manager->persist($application);
+#
+#					//Add notice in flash message
+#					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+#				}
+#			}
 
 			//Update time
 			$session->setUpdated($datetime);
@@ -341,6 +365,10 @@ class SessionController extends DefaultController {
 
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+		//Unknown action
+		} else {
+			//Add notice in flash message
+			$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
 		}
 
 		//Flush to get the ids
@@ -385,7 +413,7 @@ class SessionController extends DefaultController {
 				unset($route['_route'], $route['_controller']);
 
 				//Generate url
-				return $this->redirectToRoute($name, ['session' => $id]+$route);
+				return $this->redirectToRoute($name, $route);
 			//No route matched
 			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
 				//Unset referer to fallback to default route
@@ -395,273 +423,6 @@ class SessionController extends DefaultController {
 
 		//Redirect to cleanup the form
 		return $this->redirectToRoute('rapsys_air_session_view', ['id' => $id]);
-
-		//Protect session fetching
-		try {
-			//Fetch session
-			$session = $doctrine->getRepository(Session::class)->findOneById($id);
-
-			//Fetch session
-			$session = $doctrine->getRepository(Session::class)->findOneByLocationSlotDate($data['location'], $data['slot'], $data['date']);
-		//Catch no session case
-		} catch (\Doctrine\ORM\NoResultException $e) {
-			//Create the session
-			$session = new Session();
-			$session->setLocation($data['location']);
-			$session->setDate($data['date']);
-			$session->setSlot($data['slot']);
-			$session->setCreated(new \DateTime('now'));
-			$session->setUpdated(new \DateTime('now'));
-
-			//Get short location
-			$short = $data['location']->getShort();
-
-			//Get slot
-			$slot = $data['slot']->getTitle();
-
-			//Set premium
-			$session->setPremium($premium = false);
-
-			//Check if slot is afternoon
-			//XXX: premium is stored only for Afternoon and Evening
-			if ($slot == 'Afternoon') {
-				//Compute premium
-				//XXX: a session is considered premium a day off
-				$session->setPremium($premium = $this->isPremium($data['date']));
-			//Check if slot is evening
-			//XXX: premium is stored only for Afternoon and Evening
-			} elseif ($slot == 'Evening') {
-				//Compute premium
-				//XXX: a session is considered premium the eve of a day off
-				$session->setPremium($premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D'))));
-			//Check if slot is after
-			} elseif ($slot == 'After') {
-				//Compute premium
-				//XXX: a session is considered premium the eve of a day off
-				$premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D')));
-			}
-
-			//Set default length at 6h
-			//XXX: date part will be truncated on save
-			$session->setLength(new \DateTime('06:00:00'));
-
-			//Check if admin
-			if ($this->isGranted('ROLE_ADMIN')) {
-				//Check if morning
-				if ($slot == 'Morning') {
-					//Set begin at 9h
-					$session->setBegin(new \DateTime('09:00:00'));
-
-					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
-				//Check if afternoon
-				} elseif ($slot == 'Afternoon') {
-					//Set begin at 14h
-					$session->setBegin(new \DateTime('14:00:00'));
-
-					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
-				//Check if evening
-				} elseif ($slot == 'Evening') {
-					//Set begin at 19h
-					$session->setBegin(new \DateTime('19:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set length at 7h
-						$session->setLength(new \DateTime('07:00:00'));
-					}
-				//Check if after
-				} else {
-					//Set begin at 1h
-					$session->setBegin(new \DateTime('01:00:00'));
-
-					//Set length at 4h
-					$session->setLength(new \DateTime('04:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set begin at 2h
-						$session->setBegin(new \DateTime('02:00:00'));
-
-						//Set length at 3h
-						$session->setLength(new \DateTime('03:00:00'));
-					}
-				}
-			//Docks => 14h -> 19h | 19h -> 01/02h
-			//XXX: remove Garnier from here to switch back to 21h
-			} elseif (in_array($short, ['Docks', 'Garnier']) && in_array($slot, ['Afternoon', 'Evening', 'After'])) {
-				//Check if afternoon
-				if ($slot == 'Afternoon') {
-					//Set begin at 14h
-					$session->setBegin(new \DateTime('14:00:00'));
-
-					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
-				//Check if evening
-				} elseif ($slot == 'Evening') {
-					//Set begin at 19h
-					$session->setBegin(new \DateTime('19:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set length at 7h
-						$session->setLength(new \DateTime('07:00:00'));
-					}
-				//Check if after
-				} else {
-					//Set begin at 1h
-					$session->setBegin(new \DateTime('01:00:00'));
-
-					//Set length at 4h
-					$session->setLength(new \DateTime('04:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set begin at 2h
-						$session->setBegin(new \DateTime('02:00:00'));
-
-						//Set length at 3h
-						$session->setLength(new \DateTime('03:00:00'));
-					}
-				}
-			//Garnier => 21h -> 01/02h
-			} elseif ($short == 'Garnier' && in_array($slot, ['Evening', 'After'])) {
-				//Check if evening
-				if ($slot == 'Evening') {
-					//Set begin at 21h
-					$session->setBegin(new \DateTime('21:00:00'));
-
-					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set length at 6h
-						$session->setLength(new \DateTime('06:00:00'));
-					}
-				//Check if after
-				} else {
-					//Set begin at 1h
-					$session->setBegin(new \DateTime('01:00:00'));
-
-					//Set length at 4h
-					$session->setLength(new \DateTime('04:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set begin at 2h
-						$session->setBegin(new \DateTime('02:00:00'));
-
-						//Set length at 3h
-						$session->setLength(new \DateTime('03:00:00'));
-					}
-				}
-			//Trocadero|Tokyo|Swan|Honore|Orsay => 19h -> 01/02h
-			} elseif (in_array($short, ['Trocadero', 'Tokyo', 'Swan', 'Honore', 'Orsay']) && in_array($slot, ['Evening', 'After'])) {
-				//Check if evening
-				if ($slot == 'Evening') {
-					//Set begin at 19h
-					$session->setBegin(new \DateTime('19:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set length at 7h
-						$session->setLength(new \DateTime('07:00:00'));
-					}
-				//Check if after
-				} else {
-					//Set begin at 1h
-					$session->setBegin(new \DateTime('01:00:00'));
-
-					//Set length at 4h
-					$session->setLength(new \DateTime('04:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set begin at 2h
-						$session->setBegin(new \DateTime('02:00:00'));
-
-						//Set length at 3h
-						$session->setLength(new \DateTime('03:00:00'));
-					}
-				}
-			//La Villette => 14h -> 19h
-			} elseif ($short == 'Villette' && $slot == 'Afternoon') {
-				//Set begin at 14h
-				$session->setBegin(new \DateTime('14:00:00'));
-
-				//Set length at 5h
-				$session->setLength(new \DateTime('05:00:00'));
-			//Place Colette => 14h -> 21h
-			//TODO: add check here that it's a millegaux account ?
-			} elseif ($short == 'Colette' && $slot == 'Afternoon') {
-				//Set begin at 14h
-				$session->setBegin(new \DateTime('14:00:00'));
-
-				//Set length at 7h
-				$session->setLength(new \DateTime('07:00:00'));
-			//Galerie d'Orléans => 14h -> 18h
-			} elseif ($short == 'Orleans' && $slot == 'Afternoon') {
-				//Set begin at 14h
-				$session->setBegin(new \DateTime('14:00:00'));
-
-				//Set length at 4h
-				$session->setLength(new \DateTime('04:00:00'));
-			//Combination not supported
-			} else {
-				//Add error in flash message
-				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-			}
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Flush to get the ids
-			#$manager->flush();
-
-			$this->addFlash('notice', $this->translator->trans('Session on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-		}
-
-		//Set user
-		$user = $this->getUser();
-
-		//Replace with requested user for admin
-		if ($this->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
-			$user = $this->getDoctrine()->getRepository(User::class)->findOneById($data['user']);
-		}
-
-		//Protect application fetching
-		try {
-			//Retrieve application
-			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
-
-			//Add warning in flash message
-			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-		//Catch no application and session without identifier (not persisted&flushed) cases
-		} catch (\Doctrine\ORM\NoResultException|\Doctrine\ORM\ORMInvalidArgumentException $e) {
-			//Create the application
-			$application = new Application();
-			$application->setSession($session);
-			$application->setUser($user);
-			$application->setCreated(new \DateTime('now'));
-			$application->setUpdated(new \DateTime('now'));
-
-			//Refresh session updated field
-			$session->setUpdated(new \DateTime('now'));
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Queue application save
-			$manager->persist($application);
-
-			//Flush to get the ids
-			$manager->flush();
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-		}
 	}
 
 	/**
@@ -806,13 +567,15 @@ class SessionController extends DefaultController {
 				//Set length
 				'length' => $session['length'],
 				//Set raincancel
-				'raincancel' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['rainfall'] >= 2,
+				'raincancel' => ($this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id']) && $session['rainfall'] >= 2,
 				//Set cancel
 				'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $session['sau_id'])),
 				//Set modify
 				'modify' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
 				//Set move
 				'move' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
+				//Set attribute
+				'attribute' => $this->isGranted('ROLE_ADMIN') && $session['locked'] === null,
 				//Set session
 				'session' => $session['id']
 			]);
