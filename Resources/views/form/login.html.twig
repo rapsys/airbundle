@@ -1,15 +1,16 @@
 {% extends '@RapsysAir/body.html.twig' %}
+{% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
 		{{ form_start(login) }}
-			<section>
+			<div>
 				{{ form_row(login.mail) }}
 
 				{{ form_row(login.password) }}
 
 				{{ form_row(login.submit) }}
-			</section>
+			</div>
 
 			{# Render CSRF token etc .#}
 			<footer style="display:none">{{ form_rest(login) }}</footer>

@@ -1,4 +1,5 @@
 {% extends '@RapsysAir/body.html.twig' %}
+{% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a></h2>
@@ -22,6 +23,10 @@
 					{{ form_row(form.pseudonym) }}
 
 					{{ form_row(form.phone) }}
+
+					{{ form_row(form.donation) }}
+
+					{{ form_row(form.site) }}
 
 					{{ form_row(form.submit) }}
 				</div>

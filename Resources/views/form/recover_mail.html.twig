@@ -1,4 +1,5 @@
 {% extends '@RapsysAir/body.html.twig' %}
+{% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
 	<section id="form">
 		<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
@@ -7,20 +8,16 @@
 		{% elseif not found %}
 			<p class="message error">{% trans %}Unable to find account{% endtrans %}</p>
 		{% else %}
-			<section>
-				{{ form_start(form) }}
-					<section>
-						{{ form_row(form.password) }}
-					</section>
+			{{ form_start(form) }}
+				<div>
+					{{ form_row(form.password) }}
 
 					{{ form_row(form.submit) }}
+				</div>
 
-					{# Render CSRF token etc .#}
-					<footer style="display:none">
-						{{ form_rest(form) }}
-					</footer>
-				{{ form_end(form) }}
-			</section>
+				{# Render CSRF token etc .#}
+				<footer style="display:none">{{ form_rest(form) }}</footer>
+			{{ form_end(form) }}
 		{% endif %}
 	</section>
 {% endblock %}
