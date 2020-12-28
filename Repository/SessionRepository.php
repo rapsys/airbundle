@@ -146,9 +146,10 @@ SQL;
 	 * Fetch session by id
 	 *
 	 * @param $id The session id
+	 * @param $locale The locale
 	 * @return array The session data
 	 */
-	public function fetchOneById($id) {
+	public function fetchOneById($id, $locale = null) {
 		//Get entity manager
 		$em = $this->getEntityManager();
 
@@ -159,11 +160,12 @@ SQL;
 		//Get quoted table names
 		//XXX: this allow to make this code table name independent
 		$tables = [
-			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
-			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
 			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
+			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			//Delay
@@ -207,6 +209,10 @@ SELECT
 	s.application_id AS a_id,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
+	au.donation AS au_donation,
+	au.site AS au_site,
+	p.id AS p_id,
+	p.description AS p_description,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
 	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
@@ -219,6 +225,7 @@ JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
 LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 WHERE s.id = :sid
@@ -265,6 +272,10 @@ SQL;
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			->addScalarResult('au_donation', 'au_donation', 'string')
+			->addScalarResult('au_site', 'au_site', 'string')
+			->addScalarResult('p_id', 'p_id', 'integer')
+			->addScalarResult('p_description', 'p_description', 'text')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sa_id', 'sa_id', 'string')
 			//XXX: is a string because of \n separator
@@ -285,6 +296,7 @@ SQL;
 		return $em
 			->createNativeQuery($req, $rsm)
 			->setParameter('sid', $id)
+			->setParameter('locale', $locale)
 			->getOneOrNullResult();
 	}
 
@@ -330,7 +342,7 @@ SQL;
 			LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 			LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 			WHERE s.date BETWEEN :begin AND :end
-			'.($locationId?'AND s.location_id = :lid':'').'
+			'.(!empty($locationId)?'AND s.location_id = :lid':'').'
 			GROUP BY s.id
 			ORDER BY NULL';
 
@@ -368,9 +380,15 @@ SQL;
 		$res = $em
 			->createNativeQuery($req, $rsm)
 			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->setParameter('lid', $locationId)
-			->getResult();
+			->setParameter('end', $period->getEndDate());
+
+		//Add optional location id
+		if (!empty($locationId)) {
+			$res->setParameter('lid', $locationId);
+		}
+
+		//Get result
+		$res = $res->getResult();
 
 		//Init calendar
 		$calendar = [];
