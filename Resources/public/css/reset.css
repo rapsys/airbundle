@@ -5,11 +5,14 @@ dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody,
 tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure,
 figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,
 time, mark, audio, video, input, textarea, button, select, option, optgroup {
+	border: 0;
+	font-family: inherit;
+	font-size: inherit;
+	font-stretch: inherit;
+	font-style: inherit;
+	line-height: inherit;
 	margin: 0;
 	padding: 0;
-	border: 0;
-	font-size: 100%;
-	font: inherit;
 	vertical-align: baseline;
 }
 
