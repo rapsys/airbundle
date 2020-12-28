@@ -28,11 +28,6 @@ class ApplicationController extends DefaultController {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
-		//Reject non post requests
-		if (!$request->isMethod('POST')) {
-			throw new \RuntimeException('Request method MUST be POST');
-		}
-
 		//Create ApplicationType form
 		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
 			//Set the action
@@ -52,12 +47,12 @@ class ApplicationController extends DefaultController {
 		$form->handleRequest($request);
 
 		//Handle invalid form
-		if (!$form->isValid()) {
+		if (!$form->isSubmitted() || !$form->isValid()) {
 			//Set section
 			$section = $this->translator->trans('Application add');
 
 			//Set title
-			$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+			$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 			//Render the view
 			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
@@ -290,7 +285,7 @@ class ApplicationController extends DefaultController {
 				$section = $this->translator->trans('Application add');
 
 				//Set title
-				$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+				$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 				//Render the view
 				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
@@ -305,7 +300,7 @@ class ApplicationController extends DefaultController {
 				$section = $this->translator->trans('Application add');
 
 				//Set title
-				$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+				$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 				//Render the view
 				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
