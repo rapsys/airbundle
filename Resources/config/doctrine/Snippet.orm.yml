@@ -1,0 +1,35 @@
+Rapsys\AirBundle\Entity\Snippet:
+    type: entity
+    repositoryClass: Rapsys\AirBundle\Repository\SnippetRepository
+    table: snippets
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        locale:
+            type: string
+            length: 2
+        description:
+            type: text
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    manyToOne:
+        location:
+            targetEntity: Rapsys\AirBundle\Entity\Location
+            inversedBy: snippets
+        user:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            inversedBy: snippets
+    indexes:
+        #XXX: may be used in SnippetRepository::findByLocaleUserId
+        locale_user:
+            columns: [ locale, user_id ]
+    uniqueConstraints:
+        locale_location_user:
+            columns: [ locale, location_id, user_id ]
