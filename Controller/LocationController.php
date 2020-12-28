@@ -23,13 +23,15 @@ class LocationController extends DefaultController {
 		$doctrine = $this->getDoctrine();
 
 		//Fetch location
-		$location = $doctrine->getRepository(Location::class)->findOneById($id);
+		if (empty($location = $doctrine->getRepository(Location::class)->findOneById($id))) {
+			throw $this->createNotFoundException($this->translator->trans('Unable to find location: %id%', ['%id%' => $id]));
+		}
 
 		//Set section
-		$section = $this->translator->trans($location);
+		$section = $this->translator->trans('Argentine Tango at '.$location);
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Init context
 		$context = [];
@@ -84,7 +86,7 @@ class LocationController extends DefaultController {
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
+		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
 
 		//Render the view
 		return $this->render('@RapsysAir/location/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
