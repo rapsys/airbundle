@@ -36,6 +36,25 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		//Set translator fallbacks
 		$container->setParameter('kernel.translator.fallbacks', $framework['translator']['fallbacks']);
 
+		//Set default locale
+		$container->setParameter('kernel.default_locale', $framework['default_locale']);
+
+		//Load rapsys_user configurations
+		//XXX: required to extract default_locale and translation.fallbacks
+		$rapsys_users = $container->getExtensionConfig('rapsys_user');
+
+		//Recursively merge rapsys_user configurations
+		$rapsys_user = array_reduce(
+			$rapsys_users,
+			function ($res, $i) {
+				return array_merge_recursive($res, $i);
+			},
+			[]
+		);
+
+		//Set rapsys_user.languages key
+		$container->setParameter('rapsys_user.languages', $rapsys_user['languages']);
+
 		//Process the configuration
 		$configs = $container->getExtensionConfig($this->getAlias());
 
@@ -56,7 +75,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 
 		//Store flattened array in parameters
 		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
-		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png', 'rapsys_air.locales']) as $k => $v) {
+		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
 	}
