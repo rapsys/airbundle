@@ -28,11 +28,53 @@ class LocationRepository extends \Doctrine\ORM\EntityRepository {
 	}
 
 	/**
-	 * Fetch translated location with session by date period
+	 * Find translated location title sorted by date period
 	 *
 	 * @param $translator The TranslatorInterface instance
 	 * @param $period The date period
 	 * @param $granted The session is granted
+	 */
+	public function findTranslatedSortedByPeriod(TranslatorInterface $translator, $period, $userId = null) {
+		//Fetch sessions
+		$ret = $this->getEntityManager()
+			->createQuery(
+'SELECT l.id, l.title
+FROM RapsysAirBundle:Location l
+LEFT JOIN RapsysAirBundle:Session s WITH s.location = l.id AND s.date BETWEEN :begin AND :end
+LEFT JOIN RapsysAirBundle:Application a WITH a.id = s.application'.(!empty($userId)?' AND a.user = :uid':'').'
+GROUP BY l.id
+ORDER BY '.(!empty($userId)?'COUNT(a.id) DESC, ':'').'COUNT(s.id) DESC, l.id'
+			)
+			->setParameter('begin', $period->getStartDate())
+			->setParameter('end', $period->getEndDate());
+
+		//Set optional user id
+		if (!empty($userId)) {
+			$ret->setParameter('uid', $userId);
+		}
+
+		//Get Result
+		$ret = $ret->getResult();
+
+		//Rekey array
+		$ret = array_column($ret, 'title', 'id');
+
+		//Filter array
+		foreach($ret as $k => $v) {
+			$ret[$k] = $translator->trans($v);
+		}
+
+		//Send result
+		return $ret;
+	}
+
+	/**
+	 * Fetch translated location title with session by date period
+	 *
+	 * @param $translator The TranslatorInterface instance
+	 * @param $period The date period
+	 * @param $granted The session is granted
+	 * TODO: a dropper
 	 */
 	public function fetchTranslatedLocationByDatePeriod(TranslatorInterface $translator, $period, $granted = false) {
 		//Fetch sessions
@@ -55,11 +97,12 @@ class LocationRepository extends \Doctrine\ORM\EntityRepository {
 	}
 
 	/**
-	 * Fetch translated user location with session by date period
+	 * Fetch translated location title with user session by date period
 	 *
 	 * @param $translator The TranslatorInterface instance
 	 * @param $period The date period
 	 * @param $userId The user uid
+	 * TODO: a dropper
 	 */
 	public function fetchTranslatedUserLocationByDatePeriod(TranslatorInterface $translator, $period, $userId) {
 		//Fetch sessions
