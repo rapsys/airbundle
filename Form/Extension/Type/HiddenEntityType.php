@@ -61,11 +61,6 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 	 * {@inheritdoc}
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options): void {
-		#$this->entityClass = sprintf('App\Entity\%s', ucfirst($builder->getName()));
-		#var_dump($builder->getName());
-		#$this->entityClass = sprintf('App\Entity\%s', ucfirst($builder->getName()));
-		//$this->dataClass[$builder->getName()] = $options['data_class'];
-
 		//Set class from options['class']
 		$this->class = $options['class'];
 
@@ -80,6 +75,12 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 		$builder->addModelTransformer(clone $this);
 	}
 
+	/**
+	 * Transform data to string
+	 *
+	 * @param mixed $data The data object
+	 * @return string The object id
+	 */
 	public function transform($data): string {
 		// Modified from comments to use instanceof so that base classes or interfaces can be specified
 		if ($data === null || !$data instanceof $this->class) {
@@ -91,6 +92,12 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 		return $res;
 	}
 
+	/**
+	 * Reverse transformation from string to data object
+	 *
+	 * @param string $data The object id
+	 * @return mixed The data object
+	 */
 	public function reverseTransform($data) {
 		if (!$data) {
 			return null;
@@ -105,7 +112,7 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 		}
 
 		if ($res === null) {
-			throw new TransformationFailedException(sprintf('A %s with id "%s" does not exist!', $this->class, $data));
+			throw new TransformationFailedException(sprintf('A %s with id %s does not exist!', $this->class, $data));
 		}
 
 		return $res;
