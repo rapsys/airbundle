@@ -32,11 +32,6 @@ class Application {
 	private $updated;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
-	 */
-	private $votes;
-
-	/**
 	 * @var \Rapsys\AirBundle\Entity\Session
 	 */
 	private $session;
@@ -45,13 +40,6 @@ class Application {
 	 * @var \Rapsys\AirBundle\Entity\User
 	 */
 	private $user;
-
-	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		$this->votes = new \Doctrine\Common\Collections\ArrayCollection();
-	}
 
 	/**
 	 * Get id
@@ -148,37 +136,6 @@ class Application {
 	 */
 	public function getUpdated() {
 		return $this->updated;
-	}
-
-	/**
-	 * Add vote
-	 *
-	 * @param \Rapsys\AirBundle\Entity\Vote $vote
-	 *
-	 * @return Application
-	 */
-	public function addVote(\Rapsys\AirBundle\Entity\Vote $vote) {
-		$this->votes[] = $vote;
-
-		return $this;
-	}
-
-	/**
-	 * Remove vote
-	 *
-	 * @param \Rapsys\AirBundle\Entity\Vote $vote
-	 */
-	public function removeVote(\Rapsys\AirBundle\Entity\Vote $vote) {
-		$this->votes->removeElement($vote);
-	}
-
-	/**
-	 * Get votes
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getVotes() {
-		return $this->votes;
 	}
 
 	/**
