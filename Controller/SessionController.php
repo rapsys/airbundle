@@ -37,7 +37,7 @@ class SessionController extends DefaultController {
 		$doctrine = $this->getDoctrine();
 
 		//Fetch session
-		$session = $doctrine->getRepository(Session::class)->fetchOneById($id);
+		$session = $doctrine->getRepository(Session::class)->fetchOneById($id, $request->getLocale());
 
 		//Check if
 		if (
@@ -299,7 +299,7 @@ class SessionController extends DefaultController {
 				$this->addFlash('notice', $this->translator->trans('Session %id% auto attributed', ['%id%' => $id]));
 			//No application
 			} else {
-				//Add notice in flash message
+				//Add warning in flash message
 				$this->addFlash('warning', $this->translator->trans('Session %id% not auto attributed', ['%id%' => $id]));
 			}
 		//With lock
@@ -367,7 +367,7 @@ class SessionController extends DefaultController {
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
 		//Unknown action
 		} else {
-			//Add notice in flash message
+			//Add warning in flash message
 			$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
 		}
 
@@ -434,7 +434,7 @@ class SessionController extends DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function index(Request $request = null) {
+	public function index(Request $request) {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
@@ -442,7 +442,7 @@ class SessionController extends DefaultController {
 		$section = $this->translator->trans('Sessions');
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Init context
 		$context = [];
@@ -517,13 +517,15 @@ class SessionController extends DefaultController {
 		$doctrine = $this->getDoctrine();
 
 		//Fetch session
-		$session = $doctrine->getRepository(Session::class)->fetchOneById($id);
+		if (empty($session = $doctrine->getRepository(Session::class)->fetchOneById($id, $request->getLocale()))) {
+			throw $this->createNotFoundException($this->translator->trans('Unable to find session: %id%', ['%id%' => $id]));
+		}
 
 		//Set section
 		$section = $this->translator->trans($session['l_title']);
 
 		//Set title
-		$title = $this->translator->trans('Session %id%', ['%id%' => $id]).' - '.$section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section.' - '.$this->translator->trans('Session %id%', ['%id%' => $id]);
 
 		//Init context
 		$context = [];
@@ -632,6 +634,10 @@ class SessionController extends DefaultController {
 				'id' => $session['t_id'],
 				'title' => $this->translator->trans($session['t_title'])
 			],
+			'snippet' => [
+				'id' => $session['p_id'],
+				'description' => $session['p_description']
+			],
 			'applications' => null
 		];
 
@@ -640,7 +646,9 @@ class SessionController extends DefaultController {
 			$context['session']['application'] = [
 				'user' => [
 					'id' => $session['au_id'],
-					'title' => $session['au_pseudonym']
+					'title' => $session['au_pseudonym'],
+					'donation' => $session['au_donation'],
+					'site' => $session['au_site']
 				],
 				'id' => $session['a_id'],
 				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
@@ -686,7 +694,21 @@ class SessionController extends DefaultController {
 			}
 		}
 
+		//Compute period
+		$period = new \DatePeriod(
+			//Start from first monday of week
+			new \DateTime('Monday this week'),
+			//Iterate on each day
+			new \DateInterval('P1D'),
+			//End with next sunday and 4 weeks
+			new \DateTime('Monday this week + 5 week')
+		);
+
+		//Fetch locations
+		//XXX: we want to display all active locations anyway
+		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period, $session['au_id']);
+
 		//Render the view
-		return $this->render('@RapsysAir/session/view.html.twig', ['title' => $title, 'section' => $section]+$context+$this->context);
+		return $this->render('@RapsysAir/session/view.html.twig', ['title' => $title, 'section' => $section, 'locations' => $locations]+$context+$this->context);
 	}
 }
