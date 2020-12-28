@@ -4,9 +4,15 @@
 {% endblock %}
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site_ico) }}" />
-	<link rel="icon" type="image/svg+xml" href="{{ asset(site_svg) }}" />
-	{% for size, icon in site_png %}
+	{% if description is defined and description %}
+		<meta name="description" content="{{ description }}" />
+	{% endif %}
+	{% if keywords is defined and keywords %}
+		<meta name="keywords" content="{{ keywords|join(', ') }}" />
+	{% endif %}
+	<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site.ico) }}" />
+	<link rel="icon" type="image/svg+xml" href="{{ asset(site.svg) }}" />
+	{% for size, icon in site.png %}
 		{# Apple #}
 		{% if size in [152, 167, 180] %}
 			{% if size == 180 %}
@@ -27,6 +33,14 @@
 			<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
 		{% endstylesheet %}
 	{% endstopwatch %}
+	{% if canonical is defined and canonical %}
+		<link rel="canonical" href="{{ canonical }}" />
+	{% endif %}
+	{% if alternates is defined and alternates %}
+		{% for alternate in alternates %}
+			<link rel="alternate" href="{{ alternate.absolute }}" hreflang="{{ alternate.lang }}" />
+		{% endfor %}
+	{% endif %}
 {% endblock %}
 {% block javascripts %}
 	{% stopwatch 'javascript' %}
@@ -39,20 +53,22 @@
 {% block body %}
 	{% block header %}
 		<header id="header">
-			{% block header_title %}<h1><a href="{{ site_url }}" title="{{ site_title }}"><img src="{{ asset(site_logo) }}" alt="{{ site_title }}" width="171" height="32" /></a></h1>{% endblock %}
+			{% block header_title %}<h1><a href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo) }}" alt="{{ site.title }}" width="171" height="32" /></a></h1>{% endblock %}
 			{% block header_nav %}
 				<nav>
 					<h2>{% trans %}Navigation{% endtrans %}</h2>
-					<a href="{{ path('rapsys_air_session') }}">{% trans %}Sessions{% endtrans %}</a>
-					<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
-					<a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a>
-					<a href="{{ path('rapsys_air_regulation') }}">{% trans %}Regulation{% endtrans %}</a>
-					{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-						<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
-					{% else %}
-						<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
-						<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
-					{% endif %}
+					<ul>
+						<li><a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_organizer') }}">{% trans %}Organizers{% endtrans %}</a></li>
+						{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+							<li><a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a></li>
+						{% else %}
+							<li><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></li>
+							<li><a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a></li>
+						{% endif %}
+					</ul>
 				</nav>
 			{% endblock %}
 {#
@@ -95,8 +111,16 @@
 	{% block footer %}
 		<footer id="footer">
 			<span>&nbsp;</span>
-			<details><summary>{{ copy_long }}</summary><span>{{ copy_short }}</span></details>
-			<span>&nbsp;</span>
+			<details><summary>{{ copy.long }}</summary><span>{{ copy.short }}</span></details>
+			{% if alternates is defined and alternates %}
+				<ul>
+					{% for alternate in alternates %}
+						<li><a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a></li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<span>&nbsp;</span>
+			{% endif %}
 		</footer>
 	{% endblock %}
 {% endblock %}
