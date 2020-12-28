@@ -17,14 +17,14 @@
 {% block body %}
 	<table class="header">
 		<tr>
-			<td><a href="{{ site_url|escape('html_attr') }}"><img src="{{ email.image(site_logo) }}" alt="{{ site_title|escape('html_attr') }}" /></a></td>
-			<td><h1><a href="{{ site_url|escape('html_attr') }}">{{ site_title }}</a></h1></td>
+			<td><a href="{{ site.url|escape('html_attr') }}"><img src="{{ email.image(site.logo) }}" alt="{{ site.title|escape('html_attr') }}" /></a></td>
+			<td><h1><a href="{{ site.url|escape('html_attr') }}">{{ site.title }}</a></h1></td>
 		</tr>
 	</table>
         {% block content %}{% endblock %}
 	<table class="footer">
 		<tr>
-			<td>{{ copy_long }} - {{ copy_short }}</td>
+			<td>{{ copy.long }} - {{ copy.short }}</td>
 		</tr>
 	</table>
 {% endblock %}
