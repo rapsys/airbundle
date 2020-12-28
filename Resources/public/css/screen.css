@@ -598,7 +598,6 @@ form .message {
 	border-width: .1rem 0 0 .1rem;
 	border-radius: .2rem;
 	flex-grow: 1;
-	box-sizing: inherit;
 	box-sizing: border-box;
 	border-collapse: collapse;
 	margin: .5rem;
@@ -821,6 +820,7 @@ form .message {
 
 	form label {
 		width: 6rem;
+		line-height: 2rem;
 	}
 
 	form input,
@@ -830,10 +830,12 @@ form .message {
 	form textarea,
 	form section section {
 		width: 20rem;
+		line-height: 2rem;
 	}
 
 	form button {
 		width: 6rem;
+		line-height: 2rem;
 	}
 
 	.col label,
@@ -847,7 +849,6 @@ form .message {
 
 	.col button {
 		width: 12rem;
-		box-sizing: fit-content;
 	}
 
 	#dashboard .seventh:nth-child(7n+1),
