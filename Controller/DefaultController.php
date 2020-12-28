@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -35,9 +36,6 @@ class DefaultController {
 	///Router instance
 	protected $router;
 
-	///Slugger instance
-	protected $slugger;
-
 	///Translator instance
 	protected $translator;
 
@@ -51,10 +49,9 @@ class DefaultController {
 	 *
 	 * @param ContainerInterface $container The container instance
 	 * @param RouterInterface $router The router instance
-	 * @param Slugger $slugger The slugger instance
 	 * @param TranslatorInterface $translator The translator instance
 	 */
-	public function __construct(ContainerInterface $container, RouterInterface $router, Slugger $slugger, TranslatorInterface $translator) {
+	public function __construct(ContainerInterface $container, RouterInterface $router, RequestStack $requestStack, TranslatorInterface $translator) {
 		//Retrieve config
 		$this->config = $container->getParameter($this->getAlias());
 
@@ -64,23 +61,72 @@ class DefaultController {
 		//Set the router
 		$this->router = $router;
 
-		//Set the slugger
-		$this->slugger = $slugger;
-
 		//Set the translator
 		$this->translator = $translator;
 
 		//Set the context
 		$this->context = [
-			'copy_long' => $translator->trans($this->config['copy']['long']),
-			'copy_short' => $translator->trans($this->config['copy']['short']),
-			'site_ico' => $this->config['site']['ico'],
-			'site_logo' => $this->config['site']['logo'],
-			'site_png' => $this->config['site']['png'],
-			'site_svg' => $this->config['site']['svg'],
-			'site_title' => $translator->trans($this->config['site']['title']),
-			'site_url' => $router->generate($this->config['site']['url'])
+			'copy' => [
+				'long' => $translator->trans($this->config['copy']['long']),
+				'short' => $translator->trans($this->config['copy']['short'])
+			],
+			'site' => [
+				'ico' => $this->config['site']['ico'],
+				'logo' => $this->config['site']['logo'],
+				'png' => $this->config['site']['png'],
+				'svg' => $this->config['site']['svg'],
+				'title' => $translator->trans($this->config['site']['title']),
+				'url' => $router->generate($this->config['site']['url']),
+			],
+			'canonical' => null,
+			'alternates' => []
 		];
+
+		//Get current locale
+		#$currentLocale = $router->getContext()->getParameters()['_locale'];
+		$currentLocale = $requestStack->getCurrentRequest()->getLocale();
+
+		//Set translator locale
+		//XXX: allow LocaleSubscriber on the fly locale change for first page
+		$this->translator->setLocale($currentLocale);
+
+		//Iterate on locales excluding current one
+		foreach($this->config['locales'] as $locale) {
+			//Set titles
+			$titles = [];
+
+			//Iterate on other locales
+			foreach(array_diff($this->config['locales'], [$locale]) as $other) {
+				$titles[$other] = $translator->trans($this->config['languages'][$locale], [], null, $other);
+			}
+
+			//Get context path
+			$path = $router->getContext()->getPathInfo();
+
+			//Retrieve route matching path
+			$route = $router->match($path);
+
+			//Get route name
+			$name = $route['_route'];
+
+			//Unset route name
+			unset($route['_route']);
+
+			//With current locale
+			if ($locale == $currentLocale) {
+				//Set locale locales context
+				$this->context['canonical'] = $router->generate($name, ['_locale' => $locale]+$route, UrlGeneratorInterface::ABSOLUTE_URL);
+			} else {
+				//Set locale locales context
+				$this->context['alternates'][] = [
+					'lang' => $locale,
+					'absolute' => $router->generate($name, ['_locale' => $locale]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
+					'relative' => $router->generate($name, ['_locale' => $locale]+$route),
+					'title' => implode('/', $titles),
+					'translated' => $translator->trans($this->config['languages'][$locale], [], null, $locale)
+				];
+			}
+		}
 	}
 
 	/**
@@ -97,8 +143,20 @@ class DefaultController {
 		//Set section
 		$section = $this->translator->trans('Contact');
 
+		//Set description
+		$this->context['description'] = $this->translator->trans('Contact Libre Air');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('contact'),
+			$this->translator->trans('Libre Air'),
+			$this->translator->trans('outdoor'),
+			$this->translator->trans('Argentine Tango'),
+			$this->translator->trans('calendar')
+		];
+
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -171,15 +229,27 @@ class DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function index(Request $request = null) {
+	public function index(Request $request) {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
 		//Set section
-		$section = $this->translator->trans('Index');
+		$section = $this->translator->trans('Argentine Tango in Paris');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session calendar in Paris');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('Argentine Tango'),
+			$this->translator->trans('Paris'),
+			$this->translator->trans('outdoor'),
+			$this->translator->trans('calendar'),
+			$this->translator->trans('Libre Air')
+		];
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Init context
 		$context = [];
@@ -232,29 +302,64 @@ class DefaultController {
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
+		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
 
 		//Render the view
 		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
 	}
 
-
 	/**
-	 * The regulation page
+	 * The organizer regulation page
 	 *
-	 * @desc Display the regulation policy
+	 * @desc Display the organizer regulation policy
 	 *
 	 * @return Response The rendered view
 	 */
-	public function regulation() {
+	public function organizerRegulation() {
 		//Set section
-		$section = $this->translator->trans('Regulation');
+		$section = $this->translator->trans('Organizer regulation');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air organizer regulation');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('organizer regulation'),
+			$this->translator->trans('Libre Air')
+		];
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Render template
-		return $this->render('@RapsysAir/default/regulation.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		return $this->render('@RapsysAir/default/organizer_regulation.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+	}
+
+	/**
+	 * The terms of service page
+	 *
+	 * @desc Display the terms of service policy
+	 *
+	 * @return Response The rendered view
+	 */
+	public function termsOfService() {
+		//Set section
+		$section = $this->translator->trans('Terms of service');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air terms of service');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('terms of service'),
+			$this->translator->trans('Libre Air')
+		];
+
+		//Set title
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+
+		//Render template
+		return $this->render('@RapsysAir/default/terms_of_service.html.twig', ['title' => $title, 'section' => $section]+$this->context);
 	}
 
 	/**
