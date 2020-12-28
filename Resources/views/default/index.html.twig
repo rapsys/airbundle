@@ -1,47 +1,45 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-<section id="dashboard">
-	<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
-	<div class="panel calendar">
-		{% if calendar is defined and calendar %}
-			<div class="grid">
-				{% for date, day in calendar %}
-					<section class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
-						<h3>{{ day.title }}</h3>
-						{% if day.sessions is not empty %}
-							<ul>
-								{% for session in day.sessions %}
-									<li class="{{ ['session']|merge(session.class)|join(' ') }}">
-										<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
-										<span>
-											{% if session.weather is defined and session.weather %}<span title="{{ session.weathertitle }}">{{ session.weather }}</span>{% endif %}
-											<span title="{{ session.slottitle }}">{{ session.slot }}</span>
-										</span>
-									</li>
-								{% endfor %}
-							</ul>
-						{% else %}
-							&nbsp;
-						{% endif %}
-					</section>
-				{% endfor %}
-			</div>
-		{% endif %}
-		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
-	</div>
-	{% if locations is defined and locations %}
-		<div class="panel location">
-			<section>
-				<h3>{% trans %}Locations{% endtrans %}</h3>
+	<section id="dashboard">
+		<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
+		<div class="panel calendar">
+			{% if calendar is defined and calendar %}
 				<div class="grid">
-					{% for id, title in locations %}
-						<section class="cell">
-							<h4><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h4>
+					{% for date, day in calendar %}
+						<section class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
+							<h3>{{ day.title }}</h3>
+							{% if day.sessions is not empty %}
+								<ul>
+									{% for session in day.sessions %}
+										<li class="{{ ['session']|merge(session.class)|join(' ') }}">
+											<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
+											<span>
+												{% if session.weather is defined and session.weather %}<span title="{{ session.weathertitle }}">{{ session.weather }}</span>{% endif %}
+												<span title="{{ session.slottitle }}">{{ session.slot }}</span>
+											</span>
+										</li>
+									{% endfor %}
+								</ul>
+							{% else %}
+								&nbsp;
+							{% endif %}
 						</section>
 					{% endfor %}
 				</div>
-			</section>
+			{% endif %}
+			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 		</div>
+	</section>
+	{% if locations is defined and locations %}
+		<section id="location">
+			<h2>{% trans %}Locations{% endtrans %}</h2>
+			<div class="panel grid">
+				{% for id, title in locations %}
+					<section class="cell">
+						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
+					</section>
+				{% endfor %}
+			</div>
+		</section>
 	{% endif %}
-</section>
 {% endblock %}
