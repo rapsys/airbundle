@@ -15,14 +15,48 @@ class User extends BaseUser {
 	protected $phone;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var string
 	 */
-	private $votes;
+	protected $donation;
+
+	/**
+	 * @var string
+	 */
+	protected $site;
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 */
 	private $applications;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $subscribers;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $subscriptions;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $snippets;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		//Call parent constructor
+		parent::__construct();
+
+		//Set collections
+		$this->applications = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->subscribers = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->subscriptions = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->snippets = new \Doctrine\Common\Collections\ArrayCollection();
+	}
 
 	/**
 	 * Set phone
@@ -47,34 +81,47 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Add vote
+	 * Set donation
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Vote $vote
+	 * @param string $donation
 	 *
 	 * @return User
 	 */
-	public function addVote(Vote $vote) {
-		$this->votes[] = $vote;
+	public function setDonation($donation) {
+		$this->donation = $donation;
 
 		return $this;
 	}
 
 	/**
-	 * Remove vote
+	 * Get donation
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Vote $vote
+	 * @return string
 	 */
-	public function removeVote(Vote $vote) {
-		$this->votes->removeElement($vote);
+	public function getDonation() {
+		return $this->donation;
 	}
 
 	/**
-	 * Get votes
+	 * Set site
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @param string $site
+	 *
+	 * @return User
 	 */
-	public function getVotes() {
-		return $this->votes;
+	public function setSite($site) {
+		$this->site = $site;
+
+		return $this;
+	}
+
+	/**
+	 * Get site
+	 *
+	 * @return string
+	 */
+	public function getSite() {
+		return $this->site;
 	}
 
 	/**
@@ -106,5 +153,98 @@ class User extends BaseUser {
 	 */
 	public function getApplications() {
 		return $this->applications;
+	}
+
+	/**
+	 * Add subscriber
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $subscriber
+	 *
+	 * @return User
+	 */
+	public function addSubscriber(User $subscriber) {
+		$this->subscribers[] = $subscriber;
+
+		return $this;
+	}
+
+	/**
+	 * Remove subscriber
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $subscriber
+	 */
+	public function removeSubscriber(User $subscriber) {
+		$this->subscribers->removeElement($subscriber);
+	}
+
+	/**
+	 * Get subscribers
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSubscribers() {
+		return $this->subscribers;
+	}
+
+	/**
+	 * Add subscription
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $subscription
+	 *
+	 * @return User
+	 */
+	public function addSubscription(User $subscription) {
+		$this->subscriptions[] = $subscription;
+
+		return $this;
+	}
+
+	/**
+	 * Remove subscription
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $subscription
+	 */
+	public function removeSubscription(User $subscription) {
+		$this->subscriptions->removeElement($subscription);
+	}
+
+	/**
+	 * Get subscriptions
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSubscriptions() {
+		return $this->subscriptions;
+	}
+
+	/**
+	 * Add snippet
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 *
+	 * @return Location
+	 */
+	public function addSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
+		$this->snippets[] = $snippet;
+
+		return $this;
+	}
+
+	/**
+	 * Remove snippet
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 */
+	public function removeSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
+		$this->snippets->removeElement($snippet);
+	}
+
+	/**
+	 * Get snippets
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSnippets() {
+		return $this->snippets;
 	}
 }
