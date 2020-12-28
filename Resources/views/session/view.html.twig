@@ -1,155 +1,168 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-<section id="dashboard">
-	<h2>
-		<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
-		<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
-	</h2>
-	<div class="panel calendar">
-		<div class="grid">
-			<section class="cell">
-				<h3>{% trans %}Organizer{% endtrans %}</h3>
-				<dl>
-					<dt>{% trans %}Attributed to{% endtrans %}</dt>
-					<dd>
-						{% if session.application is null %}
-							{% trans %}None{% endtrans %}
-						{% else %}
-							<a href="{{ path('rapsys_air_user_view', {'id': session.application.user.id}) }}">{{ session.application.user.title }}</a>
-						{% endif %}
-					</dd>
-				</dl>
-				<dl>
-					<dt>TODO: text organisateur</dt>
-					<dd>TODO: text organisateur</dd>
-				</dl>
-			</section>
-			<section class="cell">
-				<h3>{% trans %}Schedule{% endtrans %}</h3>
-				<dl>
-					<dt>{% trans %}Slot{% endtrans %}</dt>
-					<dd>{{ session.slot.title }}</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Start{% endtrans %}</dt>
-					<dd>{{ session.start.format('Y-m-d H:i:s') }}</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Stop{% endtrans %}</dt>
-					<dd>
-						{% if session.start.format('Y-m-d') != session.stop.format('Y-m-d') %}
-							{{ session.stop.format('Y-m-d H:i:s') }}
-						{% else %}
-							{{ session.stop.format('H:i:s') }}
-						{% endif %}
-					</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Length{% endtrans %}</dt>
-					<dd>{{ session.length.format('H:i:s') }}</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Locked{% endtrans %}</dt>
-					<dd>
-						{% if session.locked is null %}
-							{% trans %}None{% endtrans %}
-						{% else %}
-							{{ session.locked.format('Y-m-d H:i:s') }}
-						{% endif %}
-					</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Created{% endtrans %}</dt>
-					<dd>{{ session.created.format('Y-m-d H:i:s') }}</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Updated{% endtrans %}</dt>
-					<dd>{{ session.updated.format('Y-m-d H:i:s') }}</dd>
-				</dl>
-			</section>
-			<section class="cell">
-				<h3>{% trans %}Weather{% endtrans %}</h3>
-				{% if session.rainrisk is not null %}
+	<section id="dashboard">
+		<h2>
+			<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
+			<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
+		</h2>
+		<div class="panel">
+			<div class="grid">
+				<section class="cell">
+					<h3>{% trans %}Organizer{% endtrans %}</h3>
 					<dl>
-						<dt>{% trans %}Rainrisk{% endtrans %}</dt>
-						<dd>{{ session.rainrisk }}</dd>
+						<dt>{% trans %}Attributed to{% endtrans %}</dt>
+						<dd>
+							{% if session.application is null %}
+								{% trans %}None{% endtrans %}
+							{% else %}
+								<a href="{{ path('rapsys_air_organizer_view', {'id': session.application.user.id}) }}">{{ session.application.user.title }}</a>
+							{% endif %}
+						</dd>
 					</dl>
-				{% endif %}
-				{% if session.rainfall is not null %}
+					{% if session.snippet.description is defined and session.snippet.description %}
+						<dl>
+							<dt>{% trans %}Description{% endtrans %}</dt>
+							<dd>{{ session.snippet.description|striptags|markdown_to_html }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.application.user.donation is defined and session.application.user.donation %}
+						<dl>
+							<dt>{% trans %}Donation{% endtrans %}</dt>
+							<dd><a href="{{ session.application.user.donation }}" title="{{ 'Make a donation to %title%'|trans({'%title%': session.application.user.title}) }}">{{ 'Contribute to %title%'|trans({'%title%': session.application.user.title}) }}</a></dd>
+						</dl>
+					{% endif %}
+					{% if session.application.user.site is defined and session.application.user.site %}
+						<dl>
+							<dt>{% trans %}Website{% endtrans %}</dt>
+							<dd><a href="{{ session.application.user.site }}" title="{{ 'Consult %title% website'|trans({'%title%': session.application.user.title}) }}">{{ 'Website of %title%'|trans({'%title%': session.application.user.title}) }}</a></dd>
+						</dl>
+					{% endif %}
+				</section>
+				<section class="cell">
+					<h3>{% trans %}Schedule{% endtrans %}</h3>
 					<dl>
-						<dt>{% trans %}Rainfall{% endtrans %}</dt>
-						<dd>{{ session.rainfall }}</dd>
+						<dt>{% trans %}Slot{% endtrans %}</dt>
+						<dd>{{ session.slot.title }}</dd>
 					</dl>
-				{% endif %}
-				{% if session.realfeel is not null %}
 					<dl>
-						<dt>{% trans %}Realfeel{% endtrans %}</dt>
-						<dd>{{ session.realfeel }}</dd>
+						<dt>{% trans %}Start{% endtrans %}</dt>
+						<dd>{{ session.start.format('Y-m-d H:i:s') }}</dd>
 					</dl>
-				{% endif %}
-				{% if session.realfeelmin is not null %}
 					<dl>
-						<dt>{% trans %}Realfeel min{% endtrans %}</dt>
-						<dd>{{ session.realfeelmin }}</dd>
+						<dt>{% trans %}Stop{% endtrans %}</dt>
+						<dd>
+							{% if session.start.format('Y-m-d') != session.stop.format('Y-m-d') %}
+								{{ session.stop.format('Y-m-d H:i:s') }}
+							{% else %}
+								{{ session.stop.format('H:i:s') }}
+							{% endif %}
+						</dd>
 					</dl>
-				{% endif %}
-				{% if session.realfeelmax is not null %}
 					<dl>
-						<dt>{% trans %}Realfeel max{% endtrans %}</dt>
-						<dd>{{ session.realfeelmax }}</dd>
+						<dt>{% trans %}Length{% endtrans %}</dt>
+						<dd>{{ session.length.format('H:i:s') }}</dd>
 					</dl>
-				{% endif %}
-				{% if session.temperature is not null %}
 					<dl>
-						<dt>{% trans %}Temperature{% endtrans %}</dt>
-						<dd>{{ session.temperature }}</dd>
+						<dt>{% trans %}Locked{% endtrans %}</dt>
+						<dd>
+							{% if session.locked is null %}
+								{% trans %}None{% endtrans %}
+							{% else %}
+								{{ session.locked.format('Y-m-d H:i:s') }}
+							{% endif %}
+						</dd>
 					</dl>
-				{% endif %}
-				{% if session.temperaturemin is not null %}
 					<dl>
-						<dt>{% trans %}Temperature min{% endtrans %}</dt>
-						<dd>{{ session.temperaturemin }}</dd>
+						<dt>{% trans %}Created{% endtrans %}</dt>
+						<dd>{{ session.created.format('Y-m-d H:i:s') }}</dd>
 					</dl>
-				{% endif %}
-				{% if session.temperaturemax is not null %}
 					<dl>
-						<dt>{% trans %}Temperature max{% endtrans %}</dt>
-						<dd>{{ session.temperaturemax }}</dd>
+						<dt>{% trans %}Updated{% endtrans %}</dt>
+						<dd>{{ session.updated.format('Y-m-d H:i:s') }}</dd>
 					</dl>
-				{% endif %}
-			</section>
-			<section class="cell">
-				<h3>{% trans %}Location{% endtrans %}</h3>
-				<dl>
-					{# infos #}
-					<dt>{% trans %}Location{% endtrans %}</dt>
-					<dd><a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a></dd>
-				</dl>
-				<dl>
-					{# location #}
-					<dt>{% trans %}Address{% endtrans %}</dt>
-					<dd>
-						{{ session.location.address }}
-						{{ session.location.zipcode }} {{ session.location.city }}
-					</dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Maps{% endtrans %}</dt>
-					<dd><a href="https://www.google.fr/maps/@{{ session.location.latitude }},{{ session.location.longitude }},19z">Google Maps</a></dd>
-					<dd><a href="https://www.openstreetmap.org/#map=19/{{ session.location.latitude }}/{{ session.location.longitude }}">OpenStreetMap</a></dd>
-				</dl>
-				<dl>
-					<dt>{% trans %}Minimap{% endtrans %}</dt>
-					<dd>TODO: minimap</dd>
-				</dl>
-			</section>
+				</section>
+				<section class="cell">
+					<h3>{% trans %}Weather{% endtrans %}</h3>
+					{% if session.rainrisk is not null %}
+						<dl>
+							<dt>{% trans %}Rainrisk{% endtrans %}</dt>
+							<dd>{{ session.rainrisk }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.rainfall is not null %}
+						<dl>
+							<dt>{% trans %}Rainfall{% endtrans %}</dt>
+							<dd>{{ session.rainfall }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.realfeel is not null %}
+						<dl>
+							<dt>{% trans %}Realfeel{% endtrans %}</dt>
+							<dd>{{ session.realfeel }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.realfeelmin is not null %}
+						<dl>
+							<dt>{% trans %}Realfeel min{% endtrans %}</dt>
+							<dd>{{ session.realfeelmin }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.realfeelmax is not null %}
+						<dl>
+							<dt>{% trans %}Realfeel max{% endtrans %}</dt>
+							<dd>{{ session.realfeelmax }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.temperature is not null %}
+						<dl>
+							<dt>{% trans %}Temperature{% endtrans %}</dt>
+							<dd>{{ session.temperature }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.temperaturemin is not null %}
+						<dl>
+							<dt>{% trans %}Temperature min{% endtrans %}</dt>
+							<dd>{{ session.temperaturemin }}</dd>
+						</dl>
+					{% endif %}
+					{% if session.temperaturemax is not null %}
+						<dl>
+							<dt>{% trans %}Temperature max{% endtrans %}</dt>
+							<dd>{{ session.temperaturemax }}</dd>
+						</dl>
+					{% endif %}
+				</section>
+				<section class="cell">
+					<h3>{% trans %}Location{% endtrans %}</h3>
+					<dl>
+						{# infos #}
+						<dt>{% trans %}Location{% endtrans %}</dt>
+						<dd><a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a></dd>
+					</dl>
+					<dl>
+						{# location #}
+						<dt>{% trans %}Address{% endtrans %}</dt>
+						<dd>
+							{{ session.location.address }}
+							{{ session.location.zipcode }} {{ session.location.city }}
+						</dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Maps{% endtrans %}</dt>
+						<dd><a href="https://www.google.fr/maps/@{{ session.location.latitude }},{{ session.location.longitude }},19z">Google Maps</a></dd>
+						<dd><a href="https://www.openstreetmap.org/#map=19/{{ session.location.latitude }}/{{ session.location.longitude }}">OpenStreetMap</a></dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Minimap{% endtrans %}</dt>
+						<dd>TODO: minimap</dd>
+					</dl>
+				</section>
+			</div>
+			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 		</div>
-		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
-	</div>
-	<div class="panel candidate">
 		<section>
 			<h3>{% trans %}Candidates{% endtrans %}</h3>
-			<div class="grid">
+			<div class="panel grid">
 				{% if session.applications is null %}
 					<section class="cell">
 						{% trans %}None{% endtrans %}
@@ -157,7 +170,7 @@
 				{% else %}
 					{% for application in session.applications %}
 						<section class="cell">
-							<h4><a href="{{ path('rapsys_air_user_view', {'id': application.user.id} ) }}">{{ application.user.title }}</a></h4>
+							<h4><a href="{{ path('rapsys_air_organizer_view', {'id': application.user.id} ) }}">{{ application.user.title }}</a></h4>
 							<dl>
 								<dt>{% trans %}Score{% endtrans %}</dt>
 								<dd>
@@ -190,6 +203,17 @@
 				{% endif %}
 			</div>
 		</section>
-	</div>
-</section>
+	</section>
+	{% if locations is defined and locations %}
+		<section id="location">
+			<h2>{% trans %}Locations{% endtrans %}</h2>
+			<div class="panel grid">
+				{% for id, title in locations %}
+					<section class="cell">
+						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
+					</section>
+				{% endfor %}
+			</div>
+		</section>
+	{% endif %}
 {% endblock %}

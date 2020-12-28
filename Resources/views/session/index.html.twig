@@ -30,18 +30,16 @@
 		{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 	</div>
 	{% if locations is defined and locations %}
-		<div class="panel location">
-			<section>
-				<h3>{% trans %}Locations{% endtrans %}</h3>
-				<div class="grid">
-					{% for id, title in locations %}
-						<section class="cell">
-							<h4><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h4>
-						</section>
-					{% endfor %}
-				</div>
-			</section>
-		</div>
+		<section>
+			<h3>{% trans %}Locations{% endtrans %}</h3>
+			<div class="panel grid">
+				{% for id, title in locations %}
+					<section class="cell">
+						<h4><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h4>
+					</section>
+				{% endfor %}
+			</div>
+		</section>
 	{% endif %}
 </section>
 {% endblock %}
