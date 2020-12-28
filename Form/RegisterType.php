@@ -3,6 +3,7 @@
 namespace Rapsys\AirBundle\Form;
 
 use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -12,7 +13,10 @@ class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
 		return parent::buildForm($builder, $options)
-			->add('phone', TelType::class, array('attr' => array('placeholder' => 'Your phone'), 'constraints' => array(new NotBlank(array('message' => 'Please provide your phone')))));
+			#TODO: add url ? add text ?
+			->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'constraints' => [new NotBlank(['message' => 'Please provide your phone'])]])
+			->add('donation', UrlType::class, ['attr' => ['placeholder' => 'Your donation link']])
+			->add('site', UrlType::class, ['attr' => ['placeholder' => 'Your website']]);
 	}
 
 	/**
