@@ -51,18 +51,6 @@ class LocaleSubscriber implements EventSubscriberInterface {
 				//Set back router context
 				$this->router->setContext($context);
 
-				//Generate current route with preferred language
-				//XXX: may trigger a Symfony\Component\Routing\Exception\RouteNotFoundException if route is not found for preferred locale
-				/*$uri = $this->router->generate(
-					//Current route
-					$request->get('_route'),
-					//Force preferred locale
-					['_locale' => $preferred]+$request->get('_route_params')
-				);
-
-				//Regenerate route with preferred locale
-				$event->setResponse(new RedirectResponse($uri, 302));*/
-
 				//End process
 				return;
 			}
