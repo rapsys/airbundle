@@ -222,7 +222,7 @@ class User extends BaseUser {
 	 *
 	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
 	 *
-	 * @return Location
+	 * @return User
 	 */
 	public function addSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
 		$this->snippets[] = $snippet;
