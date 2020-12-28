@@ -10,15 +10,22 @@ rapsys_air:
 rapsys_air_contact:
     path:
         en: '/en/contact'
-        fr: '/contact'
+        fr: '/contacter'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
-rapsys_air_regulation:
+rapsys_air_organizer_regulation:
     path:
-        en: '/en/regulation'
-        fr: '/reglement'
-    controller: Rapsys\AirBundle\Controller\DefaultController::regulation
+        en: '/en/organizer-regulation'
+        fr: '/reglement-organisateur'
+    controller: Rapsys\AirBundle\Controller\DefaultController::organizerRegulation
+    methods: GET
+
+rapsys_air_terms_of_service:
+    path:
+        en: '/en/terms-of-service'
+        fr: '/conditions-generales-d-utilisation'
+    controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
 rapsys_air_location_view:
@@ -56,16 +63,67 @@ rapsys_air_session_view:
     controller: Rapsys\AirBundle\Controller\SessionController::view
     methods: GET
 
-rapsys_air_user:
+rapsys_air_snippet_add:
     path:
-        en: '/en/user'
-        fr: '/utilisateur'
-    controller: Rapsys\AirBundle\Controller\UserController::index
+        en: '/en/snippet'
+        fr: '/extrait'
+    controller: Rapsys\AirBundle\Controller\SnippetController::add
+    methods: POST
+
+rapsys_air_snippet_edit:
+    path:
+        en: '/en/snippet/{id<\d+>}'
+        fr: '/extrait/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\SnippetController::edit
+    methods: POST
+
+rapsys_air_organizer:
+    path:
+        en: '/en/organizer'
+        fr: '/organisateur'
+    controller: Rapsys\AirBundle\Controller\OrganizerController::index
     methods: GET
 
-rapsys_air_user_view:
+rapsys_air_organizer_view:
     path:
-        en: '/en/user/{id<\d+>}'
-        fr: '/utilisateur/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\UserController::view
+        en: '/en/organizer/{id<\d+>}'
+        fr: '/organisateur/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\OrganizerController::view
+    methods: GET
+
+rapsys_user_login:
+    path:
+        en: /en/login
+        fr: /connecter
+    controller: Rapsys\UserBundle\Controller\DefaultController::login
+    methods: GET|POST
+
+rapsys_user_recover:
+    path:
+        en: /en/recover
+        fr: /recuperer
+    controller: Rapsys\UserBundle\Controller\DefaultController::recover
+    methods: GET|POST
+
+rapsys_user_recover_mail:
+    path:
+        en: /en/recover/{recipient}/{hash}
+        fr: /recuperer/{recipient}/{hash}
+    controller: Rapsys\UserBundle\Controller\DefaultController::recoverMail
+    requirements:
+        recipient: '[a-zA-Z0-9=_-]+'
+        hash: '[a-zA-Z0-9=_-]+'
+    methods: GET|POST
+
+rapsys_user_register:
+    path:
+        en: /en/register
+        fr: /enregistrer
+    controller: Rapsys\UserBundle\Controller\DefaultController::register
+    methods: GET|POST
+
+rapsys_user_logout:
+    path:
+        en: /en/logout
+        fr: /deconnecter
     methods: GET
