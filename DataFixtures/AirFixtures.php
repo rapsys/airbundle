@@ -80,7 +80,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'phone' => '+33677952829',
 				'password' => 'test'
 			),
-			array(
+			/*array(
 				'short' => 'Mr.',
 				'group' => 'Senior',
 				'mail' => 'denis.courvoisier@wanadoo.fr',
@@ -89,7 +89,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'surname' => 'Courvoisier',
 				'phone' => '+33600000000',
 				'password' => 'test'
-			),
+			),*/
 			array(
 				'short' => 'Mr.',
 				'group' => 'Senior',
@@ -139,7 +139,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//XXX: adding a new zipcode here requires matching accuweather uris in Command/WeatherCommand.php
 		$locationTree = [
 			[
-				'title' => 'Opera Garnier',
+				'title' => 'Garnier opera',
 				'short' => 'Garnier',
 				'address' => '10 Place de l\'Opéra',
 				'zipcode' => '75009',
@@ -170,7 +170,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'hotspot' => false
 			],
 			[
-				'title' => 'Colette square',
+				'title' => 'Colette place',
 				'short' => 'Colette',
 				'address' => 'Galerie du Théâtre Français',
 				'zipcode' => '75001',
@@ -180,7 +180,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'hotspot' => false
 			],
 			[
-				'title' => 'Swan Island',
+				'title' => 'Swan island',
 				'short' => 'Swan',
 				'address' => 'Allée des Cygnes',
 				'zipcode' => '75015',
