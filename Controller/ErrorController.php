@@ -23,7 +23,7 @@ class ErrorController extends DefaultController {
 		$section = $exception->getStatusCode().' '.$this->translator->trans($exception->getStatusText());
 
 		//Set title
-		$title = $section.' - '.$this->translator->trans($this->config['site']['title']);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Set the message
 		$message = $exception->getMessage();
