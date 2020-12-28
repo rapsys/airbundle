@@ -6,13 +6,40 @@ Rapsys\AirBundle\Entity\User:
         phone:
             type: string
             length: 16
+            nullable: true
+        donation:
+            type: string
+            length: 254
+            nullable: true
+        site:
+            type: string
+            length: 254
+            nullable: true
     oneToMany:
-        votes:
-            targetEntity: Rapsys\AirBundle\Entity\Vote
-            mappedBy: user
+#        votes:
+#            targetEntity: Rapsys\AirBundle\Entity\Vote
+#            mappedBy: user
         applications:
             targetEntity: Rapsys\AirBundle\Entity\Application
             mappedBy: user
+        snippets:
+            targetEntity: Rapsys\AirBundle\Entity\Snippet
+            mappedBy: user
+    manyToMany:
+        subscribers:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            inversedBy: subscriptions
+            joinTable:
+                name: subscriptions
+                joinColumns:
+                    id:
+                        name: user_id
+                inverseJoinColumns:
+                    id:
+                        name: subscriber_id
+        subscriptions:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            mappedBy: subscribers
 #    manyToMany:
 #        groups:
 #            targetEntity: Group
