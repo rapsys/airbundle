@@ -6,8 +6,7 @@ rapsys_air:
         mail: 'airlibre@rapsys.eu'
     #Copyright
     copy:
-        long: 'Raphaël Gertz all rights reserved'
-        short: 'Copyright 2019'
+        short: 'Copyright 2019-2020'
 
 #RapsysUser configuration
 rapsys_user:
@@ -24,6 +23,12 @@ rapsys_user:
     route:
         index:
             name: 'rapsys_air'
+    #Translate replacement
+    translate: [ 'title', 'site.title', 'copy.long', 'copy.short' ]
+    #Languages replacement
+    languages:
+        en: 'English'
+        fr: 'French'
     #Contact replacement
     contact:
         name: '%rapsys_air.contact.name%'
@@ -31,78 +36,90 @@ rapsys_user:
     #Login replacement
     login:
         route:
-            index: 'site_url'
+            index: 'site.url'
         view:
             name: '@RapsysAir/form/login.html.twig'
             context:
                 title: 'Login'
-                copy_long: '%rapsys_air.copy.long%'
-                copy_short: '%rapsys_air.copy.short%'
-                site_ico: '%rapsys_air.site.ico%'
-                site_logo: '%rapsys_air.site.logo%'
-                site_png: '%rapsys_air.site.png%'
-                site_svg: '%rapsys_air.site.svg%'
-                site_title: '%rapsys_air.site.title%'
+                copy:
+                    long: '%rapsys_air.copy.long%'
+                    short: '%rapsys_air.copy.short%'
+                site:
+                    ico: '%rapsys_air.site.ico%'
+                    logo: '%rapsys_air.site.logo%'
+                    png: '%rapsys_air.site.png%'
+                    svg: '%rapsys_air.site.svg%'
+                    title: '%rapsys_air.site.title%'
+                    url: '%rapsys_air.site.url%'
     #Recover replacement
     recover:
         route:
-            index: 'site_url'
+            index: 'site.url'
             recover_mail: 'recover_url'
         view:
             name: '@RapsysAir/form/recover.html.twig'
             context:
                 title: 'Recover'
-                copy_long: '%rapsys_air.copy.long%'
-                copy_short: '%rapsys_air.copy.short%'
-                site_ico: '%rapsys_air.site.ico%'
-                site_logo: '%rapsys_air.site.logo%'
-                site_png: '%rapsys_air.site.png%'
-                site_svg: '%rapsys_air.site.svg%'
-                site_title: '%rapsys_air.site.title%'
+                copy:
+                    long: '%rapsys_air.copy.long%'
+                    short: '%rapsys_air.copy.short%'
+                site:
+                    ico: '%rapsys_air.site.ico%'
+                    logo: '%rapsys_air.site.logo%'
+                    png: '%rapsys_air.site.png%'
+                    svg: '%rapsys_air.site.svg%'
+                    title: '%rapsys_air.site.title%'
+                    url: '%rapsys_air.site.url%'
         mail:
-            subject: '%%recipient_name%% welcome back to %%site_title%%'
+            subject: 'Welcome back %%recipient_name%% to %%site.title%%'
             html: '@RapsysAir/mail/recover.html.twig'
             text: '@RapsysAir/mail/recover.text.twig'
             context:
     #Mail recover replacement
     recover_mail:
         route:
-            index: 'site_url'
+            index: 'site.url'
             recover_mail: 'recover_url'
         view:
             name: '@RapsysAir/form/recover_mail.html.twig'
             context:
                 title: 'Mail recover'
-                copy_long: '%rapsys_air.copy.long%'
-                copy_short: '%rapsys_air.copy.short%'
-                site_ico: '%rapsys_air.site.ico%'
-                site_logo: '%rapsys_air.site.logo%'
-                site_png: '%rapsys_air.site.png%'
-                site_svg: '%rapsys_air.site.svg%'
-                site_title: '%rapsys_air.site.title%'
+                copy:
+                    long: '%rapsys_air.copy.long%'
+                    short: '%rapsys_air.copy.short%'
+                site:
+                    ico: '%rapsys_air.site.ico%'
+                    logo: '%rapsys_air.site.logo%'
+                    png: '%rapsys_air.site.png%'
+                    svg: '%rapsys_air.site.svg%'
+                    title: '%rapsys_air.site.title%'
+                    url: '%rapsys_air.site.url%'
         mail:
-            subject: '%%recipient_name%% welcome back to %%site_title%%'
+            subject: 'Welcome back %%recipient_name%% to %%site.title%%'
             html: '@RapsysAir/mail/recover_mail.html.twig'
             text: '@RapsysAir/mail/recover_mail.text.twig'
             context:
     #Register replacement
     register:
         route:
-            index: 'site_url'
+            index: 'site.url'
         view:
             form: 'Rapsys\AirBundle\Form\RegisterType'
             name: '@RapsysAir/form/register.html.twig'
             context:
                 title: 'Register'
-                copy_long: '%rapsys_air.copy.long%'
-                copy_short: '%rapsys_air.copy.short%'
-                site_ico: '%rapsys_air.site.ico%'
-                site_logo: '%rapsys_air.site.logo%'
-                site_png: '%rapsys_air.site.png%'
-                site_svg: '%rapsys_air.site.svg%'
-                site_title: '%rapsys_air.site.title%'
+                copy:
+                    long: '%rapsys_air.copy.long%'
+                    short: '%rapsys_air.copy.short%'
+                site:
+                    ico: '%rapsys_air.site.ico%'
+                    logo: '%rapsys_air.site.logo%'
+                    png: '%rapsys_air.site.png%'
+                    svg: '%rapsys_air.site.svg%'
+                    title: '%rapsys_air.site.title%'
+                    url: '%rapsys_air.site.url%'
         mail:
-            subject: '%%recipient_name%% welcome to %%site_title%%'
+            subject: 'Welcome %%recipient_name%% to %%site.title%%'
             html: '@RapsysAir/mail/register.html.twig'
             text: '@RapsysAir/mail/register.text.twig'
             context:
@@ -223,29 +240,50 @@ services:
     rapsys_air.twig.bb2html:
         class: 'Rapsys\AirBundle\Twig\Bb2htmlExtension'
         tags: [ 'twig.extension' ]
+    #new TwigFilter('markdown_to_html', ['Twig\\Extra\\Markdown\\MarkdownRuntime', 'convert'], ['is_safe' => ['all']]),
+    #new TwigFilter('html_to_markdown', 'Twig\\Extra\\Markdown\\twig_html_to_markdown', ['is_safe' => ['all']]),
+    #Register twig markdown_to_html extension
+    #    #class: 'Twig\Extra\Markdown\DefaultMarkdown'
+    #rapsys_air.twig.markdown_eruse:
+    #    class: 'Twig\Extra\Markdown\DefaultMarkdown'
+    #rapsys_air.twig.markdown_runtime:
+    #    class: 'Twig\Extra\Markdown\MarkdownRuntime'
+    #    arguments: [ '@rapsys_air.twig.markdown_eruse' ]
+    #rapsys_air.markdown:
+    #    class: 'Twig\Extra\Markdown\MarkdownExtension'
+    #    tags: [ 'twig.extension' ]
+    #Register twig pack extension
+    #rapsys_pack.pack_extension:
+    #    class: 'Rapsys\PackBundle\Twig\PackExtension'
+    #    arguments: [ '@file_locator', '@service_container', '@rapsys_pack.path_package' ]
+    #    tags: [ 'twig.extension' ]
+    #Register application controller
+    Rapsys\AirBundle\Controller\ApplicationController:
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
-        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register location controller
     Rapsys\AirBundle\Controller\LocationController:
-        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
+    #Register organizer controller
+    Rapsys\AirBundle\Controller\OrganizerController:
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register session controller
     Rapsys\AirBundle\Controller\SessionController:
-        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
-    #Register application controller
-    Rapsys\AirBundle\Controller\ApplicationController:
-        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
-        tags: [ 'controller.service_arguments' ]
-    #Register user controller
-    Rapsys\AirBundle\Controller\UserController:
-        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
+    #Register snippet controller
+    Rapsys\AirBundle\Controller\SnippetController:
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
 #    Rapsys\AirBundle\Controller\ErrorController:
-#        arguments: [ '@service_container', '@router', '@rapsys_user.slugger', '@translator' ]
+#        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
 #        tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
     Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
@@ -272,6 +310,9 @@ services:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Form\SessionEditType:
+        arguments: [ '@doctrine' ]
+        tags: [ 'form.type' ]
+    Rapsys\AirBundle\Form\Extension\Type\HiddenEntityType:
         arguments: [ '@doctrine' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Command\AttributeCommand:
