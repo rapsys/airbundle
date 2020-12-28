@@ -33,9 +33,27 @@ class LocaleSubscriber implements EventSubscriberInterface {
 				//Save preferred locale in session
 				$request->getSession()->set('_locale', $preferred);
 
+				//Send vary header as current page locale depend on it
+				header('Vary: accept-language');
+
+				//Set locale
+				$request->setLocale($preferred);
+
+				//Set default locale
+				$request->setDefaultLocale($preferred);
+
+				//Get router context
+				$context = $this->router->getContext();
+
+				//Set context locale
+				$context->setParameter('_locale', $preferred);
+
+				//Set back router context
+				$this->router->setContext($context);
+
 				//Generate current route with preferred language
 				//XXX: may trigger a Symfony\Component\Routing\Exception\RouteNotFoundException if route is not found for preferred locale
-				$uri = $this->router->generate(
+				/*$uri = $this->router->generate(
 					//Current route
 					$request->get('_route'),
 					//Force preferred locale
@@ -43,7 +61,7 @@ class LocaleSubscriber implements EventSubscriberInterface {
 				);
 
 				//Regenerate route with preferred locale
-				$event->setResponse(new RedirectResponse($uri, 302));
+				$event->setResponse(new RedirectResponse($uri, 302));*/
 
 				//End process
 				return;
