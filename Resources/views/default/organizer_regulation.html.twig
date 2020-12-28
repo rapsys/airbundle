@@ -1,0 +1,284 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="dashboard">
+		<h2><a href="{{ path('rapsys_air_organizer_regulation') }}">{{ section }}</a></h2>
+		<nav>
+			<strong>{% trans %}Table of contents{% endtrans %}</strong>
+			<ul>
+				<li><a href="#preamble">Préambule</a></li>
+				<li><a href="#article_1">Article 1 : Présentation</a></li>
+				<li>
+					<a href="#article_2">Article 2 : Inscription, réunion et contribution</a>
+					<ul>
+						<li><a href="#article_2_1">Article 2.1 : Inscription</a></li>
+						<li><a href="#article_2_2">Article 2.2 : Réunion</a></li>
+						<li><a href="#article_2_3">Article 2.3 : Contribution</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#article_3">Article 3 : Répartition</a>
+					<ul>
+						<li><a href="#article_3_1">Article 3.1 : Invité</a></li>
+						<li><a href="#article_3_2">Article 3.2 : Régulier</a></li>
+						<li><a href="#article_3_3">Article 3.3 : Senior</a></li>
+						<li><a href="#article_3_4">Article 3.4 : Administrateur</a></li>
+						<li><a href="#article_3_5">Article 3.5 : Responsable</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#article_4">Article 4 : Lieux de danse, horaires et réalisation</a>
+					<ul>
+						<li><a href="#article_4_1">Article 4.1 : Lieux de danse</a></li>
+						<li><a href="#article_4_2">Article 4.2 : Horaires</a></li>
+						<li><a href="#article_4_3">Article 4.3 : Réalisation</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#article_5">Article 5 : Affichage, réservation et modifications</a>
+					<ul>
+						<li><a href="#article_5_1">Article 5.1 : Affichage</a></li>
+						<li><a href="#article_5_2">Article 5.2 : Réservation</a></li>
+						<li><a href="#article_5_3">Article 5.3 : Modification d'horaire</a></li>
+						<li><a href="#article_5_4">Article 5.4 : Modification de lieu</a></li>
+						<li><a href="#article_5_5">Article 5.5 : Actions administrateur</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="#article_6">Article 6 : Services attribution et connexes</a>
+					<ul>
+						<li>
+							<a href="#article_6_1">Article 6.1 : Service attribution</a>
+							<ul>
+								<li><a href="#article_6_1_1">Article 6.1.1 : Score</a></li>
+								<li><a href="#article_6_1_2">Article 6.1.2 : Périmètre</a></li>
+								<li><a href="#article_6_1_3">Article 6.1.3 : Premium</a></li>
+								<li><a href="#article_6_1_4">Article 6.1.4 : Hotspot</a></li>
+								<li><a href="#article_6_1_5">Article 6.1.5 : Délais de grâce</a></li>
+							</ul>
+						</li>
+						<li><a href="#article_6_2">Article 6.2 : Services connexes</a></li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+		<section>
+			<h3 id="preamble">Préambule</h3>
+			<p>Préalablement à la visite du site www.airlibre.fr, ci-après dénommé « le Site », et à l'utilisation des services qui y sont proposés, il convient de procéder à la lecture des conditions générales d'utilisation et du règlement organisateur ci-dessous exposé.</p>
+			<p>Ce règlement organisateur a pour objet de définir les modalités de mise à disposition du service de réservation de séances de Tango Argentin sur l'espace public, ci-après « le Service Réservation », du service d'affichage, ci-après « le Service Affichage », du service d'attribution, ci-après « le Service Attribution », des services connexes, ci-après « les Services Connexes » et les conditions d'utilisation de ce dernier par l'organisateur.</p>
+			<p>Tout accès au Service Réservation ou toute utilisation des services connexes suppose le respect préalable de l'ensemble des dispositions ci-dessous ainsi que leur acceptation inconditionnelle. </p>
+			<p>Dans la mesure où l'organisateur ne souhaite pas accepter tout ou partie des présentes conditions spécifiques, il lui est demandé de renoncer à tout usage du service. Le préambule fait partie des conditions générales d'utilisation. </p>
+		</section>
+		<section>
+			<h3 id="article_1">Article 1 : Présentation</h3>
+			<p>Le Service Affichage du Site est ouvert à toute personne souhaitant consulter les séances de Tango Argentin attribuées à un organisateur sur les espaces de danse public.</p>
+			<p>Le Service Réservation du Site est ouvert à toute personne avec la volonté d'assurer une séance de Tango Argentin sur un espace de danse en public tant au niveau artistique, logistique, réglementaire et sans exclure l'aspect sécurité.</p>
+			<p>Le Service Attribution du Site assure une répartition équitable entre les différents organisateurs des séances sur un créneau et un lieu.</p>
+			<p>Les Services Connexes sont mis à disposition pour améliorer l'expérience utilisateur du Site.</p>
+		</section>
+		<section>
+			<h3 id="article_2">Article 2 : Inscription, réunion et contribution</h3>
+			<section>
+				<h4 id="article_2_1">Article 2.1 : Inscription</h4>
+				<p>La personne souhaitant accéder au Service Réservation, ci-après « l'Organisateur » crée un compte sur le Site, puis soumet sa demande d'affectation à un groupe par tout moyen.</p>
+				<p>L'Organisateur joint à sa demande la liste du matériel dont il dispose de la jouissance exclusive ou partagée nécessaire à l'organisation en extérieur :</p>
+				<ul>
+					<li><strong>Système de Sonorisation suffisante</strong> ;</li>
+					<li><strong>Source sonore</strong> ;</li>
+					<li><strong>Corde</strong> ;</li>
+					<li><strong>Talc</strong> ;</li>
+					<li><strong>Balais</strong> ;</li>
+					<li><strong>Cagnotte</strong> ;</li>
+					<li><strong>Flacon de gel hydro-alcoolique</strong> ;</li>
+					<li>Raclette ;</li>
+					<li>Batterie de secours ;</li>
+					<li>Connectique.</li>
+				</ul>
+				<p>L'affectation dans un groupe est fonction de la disponibilité des matériels essentiels ci-dessus en gras, ci-après « le Matériel Essentiel ».</p>
+				<p>Chaque système de sonorisation sera enregistré de manière unique par son numéro de série Bluetooth, à défaut par le numéro de châssis et à défaut par un numéro de remplacement unique qui sera attribué.</p>
+				<p>La candidature engage le membre à mettre en commun tout lieu accessible au public sur lequel il souhaite organiser et ne pas réaliser une séance attribuée à un autre Organisateur.</p>
+			</section>
+			<section>
+				<h4 id="article_2_2">Article 2.2 : Réunion</h4>
+				<p>Des réunions publiques d'information sont réalisées en début d'année, avant l'été et après l'été, ci-après « la Réunion ».</p>
+				<p>La Réunion permet de faire un point de situation, soumettre et voter les propositions de modification du présent règlement.</p>
+				<p>La Réunion en début d'année sera planifiée dès que possible, celle avant l'été sera planifiée après une affluence de plus de 50 personnes sur une séance, celle après l'été sera planifiée après la rentrée.</p>
+			</section>
+			<section>
+				<h4 id="article_2_3">Article 2.3 : Contribution</h4>
+				<p>Une participation sera demandée aux frais de fonctionnement, sur la base du coût total annuel, réparti entre les différents Organisateurs. La contribution des Organisateurs intégrés après la collecte initiale sera provisionné pour l'année suivante.</p>
+				<p>Les frais à prévoir sont :</p>
+				<ul>
+					<li>location du serveur (actuellement 24€20 par mois) ;</li>
+					<li>nom de domaine (actuellement de 10€ par an) ;</li>
+					<li>système de secours éventuel (actuellement 4€00 par mois) ;</li>
+					<li>assurance et couverture juridique mutuelle (a acter)</li>
+				</ul>
+			</section>
+		</section>
+		<section>
+			<h3 id="article_3">Article 3 : Répartition</h3>
+			<p>Les membres seront répartis en différents groupes selon leur matériels et niveau de participation.</p>
+			<section>
+				<h4 id="article_3_1">Article 3.1 : Invité</h4>
+				<p>L'Organisateur sans matériel ou extérieur à l'Île-de-France sera affecté au groupe invité, ci-après « l'Invité ».</p>
+				<p>Il s'assure de :</p>
+				<ul>
+					<li>disposer du Matériel Essentiel sur la séance qu'il souhaite réaliser ;</li>
+					<li>avoir assisté à au moins une séance d'un autre organisateur du début à la fin sur le même lieu ;</li>
+					<li>être accompagné sur la séance d'un organisateur Senior la première fois qu'il organise sur un nouveau lieu.</li>
+				</ul>
+			</section>
+			<section>
+				<h4 id="article_3_2">Article 3.2 : Régulier</h4>
+				<p>L'Organisateur détenteur d'un matériel d'une puissance inférieure à 500W ou ne disposant pas de l'intégralité du Matériel Essentiel sera intégré au groupe régulier, ci-après « le Régulier ».</p>
+				<p>Il s'assure d' :</p>
+				<ul>
+					<li>avoir assisté à au moins une séance d'un autre organisateur du début à la fin sur le même lieu ;</li>
+					<li>être accompagné sur la séance d'un organisateur Senior la première fois qu'il organise sur un nouveau lieu.</li>
+				</ul>
+			</section>
+			<section>
+				<h4 id="article_3_3">Article 3.3 : Senior</h4>
+				<p>L'Organisateur avec matériel d'une puissance supérieure ou égale à 500W et ayant réalisé plus de 5 séances sur plus de 2 (deux) lieux sera intégré au groupe senior.</p>
+			</section>
+			<section>
+				<h4 id="article_3_4">Article 3.4 : Administrateur</h4>
+				<p>Un Senior, élu par le collège des Organisateurs ayant réalisé plus de 20 (vingt) séances sur 2 (deux) lieux différents, son mandat est remis en jeu à chaque Réunion, sera en charge de faire appliquer le présent règlement au mieux, d'informer et d'accompagner les différents Organisateurs en cas de besoin, ci-après « l'Administrateur ».</p>
+			</section>
+			<section>
+				<h4 id="article_3_5">Article 3.5 : Responsable</h4>
+				<p>La personne en gestion du Site sera chargée d'affecter les Organisateurs, après réception de leur contribution aux frais, aux différents groupes en fonction des critères ci-dessus, ci-après « le Responsable ».</p>
+			</section>
+		</section>
+		<section>
+			<h3 id="article_4">Article 4 : Lieux de danse, horaires et réalisation</h3>
+			<section>
+				<h4 id="article_4_1">Article 4.1 : Lieux de danse</h4>
+				<p>Les espaces de danse pris en compte sont :</p>
+				<ul>
+					<li>l'Opéra Garnier, ci-après « Garnier » ;</li>
+					<li>les quais de Seine dans le jardin Tino-Rossi, ci-après « Quais » ;</li>
+					<li>l'esplanade du Trocadéro, ci-après « Trocadéro » ;</li>
+					<li>la Place Colette, ci-après « Colette » ;</li>
+					<li>l'Île-aux-Cygnes, ci-après « Cygne » ;</li>
+					<li>l'esplanade de Jussieu, ci-après « Jussieu » ;</li>
+					<li>la galerie d'Orléans, ci-après « Orléans » ;</li>
+					<li>le musée d'Orsay, ci-après « Orsay » ;</li>
+					<li>le marché Saint-Honoré, ci-après « Honoré » ;</li>
+					<li>la place Igor Stravinsky, ci-après « Stravinsky » ;</li>
+					<li>le palais de Tokyo, ci-après « Tokyo » ;</li>
+					<li>le jardin des dessins dans le parc de la Villette, ci-après « Villette ».</li>
+				</ul>
+				<p>Pour Jussieu, la réservation se fera sur les Quais avec une modification de lieu une fois la séance attribuée.</p>
+				<p>Pour Tokyo, la réservation se fera sur Trocadéro avec une modification de lieu une fois la séance attribuée.</p>
+			</section>
+			<section>
+				<h4 id="article_4_2">Article 4.2 : Horaires</h4>
+				<p>Les séances en après-midi commencent à 14h et finissent à 19h par défaut.</p>
+				<p>Les séances en soirée commencent à 19h et finissent à l'heure du dernier métro par défaut, soit 1h ou 2h les vendredi, samedi et veille de jours fériés.</p>
+				<p>Les horaires seront adaptés en fonction des contraintes des différents lieux.</p>
+				<p>L'Organisateur, dépendant des transports en commun, communique lors de son inscription ses contraintes horaires, il s'assure de pouvoir rester jusqu'à 30 minutes avant l'heure du dernier métro.</p>
+				<p>L'Organisateur assure le créneau du début à la fin, il peut mettre fin au bal en cas de départ du dernier couple ou en cas de force majeure.</p>
+				<p>La séance à Garnier notamment pourra commencer à partir de 21h en cas d'empêchement sur place.</p>
+			</section>
+			<section>
+				<h4 id="article_4_3">Article 4.3 : Réalisation</h4>
+				<p>L'Organisateur procède au nettoyage de la zone de danse, le passage du balai est obligatoire pour les Quais et Trocadéro.</p>
+				<p>L'Organisateur assure un niveau sonore raisonnable de Tango Argentin sur la séance.</p>
+				<p>L'Organisateur programme par groupes de 3 ou 4 morceaux de Tango, Valse ou Milonga, maximum 3 pour la Milonga, séparé par une séparation musicale de 30 secondes à 3 minutes maximum.</p>
+				<p>L'Organisateur souhaitant programmer des séparations musicales dansantes peut les laisser jusqu'à leur terme de temps à autre.</p>
+				<p>L'Organisateur souhaitant programmer principalement avec de la musique Nuevo ou Alternative est libre d'adopter une organisation différente au niveau musical, il en sera fait mention et sera affecté au groupe Régulier.</p>
+				<p>Une pause technique de 5 (cinq) minutes peut avoir lieu une fois dans la soirée.</p>
+				<p>L'Organisateur met à disposition des danseurs une corde pour attacher les sacs, il en assure la surveillance et éloigne les personnes extérieures.</p>
+				<p>Il met à disposition une cagnotte et un flacon de gel hydro-alcoolique.</p>
+				<p>Il met à disposition du talc au sol dans une zone hors de la circulation.</p>
+			</section>
+		</section>
+		<section>
+			<h3 id="article_5">Article 5 : Affichage, réservation et modifications</h3>
+			<section>
+				<h4 id="article_5_1">Article 5.1 : Affichage</h4>
+				<p>Le Service Affichage présente un agenda des séances à venir sur 5 (cinq) semaines.</p>
+				<p>Les séances attribuées et/ou annulées sont visibles sans identification.</p>
+				<p>L'ensemble des séances attribuées, annulées, verrouillées et en attente d'attribution sont visibles après identification.</p>
+				<p>Une vue spécifique à chaque séance présente les informations de cette dernière.</p>
+			</section>
+			<section>
+				<h4 id="article_5_2">Article 5.2 : Réservation</h4>
+				<p>L'Organisateur effectue une réservation en déposant une demande sur une séance.</p>
+				<p>L'Organisateur peut annuler sa réservation à tout moment.</p>
+				<p>L'Organisateur peut annuler pour pluie une séance même réalisée, avec une pluviométrie attendue minimale de 2 mm (deux millimètres), à tout moment, elle sera considérée comme annulée 24h avant son début.</p>
+				<p>L'Organisateur peut demander l'annulation pour cas de force majeure, sur justificatif photo, auprès d'un Administrateur ou du Responsable. En cas de motif valable, elle sera considérée comme annulée 24h avant son début.</p>
+			</section>
+			<section>
+				<h4 id="article_5_3">Article 5.3 : Modification d'horaire</h4>
+				<p>Le Régulier ou Senior peut modifier les horaires d'une séance qui lui est attribuée jusqu'à son dénouement.</p>
+			</section>
+			<section>
+				<h4 id="article_5_4">Article 5.4 : Modification de lieu</h4>
+				<p>Le Senior peut déplacer une séance sur un autre lieu disponible avant son dénouement.</p>
+			</section>
+			<section>
+				<h4 id="article_5_5">Article 5.5 : Actions administrateur</h4>
+				<p>L'Administrateur peut modifier l'horaire, déplacer, annuler, annuler pour pluie, annuler de force, attribuer, auto attribuer et verrouiller une séance.</p>
+				<p>En cas d'attribution ou d'annulation forcée, le score de la réservation en question est positionnée à 42.</p>
+				<p>Chaque action administrateur devra être dûment justifiée sous peine de perte du dit statut.</p>
+			</section>
+		</section>
+		<section>
+			<h3 id="article_6">Article 6 : Services attribution et connexes</h3>
+			<p>Le Service Attribution favorise l'organisation sur l'ensemble des lieux de danse accessibles aux danseurs de tango et maintient leur disponibilité sans défavoriser les Organisateurs qui assurent les créneaux moins favorables.</p>
+			<p>Les Services Connexes sont conçu pour faciliter l'expérience utilisateur.</p>
+			<section>
+				<h4 id="article_6_1">Article 6.1 : Service attribution</h4>
+				<p>Une tâche automatisée attribue la séance, à partir de 4 (quatre) jours avant son début, à un Organisateur l'ayant réservée, en fonction des critères suivants. Elle s'exécutera toutes les 5 (cinq) minutes avec un délai initial aléatoire.</p>
+				<p>La réservation de l'Organisateur sans aucune séance prise en compte ou à défaut avec la plus ancienne sur le même lieu sera retenue.</p>
+				<p>En cas d'égalité, la réservation de l'Organisateur sans aucune séance prise en compte ou à défaut avec la plus ancienne sur l'ensemble des lieux sera retenue.</p>
+				<p>En cas d'égalité, la première réservation déposée sera retenue.</p>
+				<p>En cas d'égalité, la réservation de l'Organisateur avec le plus d'ancienneté sera retenue.</p>
+				<p>Pour ce faire, un score est calculé pour les séances sur le même lieu et un autre sur tous les lieux, ci-après « le Score », seul le premier est consigné lors de l'attribution sur chaque réservation prise en compte.</p>
+				<section>
+					<h5 id="article_6_1_1">Article 6.1.1 : Score</h5>
+					<p>Pour chaque réservation, le Score est calculé lors de l'attribution de la séance.</p>
+					<p>Pour chaque séance prise en compte de l'Organisateur un ratio est calculé, ci-après « le Ratio », le Score en est la somme.</p>
+					<p>Le Ratio est l'inverse de la distance, en nombre de jour, entre le début de la séance réservée et celle attribuée.</p>
+					<p>Soit somme (1 / valeur absolue (date séance réservée – date séance réalisée)).</p>
+				</section>
+				<section>
+					<h5 id="article_6_1_2">Article 6.1.2 : Périmètre</h5>
+					<p>Seules sont prises en compte pour le calcul du score les séances :</p>
+					<ul>
+						<li>non verrouillées ;</li>
+						<li>en après-midi et en soirée ;</li>
+						<li>attribuées et non annulées au moins 24h avant leur début ;</li>
+						<li>réalisées sur l'année glissante avant le début de la séance demandée.</li>
+					</ul>
+				</section>
+				<section>
+					<h5 id="article_6_1_3">Article 6.1.3 : Premium</h5>
+					<p>Les séances en après-midi les samedi, dimanche et jours fériés sont considérées comme premium.</p>
+					<p>Les séances en soirée le vendredi, samedi et veille de jours fériés sont considérées comme premium.</p>
+				</section>
+				<section>
+					<h5 id="article_6_1_4">Article 6.1.4 : Hotspot</h5>
+					<p>L'Opéra Garnier et les Quais sont considérés en raison de leur affluence naturelle comme des hotspots.</p>
+				</section>
+				<section>
+					<h5 id="article_6_1_5">Article 6.1.5 : Délais de grâce</h5>
+					<p>Pour une séance réservée moins de 4 (quatre) jours avant son début, le processus d'attribution commencera après un délais supplémentaire égal au 1/4 (quart) de la période entre la première réservation et le début.</p>
+					<p>L'Invité avec une séance déjà attribuée sur le même lieu moins de 30 (trente) jours avant, verra sa réservation prise en compte seulement dans les 2 (deux) jours avant le début de la séance demandée.</p>
+					<p>Le Régulier réservant une séance premium sur un hotspot, verra sa réservation prise en compte seulement dans les 3 (trois) jours avant le début de la séance demandée.</p>
+					<p>L'Organisateur avec 5 (cinq), ou moins, séances réalisées sur le lieu demandé, verra sa réservation prise en compte seulement dans les 3 (trois) jours avant le début de la séance demandée.</p>
+					<p>L'Organisateur avec un ratio premium sur non premium supérieur ou égal à 1 (un) sur le lieu demandé, verra sa réservation prise en compte seulement dans les 3 (trois) jours avant le début de la séance demandée.</p>
+					<p>L'Organisateur avec une moyenne de ratio température sur pluviométrie plus 1 (un) supérieure ou égale à celle des autres organisateurs plus 5 (cinq) sur le lieu demandé, verra sa réservation prise en compte seulement dans les 3 (trois) jours avant le début de la séance demandée.</p>
+				</section>
+			</section>
+			<section>
+				<h4 id="article_6_2">Article 6.2 : Services connexes</h4>
+				<p>Une tâche automatisée relève sur un site météo, puis consolide sur les séances, dans la mesure du possible, les prévisions de température, température ressentie, risque de pluie et pluviométrie.</p>
+				<p>Un service d'envoi de courriel pourra être mis en place pour informer des attributions.</p>
+				<p>Un service d'envoi de courriel pourra être mis en place pour informer des séances attribuées à un Organisateur suivi.</p>
+			</section>
+		</section>
+	</section>
+{% endblock %}
