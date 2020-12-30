@@ -14,7 +14,7 @@
 	<link rel="icon" type="image/svg+xml" href="{{ asset(site.svg) }}" />
 	{% for size, icon in site.png %}
 		{# Apple #}
-		{% if size in [152, 167, 180] %}
+		{% if size in [120, 152, 167, 180] %}
 			{% if size == 180 %}
 				<link rel="apple-touch-icon" href="{{ asset(icon) }}" />
 			{% endif %}
