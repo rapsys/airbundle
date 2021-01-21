@@ -10,7 +10,6 @@ use Rapsys\AirBundle\Entity\Application;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Link;
 use Rapsys\AirBundle\Entity\Location;
 
 class SessionController extends DefaultController {
@@ -666,75 +665,23 @@ class SessionController extends DefaultController {
 			],
 			'snippet' => [
 				'id' => $session['p_id'],
-				'description' => $session['p_description']
+				'description' => $session['p_description'],
+				'class' => $session['p_class'],
+				'contact' => $session['p_contact'],
+				'donate' => $session['p_donate'],
+				'link' => $session['p_link'],
+				'social' => $session['p_social']
 			],
 			'applications' => null
 		];
 
 		//With application
 		if (!empty($session['a_id'])) {
-			//Init links
-			$links = null;
-
-			//Merge array
-			if (!empty($session['i_type']) && !empty($session['i_url'])) {
-				//Extract links type
-				$session['i_type'] = explode("\n", $session['i_type']);
-
-				//Extract links url
-				$session['i_url'] = explode("\n", $session['i_url']);
-
-				//Set links array
-				$links = [];
-
-				//Iterate on links type
-				foreach($session['i_type'] as $i => $type) {
-					//Type is contact, donate or link
-					if (in_array($type, [Link::TYPE_CONTACT, Link::TYPE_DONATE, Link::TYPE_LINK])) {
-						//Set title
-						$linkTitle = $this->translator->trans(ucfirst($type));
-					}
-
-					//Type is contact
-					if ($type == Link::TYPE_CONTACT) {
-						//Set description
-						$description = $this->translator->trans('Send a message to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
-					//Type is donate
-					} elseif ($type == Link::TYPE_DONATE) {
-						//Set description
-						$description = $this->translator->trans('Donate to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
-					//Type is link
-					} elseif ($type == Link::TYPE_LINK) {
-						//Set description
-						$description = $this->translator->trans('Link to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
-					//Type is social
-					} elseif ($type == Link::TYPE_SOCIAL) {
-						//Set description
-						$description = $this->translator->trans('Consult %pseudonym% social profile', [ '%pseudonym%' => $session['au_pseudonym'] ]);
-
-						//Set title
-						$linkTitle = $this->translator->trans('Social network');
-					//Unknown type
-					} else {
-						//Throw explode
-						throw new \InvalidArgumentException('Invalid type');
-					}
-
-					//Set link entry
-					$links[$i] = [
-						'description' => $description,
-						'title' => $linkTitle,
-						'type' => $type,
-						'url' => $session['i_url'][$i]
-					];
-				}
-			}
 			$context['session']['application'] = [
 				'user' => [
 					'id' => $session['au_id'],
 					'by' => $this->translator->trans('by %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]),
-					'title' => $session['au_pseudonym'],
-					'links' => $links
+					'title' => $session['au_pseudonym']
 				],
 				'id' => $session['a_id'],
 				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
