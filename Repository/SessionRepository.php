@@ -163,12 +163,12 @@ SQL;
 			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:Link' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Link'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
 			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
-			//Delay
 			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
@@ -209,10 +209,10 @@ SELECT
 	s.application_id AS a_id,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
-	au.donation AS au_donation,
-	au.site AS au_site,
 	p.id AS p_id,
 	p.description AS p_description,
+	GROUP_CONCAT(i.type ORDER BY i.id SEPARATOR "\\n") AS i_type,
+	GROUP_CONCAT(i.url ORDER BY i.id SEPARATOR "\\n") AS i_url,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
 	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
@@ -226,6 +226,7 @@ JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
 LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN RapsysAirBundle:Link AS i ON (i.user_id = a.user_id)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 WHERE s.id = :sid
@@ -272,8 +273,8 @@ SQL;
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('au_donation', 'au_donation', 'string')
-			->addScalarResult('au_site', 'au_site', 'string')
+			->addScalarResult('i_type', 'i_type', 'string')
+			->addScalarResult('i_url', 'i_url', 'string')
 			->addScalarResult('p_id', 'p_id', 'integer')
 			->addScalarResult('p_description', 'p_description', 'text')
 			//XXX: is a string because of \n separator
@@ -327,24 +328,62 @@ SQL;
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
 
+		//Init granted sql
+		$grantSql = '';
+
+		//When granted is set
+		if (empty($granted)) {
+			//Set application and user as optional 
+			$grantSql = 'LEFT ';
+		}
+
+		//Init location sql
+		$locationSql = '';
+
+		//When location id is set
+		if (!empty($locationId)) {
+			//Add location id clause
+			$locationSql = "\n\t".'AND s.location_id = :lid';
+		}
+
 		//Set the request
-		//TODO: change as_u_* in sau_*, a_u_* in au_*, etc, see request up
-		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_id, GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_pseudonym
-			FROM RapsysAirBundle:Session AS s
-			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-			'.($granted?'':'LEFT ').'JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-			'.($granted?'':'LEFT ').'JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-			LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-			LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-			WHERE s.date BETWEEN :begin AND :end
-			'.(!empty($locationId)?'AND s.location_id = :lid':'').'
-			GROUP BY s.id
-			ORDER BY NULL';
+		$req = <<<SQL
+SELECT
+	s.id,
+	s.date,
+	s.rainrisk,
+	s.rainfall,
+	s.realfeel,
+	s.temperature,
+	s.locked,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
+	s.location_id AS l_id,
+	l.short AS l_short,
+	l.title AS l_title,
+	s.slot_id AS t_id,
+	t.title AS t_title,
+	s.application_id AS a_id,
+	a.user_id AS au_id,
+	au.pseudonym AS au_pseudonym,
+	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
+	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
+${grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+${grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
+WHERE s.date BETWEEN :begin AND :end${locationSql}
+GROUP BY s.id
+ORDER BY NULL
+SQL;
 
 		//Replace bundle entity name by table name
 		$req = str_replace(array_keys($tables), array_values($tables), $req);
@@ -362,18 +401,21 @@ SQL;
 			->addScalarResult('rainfall', 'rainfall', 'float')
 			->addScalarResult('realfeel', 'realfeel', 'float')
 			->addScalarResult('temperature', 'temperature', 'float')
+			->addScalarResult('locked', 'locked', 'datetime')
+			->addScalarResult('start', 'start', 'datetime')
+			->addScalarResult('stop', 'stop', 'datetime')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
 			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
-			->addScalarResult('a_u_id', 'a_u_id', 'integer')
-			->addScalarResult('a_u_pseudonym', 'a_u_pseudonym', 'string')
+			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
 			//XXX: is a string because of \n separator
-			->addScalarResult('as_u_id', 'as_u_id', 'string')
+			->addScalarResult('sau_id', 'sau_id', 'string')
 			//XXX: is a string because of \n separator
-			->addScalarResult('as_u_pseudonym', 'as_u_pseudonym', 'string')
+			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
 			->addIndexByScalar('id');
 
 		//Fetch result
@@ -400,7 +442,7 @@ SQL;
 		foreach($period as $date) {
 			//Init day in calendar
 			$calendar[$Ymd = $date->format('Ymd')] = [
-				'title' => $date->format('d'),
+				'title' => $translator->trans($date->format('l')).' '.$date->format('d'),
 				'class' => [],
 				'sessions' => []
 			];
@@ -428,24 +470,29 @@ SQL;
 			//Set next month days
 			if ($date->format('m') > date('m')) {
 				$calendar[$Ymd]['next'] = true;
-				$calendar[$Ymd]['class'][] = 'next';
+				#$calendar[$Ymd]['class'][] = 'next';
+			}
+
+			//Detect sunday
+			if ($date->format('w') == 0) {
+				$calendar[$Ymd]['class'][] = 'sunday';
 			}
 
 			//Iterate on each session to find the one of the day
 			foreach($res as $session) {
 				if (($sessionYmd = $session['date']->format('Ymd')) == $Ymd) {
 					//Count number of application
-					$count = count(explode("\n", $session['as_u_id']));
+					$count = count(explode("\n", $session['sau_id']));
 
 					//Compute classes
 					$class = [];
 					if (!empty($session['a_id'])) {
-						$applications = [ $session['a_u_id'] => $session['a_u_pseudonym'] ];
+						$applications = [ $session['au_id'] => $session['au_pseudonym'] ];
 						$class[] = 'granted';
-					} elseif ($count == 0) {
-						$class[] = 'orphaned';
 					} elseif ($count > 1) {
 						$class[] = 'disputed';
+					} elseif (!empty($session['locked'])) {
+						$class[] = 'locked';
 					} else {
 						$class[] = 'pending';
 					}
@@ -505,31 +552,34 @@ SQL;
 					];
 
 					//Fetch pseudonyms from session applications
-					$applications += array_combine(explode("\n", $session['as_u_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['as_u_pseudonym'])));
+					$applications += array_combine(explode("\n", $session['sau_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['sau_pseudonym'])));
+
+					//Set pseudonym
+					$pseudonym = null;
 
 					//Check that session is not granted
 					if (empty($session['a_id'])) {
 						//With location id and unique application
-						if ($locationId && $count == 1) {
-							//Set unique application pseudonym as title
-							$title = $session['as_u_pseudonym'];
-						//Without location id or multiple application
-						} else {
-							//Set location title with optional count
-							$title = $translator->trans($session['l_title']).($count > 1 ? ' ['.$count.']':'');
+						if ($count == 1) {
+							//Set unique application pseudonym
+							$pseudonym = $session['sau_pseudonym'];
 						}
 					//Session is granted
 					} else {
 						//Replace granted application
-						$applications[$session['a_u_id']] = '* '.$session['a_u_pseudonym'];
-						//Set pseudonym with optional location title and count
-						$title = $session['a_u_pseudonym'].($locationId?'':' '.$translator->trans('at '.$session['l_short'])).($count > 1 ? ' ['.$count.']':'');
+						$applications[$session['au_id']] = '* '.$session['au_pseudonym'];
+
+						//Set pseudonym
+						$pseudonym = $session['au_pseudonym'].($count > 1 ? ' ['.$count.']':'');
 					}
 
 					//Add the session
 					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
 						'id' => $session['id'],
-						'title' => $title,
+						'start' => $session['start'],
+						'stop' => $session['stop'],
+						'location' => $translator->trans($session['l_short']),
+						'pseudonym' => $pseudonym,
 						'class' => $class,
 						'slot' => self::GLYPHS[$session['t_title']],
 						'slottitle' => $translator->trans($session['t_title']),
@@ -574,24 +624,56 @@ SQL;
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
 
+		//Init user sql
+		$userJoinSql = $userWhereSql = '';
+
+		//When user id is set
+		if (!empty($userId)) {
+			//Add user join
+			$userJoinSql = 'JOIN RapsysAirBundle:Application AS sua ON (sua.session_id = s.id)'."\n";
+			//Add user id clause
+			$userWhereSql = "\n\t".'AND sua.user_id = :uid';
+		}
+
 		//Set the request
-		$req = 'SELECT s.id, s.date, s.rainrisk, s.rainfall, s.realfeel, s.temperature, s.location_id AS l_id, l.short AS l_short, l.title AS l_title, s.slot_id AS t_id, t.title AS t_title, s.application_id AS a_id, a.user_id AS a_u_id, au.pseudonym AS a_u_pseudonym, GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_id, GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\\n") AS as_u_pseudonym
-			FROM RapsysAirBundle:Session AS s
-			JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-			JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-			'.($userId?'JOIN RapsysAirBundle:Application AS sua ON (sua.session_id = s.id)':'').'
-			LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-			LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-			LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-			LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-			WHERE s.date BETWEEN :begin AND :end
-			'.($userId?'AND sua.user_id = :uid':'').'
-			GROUP BY s.id
-			ORDER BY NULL';
+		//TODO: change as_u_* in sau_*, a_u_* in au_*, etc, see request up
+		$req = <<<SQL
+SELECT
+	s.id,
+	s.date,
+	s.rainrisk,
+	s.rainfall,
+	s.realfeel,
+	s.temperature,
+	s.locked,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
+	s.location_id AS l_id,
+	l.short AS l_short,
+	l.title AS l_title,
+	s.slot_id AS t_id,
+	t.title AS t_title,
+	s.application_id AS a_id,
+	a.user_id AS au_id,
+	au.pseudonym AS au_pseudonym,
+	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
+	GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
+${userJoinSql}LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
+WHERE s.date BETWEEN :begin AND :end${userWhereSql}
+GROUP BY s.id
+ORDER BY NULL
+SQL;
 
 		//Replace bundle entity name by table name
 		$req = str_replace(array_keys($tables), array_values($tables), $req);
@@ -609,18 +691,21 @@ SQL;
 			->addScalarResult('rainfall', 'rainfall', 'float')
 			->addScalarResult('realfeel', 'realfeel', 'float')
 			->addScalarResult('temperature', 'temperature', 'float')
+			->addScalarResult('locked', 'locked', 'datetime')
+			->addScalarResult('start', 'start', 'datetime')
+			->addScalarResult('stop', 'stop', 'datetime')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
 			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
-			->addScalarResult('a_u_id', 'a_u_id', 'integer')
-			->addScalarResult('a_u_pseudonym', 'a_u_pseudonym', 'string')
+			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
 			//XXX: is a string because of \n separator
-			->addScalarResult('as_u_id', 'as_u_id', 'string')
+			->addScalarResult('sau_id', 'sau_id', 'string')
 			//XXX: is a string because of \n separator
-			->addScalarResult('as_u_pseudonym', 'as_u_pseudonym', 'string')
+			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
 			->addIndexByScalar('id');
 
 		//Fetch result
@@ -641,7 +726,7 @@ SQL;
 		foreach($period as $date) {
 			//Init day in calendar
 			$calendar[$Ymd = $date->format('Ymd')] = [
-				'title' => $date->format('d'),
+				'title' => $translator->trans($date->format('l')).' '.$date->format('d'),
 				'class' => [],
 				'sessions' => []
 			];
@@ -669,28 +754,33 @@ SQL;
 			//Set next month days
 			if ($date->format('m') > date('m')) {
 				$calendar[$Ymd]['next'] = true;
-				$calendar[$Ymd]['class'][] = 'next';
+				#$calendar[$Ymd]['class'][] = 'next';
+			}
+
+			//Detect sunday
+			if ($date->format('w') == 0) {
+				$calendar[$Ymd]['class'][] = 'sunday';
 			}
 
 			//Iterate on each session to find the one of the day
 			foreach($res as $session) {
 				if (($sessionYmd = $session['date']->format('Ymd')) == $Ymd) {
 					//Count number of application
-					$count = count(explode("\n", $session['as_u_id']));
+					$count = count(explode("\n", $session['sau_id']));
 
 					//Compute classes
 					$class = [];
 					if (!empty($session['a_id'])) {
-						$applications = [ $session['a_u_id'] => $session['a_u_pseudonym'] ];
-						if ($session['a_u_id'] == $userId) {
+						$applications = [ $session['au_id'] => $session['au_pseudonym'] ];
+						if ($session['au_id'] == $userId) {
 							$class[] = 'granted';
 						} else {
 							$class[] = 'disputed';
 						}
-					} elseif ($count == 0) {
-						$class[] = 'orphaned';
 					} elseif ($count > 1) {
 						$class[] = 'disputed';
+					} elseif (!empty($session['locked'])) {
+						$class[] = 'locked';
 					} else {
 						$class[] = 'pending';
 					}
@@ -749,16 +839,26 @@ SQL;
 						0 => $translator->trans($session['t_title']).' '.$translator->trans('at '.$session['l_title']).$translator->trans(':')
 					];
 
+					//Fetch pseudonyms from session applications
+					$applications += array_combine(explode("\n", $session['sau_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['sau_pseudonym'])));
+
+					//Set pseudonym
+					$pseudonym = null;
+
 					//Check that session is not granted
 					if (empty($session['a_id'])) {
-						//Fetch pseudonyms from session applications
-						$applications += array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
+						//With location id and unique application
+						if ($count == 1) {
+							//Set unique application pseudonym
+							$pseudonym = $session['sau_pseudonym'];
+						}
 					//Session is granted
 					} else {
-						//Fetch pseudonyms from session applications
-						$applications += array_combine(explode("\n", $session['as_u_id']), explode("\n", $session['as_u_pseudonym']));
 						//Replace granted application
-						$applications[$session['a_u_id']] = '* '.$session['a_u_pseudonym'];
+						$applications[$session['au_id']] = '* '.$session['au_pseudonym'];
+
+						//Set pseudonym
+						$pseudonym = $session['au_pseudonym'].($count > 1 ? ' ['.$count.']':'');
 					}
 
 					//Set title
@@ -767,7 +867,10 @@ SQL;
 					//Add the session
 					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
 						'id' => $session['id'],
-						'title' => $title,
+						'start' => $session['start'],
+						'stop' => $session['stop'],
+						'location' => $translator->trans($session['l_short']),
+						'pseudonym' => $pseudonym,
 						'class' => $class,
 						'slot' => self::GLYPHS[$session['t_title']],
 						'slottitle' => $translator->trans($session['t_title']),
