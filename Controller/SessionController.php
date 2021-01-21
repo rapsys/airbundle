@@ -10,6 +10,7 @@ use Rapsys\AirBundle\Entity\Application;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Link;
 use Rapsys\AirBundle\Entity\Location;
 
 class SessionController extends DefaultController {
@@ -441,6 +442,17 @@ class SessionController extends DefaultController {
 		//Set section
 		$section = $this->translator->trans('Sessions');
 
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air session list');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('sessions'),
+			$this->translator->trans('session list'),
+			$this->translator->trans('listing'),
+			$this->translator->trans('Libre Air')
+		];
+
 		//Set title
 		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
@@ -487,7 +499,9 @@ class SessionController extends DefaultController {
 			//Iterate on each day
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
-			new \DateTime('Monday this week + 5 week')
+			new \DateTime(
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+			)
 		);
 
 		//Fetch calendar
@@ -496,7 +510,7 @@ class SessionController extends DefaultController {
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->fetchTranslatedLocationByDatePeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
+		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
 
 		//Render the view
 		return $this->render('@RapsysAir/session/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
@@ -524,8 +538,24 @@ class SessionController extends DefaultController {
 		//Set section
 		$section = $this->translator->trans($session['l_title']);
 
+		//Set localization date formater
+		$intl = new \IntlDateFormatter($request->getLocale(), \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('outdoor'),
+			$this->translator->trans('Argentine Tango'),
+		];
+
+		//With granted session
+		if (!empty($session['au_id'])) {
+			$this->context['keywords'][0] = $session['au_pseudonym'];
+		}
 		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section.' - '.$this->translator->trans('Session %id%', ['%id%' => $id]);
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section.' - '.$this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
 
 		//Init context
 		$context = [];
@@ -643,12 +673,68 @@ class SessionController extends DefaultController {
 
 		//With application
 		if (!empty($session['a_id'])) {
+			//Init links
+			$links = null;
+
+			//Merge array
+			if (!empty($session['i_type']) && !empty($session['i_url'])) {
+				//Extract links type
+				$session['i_type'] = explode("\n", $session['i_type']);
+
+				//Extract links url
+				$session['i_url'] = explode("\n", $session['i_url']);
+
+				//Set links array
+				$links = [];
+
+				//Iterate on links type
+				foreach($session['i_type'] as $i => $type) {
+					//Type is contact, donate or link
+					if (in_array($type, [Link::TYPE_CONTACT, Link::TYPE_DONATE, Link::TYPE_LINK])) {
+						//Set title
+						$linkTitle = $this->translator->trans(ucfirst($type));
+					}
+
+					//Type is contact
+					if ($type == Link::TYPE_CONTACT) {
+						//Set description
+						$description = $this->translator->trans('Send a message to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
+					//Type is donate
+					} elseif ($type == Link::TYPE_DONATE) {
+						//Set description
+						$description = $this->translator->trans('Donate to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
+					//Type is link
+					} elseif ($type == Link::TYPE_LINK) {
+						//Set description
+						$description = $this->translator->trans('Link to %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]);
+					//Type is social
+					} elseif ($type == Link::TYPE_SOCIAL) {
+						//Set description
+						$description = $this->translator->trans('Consult %pseudonym% social profile', [ '%pseudonym%' => $session['au_pseudonym'] ]);
+
+						//Set title
+						$linkTitle = $this->translator->trans('Social network');
+					//Unknown type
+					} else {
+						//Throw explode
+						throw new \InvalidArgumentException('Invalid type');
+					}
+
+					//Set link entry
+					$links[$i] = [
+						'description' => $description,
+						'title' => $linkTitle,
+						'type' => $type,
+						'url' => $session['i_url'][$i]
+					];
+				}
+			}
 			$context['session']['application'] = [
 				'user' => [
 					'id' => $session['au_id'],
+					'by' => $this->translator->trans('by %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]),
 					'title' => $session['au_pseudonym'],
-					'donation' => $session['au_donation'],
-					'site' => $session['au_site']
+					'links' => $links
 				],
 				'id' => $session['a_id'],
 				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
@@ -701,7 +787,9 @@ class SessionController extends DefaultController {
 			//Iterate on each day
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
-			new \DateTime('Monday this week + 5 week')
+			new \DateTime(
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+			)
 		);
 
 		//Fetch locations
