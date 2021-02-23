@@ -34,22 +34,22 @@ class LocaleSubscriber implements EventSubscriberInterface {
 				$request->getSession()->set('_locale', $preferred);
 
 				//Send vary header as current page locale depend on it
-				header('Vary: accept-language');
+				#header('Vary: accept-language');
 
 				//Set locale
-				$request->setLocale($preferred);
+				#$request->setLocale($preferred);
 
 				//Set default locale
-				$request->setDefaultLocale($preferred);
+				#$request->setDefaultLocale($preferred);
 
 				//Get router context
-				$context = $this->router->getContext();
+				#$context = $this->router->getContext();
 
 				//Set context locale
-				$context->setParameter('_locale', $preferred);
+				#$context->setParameter('_locale', $preferred);
 
 				//Set back router context
-				$this->router->setContext($context);
+				#$this->router->setContext($context);
 
 				//End process
 				return;
