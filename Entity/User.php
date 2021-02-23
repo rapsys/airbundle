@@ -5,7 +5,8 @@ namespace Rapsys\AirBundle\Entity;
 
 use Rapsys\AirBundle\Entity\Application;
 use Rapsys\AirBundle\Entity\Group;
-use Rapsys\AirBundle\Entity\Vote;
+use Rapsys\AirBundle\Entity\Link;
+use Rapsys\AirBundle\Entity\Snippet;
 use Rapsys\UserBundle\Entity\User as BaseUser;
 
 class User extends BaseUser {
@@ -13,16 +14,6 @@ class User extends BaseUser {
 	 * @var string
 	 */
 	protected $phone;
-
-	/**
-	 * @var string
-	 */
-	protected $donation;
-
-	/**
-	 * @var string
-	 */
-	protected $site;
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
@@ -224,7 +215,7 @@ class User extends BaseUser {
 	 *
 	 * @return User
 	 */
-	public function addSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
+	public function addSnippet(Snippet $snippet) {
 		$this->snippets[] = $snippet;
 
 		return $this;
@@ -235,7 +226,7 @@ class User extends BaseUser {
 	 *
 	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
 	 */
-	public function removeSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
+	public function removeSnippet(Snippet $snippet) {
 		$this->snippets->removeElement($snippet);
 	}
 
