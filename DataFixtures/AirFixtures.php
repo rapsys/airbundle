@@ -258,6 +258,26 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 				'latitude' => 48.892503,
 				'longitude' => 2.389300,
 				'hotspot' => false
+			],
+			[
+				'title' => 'Louvre palace',
+				'short' => 'Louvre',
+				'address' => 'Quai François Mitterrand',
+				'zipcode' => '75001',
+				'city' => 'Paris',
+				'latitude' => 48.860386,
+				'longitude' => 2.332611,
+				'hotspot' => false
+			],
+			[
+				'title' => 'Monde garden',
+				'short' => 'Monde',
+				'address' => '63 avenue Pierre Mendès-France',
+				'zipcode' => '75013',
+				'city' => 'Paris',
+				'latitude' => 48.840451,
+				'longitude' => 2.367638,
+				'hotspot' => false
 			]
 		];
 
