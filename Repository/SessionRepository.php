@@ -163,7 +163,6 @@ SQL;
 			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
-			'RapsysAirBundle:Link' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Link'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
 			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
@@ -207,12 +206,16 @@ SELECT
 	s.slot_id AS t_id,
 	t.title AS t_title,
 	s.application_id AS a_id,
+	a.canceled AS a_canceled,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
 	p.id AS p_id,
 	p.description AS p_description,
-	GROUP_CONCAT(i.type ORDER BY i.id SEPARATOR "\\n") AS i_type,
-	GROUP_CONCAT(i.url ORDER BY i.id SEPARATOR "\\n") AS i_url,
+	p.class AS p_class,
+	p.contact AS p_contact,
+	p.donate AS p_donate,
+	p.link AS p_link,
+	p.profile AS p_profile,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
 	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
@@ -226,7 +229,6 @@ JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
 LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:Link AS i ON (i.user_id = a.user_id)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 WHERE s.id = :sid
@@ -271,12 +273,16 @@ SQL;
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
+			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('i_type', 'i_type', 'string')
-			->addScalarResult('i_url', 'i_url', 'string')
 			->addScalarResult('p_id', 'p_id', 'integer')
 			->addScalarResult('p_description', 'p_description', 'text')
+			->addScalarResult('p_class', 'p_class', 'text')
+			->addScalarResult('p_contact', 'p_contact', 'text')
+			->addScalarResult('p_donate', 'p_donate', 'text')
+			->addScalarResult('p_link', 'p_link', 'text')
+			->addScalarResult('p_profile', 'p_profile', 'text')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sa_id', 'sa_id', 'string')
 			//XXX: is a string because of \n separator
@@ -338,7 +344,7 @@ SQL;
 
 		//When granted is set
 		if (empty($granted)) {
-			//Set application and user as optional 
+			//Set application and user as optional
 			$grantSql = 'LEFT ';
 		}
 
@@ -369,6 +375,7 @@ SELECT
 	s.slot_id AS t_id,
 	t.title AS t_title,
 	s.application_id AS a_id,
+	a.canceled AS a_canceled,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
 	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
@@ -410,6 +417,7 @@ SQL;
 			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
+			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
 			//XXX: is a string because of \n separator
@@ -488,7 +496,11 @@ SQL;
 					$class = [];
 					if (!empty($session['a_id'])) {
 						$applications = [ $session['au_id'] => $session['au_pseudonym'] ];
-						$class[] = 'granted';
+						if (!empty($session['a_canceled'])) {
+							$class[] = 'canceled';
+						} else {
+							$class[] = 'granted';
+						}
 					} elseif ($count > 1) {
 						$class[] = 'disputed';
 					} elseif (!empty($session['locked'])) {
@@ -574,7 +586,7 @@ SQL;
 					}
 
 					//Add the session
-					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
+					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%05d', $session['id'])] = [
 						'id' => $session['id'],
 						'start' => $session['start'],
 						'stop' => $session['stop'],
