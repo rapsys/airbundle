@@ -37,6 +37,7 @@ class WeatherCommand extends DoctrineCommand {
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/hourly-weather-forecast/179146_pc?day=',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/hourly-weather-forecast/179148_pc?day=',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/hourly-weather-forecast/179150_pc?day=',
+			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/hourly-weather-forecast/179154_pc?day=',
 			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/hourly-weather-forecast/179156_pc?day=',
 			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/hourly-weather-forecast/179160_pc?day=',
 			75116 => 'https://www.accuweather.com/en/fr/paris-16-passy/75116/hourly-weather-forecast/179246_pc?day='
@@ -48,6 +49,7 @@ class WeatherCommand extends DoctrineCommand {
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/daily-weather-forecast/179146_pc',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/daily-weather-forecast/179148_pc',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/daily-weather-forecast/179150_pc',
+			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/daily-weather-forecast/179154_pc',
 			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/daily-weather-forecast/179156_pc',
 			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/daily-weather-forecast/179160_pc',
 			75116 => 'https://www.accuweather.com/en/fr/paris-16-passy/75116/daily-weather-forecast/179246_pc'
