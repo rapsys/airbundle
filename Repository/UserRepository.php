@@ -10,11 +10,11 @@ use Doctrine\ORM\Query\ResultSetMapping;
  */
 class UserRepository extends \Doctrine\ORM\EntityRepository {
 	/**
-	 * Find users with translated highest group and title
+	 * Find users with translated highest group and civility
 	 *
 	 * @param $translator The TranslatorInterface instance
 	 */
-	public function findAllWithTranslatedGroupAndTitle(TranslatorInterface $translator) {
+	public function findAllWithTranslatedGroupAndCivility(TranslatorInterface $translator) {
 		//Get entity manager
 		$em = $this->getEntityManager();
 
@@ -27,7 +27,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		$tables = [
 			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
-			'RapsysAirBundle:Title' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Title'), $dp),
+			'RapsysAirBundle:Civility' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Civility'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
 		];
 
@@ -35,7 +35,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		$req = 'SELECT a.id, a.forename, a.surname, a.t_id, a.t_short, a.t_title, a.g_id, a.g_title FROM (
 			SELECT u.id, u.forename, u.surname, t.id AS t_id, t.short AS t_short, t.title AS t_title, g.id AS g_id, g.title AS g_title
 			FROM RapsysAirBundle:User AS u
-			JOIN RapsysAirBundle:Title AS t ON (t.id = u.title_id)
+			JOIN RapsysAirBundle:Civility AS t ON (t.id = u.civility_id)
 			LEFT JOIN RapsysAirBundle:GroupUser AS gu ON (gu.user_id = u.id)
 			LEFT JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
 			ORDER BY g.id DESC, NULL LIMIT '.PHP_INT_MAX.'
@@ -124,12 +124,12 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 	}
 
 	/**
-	 * Find all organizer grouped by translated group
+	 * Find all users grouped by translated group
 	 *
 	 * @param $translator The TranslatorInterface instance
-	 * @return array|null The organizer array or null
+	 * @return array|null The user array or null
 	 */
-	public function findOrganizerGroupedByGroup(TranslatorInterface $translator) {
+	public function findUserGroupedByTranslatedGroup(TranslatorInterface $translator) {
 		//Get entity manager
 		$em = $this->getEntityManager();
 
@@ -201,28 +201,6 @@ SQL;
 			//Set data
 			$ret[$group][$data['id']] = $data['pseudonym'];
 		}
-
-		//Send result
-		return $ret;
-
-		header('Content-Type: text/plain');
-		var_dump($ret);
-		exit;
-
-		//Get entity manager
-		$em = $this->getEntityManager();
-
-		//Fetch sessions
-		$ret = $this->getEntityManager()
-			->createQuery('SELECT u.id, u.pseudonym, g.title FROM RapsysAirBundle:User u JOIN RapsysAirBundle:GroupUser gu WITH gu.user = u.id JOIN RapsysAirBundle:Group g WITH g.id = gu.group GROUP BY u.id ORDER BY g.id DESC')
-			->getResult();
-
-		header('Content-Type: text/plain');
-		var_dump($ret);
-		exit;
-
-		//Process result
-		$ret = array_column($ret, 'id', 'pseudonym');
 
 		//Send result
 		return $ret;
