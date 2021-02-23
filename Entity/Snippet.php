@@ -20,9 +20,34 @@ class Snippet {
 	protected $locale;
 
 	/**
-	 * @var text
+	 * @var string
 	 */
 	protected $description;
+
+	/**
+	 * @var string
+	 */
+	protected $class;
+
+	/**
+	 * @var string
+	 */
+	protected $contact;
+
+	/**
+	 * @var string
+	 */
+	protected $donate;
+
+	/**
+	 * @var string
+	 */
+	protected $link;
+
+	/**
+	 * @var string
+	 */
+	protected $profile;
 
 	/**
 	 * @var \DateTime
@@ -98,11 +123,121 @@ class Snippet {
 	}
 
 	/**
+	 * Set class
+	 *
+	 * @param string $class
+	 *
+	 * @return Snippet
+	 */
+	public function setClass($class) {
+		$this->class = $class;
+
+		return $this;
+	}
+
+	/**
+	 * Get class
+	 *
+	 * @return string
+	 */
+	public function getClass() {
+		return $this->class;
+	}
+
+	/**
+	 * Set contact
+	 *
+	 * @param string $contact
+	 *
+	 * @return Snippet
+	 */
+	public function setContact($contact) {
+		$this->contact = $contact;
+
+		return $this;
+	}
+
+	/**
+	 * Get contact
+	 *
+	 * @return string
+	 */
+	public function getContact() {
+		return $this->contact;
+	}
+
+	/**
+	 * Set donate
+	 *
+	 * @param string $donate
+	 *
+	 * @return Snippet
+	 */
+	public function setDonate($donate) {
+		$this->donate = $donate;
+
+		return $this;
+	}
+
+	/**
+	 * Get donate
+	 *
+	 * @return string
+	 */
+	public function getDonate() {
+		return $this->donate;
+	}
+
+	/**
+	 * Set link
+	 *
+	 * @param string $link
+	 *
+	 * @return Snippet
+	 */
+	public function setLink($link) {
+		$this->link = $link;
+
+		return $this;
+	}
+
+	/**
+	 * Get link
+	 *
+	 * @return string
+	 */
+	public function getLink() {
+		return $this->link;
+	}
+
+	/**
+	 * Set profile
+	 *
+	 * @param string $profile
+	 *
+	 * @return Snippet
+	 */
+	public function setProfile($profile) {
+		$this->profile = $profile;
+
+		return $this;
+	}
+
+	/**
+	 * Get profile
+	 *
+	 * @return string
+	 */
+	public function getProfile() {
+		return $this->profile;
+	}
+
+	/**
 	 * Set created
 	 *
 	 * @param \DateTime $created
 	 *
-	 * @return User
+	 * @return Snippet
 	 */
 	public function setCreated($created) {
 		$this->created = $created;
@@ -124,7 +259,7 @@ class Snippet {
 	 *
 	 * @param \DateTime $updated
 	 *
-	 * @return User
+	 * @return Snippet
 	 */
 	public function setUpdated($updated) {
 		$this->updated = $updated;
@@ -143,6 +278,10 @@ class Snippet {
 
 	/**
 	 * Set location
+	 *
+	 * @param Location $location
+	 *
+	 * @return Snippet
 	 */
 	public function setLocation(Location $location) {
 		$this->location = $location;
@@ -152,6 +291,8 @@ class Snippet {
 
 	/**
 	 * Get location
+	 *
+	 * @return Location
 	 */
 	public function getLocation() {
 		return $this->location;
@@ -159,6 +300,10 @@ class Snippet {
 
 	/**
 	 * Set user
+	 *
+	 * @param User $user
+	 *
+	 * @return Snippet
 	 */
 	public function setUser(User $user) {
 		$this->user = $user;
@@ -168,6 +313,8 @@ class Snippet {
 
 	/**
 	 * Get user
+	 *
+	 * @return User
 	 */
 	public function getUser() {
 		return $this->user;
