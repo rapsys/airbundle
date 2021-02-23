@@ -13,10 +13,7 @@ class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
 		return parent::buildForm($builder, $options)
-			#TODO: add url ? add text ?
-			->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'constraints' => [new NotBlank(['message' => 'Please provide your phone'])]])
-			->add('donation', UrlType::class, ['attr' => ['placeholder' => 'Your donation link']])
-			->add('site', UrlType::class, ['attr' => ['placeholder' => 'Your website']]);
+			->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'required' => false]);
 	}
 
 	/**
