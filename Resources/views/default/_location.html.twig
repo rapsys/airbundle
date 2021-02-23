@@ -1,0 +1,48 @@
+{# Display locations calendar #}
+{% if locations is defined and locations %}
+	<article class="location">
+		<header>
+			<h2><a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a></h2>
+			{% if forms.snippets is defined %}
+				<p>{% trans %}Organizer's snippet by dance space{% endtrans %}</p>
+			{% else %}
+				<p>{% trans %}Libre Air location list{% endtrans %}</p>
+			{% endif %}
+		</header>
+		<div class="panel">
+			<div class="grid four">
+				{% for id, title in locations %}
+					<article class="cell">
+						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
+						{% if forms.snippets is defined and forms.snippets[id] is defined and forms.snippets[id] %}
+							{{ form_start(forms.snippets[id]) }}
+								<div>
+									{{ form_row(forms.snippets[id].description) }}
+
+									{{ form_row(forms.snippets[id].class) }}
+
+									{{ form_row(forms.snippets[id].contact) }}
+
+									{{ form_row(forms.snippets[id].donate) }}
+
+									{{ form_row(forms.snippets[id].link) }}
+
+									{{ form_row(forms.snippets[id].profile) }}
+
+									{{ form_row(forms.snippets[id].submit) }}
+
+									{% if forms.snippets[id].delete is defined %}
+										{{ form_row(forms.snippets[id].delete) }}
+									{% endif %}
+								</div>
+
+								{# render csrf token etc .#}
+								<footer style="display:none">{{ form_rest(forms.snippets[id]) }}</footer>
+							{{ form_end(forms.snippets[id]) }}
+						{% endif %}
+					</article>
+				{% endfor %}
+			</div>
+		</div>
+	</article>
+{% endif %}
