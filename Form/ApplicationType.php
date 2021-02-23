@@ -46,7 +46,7 @@ class ApplicationType extends AbstractType {
 
 		//Add extra user field
 		if (!empty($options['admin'])) {
-			$users = $this->doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndTitle($this->translator);
+			$users = $this->doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator);
 			$form->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $users, 'data' => $options['user'], 'choice_translation_domain' => false]);
 		}
 
