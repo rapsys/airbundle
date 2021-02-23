@@ -9,8 +9,14 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
 
 class LogoutSuccessHandler implements LogoutSuccessHandlerInterface {
+	/**
+	 * {@inheritdoc}
+	 */
 	protected $router;
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function __construct(RouterInterface $router) {
 		$this->router = $router;
 	}
