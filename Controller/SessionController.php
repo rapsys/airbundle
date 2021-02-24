@@ -3,6 +3,7 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -24,7 +25,7 @@ class SessionController extends DefaultController {
 	 *
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
-	public function edit(Request $request, $id) {
+	public function edit(Request $request, $id): Response {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
@@ -55,8 +56,8 @@ class SessionController extends DefaultController {
 		//Set now
 		$now = new \DateTime('now');
 
-		//Create SessionEditType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\SessionEditType', null, [
+		//Create SessionType form
+		$form = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
 			//Set the action
 			'action' => $this->generateUrl('rapsys_air_session_edit', [ 'id' => $id ]),
 			//Set the form attribute
@@ -434,7 +435,7 @@ class SessionController extends DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function index(Request $request) {
+	public function index(Request $request): Response {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
@@ -454,42 +455,6 @@ class SessionController extends DefaultController {
 
 		//Set title
 		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-		//Init context
-		$context = [];
-
-		//Create application form for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
-			//Create ApplicationType form
-			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_air_application_add'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ],
-				//Set admin
-				'admin' => $this->isGranted('ROLE_ADMIN'),
-				//Set default user to current
-				'user' => $this->getUser()->getId(),
-				//Set default slot to evening
-				//XXX: default to Evening (3)
-				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
-			]);
-
-			//Add form to context
-			$context['application'] = $application->createView();
-		//Create login form for anonymous
-		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-			//Create ApplicationType form
-			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_user_login'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ]
-			]);
-
-			//Add form to context
-			$context['login'] = $login->createView();
-		}
 
 		//Compute period
 		$period = new \DatePeriod(
@@ -512,7 +477,7 @@ class SessionController extends DefaultController {
 		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
 
 		//Render the view
-		return $this->render('@RapsysAir/session/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
+		return $this->render('@RapsysAir/session/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
 	}
 
 	/**
@@ -525,7 +490,7 @@ class SessionController extends DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function view(Request $request, $id) {
+	public function view(Request $request, $id): Response {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
@@ -556,13 +521,10 @@ class SessionController extends DefaultController {
 		//Set title
 		$title = $this->translator->trans($this->config['site']['title']).' - '.$section.' - '.$this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
 
-		//Init context
-		$context = [];
-
 		//Create application form for role_guest
 		if ($this->isGranted('ROLE_GUEST')) {
 			//Create ApplicationType form
-			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+			$applicationForm = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
 				//Set the action
 				'action' => $this->generateUrl('rapsys_air_application_add'),
 				//Set the form attribute
@@ -578,13 +540,13 @@ class SessionController extends DefaultController {
 			]);
 
 			//Add form to context
-			$context['application'] = $application->createView();
+			$this->context['forms']['application'] = $applicationForm->createView();
 
 			//Set now
 			$now = new \DateTime('now');
 
-			//Create SessionEditType form
-			$session_edit = $this->createForm('Rapsys\AirBundle\Form\SessionEditType', null, [
+			//Create SessionType form
+			$sessionForm = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
 				//Set the action
 				'action' => $this->generateUrl('rapsys_air_session_edit', [ 'id' => $id ]),
 				//Set the form attribute
@@ -612,19 +574,7 @@ class SessionController extends DefaultController {
 			]);
 
 			//Add form to context
-			$context['session_edit'] = $session_edit->createView();
-		//Create login form for anonymous
-		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-			//Create ApplicationType form
-			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_user_login'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ]
-			]);
-
-			//Add form to context
-			$context['login'] = $login->createView();
+			$this->context['forms']['session'] = $sessionForm->createView();
 		}
 
 		//Add session in context
@@ -670,7 +620,7 @@ class SessionController extends DefaultController {
 				'contact' => $session['p_contact'],
 				'donate' => $session['p_donate'],
 				'link' => $session['p_link'],
-				'social' => $session['p_social']
+				'profile' => $session['p_profile']
 			],
 			'applications' => null
 		];
@@ -684,6 +634,7 @@ class SessionController extends DefaultController {
 					'title' => $session['au_pseudonym']
 				],
 				'id' => $session['a_id'],
+				'canceled' => $session['a_canceled'],
 				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
 			];
 		}
