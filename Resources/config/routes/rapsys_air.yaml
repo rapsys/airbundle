@@ -28,6 +28,34 @@ rapsys_air_terms_of_service:
     controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
+rapsys_air_frequently_asked_questions:
+    path:
+        en: '/en/frequently-asked-questions'
+        fr: '/foire-aux-questions'
+    controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
+    methods: GET
+
+rapsys_air_location:
+    path:
+        en: '/en/location'
+        fr: '/emplacement'
+    controller: Rapsys\AirBundle\Controller\LocationController::index
+    methods: GET
+
+rapsys_air_location_add:
+    path:
+        en: '/en/location'
+        fr: '/emplacement'
+    controller: Rapsys\AirBundle\Controller\LocationController::add
+    methods: POST
+
+rapsys_air_location_edit:
+    path:
+        en: '/en/location/{id<\d+>}'
+        fr: '/emplacement/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\LocationController::edit
+    methods: POST
+
 rapsys_air_location_view:
     path:
         en: '/en/location/{id<\d+>}'
@@ -77,18 +105,18 @@ rapsys_air_snippet_edit:
     controller: Rapsys\AirBundle\Controller\SnippetController::edit
     methods: POST
 
-rapsys_air_organizer:
+rapsys_air_user:
     path:
-        en: '/en/organizer'
-        fr: '/organisateur'
-    controller: Rapsys\AirBundle\Controller\OrganizerController::index
+        en: '/en/user'
+        fr: '/utilisateur'
+    controller: Rapsys\AirBundle\Controller\UserController::index
     methods: GET
 
-rapsys_air_organizer_view:
+rapsys_air_user_view:
     path:
-        en: '/en/organizer/{id<\d+>}'
-        fr: '/organisateur/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\OrganizerController::view
+        en: '/en/user/{id<\d+>}'
+        fr: '/utilisateur/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\UserController::view
     methods: GET
 
 rapsys_user_login:
