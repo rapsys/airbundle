@@ -1,7 +1,10 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 	<section id="form">
-		<h2><a href="{{ path('rapsys_air_contact') }}">{{ section }}</a></h2>
+		<header>
+			<h2><a href="{{ path('rapsys_air_contact') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
 		{% if sent %}
 			<p class="message notice">{% trans %}Your message has been sent{% endtrans %}</p>
 		{% else %}
