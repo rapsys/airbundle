@@ -1,7 +1,7 @@
-Rapsys\AirBundle\Entity\Title:
+Rapsys\AirBundle\Entity\Civility:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\TitleRepository
-    table: titles
+    #repositoryClass: Rapsys\AirBundle\Repository\CivilityRepository
+    table: civilities
     fields:
         short:
             type: string
@@ -9,4 +9,4 @@ Rapsys\AirBundle\Entity\Title:
     oneToMany:
         users:
             targetEntity: User
-            mappedBy: title
+            mappedBy: civility
