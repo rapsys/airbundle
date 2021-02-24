@@ -1,0 +1,27 @@
+<section>
+	<h2>{% trans %}Modify{% endtrans %}</h2>
+	{{ form_start(forms.location) }}
+		<div>
+			{{ form_row(forms.location.title) }}
+
+			{{ form_row(forms.location.short) }}
+
+			{{ form_row(forms.location.address) }}
+
+			{{ form_row(forms.location.zipcode) }}
+
+			{{ form_row(forms.location.city) }}
+
+			{{ form_row(forms.location.latitude) }}
+
+			{{ form_row(forms.location.longitude) }}
+
+			{{ form_row(forms.location.hotspot) }}
+
+			{{ form_row(forms.location.submit) }}
+		</div>
+
+		{# render csrf token etc .#}
+		<footer style="display:none">{{ form_rest(forms.location) }}</footer>
+	{{ form_end(forms.location) }}
+</section>
