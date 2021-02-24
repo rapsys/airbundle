@@ -10,23 +10,25 @@
 	{% if keywords is defined and keywords %}
 		<meta name="keywords" content="{{ keywords|join(', ') }}" />
 	{% endif %}
-	<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site.ico) }}" />
-	<link rel="icon" type="image/svg+xml" href="{{ asset(site.svg) }}" />
-	{% for size, icon in site.png %}
-		{# Apple #}
-		{% if size in [120, 152, 167, 180] %}
-			{% if size == 180 %}
-				<link rel="apple-touch-icon" href="{{ asset(icon) }}" />
+	{% if site is defined and site %}
+		<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site.ico) }}" />
+		<link rel="icon" type="image/svg+xml" href="{{ asset(site.svg) }}" />
+		{% for size, icon in site.png %}
+			{# Apple #}
+			{% if size in [120, 152, 167, 180] %}
+				{% if size == 180 %}
+					<link rel="apple-touch-icon" href="{{ asset(icon) }}" />
+				{% endif %}
+				<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
+			{# Windows #}
+			{% elseif size in [70, 150, 310] %}
+				<meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ asset(icon) }}" />
+			{# Others #}
+			{% else %}
+				<link rel="icon" type="image/png" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
 			{% endif %}
-			<link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
-		{# Windows #}
-		{% elseif size in [70, 150, 310] %}
-			<meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ asset(icon) }}" />
-		{# Others #}
-		{% else %}
-			<link rel="icon" type="image/png" sizes="{{ size }}x{{ size }}" href="{{ asset(icon) }}" />
-		{% endif %}
-	{% endfor %}
+		{% endfor %}
+	{% endif %}
 	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
 	{% stopwatch 'stylesheet' %}
 		{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,screen}.css' %}
@@ -53,15 +55,18 @@
 {% block body %}
 	{% block header %}
 		<header id="header">
-			{% block header_title %}<h1><a href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo) }}" alt="{{ site.title }}" width="171" height="32" /></a></h1>{% endblock %}
+			{% if site is defined and site %}
+				{% block header_title %}<h1><a href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo) }}" alt="{{ site.title }}" width="171" height="32" /></a></h1>{% endblock %}
+			{% endif %}
 			{% block header_nav %}
 				<nav>
 					<h2>{% trans %}Navigation{% endtrans %}</h2>
 					<ul>
+						<li><a href="{{ path('rapsys_air') }}">{% trans %}Home{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_organizer') }}">{% trans %}Organizers{% endtrans %}</a></li>
 						{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
 							<li><a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a></li>
 						{% else %}
@@ -110,14 +115,22 @@
 	{% endblock %}
 	{% block footer %}
 		<footer id="footer">
-			<span>&nbsp;</span>
-			<details><summary>{{ copy.long }}</summary><span>{{ copy.short }}</span></details>
+			{% if copy is defined and copy %}
+				<a href="{{ copy.link }}" title="{{ copy.title }}" rel="author">{{ copy.by }}</a>
+				<details><summary>{{ copy.long }}</summary><span>{{ copy.short }}</span></details>
+			{% endif %}
+			<a href="{{ path('rapsys_air_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a>
 			{% if alternates is defined and alternates %}
-				<ul>
-					{% for alternate in alternates %}
-						<li><a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a></li>
-					{% endfor %}
-				</ul>
+				{% if alternates|length > 1 %}
+					<ul>
+						{% for alternate in alternates %}
+							<li><a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a></li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					{% set alternate = alternates|first %}
+					<a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a>
+				{% endif %}
 			{% else %}
 				<span>&nbsp;</span>
 			{% endif %}
