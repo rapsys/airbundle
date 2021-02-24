@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -25,7 +26,10 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 
 class DefaultController {
-	use ControllerTrait;
+	use ControllerTrait {
+		//Rename render as _render
+		render as protected _render;
+	}
 
 	///Config array
 	protected $config;
@@ -67,8 +71,11 @@ class DefaultController {
 		//Set the context
 		$this->context = [
 			'copy' => [
+				'by' => $translator->trans($this->config['copy']['by']),
+				'link' => $this->config['copy']['link'],
 				'long' => $translator->trans($this->config['copy']['long']),
-				'short' => $translator->trans($this->config['copy']['short'])
+				'short' => $translator->trans($this->config['copy']['short']),
+				'title' => $this->config['copy']['title']
 			],
 			'site' => [
 				'ico' => $this->config['site']['ico'],
@@ -79,7 +86,8 @@ class DefaultController {
 				'url' => $router->generate($this->config['site']['url']),
 			],
 			'canonical' => null,
-			'alternates' => []
+			'alternates' => [],
+			'forms' => []
 		];
 
 		//Get current locale
@@ -139,7 +147,7 @@ class DefaultController {
 	 *
 	 * @return Response The rendered view or redirection
 	 */
-	public function contact(Request $request, MailerInterface $mailer) {
+	public function contact(Request $request, MailerInterface $mailer): Response {
 		//Set section
 		$section = $this->translator->trans('Contact');
 
@@ -229,7 +237,7 @@ class DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function index(Request $request) {
+	public function index(Request $request): Response {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
@@ -251,42 +259,6 @@ class DefaultController {
 		//Set title
 		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
-		//Init context
-		$context = [];
-
-		//Create application form for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
-			//Create ApplicationType form
-			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_air_application_add'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ],
-				//Set admin
-				'admin' => $this->isGranted('ROLE_ADMIN'),
-				//Set default user to current
-				'user' => $this->getUser()->getId(),
-				//Set default slot to evening
-				//XXX: default to Evening (3)
-				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
-			]);
-
-			//Add form to context
-			$context['application'] = $application->createView();
-		//Create login form for anonymous
-		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-			//Create ApplicationType form
-			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_user_login'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ]
-			]);
-
-			//Add form to context
-			$context['login'] = $login->createView();
-		}
-
 		//Compute period
 		$period = new \DatePeriod(
 			//Start from first monday of week
@@ -294,7 +266,9 @@ class DefaultController {
 			//Iterate on each day
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
-			new \DateTime('Monday this week + 5 week')
+			new \DateTime(
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+			)
 		);
 
 		//Fetch calendar
@@ -302,10 +276,19 @@ class DefaultController {
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period/*, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED')*/);
+		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
 
 		//Render the view
-		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$context+$this->context);
+		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+
+		//Set Cache-Control must-revalidate directive
+		#$response->setPublic(true);
+		#$response->setMaxAge(300);
+		#$response->mustRevalidate();
+		##$response->setCache(['public' => true, 'max_age' => 300]);
+
+		//Return the response
+		#return $response;
 	}
 
 	/**
@@ -315,7 +298,7 @@ class DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function organizerRegulation() {
+	public function organizerRegulation(): Response {
 		//Set section
 		$section = $this->translator->trans('Organizer regulation');
 
@@ -342,7 +325,7 @@ class DefaultController {
 	 *
 	 * @return Response The rendered view
 	 */
-	public function termsOfService() {
+	public function termsOfService(): Response {
 		//Set section
 		$section = $this->translator->trans('Terms of service');
 
@@ -363,11 +346,88 @@ class DefaultController {
 	}
 
 	/**
+	 * The frequently asked questions page
+	 *
+	 * @desc Display the frequently asked questions
+	 *
+	 * @return Response The rendered view
+	 */
+	public function frequentlyAskedQuestions(): Response {
+		//Set section
+		$section = $this->translator->trans('Frequently asked questions');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air frequently asked questions');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('frequently asked questions'),
+			$this->translator->trans('faq'),
+			$this->translator->trans('Libre Air')
+		];
+
+		//Set title
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+
+		//Render template
+		return $this->render('@RapsysAir/default/frequently_asked_questions.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+	}
+
+	/**
 	 * Return the bundle alias
 	 *
 	 * {@inheritdoc}
 	 */
-	public function getAlias() {
+	public function getAlias(): string {
 		return 'rapsys_air';
+	}
+
+	/**
+	 * Renders a view
+	 *
+	 * {@inheritdoc}
+	 */
+	protected function render(string $view, array $parameters = [], Response $response = null): Response {
+		//Create application form for role_guest
+		if ($this->isGranted('ROLE_GUEST')) {
+			//Without application form
+			if (empty($parameters['forms']['application'])) {
+				//Fetch doctrine
+				$doctrine = $this->getDoctrine();
+
+				//Create ApplicationType form
+				$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+					//Set the action
+					'action' => $this->generateUrl('rapsys_air_application_add'),
+					//Set the form attribute
+					'attr' => [ 'class' => 'col' ],
+					//Set admin
+					'admin' => $this->isGranted('ROLE_ADMIN'),
+					//Set default user to current
+					'user' => $this->getUser()->getId(),
+					//Set default slot to evening
+					//XXX: default to Evening (3)
+					'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
+				]);
+
+				//Add form to context
+				$parameters['forms']['application'] = $application->createView();
+			}
+		//Create login form for anonymous
+		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Create ApplicationType form
+			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
+				//Set the action
+				'action' => $this->generateUrl('rapsys_user_login'),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ]
+			]);
+
+			//Add form to context
+			$parameters['forms']['login'] = $login->createView();
+		}
+
+		//Call parent method
+		return $this->_render($view, $parameters, $response);
 	}
 }
