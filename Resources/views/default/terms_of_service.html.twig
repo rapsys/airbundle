@@ -1,11 +1,14 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 	<section id="dashboard">
-		<h2><a href="{{ path('rapsys_air_terms_of_service') }}">{{ section }}</a></h2>
+		<header>
+			<h2><a href="{{ path('rapsys_air_terms_of_service') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
 		<nav>
 			<strong>{% trans %}Table of contents{% endtrans %}</strong>
 			<ul>
-				<li><a href="#preamble">Préambule</a></li>
+				<li><a href="#preamble">{% trans %}Preamble{% endtrans %}</a></li>
 				<li><a href="#article1">Article 1 : Présentation</a></li>
 				<li>
 					<a href="#article2">Article 2 : Accès, disponibilité et utilisation</a>
@@ -29,7 +32,7 @@
 			</ul>
 		</nav>
 		<section>
-			<h3 id="preamble">Préambule</h3>
+			<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
 			<p>Préalablement à la visite du site <a href="//airlibre.eu/" title="Air Libre">www.airlibre.eu</a> (ci-après dénommé « le Site ») et de l'utilisation des services qui y sont proposés, il convient de procéder à la lecture des conditions générales d'utilisations ci-dessous exposées.</p>
 			<p>Ces conditions générales ont pour objet de définir les modalités de mise à disposition du service de réservation d'espace en plein air, du service d'affichage, du service d'attribution, des services connexes sur le Site et les conditions d'utilisation de ces derniers par l'utilisateur. Tout accès au Site ou toute utilisation de ces services suppose le respect préalable de l'ensemble des dispositions ci-dessous ainsi que leur acceptation inconditionnelle.</p>
 			<p>Les conditions générales d'utilisation pourront être modifiées en début d'année, début d'été et fin d'été par la personne en charge du Site, ci-après dénommé « le Responsable », après consultation des utilisateurs et référendum pour toute modification substantielle.</p>
