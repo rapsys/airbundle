@@ -1,0 +1,46 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="dashboard">
+		<header>
+			<h2><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
+		<nav>
+			<strong>{% trans %}Table of contents{% endtrans %}</strong>
+			<ul>
+				<li><a href="#preamble">{% trans %}Preamble{% endtrans %}</a></li>
+				<li><a href="#whatisit">{% trans %}What is it ?{% endtrans %}</a></li>
+				<li><a href="#whocancreateanaccount">{% trans %}Who can create an account ?{% endtrans %}</a></li>
+				{# qu'est-ce qu'un utilisateur ? #}
+				{# qu'est-ce qu'un organisateur ? #}
+				{# où se déroulent les soirées ? #}
+				{# pourquoi air libre, parce qu'aucun service ne fournissait les services dont j'avais besoin; e l'offre existante ne semblait pas appropriée #}
+				{# pourquoi s'enregister, pour bénéficier d'un service spécifique à la demande, quand ça sera fait, pouvoir suivre un ou plusieurs organisateurs, pour l'organisateur pour envoyer automatiquement la programmation par mail #}
+				{# quand sont annoncé les bals #}
+				{# infos sur le menu #}
+				{# infos sur le multi-langue #}
+				{#<li><a href="#">{% trans %}{% endtrans %}</a></li>#}
+			</ul>
+		</nav>
+		<section>
+			<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			<p>{% trans %}On this page you will find the most recurring questions of Libre Air users.{% endtrans %}</p>
+			<p>{% trans %}Questions asked via the contact form will be added to this page as they arise.{% endtrans %}</p>
+		</section>
+		<section>
+			<h3 id="whatisit">{% trans %}What is it ?{% endtrans %}</h3>
+			<p>{% trans %}Libre Air is an initiative to have a powerful and shared calendar for outdoor Tango Argentin sessions.{% endtrans %}</p>{# sur paris dans un premier temps #}
+		</section>
+		<section>
+			<h3 id="whocancreateanaccount">{% trans %}Who can create an account ?{% endtrans %}</h3>
+			<p>{% trans %}Anyone can create an account on Air Libre, dancer or organizer.{% endtrans %}</p>
+			<p>{% trans %}The dancer can follow an organizer by email.{% endtrans %}</p>
+			<p>{% trans %}The organizer will have a convenient way to automatically notify subscribers with minimum effort.{% endtrans %}</p>
+			<p>{% trans %}When the feature will be available on Libre Air.{% endtrans %}</p>
+		</section>
+		{#<section>
+			<h3 id="">{% trans %}{% endtrans %}</h3>
+			<p>{% trans %}{% endtrans %}</p>
+		</section>#}
+	</section>
+{% endblock %}
