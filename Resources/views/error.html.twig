@@ -1,8 +1,9 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-<section id="content">
+<section id="dashboard">
 	<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
-	<p class="error">{% if message %}{{ message }}{% else %}{% trans %}Error{% endtrans %}{% endif %}</p>
-	{% if app.environment == 'dev' and trace is defined %}<pre class="trace">{{ trace }}</pre>{% endif %}
+	<p class="message error">{% if message %}{{ message }}{% else %}{% trans %}Error{% endtrans %}{% endif %}</p>
+	{# {% if app.environment == 'dev' and trace is defined %}<pre class="trace">{{ trace }}</pre>{% endif %} #}
+	{% if trace is defined and trace %}<pre class="trace">{{ trace }}</pre>{% endif %}
 </section>
 {% endblock %}
