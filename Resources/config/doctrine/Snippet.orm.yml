@@ -15,6 +15,25 @@ Rapsys\AirBundle\Entity\Snippet:
             length: 2
         description:
             type: text
+        class:
+            type: text
+            nullable: true
+        contact:
+            type: string
+            length: 254
+            nullable: true
+        donate:
+            type: string
+            length: 254
+            nullable: true
+        link:
+            type: string
+            length: 254
+            nullable: true
+        profile:
+            type: string
+            length: 254
+            nullable: true
         created:
             type: datetime
         updated:
