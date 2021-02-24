@@ -1,45 +1,43 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<section id="dashboard">
-		<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
-		<div class="panel calendar">
+	<article id="dashboard">
+		<header>
+			<h2><a href="{{ path('rapsys_air') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
+		<div class="panel">
 			{% if calendar is defined and calendar %}
-				<div class="grid">
+				<div class="grid calendar seven">
 					{% for date, day in calendar %}
-						<section class="{{ ['cell', 'seventh']|merge(day.class)|join(' ') }}">
+						<article class="{{ day.class|join(' ') }}">
 							<h3>{{ day.title }}</h3>
 							{% if day.sessions is not empty %}
 								<ul>
 									{% for session in day.sessions %}
-										<li class="{{ ['session']|merge(session.class)|join(' ') }}">
-											<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">{{ session.title }}</a>
-											<span>
-												{% if session.weather is defined and session.weather %}<span title="{{ session.weathertitle }}">{{ session.weather }}</span>{% endif %}
-												<span title="{{ session.slottitle }}">{{ session.slot }}</span>
-											</span>
+										<li class="{{ session.class|join(' ') }}">
+											<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">
+												<span>{{ session.start|localizeddate('none', 'short') }}</span>
+												<span class="reducible">{{ session.location }}</span>
+												<span class="info">
+													{% if session.weather is defined and session.weather %}
+														<span title="{{ session.weathertitle }}">{{ session.weather }}</span>
+													{% endif %}
+													<span title="{{ session.slottitle }}">{{ session.slot }}</span>
+												</span>
+												{% if session.pseudonym is defined and session.pseudonym %}
+													<span class="reducible pseudonym">{{ session.pseudonym }}</span>
+												{% endif %}
+											</a>
 										</li>
 									{% endfor %}
 								</ul>
-							{% else %}
-								&nbsp;
 							{% endif %}
-						</section>
+						</article>
 					{% endfor %}
 				</div>
 			{% endif %}
 			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 		</div>
-	</section>
-	{% if locations is defined and locations %}
-		<section id="location">
-			<h2>{% trans %}Locations{% endtrans %}</h2>
-			<div class="panel grid">
-				{% for id, title in locations %}
-					<section class="cell">
-						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
-					</section>
-				{% endfor %}
-			</div>
-		</section>
-	{% endif %}
+	</article>
+	{{ include('@RapsysAir/default/_location.html.twig') }}
 {% endblock %}
