@@ -1,21 +1,21 @@
 <section>
 	<h2>{% trans %}Application{% endtrans %}</h2>
-	{{ form_start(application) }}
+	{{ form_start(forms.application) }}
 		<div>
-			{% if application.user is defined %}
-				{{ form_row(application.user) }}
+			{% if forms.application.user is defined %}
+				{{ form_row(forms.application.user) }}
 			{% endif %}
 
-			{{ form_row(application.location) }}
+			{{ form_row(forms.application.location) }}
 
-			{{ form_row(application.date) }}
+			{{ form_row(forms.application.date) }}
 
-			{{ form_row(application.slot) }}
+			{{ form_row(forms.application.slot) }}
 
-			{{ form_row(application.submit) }}
+			{{ form_row(forms.application.submit) }}
 		</div>
 
 		{# render csrf token etc .#}
-		<footer style="display:none">{{ form_rest(application) }}</footer>
-	{{ form_end(application) }}
+		<footer style="display:none">{{ form_rest(forms.application) }}</footer>
+	{{ form_end(forms.application) }}
 </section>
