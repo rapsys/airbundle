@@ -7,17 +7,9 @@ Rapsys\AirBundle\Entity\User:
             type: string
             length: 16
             nullable: true
-        donation:
-            type: string
-            length: 254
-            nullable: true
-        site:
-            type: string
-            length: 254
-            nullable: true
     oneToMany:
-#        votes:
-#            targetEntity: Rapsys\AirBundle\Entity\Vote
+#        links:
+#            targetEntity: Rapsys\AirBundle\Entity\Link
 #            mappedBy: user
         applications:
             targetEntity: Rapsys\AirBundle\Entity\Application
