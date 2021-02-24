@@ -1,15 +1,21 @@
-{# Display application or login form #}
-{% if is_granted('ROLE_GUEST') %}
-	<div class="form">
-		{% if application is defined %}
-			{{ include('@RapsysAir/form/_application.html.twig') }}
-		{% endif %}
-		{% if session_edit is defined %}
-			{{ include('@RapsysAir/form/_session_edit.html.twig') }}
-		{% endif %}
-	</div>
-{% elseif not is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-	<div class="form">
-		{{ include('@RapsysAir/form/_login.html.twig') }}
-	</div>
+{# Display login or application form #}
+{% if forms is defined and forms %}
+	{% if forms.login is defined and forms.login %}
+		<aside class="form">
+			{# <header><h2>Toolbox</h2></header> #}
+			{{ include('@RapsysAir/form/_login.html.twig') }}
+		</aside>
+	{% else %}
+		<aside class="form">
+			{% if forms.application is defined %}
+				{{ include('@RapsysAir/form/_application.html.twig') }}
+			{% endif %}
+			{% if forms.location is defined %}
+				{{ include('@RapsysAir/form/_location.html.twig') }}
+			{% endif %}
+			{% if forms.session is defined %}
+				{{ include('@RapsysAir/form/_session.html.twig') }}
+			{% endif %}
+		</aside>
+	{% endif %}
 {% endif %}
