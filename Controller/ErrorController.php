@@ -18,7 +18,7 @@ class ErrorController extends DefaultController {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function preview(Request $request, FlattenException $exception) {
+	public function show(Request $request, FlattenException $exception) {
 		//Set section
 		$section = $exception->getStatusCode().' '.$this->translator->trans($exception->getStatusText());
 
@@ -28,8 +28,37 @@ class ErrorController extends DefaultController {
 		//Set the message
 		$message = $exception->getMessage();
 
-		//Set the trace
-		$trace = $exception->getAsString();
+		//Init trace
+		$trace = null;
+
+		//Prevent non admin access to trace
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//Set project dir
+			$projectDir = $this->container->getParameter('kernel.project_dir').'/';
+
+			//Set the trace
+			//$trace = $exception->getAsString();
+			$trace = '';
+
+			//Iterate on array
+			foreach($exception->toArray() as $current) {
+				$trace .= $current['class'];
+
+				if (!empty($current['message'])) {
+					$trace .= ': '.$current['message'];
+				}
+
+				if (!empty($current['trace'])) {
+					foreach($current['trace'] as $id => $sub) {
+						$trace .= "\n".'#'.$id.' '.$sub['class'].$sub['type'].$sub['function'];
+						if (!empty($sub['args'])) {
+							$trace .= '('.implode(', ', array_map(function($v){return $v[0].' '.$v[1];}, $sub['args'])).')';
+						}
+						$trace .= ' in '.str_replace($projectDir, '', $sub['file']).':'.$sub['line'];
+					}
+				}
+			}
+		}
 
 		//Render template
 		return $this->render(
