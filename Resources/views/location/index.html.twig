@@ -1,0 +1,45 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<article id="dashboard">
+		<header>
+			<h2><a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a></h2>
+			<p>{% trans %}Libre Air location list{% endtrans %}</p>
+		</header>
+		<div class="panel">
+			<div class="grid four location">
+				{% for id, title in locations %}
+					<article class="cell">
+						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
+						{% if forms.locations is defined and forms.locations[id] is defined and forms.locations[id] %}
+							{{ form_start(forms.locations[id]) }}
+								<div>
+									{{ form_row(forms.locations[id].title) }}
+
+									{{ form_row(forms.locations[id].short) }}
+
+									{{ form_row(forms.locations[id].address) }}
+
+									{{ form_row(forms.locations[id].zipcode) }}
+
+									{{ form_row(forms.locations[id].city) }}
+
+									{{ form_row(forms.locations[id].latitude) }}
+
+									{{ form_row(forms.locations[id].longitude) }}
+
+									{{ form_row(forms.locations[id].hotspot) }}
+
+									{{ form_row(forms.locations[id].submit) }}
+								</div>
+
+								{# render csrf token etc .#}
+								<footer style="display:none">{{ form_rest(forms.locations[id]) }}</footer>
+							{{ form_end(forms.locations[id]) }}
+						{% endif %}
+					</article>
+				{% endfor %}
+			</div>
+			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
+		</div>
+	</article>
+{% endblock %}
