@@ -4,27 +4,24 @@ rapsys_air:
     contact:
         name: 'Raphaël Gertz'
         mail: 'airlibre@rapsys.eu'
-    #Copyright
-    copy:
-        short: 'Copyright 2019-2020'
 
 #RapsysUser configuration
 rapsys_user:
     #Class replacement
     class:
         group: 'Rapsys\AirBundle\Entity\Group'
-        title: 'Rapsys\AirBundle\Entity\Title'
+        civility: 'Rapsys\AirBundle\Entity\Civility'
         user: 'Rapsys\AirBundle\Entity\User'
     #Default replacement
     default:
-        group: [ 'Senior' ]
-        title: 'Mister'
+        group: [ 'User' ]
+        civility: 'Mister'
     #Route replacement
     route:
         index:
             name: 'rapsys_air'
     #Translate replacement
-    translate: [ 'title', 'site.title', 'copy.long', 'copy.short' ]
+    translate: [ 'title', 'site.title', 'copy.by', 'copy.long', 'copy.short' ]
     #Languages replacement
     languages:
         en: 'English'
@@ -42,8 +39,11 @@ rapsys_user:
             context:
                 title: 'Login'
                 copy:
+                    by: '%rapsys_air.copy.by%'
+                    link: '%rapsys_air.copy.link%'
                     long: '%rapsys_air.copy.long%'
                     short: '%rapsys_air.copy.short%'
+                    title: '%rapsys_air.copy.title%'
                 site:
                     ico: '%rapsys_air.site.ico%'
                     logo: '%rapsys_air.site.logo%'
@@ -61,8 +61,11 @@ rapsys_user:
             context:
                 title: 'Recover'
                 copy:
+                    by: '%rapsys_air.copy.by%'
+                    link: '%rapsys_air.copy.link%'
                     long: '%rapsys_air.copy.long%'
                     short: '%rapsys_air.copy.short%'
+                    title: '%rapsys_air.copy.title%'
                 site:
                     ico: '%rapsys_air.site.ico%'
                     logo: '%rapsys_air.site.logo%'
@@ -85,8 +88,11 @@ rapsys_user:
             context:
                 title: 'Mail recover'
                 copy:
+                    by: '%rapsys_air.copy.by%'
+                    link: '%rapsys_air.copy.link%'
                     long: '%rapsys_air.copy.long%'
                     short: '%rapsys_air.copy.short%'
+                    title: '%rapsys_air.copy.title%'
                 site:
                     ico: '%rapsys_air.site.ico%'
                     logo: '%rapsys_air.site.logo%'
@@ -109,8 +115,11 @@ rapsys_user:
             context:
                 title: 'Register'
                 copy:
+                    by: '%rapsys_air.copy.by%'
+                    link: '%rapsys_air.copy.link%'
                     long: '%rapsys_air.copy.long%'
                     short: '%rapsys_air.copy.short%'
+                    title: '%rapsys_air.copy.title%'
                 site:
                     ico: '%rapsys_air.site.ico%'
                     logo: '%rapsys_air.site.logo%'
@@ -126,13 +135,17 @@ rapsys_user:
 
 #Doctrine configuration
 doctrine:
+    #Dbal configuration
+    dbal:
+        mapping_types:
+            enum: string
     #Orm configuration
     orm:
         #Force resolution of UserBundle entities to AirBundle one
         #XXX: without these lines, relations are lookup in parent namespace ignoring AirBundle extension
         resolve_target_entities:
             Rapsys\UserBundle\Entity\Group: Rapsys\AirBundle\Entity\Group
-            Rapsys\UserBundle\Entity\Title: Rapsys\AirBundle\Entity\Title
+            Rapsys\UserBundle\Entity\Civility: Rapsys\AirBundle\Entity\Civility
             Rapsys\UserBundle\Entity\User: Rapsys\AirBundle\Entity\User
 
 #Security configuration
@@ -200,6 +213,7 @@ security:
 #Framework configuration
 framework:
     default_locale: 'fr'
+    #error_controller: 'Rapsys\AirBundle\Controller\ErrorController::show'
     translator:
         fallbacks: [ 'fr', 'en' ]
     session:
@@ -240,6 +254,12 @@ services:
     rapsys_air.twig.bb2html:
         class: 'Rapsys\AirBundle\Twig\Bb2htmlExtension'
         tags: [ 'twig.extension' ]
+    #Register twig intl extension
+    #XXX: https://www.php.net/manual/en/class.intldateformatter.php
+    #XXX: https://stackoverflow.com/questions/25948853/how-to-install-the-intl-extension-for-twig
+    rapsys_air.twig.intl:
+        class: 'Twig\Extensions\IntlExtension'
+        tags: [ 'twig.extension' ]
     #new TwigFilter('markdown_to_html', ['Twig\\Extra\\Markdown\\MarkdownRuntime', 'convert'], ['is_safe' => ['all']]),
     #new TwigFilter('html_to_markdown', 'Twig\\Extra\\Markdown\\twig_html_to_markdown', ['is_safe' => ['all']]),
     #Register twig markdown_to_html extension
@@ -269,8 +289,8 @@ services:
     Rapsys\AirBundle\Controller\LocationController:
         arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
-    #Register organizer controller
-    Rapsys\AirBundle\Controller\OrganizerController:
+    #Register user controller
+    Rapsys\AirBundle\Controller\UserController:
         arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register session controller
@@ -282,16 +302,16 @@ services:
         arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
-#    Rapsys\AirBundle\Controller\ErrorController:
-#        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
-#        tags: [ 'controller.service_arguments' ]
+    Rapsys\AirBundle\Controller\ErrorController:
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
     Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
         arguments: [ '@router', '%rapsys_air.locales%' ]
         tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Security\AccessDeniedHandler:
-        arguments: [ '@service_container', '@twig', '@router', '@translator' ]
+        arguments: [ '@service_container', '@twig', '@router', '@request_stack', '@translator' ]
     #Register logout success handler
     Rapsys\AirBundle\Security\LogoutSuccessHandler:
         arguments: [ '@router' ]
@@ -309,7 +329,9 @@ services:
     Rapsys\AirBundle\Form\ApplicationType:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
-    Rapsys\AirBundle\Form\SessionEditType:
+    Rapsys\AirBundle\Form\LocationType:
+        tags: [ 'form.type' ]
+    Rapsys\AirBundle\Form\SessionType:
         arguments: [ '@doctrine' ]
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Form\Extension\Type\HiddenEntityType:
@@ -325,8 +347,8 @@ services:
 #Twig Configuration
 twig:
     #Enforce debug
-    debug: true
-    auto_reload: ~
+    #debug: true
+    #auto_reload: ~
     cache: false
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
