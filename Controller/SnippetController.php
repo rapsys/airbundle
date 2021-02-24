@@ -3,6 +3,7 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -26,13 +27,22 @@ class SnippetController extends DefaultController {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
-		//Create ApplicationType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\SnippetType', null, [
-			//Set the action
-			'action' => $this->generateUrl('rapsys_air_snippet_add'),
-			//Set the form attribute
-			'attr' => []
-		]);
+		//Create SnippetType form
+		$form = $this->container->get('form.factory')->createNamed(
+			//Set name
+			'snipped_'.$request->getLocale().'_'.$request->get('location'),
+			//Set type
+			'Rapsys\AirBundle\Form\SnippetType',
+			//Set data
+			null,
+			//Set options
+			[
+				//Set the action
+				'action' => $this->generateUrl('rapsys_air_snippet_add', ['location' => $request->get('location')]),
+				//Set the form attribute
+				'attr' => []
+			]
+		);
 
 		//Refill the fields in case of invalid form
 		$form->handleRequest($request);
@@ -118,7 +128,7 @@ class SnippetController extends DefaultController {
 				unset($route['_route'], $route['_controller']);
 
 				//Check if snippet view route
-				if ($name == 'rapsys_air_organizer_view' && !empty($route['id'])) {
+				if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
 					//Replace id
 					$route['id'] = $snippet->getUser()->getId();
 				//Other routes
@@ -163,13 +173,22 @@ class SnippetController extends DefaultController {
 			throw $this->createNotFoundException($this->translator->trans('Unable to find snippet: %id%', ['%id%' => $id]));
 		}
 
-		//Create ApplicationType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\SnippetType', $snippet, [
-			//Set the action
-			'action' => $this->generateUrl('rapsys_air_snippet_edit', ['id' => $id]),
-			//Set the form attribute
-			'attr' => []
-		]);
+		//Create SnippetType form
+		$form = $this->container->get('form.factory')->createNamed(
+			//Set name
+			'snipped_'.$request->getLocale().'_'.$snippet->getLocation()->getId(),
+			//Set type
+			'Rapsys\AirBundle\Form\SnippetType',
+			//Set data
+			$snippet,
+			//Set options
+			[
+				//Set the action
+				'action' => $this->generateUrl('rapsys_air_snippet_edit', ['id' => $id]),
+				//Set the form attribute
+				'attr' => []
+			]
+		);
 
 		//Refill the fields in case of invalid form
 		$form->handleRequest($request);
@@ -246,7 +265,7 @@ class SnippetController extends DefaultController {
 				unset($route['_route'], $route['_controller']);
 
 				//Check if snippet view route
-				if ($name == 'rapsys_air_organizer_view' && !empty($route['id'])) {
+				if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
 					//Replace id
 					$route['id'] = $snippet->getUser()->getId();
 				//Other routes
