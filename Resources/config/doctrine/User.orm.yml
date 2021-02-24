@@ -8,9 +8,6 @@ Rapsys\AirBundle\Entity\User:
             length: 16
             nullable: true
     oneToMany:
-#        links:
-#            targetEntity: Rapsys\AirBundle\Entity\Link
-#            mappedBy: user
         applications:
             targetEntity: Rapsys\AirBundle\Entity\Application
             mappedBy: user
