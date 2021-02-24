@@ -1,11 +1,14 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 	<section id="dashboard">
-		<h2><a href="{{ path('rapsys_air_organizer_regulation') }}">{{ section }}</a></h2>
+		<header>
+			<h2><a href="{{ path('rapsys_air_organizer_regulation') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
 		<nav>
 			<strong>{% trans %}Table of contents{% endtrans %}</strong>
 			<ul>
-				<li><a href="#preamble">Préambule</a></li>
+				<li><a href="#preamble">{% trans %}Preamble{% endtrans %}</a></li>
 				<li><a href="#article_1">Article 1 : Présentation</a></li>
 				<li>
 					<a href="#article_2">Article 2 : Inscription, réunion et contribution</a>
@@ -62,8 +65,8 @@
 			</ul>
 		</nav>
 		<section>
-			<h3 id="preamble">Préambule</h3>
-			<p>Préalablement à la visite du site www.airlibre.fr, ci-après dénommé « le Site », et à l'utilisation des services qui y sont proposés, il convient de procéder à la lecture des conditions générales d'utilisation et du règlement organisateur ci-dessous exposé.</p>
+			<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			<p>Préalablement à la visite du site <a href="https://airlibre.eu" title="Air Libre">www.airlibre.eu</a>, ci-après dénommé « le Site », et à l'utilisation des services qui y sont proposés, il convient de procéder à la lecture des conditions générales d'utilisation et du règlement organisateur ci-dessous exposé.</p>
 			<p>Ce règlement organisateur a pour objet de définir les modalités de mise à disposition du service de réservation de séances de Tango Argentin sur l'espace public, ci-après « le Service Réservation », du service d'affichage, ci-après « le Service Affichage », du service d'attribution, ci-après « le Service Attribution », des services connexes, ci-après « les Services Connexes » et les conditions d'utilisation de ce dernier par l'organisateur.</p>
 			<p>Tout accès au Service Réservation ou toute utilisation des services connexes suppose le respect préalable de l'ensemble des dispositions ci-dessous ainsi que leur acceptation inconditionnelle. </p>
 			<p>Dans la mesure où l'organisateur ne souhaite pas accepter tout ou partie des présentes conditions spécifiques, il lui est demandé de renoncer à tout usage du service. Le préambule fait partie des conditions générales d'utilisation. </p>
@@ -139,7 +142,7 @@
 			</section>
 			<section>
 				<h4 id="article_3_3">Article 3.3 : Senior</h4>
-				<p>L'Organisateur avec matériel d'une puissance supérieure ou égale à 500W et ayant réalisé plus de 5 séances sur plus de 2 (deux) lieux sera intégré au groupe senior.</p>
+				<p>L'Organisateur avec matériel d'une puissance supérieure ou égale à 500W et ayant réalisé plus de 5 séances sur plus de 2 (deux) lieux peut être intégré au groupe senior.</p>
 			</section>
 			<section>
 				<h4 id="article_3_4">Article 3.4 : Administrateur</h4>
