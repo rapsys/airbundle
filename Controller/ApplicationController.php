@@ -126,10 +126,10 @@ class ApplicationController extends DefaultController {
 				//Check if afternoon
 				} elseif ($slot == 'Afternoon') {
 					//Set begin at 14h
-					$session->setBegin(new \DateTime('14:00:00'));
+					$session->setBegin(new \DateTime('14:30:00'));
 
 					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
+					$session->setLength(new \DateTime('04:30:00'));
 				//Check if evening
 				} elseif ($slot == 'Evening') {
 					//Set begin at 19h
