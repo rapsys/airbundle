@@ -267,7 +267,7 @@ class DefaultController {
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
 			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
 			)
 		);
 
@@ -282,6 +282,7 @@ class DefaultController {
 		return $this->render('@RapsysAir/default/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
 
 		//Set Cache-Control must-revalidate directive
+		//TODO: add a javascript forced refresh after 1h ? or header refresh ?
 		#$response->setPublic(true);
 		#$response->setMaxAge(300);
 		#$response->mustRevalidate();

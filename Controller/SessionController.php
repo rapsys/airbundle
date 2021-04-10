@@ -464,7 +464,7 @@ class SessionController extends DefaultController {
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
 			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
 			)
 		);
 
@@ -686,7 +686,7 @@ class SessionController extends DefaultController {
 			new \DateInterval('P1D'),
 			//End with next sunday and 4 weeks
 			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 4 week':'Monday this week + 2 week'
+				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
 			)
 		);
 
