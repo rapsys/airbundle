@@ -228,6 +228,131 @@ class DefaultController {
 		return $this->render('@RapsysAir/form/contact.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
 	}
 
+
+	/**
+	 * The dispute page
+	 *
+	 * @desc Generate a dispute document
+	 *
+	 * @param Request $request The request instance
+	 * @param MailerInterface $mailer The mailer instance
+	 *
+	 * @return Response The rendered view or redirection
+	 */
+	public function dispute(Request $request, MailerInterface $mailer): Response {
+		//Prevent non-guest to access here
+		$this->denyAccessUnlessGranted('ROLE_USER', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('User')]));
+		//Set section
+		$section = $this->translator->trans('Dispute');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air dispute');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('dispute'),
+			$this->translator->trans('Libre Air'),
+			$this->translator->trans('outdoor'),
+			$this->translator->trans('Argentine Tango'),
+			$this->translator->trans('calendar')
+		];
+
+		//Set title
+		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+
+		//Create the form according to the FormType created previously.
+		//And give the proper parameters
+		$form = $this->createForm('Rapsys\AirBundle\Form\DisputeType', null, [
+			'action' => $this->generateUrl('rapsys_air_dispute'),
+			'method' => 'POST'
+		]);
+
+		if ($request->isMethod('POST')) {
+			// Refill the fields in case the form is not valid.
+			$form->handleRequest($request);
+
+			if ($form->isValid()) {
+				//Get data
+				$data = $form->getData();
+
+				header('Content-Type: text/plain');
+
+				//Infraction
+				var_dump($data['offense']);
+
+				//Numéro d'avis
+				var_dump($data['notice']);
+
+				//Numéro d'agent
+				var_dump($data['agent']);
+
+				//Code service
+				var_dump($data['service']);
+
+				//Masque porté
+				var_dump($data['mask']);
+
+				//Civilité
+				var_dump($this->translator->trans($this->getUser()->getCivility()->getTitle()));
+
+				//Prénom
+				var_dump($this->getUser()->getForename());
+
+				//Nom
+				var_dump($this->getUser()->getSurname());
+
+				//Mail
+				var_dump($this->getUser()->getMail());
+
+				exit;
+
+#				//Create message
+#				$message = (new TemplatedEmail())
+#					//Set sender
+#					->from(new Address($data['mail'], $data['name']))
+#					//Set recipient
+#					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
+#					->to(new Address($this->config['contact']['mail'], $this->config['contact']['name']))
+#					//Set subject
+#					->subject($data['subject'])
+#
+#					//Set path to twig templates
+#					->htmlTemplate('@RapsysAir/mail/contact.html.twig')
+#					->textTemplate('@RapsysAir/mail/contact.text.twig')
+#
+#					//Set context
+#					->context(
+#						[
+#							'subject' => $data['subject'],
+#							'message' => strip_tags($data['message']),
+#						]+$this->context
+#					);
+#
+#				//Try sending message
+#				//XXX: mail delivery may silently fail
+#				try {
+#					//Send message
+#					$mailer->send($message);
+#
+#					//Redirect on the same route with sent=1 to cleanup form
+#					return $this->redirectToRoute($request->get('_route'), ['sent' => 1]+$request->get('_route_params'));
+#				//Catch obvious transport exception
+#				} catch(TransportExceptionInterface $e) {
+#					if ($message = $e->getMessage()) {
+#						//Add error message mail unreachable
+#						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->config['contact']['mail'], '%message%' => $this->translator->trans($message)])));
+#					} else {
+#						//Add error message mail unreachable
+#						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->config['contact']['mail']])));
+#					}
+#				}
+			}
+		}
+
+		//Render template
+		return $this->render('@RapsysAir/form/dispute.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
+	}
+
 	/**
 	 * The index page
 	 *

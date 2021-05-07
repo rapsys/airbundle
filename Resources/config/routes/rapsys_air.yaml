@@ -14,6 +14,13 @@ rapsys_air_contact:
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
+rapsys_air_frequently_asked_questions:
+    path:
+        en: '/en/frequently-asked-questions'
+        fr: '/foire-aux-questions'
+    controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
+    methods: GET
+
 rapsys_air_organizer_regulation:
     path:
         en: '/en/organizer-regulation'
@@ -28,12 +35,12 @@ rapsys_air_terms_of_service:
     controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
-rapsys_air_frequently_asked_questions:
+rapsys_air_dispute:
     path:
-        en: '/en/frequently-asked-questions'
-        fr: '/foire-aux-questions'
-    controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
-    methods: GET
+        en: '/en/dispute'
+        fr: '/contestation'
+    controller: Rapsys\AirBundle\Controller\DefaultController::dispute
+    methods: GET|POST
 
 rapsys_air_location:
     path:
