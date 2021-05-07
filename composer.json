@@ -14,17 +14,27 @@
     },
     "require": {
         "php": "*",
-        "doctrine/common": "*",
-        "symfony/config": "*",
-        "symfony/dependency-injection": "*",
+        "doctrine/doctrine-bundle": "*",
+        "doctrine/orm": "*",
+        "rospdf/pdf-php": "*",
+        "symfony/flex": "*",
         "symfony/form": "*",
         "symfony/framework-bundle": "*",
-        "symfony/routing": "*",
-        "symfony/security": "*",
+        "symfony/mailer": "*",
+        "symfony/profiler-pack": "*",
+        "symfony/security-bundle": "*",
         "symfony/translation": "*",
         "symfony/twig-bundle": "*",
-        "doctrine/data-fixtures": "*",
-        "twig/extensions": "^1.5"
+        "symfony/validator": "*",
+        "twig/extensions": "^1.5",
+        "twig/html-extra": "^2.12"
+    },
+    "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "*",
+        "symfony/browser-kit": "*",
+        "symfony/maker-bundle": "*",
+        "symfony/phpunit-bridge": "*",
+        "symfony/web-profiler-bundle": "*"
     },
     "extra": {
         "branch-alias": {
