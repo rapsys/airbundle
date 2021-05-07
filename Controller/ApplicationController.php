@@ -277,6 +277,13 @@ class ApplicationController extends DefaultController {
 
 				//Set length at 4h
 				$session->setLength(new \DateTime('04:00:00'));
+			//Jardin du Monde => 14h -> 15h
+			} elseif ($short == 'Monde' && $slot == 'Morning') {
+				//Set begin at 14h
+				$session->setBegin(new \DateTime('14:00:00'));
+
+				//Set length at 4h
+				$session->setLength(new \DateTime('01:00:00'));
 			//Combination not supported
 			} else {
 				//Add error in flash message
