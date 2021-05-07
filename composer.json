@@ -16,7 +16,7 @@
         "php": "*",
         "doctrine/doctrine-bundle": "*",
         "doctrine/orm": "*",
-        "rospdf/pdf-php": "*",
+        "fpdf/fpdf": "*",
         "symfony/flex": "*",
         "symfony/form": "*",
         "symfony/framework-bundle": "*",
