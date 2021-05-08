@@ -16,6 +16,9 @@
 			{% if forms.session is defined %}
 				{{ include('@RapsysAir/form/_session.html.twig') }}
 			{% endif %}
+			{% if forms.user is defined %}
+				{{ include('@RapsysAir/form/_user.html.twig') }}
+			{% endif %}
 		</aside>
 	{% endif %}
 {% endif %}
