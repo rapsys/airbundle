@@ -4,6 +4,7 @@ namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
@@ -90,15 +91,15 @@ class UserController extends DefaultController {
 			throw $this->createNotFoundException($this->translator->trans('Unable to find user: %id%', ['%id%' => $id]));
 		}
 
-		//Prevent non admin access to non guest users
-		if (!$this->isGranted('ROLE_ADMIN')) {
-			//Get user token
-			$token = new UsernamePasswordToken($user, null, 'none', $user->getRoles());
+		//Get user token
+		$token = new UsernamePasswordToken($user, null, 'none', $user->getRoles());
 
-			//Check if guest access
-			if (!($isGuest = $this->get('rapsys_user.access_decision_manager')->decide($token, ['ROLE_GUEST']))) {
-				throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %id%', ['%id%' => $id]));
-			}
+		//Check if guest
+		$isGuest = $this->get('rapsys_user.access_decision_manager')->decide($token, ['ROLE_GUEST']);
+
+		//Prevent access when not admin, user is not guest and not currently logged user
+		if (!$this->isGranted('ROLE_ADMIN') && empty($isGuest) && $user != $this->getUser()) {
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %id%', ['%id%' => $id]));
 		}
 
 		//Set section
@@ -132,14 +133,119 @@ class UserController extends DefaultController {
 
 		//Fetch calendar
 		//TODO: highlight with current session route parameter
-		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $isGuest?$id:null, $request->get('session'));
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
 		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period, $id);
 
+		//Create user form for admin or current user
+		if ($this->isGranted('ROLE_ADMIN') || $user == $this->getUser()) {
+			//Create SnippetType form
+			$userForm = $this->createForm('Rapsys\AirBundle\Form\RegisterType', $user, [
+				//Set action
+				'action' => $this->generateUrl('rapsys_air_user_view', ['id' => $id]),
+				//Set the form attribute
+				'attr' => [ 'class' => 'col' ],
+				//Disable mail
+				'mail' => $this->isGranted('ROLE_ADMIN'),
+				//Disable password
+				'password' => false
+			]);
+
+			//Init user to context
+			$this->context['forms']['user'] = $userForm->createView();
+
+			//Check if submitted
+			if ($request->isMethod('POST')) {
+				//Refill the fields in case the form is not valid.
+				$userForm->handleRequest($request);
+
+				//Handle invalid form
+				if (!$userForm->isSubmitted() || !$userForm->isValid()) {
+					//Render the view
+					return $this->render('@RapsysAir/user/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+				}
+
+				//Get data
+				$data = $userForm->getData();
+
+				//Get manager
+				$manager = $doctrine->getManager();
+
+				//Queue snippet save
+				$manager->persist($data);
+
+				//Flush to get the ids
+				$manager->flush();
+
+				//Add notice
+				$this->addFlash('notice', $this->translator->trans('User %id% updated', ['%id%' => $id]));
+
+				//Extract and process referer
+				if ($referer = $request->headers->get('referer')) {
+					//Create referer request instance
+					$req = Request::create($referer);
+
+					//Get referer path
+					$path = $req->getPathInfo();
+
+					//Get referer query string
+					$query = $req->getQueryString();
+
+					//Remove script name
+					$path = str_replace($request->getScriptName(), '', $path);
+
+					//Try with referer path
+					try {
+						//Save old context
+						$oldContext = $this->router->getContext();
+
+						//Force clean context
+						//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
+						$this->router->setContext(new RequestContext());
+
+						//Retrieve route matching path
+						$route = $this->router->match($path);
+
+						//Reset context
+						$this->router->setContext($oldContext);
+
+						//Clear old context
+						unset($oldContext);
+
+						//Extract name
+						$name = $route['_route'];
+
+						//Remove route and controller from route defaults
+						unset($route['_route'], $route['_controller']);
+
+						//Check if user view route
+						if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
+							//Replace id
+							$route['id'] = $data->getId();
+						//Other routes
+						} else {
+							//Set user
+							$route['user'] = $data->getId();
+						}
+
+						//Generate url
+						return $this->redirectToRoute($name, $route);
+					//No route matched
+					} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
+						//Unset referer to fallback to default route
+						unset($referer);
+					}
+				}
+
+				//Redirect to cleanup the form
+				return $this->redirectToRoute('rapsys_air', ['user' => $data->getId()]);
+			}
+		}
+
 		//Create snippet forms for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
+		if ($this->isGranted('ROLE_ADMIN') || ($this->isGranted('ROLE_GUEST') && $user == $this->getUser())) {
 			//Fetch all user snippet
 			$snippets = $doctrine->getRepository(Snippet::class)->findByLocaleUserId($request->getLocale(), $id);
 
