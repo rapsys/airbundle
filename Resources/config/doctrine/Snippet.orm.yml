@@ -52,3 +52,5 @@ Rapsys\AirBundle\Entity\Snippet:
     uniqueConstraints:
         locale_location_user:
             columns: [ locale, location_id, user_id ]
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']

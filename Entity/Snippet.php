@@ -319,4 +319,15 @@ class Snippet {
 	public function getUser() {
 		return $this->user;
 	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function preUpdate(\Doctrine\ORM\Event\PreUpdateEventArgs  $eventArgs) {
+		//Check that we have an snippet instance
+		if (($snippet = $eventArgs->getEntity()) instanceof Snippet) {
+			//Set updated value
+			$snippet->setUpdated(new \DateTime('now'));
+		}
+	}
 }
