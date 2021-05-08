@@ -7,6 +7,8 @@ use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
+use Rapsys\AirBundle\Pdf\DisputePdf;
+use Rapsys\UserBundle\Utils\Slugger;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -20,7 +22,6 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
-use Rapsys\UserBundle\Utils\Slugger;
 use Symfony\Bundle\FrameworkBundle\Controller\ControllerTrait;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
@@ -262,7 +263,7 @@ class DefaultController {
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
-		$form = $this->createForm('Rapsys\AirBundle\Form\DisputeType', null, [
+		$form = $this->createForm('Rapsys\AirBundle\Form\DisputeType', ['court' => 'Paris', 'abstract' => 'Pour constater cette prétendue infraction, les agents verbalisateurs ont pénétré dans un jardin privatif, sans visibilité depuis la voie publique, situé derrière un batiment privé, pour ce faire ils ont franchi au moins un grillage de chantier ou des potteaux métalliques séparant le terrain privé de la voie publique de l\'autre côté du batiment.'], [
 			'action' => $this->generateUrl('rapsys_air_dispute'),
 			'method' => 'POST'
 		]);
@@ -275,35 +276,35 @@ class DefaultController {
 				//Get data
 				$data = $form->getData();
 
-				header('Content-Type: text/plain');
+				//Gathering offense
+				if (!empty($data['offense']) && $data['offense'] == 'gathering') {
+					//Add gathering
+					$output = DisputePdf::genGathering($data['court'], $data['notice'], $data['agent'], $data['service'], $data['abstract'], $this->translator->trans($this->getUser()->getCivility()->getTitle()), $this->getUser()->getForename(), $this->getUser()->getSurname());
+				//Traffic offense
+				} elseif (!empty($data['offense'] && $data['offense'] == 'traffic')) {
+					//Add traffic
+					$output = DisputePdf::genTraffic($data['court'], $data['notice'], $data['agent'], $data['service'], $data['abstract'], $this->translator->trans($this->getUser()->getCivility()->getTitle()), $this->getUser()->getForename(), $this->getUser()->getSurname());
+				//Unsupported offense
+				} else {
+					header('Content-Type: text/plain');
+					die('TODO');
+					exit;
+				}
 
-				//Infraction
-				var_dump($data['offense']);
+				//Send common headers
+				header('Content-Type: application/pdf');
 
-				//Numéro d'avis
-				var_dump($data['notice']);
+				//Send remaining headers
+				header('Cache-Control: private, max-age=0, must-revalidate');
+				header('Pragma: public');
 
-				//Numéro d'agent
-				var_dump($data['agent']);
+				//Send content-length
+				header('Content-Length: '.strlen($output));
 
-				//Code service
-				var_dump($data['service']);
+				//Display the pdf
+				echo $output;
 
-				//Masque porté
-				var_dump($data['mask']);
-
-				//Civilité
-				var_dump($this->translator->trans($this->getUser()->getCivility()->getTitle()));
-
-				//Prénom
-				var_dump($this->getUser()->getForename());
-
-				//Nom
-				var_dump($this->getUser()->getSurname());
-
-				//Mail
-				var_dump($this->getUser()->getMail());
-
+				//Die for now
 				exit;
 
 #				//Create message
