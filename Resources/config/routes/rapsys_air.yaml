@@ -124,7 +124,7 @@ rapsys_air_user_view:
         en: '/en/user/{id<\d+>}'
         fr: '/utilisateur/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\UserController::view
-    methods: GET
+    methods: GET|POST
 
 rapsys_user_login:
     path:
