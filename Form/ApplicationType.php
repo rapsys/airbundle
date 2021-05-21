@@ -38,7 +38,6 @@ class ApplicationType extends AbstractType {
 
 		//Create base form
 		$form = $builder
-			->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location']])
 			->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Date(['message' => 'Your date doesn\'t seems to be valid'])]])
 			#->add('slot', ChoiceType::class, ['attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choices' => $slots, 'data' => $options['slot']])
 			->add('slot', EntityType::class, ['class' => 'RapsysAirBundle:Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot']])
@@ -47,7 +46,13 @@ class ApplicationType extends AbstractType {
 		//Add extra user field
 		if (!empty($options['admin'])) {
 			$users = $this->doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator);
-			$form->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $users, 'data' => $options['user'], 'choice_translation_domain' => false]);
+			$form
+				->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location']])
+				->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'choice_translation_domain' => false, 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $users, 'data' => $options['user']]);
+		//Add user locations
+		} else {
+			$locations = $this->doctrine->getRepository(Location::class)->findByUserId($options['user']);
+			$form->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'choices' => $locations, 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location']]);
 		}
 
 		//Return form
