@@ -72,11 +72,17 @@ class Location {
 	private $snippets;
 
 	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $users;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		$this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->snippets = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->users = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	/**
@@ -368,6 +374,37 @@ class Location {
 	 */
 	public function getSnippets() {
 		return $this->snippets;
+	}
+
+	/**
+	 * Add user
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $user
+	 *
+	 * @return Location
+	 */
+	public function addUser(\Rapsys\AirBundle\Entity\User $user) {
+		$this->users[] = $user;
+
+		return $this;
+	}
+
+	/**
+	 * Remove user
+	 *
+	 * @param \Rapsys\AirBundle\Entity\User $user
+	 */
+	public function removeUser(\Rapsys\AirBundle\Entity\User $user) {
+		$this->users->removeElement($user);
+	}
+
+	/**
+	 * Get users
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getUsers() {
+		return $this->users;
 	}
 
 	/**

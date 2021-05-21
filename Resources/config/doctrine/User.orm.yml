@@ -19,7 +19,7 @@ Rapsys\AirBundle\Entity\User:
             targetEntity: Rapsys\AirBundle\Entity\User
             inversedBy: subscriptions
             joinTable:
-                name: subscriptions
+                name: users_subscriptions
                 joinColumns:
                     id:
                         name: user_id
@@ -29,6 +29,17 @@ Rapsys\AirBundle\Entity\User:
         subscriptions:
             targetEntity: Rapsys\AirBundle\Entity\User
             mappedBy: subscribers
+        locations:
+            targetEntity: Rapsys\AirBundle\Entity\Location
+            inversedBy: users
+            joinTable:
+                name: users_locations
+                joinColumns:
+                    id:
+                        name: user_id
+                inverseJoinColumns:
+                    id:
+                        name: location_id
 #    manyToMany:
 #        groups:
 #            targetEntity: Group
@@ -38,7 +49,7 @@ Rapsys\AirBundle\Entity\User:
     associationOverride:
         groups:
             joinTable:
-                name: groups_users
+                name: users_groups
                 joinColumns:
                     id:
                         name: user_id

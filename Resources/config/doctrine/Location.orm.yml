@@ -46,6 +46,10 @@ Rapsys\AirBundle\Entity\Location:
         snippets:
             targetEntity: Rapsys\AirBundle\Entity\Snippet
             mappedBy: location
+    manyToMany:
+        users:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            mappedBy: locations
     indexes:
         #XXX: used in SessionRepository::(findAllPendingDailyWeather|findAllPendingHourlyWeather)
         zipcode:

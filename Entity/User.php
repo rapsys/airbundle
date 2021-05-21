@@ -23,17 +23,22 @@ class User extends BaseUser {
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 */
+	private $locations;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private $snippets;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
 	private $subscribers;
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 */
 	private $subscriptions;
-
-	/**
-	 * @var \Doctrine\Common\Collections\Collection
-	 */
-	private $snippets;
 
 	/**
 	 * Constructor
@@ -44,9 +49,10 @@ class User extends BaseUser {
 
 		//Set collections
 		$this->applications = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->locations = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->snippets = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->subscribers = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->subscriptions = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->snippets = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	/**
@@ -147,6 +153,68 @@ class User extends BaseUser {
 	}
 
 	/**
+	 * Add snippet
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 *
+	 * @return User
+	 */
+	public function addSnippet(Snippet $snippet) {
+		$this->snippets[] = $snippet;
+
+		return $this;
+	}
+
+	/**
+	 * Remove snippet
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 */
+	public function removeSnippet(Snippet $snippet) {
+		$this->snippets->removeElement($snippet);
+	}
+
+	/**
+	 * Get snippets
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSnippets() {
+		return $this->snippets;
+	}
+
+	/**
+	 * Add location
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Location $location
+	 *
+	 * @return User
+	 */
+	public function addLocation(Location $location) {
+		$this->locations[] = $location;
+
+		return $this;
+	}
+
+	/**
+	 * Remove location
+	 *
+	 * @param \Rapsys\AirBundle\Entity\Location $location
+	 */
+	public function removeLocation(Location $location) {
+		$this->locations->removeElement($location);
+	}
+
+	/**
+	 * Get locations
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getLocations() {
+		return $this->locations;
+	}
+
+	/**
 	 * Add subscriber
 	 *
 	 * @param \Rapsys\AirBundle\Entity\User $subscriber
@@ -206,36 +274,5 @@ class User extends BaseUser {
 	 */
 	public function getSubscriptions() {
 		return $this->subscriptions;
-	}
-
-	/**
-	 * Add snippet
-	 *
-	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
-	 *
-	 * @return User
-	 */
-	public function addSnippet(Snippet $snippet) {
-		$this->snippets[] = $snippet;
-
-		return $this;
-	}
-
-	/**
-	 * Remove snippet
-	 *
-	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
-	 */
-	public function removeSnippet(Snippet $snippet) {
-		$this->snippets->removeElement($snippet);
-	}
-
-	/**
-	 * Get snippets
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getSnippets() {
-		return $this->snippets;
 	}
 }
