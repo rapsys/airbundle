@@ -3,6 +3,7 @@
 namespace Rapsys\AirBundle\Repository;
 
 use Symfony\Component\Translation\TranslatorInterface;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * LocationRepository
@@ -107,8 +108,7 @@ ORDER BY '.(!empty($userId)?'COUNT(a.id) DESC, ':'').'COUNT(s.id) DESC, l.id'
 	public function fetchTranslatedUserLocationByDatePeriod(TranslatorInterface $translator, $period, $userId) {
 		//Fetch sessions
 		$ret = $this->getEntityManager()
-			  ->createQuery('SELECT l.id, l.title FROM RapsysAirBundle:Application a JOIN RapsysAirBundle:Session s JOIN RapsysAirBundle:Location l WHERE a.user = :uid AND a.session = s.id AND s.date BETWEEN :begin AND :end AND s.location = l.id GROUP BY l.id ORDER BY l.id')
-#SELECT l.id, l.title FROM RapsysAirBundle:Session s JOIN RapsysAirBundle:Application a JOIN RapsysAirBundle:Location l WHERE s.date BETWEEN :begin AND :end AND s.id = a.session AND l.id = s.location GROUP BY l.id ORDER BY l.id
+			->createQuery('SELECT l.id, l.title FROM RapsysAirBundle:Application a JOIN RapsysAirBundle:Session s JOIN RapsysAirBundle:Location l WHERE a.user = :uid AND a.session = s.id AND s.date BETWEEN :begin AND :end AND s.location = l.id GROUP BY l.id ORDER BY l.id')
 			->setParameter('begin', $period->getStartDate())
 			->setParameter('end', $period->getEndDate())
 			->setParameter('uid', $userId)
@@ -124,5 +124,51 @@ ORDER BY '.(!empty($userId)?'COUNT(a.id) DESC, ':'').'COUNT(s.id) DESC, l.id'
 
 		//Send result
 		return $ret;
+	}
+
+	/**
+	 * Find locations by user id
+	 *
+	 * @param $id The user id
+	 * @return array The user locations
+	 */
+	public function findByUserId($userId) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:UserLocation' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('locations'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp)
+		];
+
+		//Set the request
+		$req = 'SELECT l.id, l.title
+FROM RapsysAirBundle:UserLocation AS ul
+JOIN RapsysAirBundle:Location AS l ON (l.id = ul.location_id)
+WHERE ul.user_id = :uid';
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare result set for our request
+		$rsm->addEntityResult('RapsysAirBundle:Location', 'l');
+		$rsm->addFieldResult('l', 'id', 'id');
+		$rsm->addFieldResult('l', 'title', 'title');
+
+		//Send result
+		return $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('uid', $userId)
+			->getResult();
 	}
 }

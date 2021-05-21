@@ -25,7 +25,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		//Get quoted table names
 		//XXX: this allow to make this code table name independent
 		$tables = [
-			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:UserGroup' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Civility' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Civility'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp)
@@ -36,7 +36,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 			SELECT u.id, u.forename, u.surname, t.id AS t_id, t.short AS t_short, t.title AS t_title, g.id AS g_id, g.title AS g_title
 			FROM RapsysAirBundle:User AS u
 			JOIN RapsysAirBundle:Civility AS t ON (t.id = u.civility_id)
-			LEFT JOIN RapsysAirBundle:GroupUser AS gu ON (gu.user_id = u.id)
+			LEFT JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
 			LEFT JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
 			ORDER BY g.id DESC, NULL LIMIT '.PHP_INT_MAX.'
 		) AS a GROUP BY a.id ORDER BY NULL';
@@ -140,7 +140,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 		//Get quoted table names
 		//XXX: this allow to make this code table name independent
 		$tables = [
-			'RapsysAirBundle:GroupUser' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:UserGroup' => $qs->getJoinTableName($em->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			//XXX: Set limit used to workaround mariadb subselect optimization
@@ -155,7 +155,7 @@ SELECT a.id, a.pseudonym, a.g_id, a.g_title
 FROM (
 	SELECT u.id, u.pseudonym, g.id AS g_id, g.title AS g_title
 	FROM RapsysAirBundle:User AS u
-	JOIN RapsysAirBundle:GroupUser AS gu ON (gu.user_id = u.id)
+	JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
 	JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
 	ORDER BY g.id DESC
 	LIMIT 0, :limit
