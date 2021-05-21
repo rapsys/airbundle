@@ -265,14 +265,16 @@ class WeatherCommand extends DoctrineCommand {
 						//Get rainrisk
 						$rainrisk = str_replace('%', '', trim($node->div[0]->div[0]->div[1]))/100;
 
-						//Label is Rain when we have a rainfall
-						if (($pluviolabel = trim($node->div[1]->div[0]->div[0]->div[1]->p[1])) == 'Rain') {
-							//Get rainfall
-							$rainfall = str_replace(' mm', '', $node->div[1]->div[0]->div[0]->div[1]->p[1]->span[0]);
-						//Cloud Cover, no rainfall
-						} else {
-							//Set rainfall to 0 (mm)
-							$rainfall = 0;
+						//Set rainfall to 0 (mm)
+						$rainfall = 0;
+
+						//Iterate on each entry
+						foreach($node->div[1]->div[0]->div[0]->div[1]->p as $p) {
+							//Lookup for rain entry if present
+							if (trim($p) == 'Rain') {
+								//Get rainfall
+								$rainfall = floatval(str_replace(' mm', '', $p->span[0]));
+							}
 						}
 
 						//Store data
