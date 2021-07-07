@@ -143,6 +143,121 @@ SQL;
 	}
 
 	/**
+	 * Fetch sessions by date period
+	 *
+	 * @param $period The date period
+	 * @param $locale The locale
+	 */
+	public function fetchAllByDatePeriod($period, $locale = null) {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
+			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
+			':afterid' => 4,
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Set the request
+		//TODO: exclude opera and others ?
+		$req = <<<SQL
+SELECT
+	s.id,
+	s.date,
+	s.locked,
+	s.updated,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
+	s.location_id AS l_id,
+	l.address AS l_address,
+	l.zipcode AS l_zipcode,
+	l.city AS l_city,
+	l.short AS l_short,
+	l.title AS l_title,
+	l.latitude AS l_latitude,
+	l.longitude AS l_longitude,
+	s.application_id AS a_id,
+	a.canceled AS a_canceled,
+	a.user_id AS au_id,
+	au.pseudonym AS au_pseudonym,
+	p.id AS p_id,
+	p.description AS p_description,
+	p.class AS p_class,
+	p.contact AS p_contact,
+	p.donate AS p_donate,
+	p.link AS p_link,
+	p.profile AS p_profile
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+WHERE s.date BETWEEN :begin AND :end
+ORDER BY NULL
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		//addScalarResult($sqlColName, $resColName, $type = 'string');
+		$rsm->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('date', 'date', 'date')
+			->addScalarResult('locked', 'locked', 'datetime')
+			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('start', 'start', 'datetime')
+			->addScalarResult('stop', 'stop', 'datetime')
+			->addScalarResult('l_id', 'l_id', 'integer')
+			->addScalarResult('l_address', 'l_address', 'string')
+			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
+			->addScalarResult('l_city', 'l_city', 'string')
+			->addScalarResult('l_latitude', 'l_latitude', 'float')
+			->addScalarResult('l_longitude', 'l_longitude', 'float')
+			->addScalarResult('l_short', 'l_short', 'string')
+			->addScalarResult('l_title', 'l_title', 'string')
+			->addScalarResult('t_id', 't_id', 'integer')
+			->addScalarResult('t_title', 't_title', 'string')
+			->addScalarResult('a_id', 'a_id', 'integer')
+			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
+			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			->addScalarResult('p_id', 'p_id', 'integer')
+			->addScalarResult('p_description', 'p_description', 'string')
+			->addScalarResult('p_class', 'p_class', 'string')
+			->addScalarResult('p_contact', 'p_contact', 'string')
+			->addScalarResult('p_donate', 'p_donate', 'string')
+			->addScalarResult('p_link', 'p_link', 'string')
+			->addScalarResult('p_profile', 'p_profile', 'string')
+			->addIndexByScalar('id');
+
+		//Fetch result
+		$res = $em
+			->createNativeQuery($req, $rsm)
+			->setParameter('begin', $period->getStartDate())
+			->setParameter('end', $period->getEndDate())
+			->setParameter('locale', $locale);
+
+		//Return result
+		return $res->getResult();
+	}
+
+	/**
 	 * Fetch session by id
 	 *
 	 * @param $id The session id
