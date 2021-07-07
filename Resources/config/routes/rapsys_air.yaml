@@ -14,6 +14,18 @@ rapsys_air_contact:
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
+rapsys_air_calendar:
+    path:
+        en: '/en/calendar'
+        fr: '/calendrier'
+    controller: Rapsys\AirBundle\Controller\CalendarController::index
+    methods: GET|POST
+
+rapsys_air_calendar_callback:
+    path: '/calendar/callback'
+    controller: Rapsys\AirBundle\Controller\CalendarController::callback
+    methods: GET
+
 rapsys_air_frequently_asked_questions:
     path:
         en: '/en/frequently-asked-questions'

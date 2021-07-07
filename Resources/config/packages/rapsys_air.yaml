@@ -281,6 +281,10 @@ services:
     Rapsys\AirBundle\Controller\ApplicationController:
         arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
+    #Register calendar controller
+    Rapsys\AirBundle\Controller\CalendarController:
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        tags: [ 'controller.service_arguments' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
         arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
@@ -339,6 +343,9 @@ services:
         tags: [ 'form.type' ]
     Rapsys\AirBundle\Command\AttributeCommand:
         arguments: [ '@doctrine' ]
+        tags: [ 'console.command' ]
+    Rapsys\AirBundle\Command\CalendarCommand:
+        arguments: [ '@service_container', '@doctrine', '@router', '@translator' ]
         tags: [ 'console.command' ]
     Rapsys\AirBundle\Command\WeatherCommand:
         arguments: [ '@doctrine' ]
