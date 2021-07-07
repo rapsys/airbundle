@@ -1,0 +1,14 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<section id="form">
+		<header>
+			<h2><a href="{{ path('rapsys_air_calendar') }}">{{ section }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
+		{% if error is defined %}
+			<p class="message error">{{ error }}</p>
+		{% elseif message is defined %}
+			<p class="message notice">{{ message }}</p>
+		{% endif %}
+	</section>
+{% endblock %}
