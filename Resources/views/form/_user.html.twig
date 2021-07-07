@@ -1,0 +1,25 @@
+<section>
+	<h2>{% trans %}Modify{% endtrans %}</h2>
+	{{ form_start(forms.user) }}
+		<div>
+			{% if forms.user.mail is defined %}
+				{{ form_row(forms.user.mail) }}
+			{% endif %}
+
+			{{ form_row(forms.user.civility) }}
+
+			{{ form_row(forms.user.forename) }}
+
+			{{ form_row(forms.user.surname) }}
+
+			{{ form_row(forms.user.pseudonym) }}
+
+			{{ form_row(forms.user.phone) }}
+
+			{{ form_row(forms.user.submit) }}
+		</div>
+
+		{# render csrf token etc .#}
+		<footer style="display:none">{{ form_rest(forms.user) }}</footer>
+	{{ form_end(forms.user) }}
+</section>
