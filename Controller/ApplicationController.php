@@ -125,21 +125,24 @@ class ApplicationController extends DefaultController {
 					$session->setLength(new \DateTime('05:00:00'));
 				//Check if afternoon
 				} elseif ($slot == 'Afternoon') {
-					//Set begin at 14h
-					$session->setBegin(new \DateTime('14:30:00'));
+					//Set begin at 16h
+					$session->setBegin(new \DateTime('16:00:00'));
 
-					//Set length at 5h
-					$session->setLength(new \DateTime('04:30:00'));
+					//Set length at 3h
+					$session->setLength(new \DateTime('03:00:00'));
 				//Check if evening
 				} elseif ($slot == 'Evening') {
 					//Set begin at 19h
-					$session->setBegin(new \DateTime('19:00:00'));
+					$session->setBegin(new \DateTime('19:30:00'));
 
 					//Check if next day is premium
 					if ($premium) {
 						//Set length at 7h
 						$session->setLength(new \DateTime('07:00:00'));
 					}
+
+					//Set length at 4h
+					$session->setLength(new \DateTime('04:30:00'));
 				//Check if after
 				} else {
 					//Set begin at 1h
