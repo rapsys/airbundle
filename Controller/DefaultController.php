@@ -351,7 +351,7 @@ class DefaultController {
 		}
 
 		//Render template
-		return $this->render('@RapsysAir/form/dispute.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
+		return $this->render('@RapsysAir/default/dispute.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
 	}
 
 	/**
