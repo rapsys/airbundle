@@ -32,6 +32,16 @@ class Snippet {
 	/**
 	 * @var string
 	 */
+	protected $short;
+
+	/**
+	 * @var integer
+	 */
+	protected $rate;
+
+	/**
+	 * @var string
+	 */
 	protected $contact;
 
 	/**
@@ -142,6 +152,50 @@ class Snippet {
 	 */
 	public function getClass() {
 		return $this->class;
+	}
+
+	/**
+	 * Set short
+	 *
+	 * @param string $short
+	 *
+	 * @return Snippet
+	 */
+	public function setShort($short) {
+		$this->short = $short;
+
+		return $this;
+	}
+
+	/**
+	 * Get short
+	 *
+	 * @return string
+	 */
+	public function getShort() {
+		return $this->short;
+	}
+
+	/**
+	 * Set rate
+	 *
+	 * @param string $rate
+	 *
+	 * @return Snippet
+	 */
+	public function setRate($rate) {
+		$this->rate = $rate;
+
+		return $this;
+	}
+
+	/**
+	 * Get rate
+	 *
+	 * @return string
+	 */
+	public function getRate() {
+		return $this->rate;
 	}
 
 	/**
