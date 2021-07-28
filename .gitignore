@@ -1,2 +1,4 @@
 *.deadcode
 .*.un~
+/Resources/public/facebook/*
+/Resources/public/location/*
