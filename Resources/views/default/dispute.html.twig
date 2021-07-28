@@ -2,8 +2,8 @@
 {% block content %}
 	<section id="form">
 		<header>
-			<h2><a href="{{ path('rapsys_air_dispute') }}">{{ section }}</a></h2>
-			<p>{{ description }}</p>
+			<h2><a href="{{ path('rapsys_air_dispute') }}">{{ page.title }}</a></h2>
+			<p>{{ page.description }}</p>
 		</header>
 		{% if sent %}
 			<p class="message notice">{% trans %}Your message has been sent{% endtrans %}</p>
