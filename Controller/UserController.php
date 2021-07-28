@@ -6,11 +6,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Rapsys\AirBundle\Entity\Slot;
-use Rapsys\AirBundle\Entity\Session;
+
+use Rapsys\AirBundle\Entity\Civility;
 use Rapsys\AirBundle\Entity\Location;
-use Rapsys\AirBundle\Entity\User;
+use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Snippet;
+use Rapsys\AirBundle\Entity\User;
 
 class UserController extends DefaultController {
 	/**
@@ -147,6 +149,8 @@ class UserController extends DefaultController {
 				'action' => $this->generateUrl('rapsys_air_user_view', ['id' => $id]),
 				//Set the form attribute
 				'attr' => [ 'class' => 'col' ],
+				//Set civility class
+				'class_civility' => Civility::class,
 				//Disable mail
 				'mail' => $this->isGranted('ROLE_ADMIN'),
 				//Disable password
