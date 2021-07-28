@@ -2,11 +2,15 @@
 
 namespace Rapsys\AirBundle\Controller;
 
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\RequestContext;
+
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Snippet;
 use Rapsys\AirBundle\Entity\User;
@@ -209,6 +213,47 @@ class SnippetController extends DefaultController {
 
 			//Render the view
 			return $this->render('@RapsysAir/snippet/edit.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+		}
+
+		//With image
+		//TODO: add delete button ???
+		if ($image = $form->get('image')->getData()) {
+			//Get public path
+			#$public = $this->container->get('kernel')->getBundle('RapsysAirBundle')->getPath().'/Resources/public';
+			#$public = $this->container->get('kernel')->locateResource('@RapsysAirBundle/Resources/public');
+			$public = $this->getPublicPath();
+
+			//Create imagick object
+			$imagick = new \Imagick();
+
+			//Read image
+			$imagick->readImage($image->getRealPath());
+
+			//Set destination
+			//XXX: uploaded path location/<userId>/<locationId>.png and session image location/<userId>/<locationId>/<sessionId>.jpeg
+			//XXX: default path location/default.png and session location/default/<sessionId>.jpeg
+			$destination = $public.'/location/'.$snippet->getUser()->getId().'/'.$snippet->getLocation()->getId().'.png';
+
+			//Check target directory
+			if (!is_dir($dir = dirname($destination))) {
+				//Create filesystem object
+				$filesystem = new Filesystem();
+
+				try {
+					//Create dir
+					//XXX: set as 0775, symfony umask (0022) will reduce rights (0755)
+					$filesystem->mkdir($dir, 0775);
+				} catch (IOExceptionInterface $e) {
+					//Throw error
+					throw new \Exception(sprintf('Output directory "%s" do not exists and unable to create it', $dir), 0, $e);
+				}
+			}
+
+			//Save image
+			if (!$imagick->writeImage($destination)) {
+				//Throw error
+				throw new \Exception(sprintf('Unable to write image "%s"', $destination));
+			}
 		}
 
 		//Get manager
