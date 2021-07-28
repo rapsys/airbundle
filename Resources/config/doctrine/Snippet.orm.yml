@@ -12,12 +12,21 @@ Rapsys\AirBundle\Entity\Snippet:
     fields:
         locale:
             type: string
-            length: 2
+            length: 5
         description:
             type: text
+            nullable: true
         class:
             type: text
             nullable: true
+        short:
+            type: text
+            nullable: true
+        rate:
+            type: integer
+            nullable: true
+            options:
+                unsigned: true
         contact:
             type: string
             length: 254
