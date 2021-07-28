@@ -4,8 +4,8 @@
 {% endblock %}
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	{% if description is defined and description %}
-		<meta name="description" content="{{ description }}" />
+	{% if page.description is defined and page.description %}
+		<meta name="description" content="{{ page.description }}" />
 	{% endif %}
 	{% if keywords is defined and keywords %}
 		<meta name="keywords" content="{{ keywords|join(', ') }}" />
@@ -36,11 +36,25 @@
 		{% endstylesheet %}
 	{% endstopwatch %}
 	{% if canonical is defined and canonical %}
-		<link rel="canonical" href="{{ canonical }}" />
+		<link rel="canonical" href="{{ canonical }}"{% if app.request.locale is defined and app.request.locale %} hreflang="{{ app.request.locale }}"{% endif %} />
 	{% endif %}
 	{% if alternates is defined and alternates %}
-		{% for alternate in alternates %}
-			<link rel="alternate" href="{{ alternate.absolute }}" hreflang="{{ alternate.lang }}" />
+		{% for lang, alternate in alternates %}
+			<link rel="alternate" href="{{ alternate.absolute }}" hreflang="{{ lang }}" />
+		{% endfor %}
+	{% endif %}
+	{% if ogps is defined and ogps %}
+		{% for property, content in ogps %}
+			<meta property="og:{{ property }}" content="{{ content }}" />
+		{% endfor %}
+		{% for property, contents in facebooks %}
+			{% if contents is iterable %}
+				{% for content in contents %}
+					<meta property="fb:{{ property }}" content="{{ content }}" />
+				{% endfor %}
+			{% else %}
+				<meta property="fb:{{ property }}" content="{{ contents }}" />
+			{% endif %}
 		{% endfor %}
 	{% endif %}
 {% endblock %}
@@ -51,7 +65,7 @@
 		{% endjavascript %}#}
 	{% endstopwatch %}
 {% endblock %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ [site.title, page.section, page.title]|filter(v => v)|join(' - ') }}{% endblock %}
 {% block body %}
 	{% block header %}
 		<header id="header">
@@ -62,12 +76,15 @@
 				<nav>
 					<h2>{% trans %}Navigation{% endtrans %}</h2>
 					<ul>
-						<li><a href="{{ path('rapsys_air') }}">{% trans %}Home{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_contact') }}">{% trans %}Contact{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a></li>
+						<li><a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
+						{% if is_granted('ROLE_GUEST') %}
+							<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
+						{% endif %}
 						{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+							<li><a href="{{ path('rapsys_air_user_view', {id: app.user.id}) }}">{% trans %}My account{% endtrans %}</a></li>
 							<li><a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a></li>
 						{% else %}
 							<li><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></li>
@@ -115,21 +132,22 @@
 	{% endblock %}
 	{% block footer %}
 		<footer id="footer">
+			<a href="{{ path('rapsys_air_about') }}">{% trans %}About{% endtrans %}</a>
 			{% if copy is defined and copy %}
-				<a href="{{ copy.link }}" title="{{ copy.title }}" rel="author">{{ copy.by }}</a>
-				<details><summary>{{ copy.long }}</summary><span>{{ copy.short }}</span></details>
+				<details><summary>{{ copy.long }}</summary><span>{{ copy.short }} <a href="{{ copy.link }}" title="{{ copy.title }}" rel="author">{{ copy.by }}</a></span></details>
 			{% endif %}
 			<a href="{{ path('rapsys_air_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a>
 			{% if alternates is defined and alternates %}
-				{% if alternates|length > 1 %}
+				{% set langs = alternates|keys|filter(v => v|length == 5) %}
+				{% if langs|length > 1 %}
 					<ul>
-						{% for alternate in alternates %}
-							<li><a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a></li>
+						{% for lang in langs %}
+							<li><a href="{{ alternates[lang].relative }}" hreflang="{{ lang }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
-					{% set alternate = alternates|first %}
-					<a href="{{ alternate.relative }}" hreflang="{{ alternate.lang }}" title="{{ alternate.title }}">{{ alternate.translated }}</a>
+					{% set lang = langs|first %}
+					<a href="{{ alternates[lang].relative }}" hreflang="{{ lang }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a>
 				{% endif %}
 			{% else %}
 				<span>&nbsp;</span>
