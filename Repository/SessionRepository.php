@@ -190,10 +190,13 @@ SELECT
 	s.application_id AS a_id,
 	a.canceled AS a_canceled,
 	a.user_id AS au_id,
+	au.forename AS au_forename,
 	au.pseudonym AS au_pseudonym,
 	p.id AS p_id,
 	p.description AS p_description,
 	p.class AS p_class,
+	p.short AS p_short,
+	p.rate AS p_rate,
 	p.contact AS p_contact,
 	p.donate AS p_donate,
 	p.link AS p_link,
@@ -236,10 +239,13 @@ SQL;
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
 			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_forename', 'au_forename', 'string')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
 			->addScalarResult('p_id', 'p_id', 'integer')
 			->addScalarResult('p_description', 'p_description', 'string')
 			->addScalarResult('p_class', 'p_class', 'string')
+			->addScalarResult('p_short', 'p_short', 'string')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
 			->addScalarResult('p_contact', 'p_contact', 'string')
 			->addScalarResult('p_donate', 'p_donate', 'string')
 			->addScalarResult('p_link', 'p_link', 'string')
@@ -318,8 +324,10 @@ SELECT
 	l.city AS l_city,
 	l.latitude AS l_latitude,
 	l.longitude AS l_longitude,
+	l.updated AS l_updated,
 	s.slot_id AS t_id,
 	t.title AS t_title,
+	t.updated AS t_updated,
 	s.application_id AS a_id,
 	a.canceled AS a_canceled,
 	a.user_id AS au_id,
@@ -331,6 +339,7 @@ SELECT
 	p.donate AS p_donate,
 	p.link AS p_link,
 	p.profile AS p_profile,
+	p.updated AS p_updated,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
 	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
@@ -385,8 +394,10 @@ SQL;
 			->addScalarResult('l_city', 'l_city', 'string')
 			->addScalarResult('l_latitude', 'l_latitude', 'float')
 			->addScalarResult('l_longitude', 'l_longitude', 'float')
+			->addScalarResult('l_updated', 'l_updated', 'datetime')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
+			->addScalarResult('t_updated', 't_updated', 'datetime')
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
 			->addScalarResult('au_id', 'au_id', 'integer')
@@ -398,6 +409,7 @@ SQL;
 			->addScalarResult('p_donate', 'p_donate', 'text')
 			->addScalarResult('p_link', 'p_link', 'text')
 			->addScalarResult('p_profile', 'p_profile', 'text')
+			->addScalarResult('p_updated', 'p_updated', 'datetime')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sa_id', 'sa_id', 'string')
 			//XXX: is a string because of \n separator
@@ -1433,5 +1445,174 @@ SQL;
 
 		//Return best ranked application
 		return $ret;
+	}
+
+
+	/**
+	 * Rekey sessions and applications by chronological session id
+	 *
+	 * @return bool The rekey success or failure
+	 */
+	function rekey(): bool {
+		//Get entity manager
+		$em = $this->getEntityManager();
+
+		//Get connection
+		$cnx = $em->getConnection();
+
+		//Get quote strategy
+		$qs = $em->getConfiguration()->getQuoteStrategy();
+		$dp = $em->getConnection()->getDatabasePlatform();
+
+		//Get quoted table names
+		//XXX: this allow to make this code table name independent
+		$tables = [
+			'RapsysAirBundle:Application' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Application'), $dp),
+			'RapsysAirBundle:Session' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			':afterid' => 4,
+			"\t" => '',
+			"\n" => ' '
+		];
+
+		//Set the request
+		$req = <<<SQL
+SELECT
+	a.id,
+	a.sa_id
+FROM (
+	SELECT
+		s.id,
+		s.date,
+		s.begin,
+		s.slot_id,
+		GROUP_CONCAT(sa.id ORDER BY sa.id SEPARATOR "\\n") AS sa_id
+	FROM RapsysAirBundle:Session AS s
+	LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+	GROUP BY s.id
+	ORDER BY NULL
+) AS a
+ORDER BY ADDDATE(ADDTIME(a.date, a.begin), INTERVAL IF(a.slot_id = :afterid, 1, 0) DAY) ASC
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace(array_keys($tables), array_values($tables), $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		//addScalarResult($sqlColName, $resColName, $type = 'string');
+		$rsm->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('sa_id', 'sa_id', 'string');
+			#->addIndexByScalar('id');
+
+		//Fetch result
+		$rnq = $em->createNativeQuery($req, $rsm);
+
+		//Get result set
+		$res = $rnq->getResult();
+
+		//Start transaction
+		$cnx->beginTransaction();
+
+		//Set update session request
+		$sreq = <<<SQL
+UPDATE RapsysAirBundle:Session
+SET id = :nid, updated = NOW()
+WHERE id = :id
+SQL;
+
+		//Replace bundle entity name by table name
+		$sreq = str_replace(array_keys($tables), array_values($tables), $sreq);
+
+		//Set update application request
+		$areq = <<<SQL
+UPDATE RapsysAirBundle:Application
+SET session_id = :nid, updated = NOW()
+WHERE session_id = :id
+SQL;
+
+		//Replace bundle entity name by table name
+		$areq = str_replace(array_keys($tables), array_values($tables), $areq);
+
+		//Set max value
+		$max = max(array_keys($res));
+
+		try {
+			//Prepare session to update
+			foreach($res as $id => $data) {
+				//Set temp id
+				$res[$id]['t_id'] = $max + $id + 1;
+
+				//Set new id
+				$res[$id]['n_id'] = $id + 1;
+
+				//Explode application ids
+				$res[$id]['sa_id'] = explode("\n", $data['sa_id']);
+
+				//Without change
+				if ($res[$id]['n_id'] == $res[$id]['id']) {
+					//Remove unchanged session
+					unset($res[$id]);
+				}
+			}
+
+			//With changes
+			if (!empty($res)) {
+				//Disable foreign key checks
+				$cnx->prepare('SET foreign_key_checks = 0')->execute();
+
+				//Update to temp id
+				foreach($res as $id => $data) {
+					//Run session update
+					$cnx->executeUpdate($sreq, ['nid' => $res[$id]['t_id'], 'id' => $res[$id]['id']]);
+
+					//Run applications update
+					$cnx->executeUpdate($areq, ['nid' => $res[$id]['t_id'], 'id' => $res[$id]['id']]);
+				}
+
+				//Update to new id
+				foreach($res as $id => $data) {
+					//Run session update
+					$cnx->executeUpdate($sreq, ['nid' => $res[$id]['n_id'], 'id' => $res[$id]['t_id']]);
+
+					//Run applications update
+					$cnx->executeUpdate($areq, ['nid' => $res[$id]['n_id'], 'id' => $res[$id]['t_id']]);
+				}
+
+				//Restore foreign key checks
+				$cnx->prepare('SET foreign_key_checks = 1')->execute();
+
+				//Commit transaction
+				$cnx->commit();
+
+				//Set update auto_increment request
+				$ireq = <<<SQL
+ALTER TABLE RapsysAirBundle:Session
+auto_increment = 1
+SQL;
+
+				//Replace bundle entity name by table name
+				$ireq = str_replace(array_keys($tables), array_values($tables), $ireq);
+
+				//Reset auto_increment
+				$cnx->exec($ireq);
+			//Without changes
+			} else {
+				//Rollback transaction
+				$cnx->rollback();
+			}
+		} catch(\Exception $e) {
+			//Rollback transaction
+			$cnx->rollback();
+
+			//Throw exception
+			throw $e;
+		}
+
+		//Return success
+		return true;
 	}
 }
