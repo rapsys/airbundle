@@ -54,6 +54,12 @@ class DefaultController {
 	///RequestStack instance
 	protected $stack;
 
+	///Request instance
+	protected $request;
+
+	///Locale instance
+	protected $locale;
+
 	/**
 	 * @var ContainerInterface
 	 */
@@ -91,6 +97,10 @@ class DefaultController {
 
 		//Set the context
 		$this->context = [
+			'contact' => [
+				'title' => $translator->trans($this->config['contact']['title']),
+				'mail' => $this->config['contact']['mail']
+			],
 			'copy' => [
 				'by' => $translator->trans($this->config['copy']['by']),
 				'link' => $this->config['copy']['link'],
@@ -104,12 +114,13 @@ class DefaultController {
 				'title' => null
 			],
 			'site' => [
+				'donate' => $this->config['site']['donate'],
 				'ico' => $this->config['site']['ico'],
 				'logo' => $this->config['site']['logo'],
 				'png' => $this->config['site']['png'],
 				'svg' => $this->config['site']['svg'],
 				'title' => $translator->trans($this->config['site']['title']),
-				'url' => $router->generate($this->config['site']['url']),
+				'url' => $router->generate($this->config['site']['url'])
 			],
 			'canonical' => null,
 			'alternates' => [],
@@ -125,15 +136,15 @@ class DefaultController {
 		];
 
 		//Get current request
-		$currentRequest = $stack->getCurrentRequest();
+		$this->request = $stack->getCurrentRequest();
 
 		//Get current locale
-		#$currentLocale = $router->getContext()->getParameters()['_locale'];
-		$currentLocale = $currentRequest->getLocale();
+		#$this->locale = $router->getContext()->getParameters()['_locale'];
+		$this->locale = $this->request->getLocale();
 
 		//Set translator locale
 		//XXX: allow LocaleSubscriber on the fly locale change for first page
-		$this->translator->setLocale($currentLocale);
+		$this->translator->setLocale($this->locale);
 
 		//Iterate on locales excluding current one
 		foreach($this->config['locales'] as $locale) {
@@ -158,13 +169,23 @@ class DefaultController {
 			unset($route['_route']);
 
 			//With current locale
-			if ($locale == $currentLocale) {
+			if ($locale == $this->locale) {
 				//Set locale locales context
 				$this->context['canonical'] = $router->generate($name, ['_locale' => $locale]+$route, UrlGeneratorInterface::ABSOLUTE_URL);
 			} else {
 				//Set locale locales context
-				$this->context['alternates'][] = [
-					'lang' => $locale,
+				$this->context['alternates'][$locale] = [
+					'absolute' => $router->generate($name, ['_locale' => $locale]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
+					'relative' => $router->generate($name, ['_locale' => $locale]+$route),
+					'title' => implode('/', $titles),
+					'translated' => $translator->trans($this->config['languages'][$locale], [], null, $locale)
+				];
+			}
+
+			//Add shorter locale
+			if (empty($this->context['alternates'][$shortLocale = substr($locale, 0, 2)])) {
+				//Set locale locales context
+				$this->context['alternates'][$shortLocale] = [
 					'absolute' => $router->generate($name, ['_locale' => $locale]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
 					'relative' => $router->generate($name, ['_locale' => $locale]+$route),
 					'title' => implode('/', $titles),
@@ -172,6 +193,36 @@ class DefaultController {
 				];
 			}
 		}
+	}
+
+	/**
+	 * The about page
+	 *
+	 * @desc Display the about informations
+	 *
+	 * @return Response The rendered view
+	 */
+	public function about(): Response {
+		//Set page
+		$this->context['page']['title'] = $this->translator->trans('About');
+
+		//Set description
+		$this->context['page']['description'] = $this->translator->trans('Libre Air about');
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->translator->trans('about'),
+			$this->translator->trans('Libre Air')
+		];
+
+		//Render template
+		$response = $this->render('@RapsysAir/default/about.html.twig', $this->context);
+		$response->setEtag(md5($response->getContent()));
+		$response->setPublic();
+		$response->isNotModified($this->request);
+
+		//Return response
+		return $response;
 	}
 
 	/**
@@ -220,8 +271,7 @@ class DefaultController {
 					//Set sender
 					->from(new Address($data['mail'], $data['name']))
 					//Set recipient
-					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
-					->to(new Address($this->config['contact']['mail'], $this->config['contact']['name']))
+					->to(new Address($this->context['contact']['mail'], $this->context['contact']['title']))
 					//Set subject
 					->subject($data['subject'])
 
@@ -249,10 +299,10 @@ class DefaultController {
 				} catch(TransportExceptionInterface $e) {
 					if ($message = $e->getMessage()) {
 						//Add error message mail unreachable
-						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->config['contact']['mail'], '%message%' => $this->translator->trans($message)])));
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->context['contact']['mail'], '%message%' => $this->translator->trans($message)])));
 					} else {
 						//Add error message mail unreachable
-						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->config['contact']['mail']])));
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->context['contact']['mail']])));
 					}
 				}
 			}
@@ -275,11 +325,12 @@ class DefaultController {
 	public function dispute(Request $request, MailerInterface $mailer): Response {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_USER', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('User')]));
-		//Set section
-		$section = $this->translator->trans('Dispute');
+
+		//Set page
+		$this->context['page']['title'] = $this->translator->trans('Dispute');
 
 		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air dispute');
+		$this->context['page']['description'] = $this->translator->trans('Libre Air dispute');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -289,9 +340,6 @@ class DefaultController {
 			$this->translator->trans('Argentine Tango'),
 			$this->translator->trans('calendar')
 		];
-
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -345,7 +393,7 @@ class DefaultController {
 #					->from(new Address($data['mail'], $data['name']))
 #					//Set recipient
 #					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
-#					->to(new Address($this->config['contact']['mail'], $this->config['contact']['name']))
+#					->to(new Address($this->config['contact']['mail'], $this->config['contact']['title']))
 #					//Set subject
 #					->subject($data['subject'])
 #
@@ -383,7 +431,7 @@ class DefaultController {
 		}
 
 		//Render template
-		return $this->render('@RapsysAir/default/dispute.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
+		return $this->render('@RapsysAir/default/dispute.html.twig', ['form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
 	}
 
 	/**
@@ -417,26 +465,6 @@ class DefaultController {
 		//Set type
 		//XXX: only valid for home page
 		$this->context['ogps']['type'] = 'website';
-
-		//Set facebook image
-		$this->facebookImage = [
-			//XXX: format facebook/<controller>/<action>.<locale>.jpeg
-			'destination' => 'facebook/default/index.'.$request->getLocale().'.jpeg',
-			'texts' => [
-				$this->context['site']['title'] => [
-					'font' => 'irishgrover',
-					'size' => 110
-				],
-				$this->context['page']['title'] => [
-					'align' => 'left'
-				]/*,
-				$this->context['canonical'] => [
-					'align' => 'right',
-					'font' => 'labelleaurore',
-					'size' => 75
-				]*/
-			]
-		];
 
 		//Compute period
 		$period = new \DatePeriod(
@@ -479,11 +507,11 @@ class DefaultController {
 	 * @return Response The rendered view
 	 */
 	public function organizerRegulation(): Response {
-		//Set section
-		$section = $this->translator->trans('Organizer regulation');
+		//Set page
+		$this->context['page']['title'] = $this->translator->trans('Organizer regulation');
 
 		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air organizer regulation');
+		$this->context['page']['description'] = $this->translator->trans('Libre Air organizer regulation');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -491,11 +519,16 @@ class DefaultController {
 			$this->translator->trans('Libre Air')
 		];
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
 		//Render template
-		return $this->render('@RapsysAir/default/organizer_regulation.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		$response = $this->render('@RapsysAir/default/organizer_regulation.html.twig', $this->context);
+
+		//Set as cachable
+		$response->setEtag(md5($response->getContent()));
+		$response->setPublic();
+		$response->isNotModified($this->request);
+
+		//Return response
+		return $response;
 	}
 
 	/**
@@ -506,11 +539,11 @@ class DefaultController {
 	 * @return Response The rendered view
 	 */
 	public function termsOfService(): Response {
-		//Set section
-		$section = $this->translator->trans('Terms of service');
+		//Set page
+		$this->context['page']['title'] = $this->translator->trans('Terms of service');
 
 		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air terms of service');
+		$this->context['page']['description'] = $this->translator->trans('Libre Air terms of service');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -518,11 +551,16 @@ class DefaultController {
 			$this->translator->trans('Libre Air')
 		];
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
 		//Render template
-		return $this->render('@RapsysAir/default/terms_of_service.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		$response = $this->render('@RapsysAir/default/terms_of_service.html.twig', $this->context);
+
+		//Set as cachable
+		$response->setEtag(md5($response->getContent()));
+		$response->setPublic();
+		$response->isNotModified($this->request);
+
+		//Return response
+		return $response;
 	}
 
 	/**
@@ -533,11 +571,11 @@ class DefaultController {
 	 * @return Response The rendered view
 	 */
 	public function frequentlyAskedQuestions(): Response {
-		//Set section
-		$section = $this->translator->trans('Frequently asked questions');
+		//Set page
+		$this->context['page']['title'] = $this->translator->trans('Frequently asked questions');
 
 		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air frequently asked questions');
+		$this->context['page']['description'] = $this->translator->trans('Libre Air frequently asked questions');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -546,11 +584,16 @@ class DefaultController {
 			$this->translator->trans('Libre Air')
 		];
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
 		//Render template
-		return $this->render('@RapsysAir/default/frequently_asked_questions.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		$response = $this->render('@RapsysAir/default/frequently_asked_questions.html.twig', $this->context);
+
+		//Set as cachable
+		$response->setEtag(md5($response->getContent()));
+		$response->setPublic();
+		$response->isNotModified($this->request);
+
+		//Return response
+		return $response;
 	}
 
 	/**
@@ -579,6 +622,11 @@ class DefaultController {
 		//Set default source
 		$updated = $this->facebookImage['updated'] ?? strtotime('last week');
 
+		//Set default destination
+		//XXX: format facebook<pathinfo>.jpeg
+		//XXX: was facebook/<controller>/<action>.<locale>.jpeg
+		$destination = $this->facebookImage['destination'] ?? 'facebook'.$this->request->getPathInfo().'.jpeg';
+
 		//Set source path
 		$src = $this->config['path']['public'].'/'.$source;
 
@@ -587,10 +635,10 @@ class DefaultController {
 		$cache = $this->config['path']['cache'].'/facebook/'.substr($source, 0, strrpos($source, '.')).'.'.$this->config['facebook']['width'].'x'.$this->config['facebook']['height'].'.png';
 
 		//Set destination path
-		$dest = $this->config['path']['public'].'/'.$this->facebookImage['destination'];
+		$dest = $this->config['path']['public'].'/'.$destination;
 
 		//Set asset
-		$asset = '@RapsysAir/'.$this->facebookImage['destination'];
+		$asset = '@RapsysAir/'.$destination;
 
 		//With up to date generated image
 		if (
@@ -599,13 +647,19 @@ class DefaultController {
 			$stat['mtime'] >= $updated
 		) {
 			//Get image size
-			//TODO: see if it works every time
 			list ($width, $height) = getimagesize($dest);
+
+			//With canonical in texts
+			if (!empty($texts[$this->context['canonical']])) {
+				//Prevent canonical to finish in alt
+				unset($texts[$this->context['canonical']]);
+			}
 
 			//Return image data
 			return [
-				//TODO: see if it works every time
-				'image' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				#'image' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				'image:url' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				#'image:secure_url' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
 				'image:alt' => str_replace("\n", ' ', implode(' - ', array_keys($texts))),
 				'image:height' => $height,
 				'image:width' => $width
@@ -683,8 +737,7 @@ class DefaultController {
 			$draw->setTextAntialias(true);
 
 			//Set stroke width
-			//TODO: configure that ?
-			$draw->setStrokeWidth(15);
+			$draw->setStrokeWidth($this->facebookImage['stroke']??15);
 
 			//Set font aliases
 			$fonts = [
@@ -840,10 +893,18 @@ class DefaultController {
 			//TODO: see if it works every time
 			$stat = stat($dest);
 
+			//With canonical in texts
+			if (!empty($texts[$this->context['canonical']])) {
+				//Prevent canonical to finish in alt
+				unset($texts[$this->context['canonical']]);
+			}
+
 			//Return image data
 			return [
 				//TODO: see if it works every time
-				'image' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				#'image' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				'image:url' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
+				#'image:secure_url' => $this->stack->getCurrentRequest()->getUriForPath($this->asset->getUrl($asset), true),#.'?fbrefresh='.$stat['mtime'],
 				'image:alt' => str_replace("\n", ' ', implode(' - ', array_keys($texts))),
 				'image:height' => $height,
 				'image:width' => $width
@@ -899,22 +960,26 @@ class DefaultController {
 			$parameters['forms']['login'] = $login->createView();
 		}
 
-		/*
-		//TODO: set here or in constructor the controller and action name
-		//XXX: used to autogenerate the facebookimage dest
-		//XXX: with just page title and canonical we may generate miniatures automaticaly
-		if ($_SERVER['REMOTE_ADDR'] == '89.3.147.209') {
-			header('Content-Type: text/plain');
-			#var_dump($this->getModuleName());
-			#var_dump($this->getController());
-			exit;
-			#var_dump(__CLASS__);
-			#var_dump($router);
-			exit;
-			var_dump($currentRequest->attributes->get('_controller'));
-			exit;
-		}*/
-
+		//With page infos and without facebook image
+		if (empty($this->facebookImage) && !empty($parameters['site']['title']) && !empty($parameters['page']['title']) && !empty($parameters['canonical'])) {
+			//Set facebook image
+			$this->facebookImage = [
+				'texts' => [
+					$parameters['site']['title'] => [
+						'font' => 'irishgrover',
+						'size' => 110
+					],
+					$parameters['page']['title'] => [
+						'align' => 'left'
+					],
+					$parameters['canonical'] => [
+						'align' => 'right',
+						'font' => 'labelleaurore',
+						'size' => 50
+					]
+				]
+			];
+		}
 
 		//With canonical
 		if (!empty($parameters['canonical'])) {
@@ -932,6 +997,25 @@ class DefaultController {
 		if (!empty($parameters['page']['description'])) {
 			//Set facebook description
 			$parameters['ogps']['description'] = $parameters['page']['description'];
+		}
+
+		//With locale
+		if (!empty($this->locale)) {
+			//Set facebook locale
+			$parameters['ogps']['locale'] = str_replace('-', '_', $this->locale);
+
+			//With alternates
+			//XXX: disabled as we don't support fb_locale=xx_xx
+			//XXX: see https://stackoverflow.com/questions/20827882/in-open-graph-markup-whats-the-use-of-oglocalealternate-without-the-locati
+			#if (!empty($parameters['alternates'])) {
+			#	//Iterate on alternates
+			#	foreach($parameters['alternates'] as $lang => $alternate) {
+			#		if (strlen($lang) == 5) {
+			#			//Set facebook locale alternate
+			#			$parameters['ogps']['locale:alternate'] = str_replace('-', '_', $lang);
+			#		}
+			#	}
+			#}
 		}
 
 		//With facebook image defined
