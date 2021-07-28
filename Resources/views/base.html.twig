@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html{% if app.request.locale is defined and app.request.locale %} lang="{{ app.request.locale }}"{% endif %}>
-	<head>
+	<head{% if ogps is defined or facebooks is defined %} prefix="{% if ogps is defined and ogps %}og: http://ogp.me/ns#{% endif %} {% if facebooks is defined and facebooks %}fb: http://ogp.me/ns/fb#{% endif %}"{% endif %}>
 		{% block metas %}<meta charset="UTF-8">{% endblock %}
 		<title>{% block title %}Welcome!{% endblock %}</title>
 		{% block stylesheets %}{% endblock %}
