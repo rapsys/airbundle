@@ -1,9 +1,5 @@
 #RapsysAir configuration
 rapsys_air:
-    #Contact
-    contact:
-        name: 'Raphaël Gertz'
-        mail: 'airlibre@rapsys.eu'
 
 #RapsysUser configuration
 rapsys_user:
@@ -21,14 +17,14 @@ rapsys_user:
         index:
             name: 'rapsys_air'
     #Translate replacement
-    translate: [ 'title', 'site.title', 'copy.by', 'copy.long', 'copy.short' ]
+    translate: [ 'title', 'site.title', 'contact.title', 'copy.by', 'copy.long', 'copy.short' ]
     #Languages replacement
     languages:
-        en: 'English'
-        fr: 'French'
+        en-gb: 'English'
+        fr-fr: 'French'
     #Contact replacement
     contact:
-        name: '%rapsys_air.contact.name%'
+        title: '%rapsys_air.contact.title%'
         mail: '%rapsys_air.contact.mail%'
     #Login replacement
     login:
@@ -212,10 +208,10 @@ security:
 
 #Framework configuration
 framework:
-    default_locale: 'fr'
+    default_locale: 'fr-fr'
     #error_controller: 'Rapsys\AirBundle\Controller\ErrorController::show'
     translator:
-        fallbacks: [ 'fr', 'en' ]
+        fallbacks: [ 'fr-fr', 'en-gb' ]
     session:
         enabled: true
         handler_id: ~
@@ -277,42 +273,47 @@ services:
     #    class: 'Rapsys\PackBundle\Twig\PackExtension'
     #    arguments: [ '@file_locator', '@service_container', '@rapsys_pack.path_package' ]
     #    tags: [ 'twig.extension' ]
+    #Replace assets packages
+    assets.packages:
+        class: 'Symfony\Component\Asset\Packages'
+        arguments: [ '@rapsys_pack.path_package' ]
     #Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register calendar controller
     Rapsys\AirBundle\Controller\CalendarController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register location controller
     Rapsys\AirBundle\Controller\LocationController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register user controller
     Rapsys\AirBundle\Controller\UserController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register session controller
     Rapsys\AirBundle\Controller\SessionController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register snippet controller
     Rapsys\AirBundle\Controller\SnippetController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
     Rapsys\AirBundle\Controller\ErrorController:
-        arguments: [ '@service_container', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@request_stack', '@translator', '@assets.packages' ]
         tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
-    Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
-        arguments: [ '@router', '%rapsys_air.locales%' ]
-        tags: [ 'kernel.event_subscriber' ]
+    #TODO: remove that shit now ???
+    #Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
+    #    arguments: [ '@router', '%rapsys_air.locales%' ]
+    #    tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Security\AccessDeniedHandler:
         arguments: [ '@service_container', '@twig', '@router', '@request_stack', '@translator' ]
@@ -322,10 +323,6 @@ services:
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         tags: [ 'doctrine.fixture.orm' ]
-    #Replace assets packages
-    assets.packages:
-        class: 'Symfony\Component\Asset\Packages'
-        arguments: [ '@rapsys_pack.path_package' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
 #       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
@@ -347,6 +344,9 @@ services:
     Rapsys\AirBundle\Command\CalendarCommand:
         arguments: [ '@service_container', '@doctrine', '@router', '@translator' ]
         tags: [ 'console.command' ]
+    Rapsys\AirBundle\Command\RekeyCommand:
+        arguments: [ '@doctrine' ]
+        tags: [ 'console.command' ]
     Rapsys\AirBundle\Command\WeatherCommand:
         arguments: [ '@doctrine' ]
         tags: [ 'console.command' ]
@@ -356,6 +356,8 @@ twig:
     #Enforce debug
     #debug: true
     #auto_reload: ~
+    #Disable cache
+    #XXX: enable forced regeneration of css and js at each page load
     cache: false
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
