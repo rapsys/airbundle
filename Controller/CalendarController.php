@@ -199,7 +199,7 @@ class CalendarController extends DefaultController {
 				//With valid token
 				} else {
 					//Retrieve cache object
-					$cache = new FilesystemAdapter($this->config['cache']['namespace'], $this->config['cache']['lifetime'], $this->config['cache']['directory']);
+					$cache = new FilesystemAdapter($this->config['cache']['namespace'], $this->config['cache']['lifetime'], $this->config['path']['cache']);
 
 					//Retrieve calendars
 					$cacheCalendars = $cache->getItem('calendars');
