@@ -2,29 +2,29 @@
 #SCRUD: index, add, edit, delete, view
 rapsys_air:
     path:
-        en-gb: '/en'
-        fr-fr: '/'
+        en_gb: '/en'
+        fr_fr: '/'
     controller: Rapsys\AirBundle\Controller\DefaultController::index
     methods: GET
 
 rapsys_air_about:
     path:
-        en-gb: '/en/about'
-        fr-fr: '/a-propos'
+        en_gb: '/en/about'
+        fr_fr: '/a-propos'
     controller: Rapsys\AirBundle\Controller\DefaultController::about
     methods: GET
 
 rapsys_air_contact:
     path:
-        en-gb: '/en/contact'
-        fr-fr: '/contacter'
+        en_gb: '/en/contact'
+        fr_fr: '/contacter'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
 rapsys_air_calendar:
     path:
-        en-gb: '/en/calendar'
-        fr-fr: '/calendrier'
+        en_gb: '/en/calendar'
+        fr_fr: '/calendrier'
     controller: Rapsys\AirBundle\Controller\CalendarController::index
     methods: GET|POST
 
@@ -35,157 +35,181 @@ rapsys_air_calendar_callback:
 
 rapsys_air_frequently_asked_questions:
     path:
-        en-gb: '/en/frequently-asked-questions'
-        fr-fr: '/foire-aux-questions'
+        en_gb: '/en/frequently-asked-questions'
+        fr_fr: '/foire-aux-questions'
     controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
     methods: GET
 
 rapsys_air_organizer_regulation:
     path:
-        en-gb: '/en/organizer-regulation'
-        fr-fr: '/reglement-organisateur'
+        en_gb: '/en/organizer-regulation'
+        fr_fr: '/reglement-organisateur'
     controller: Rapsys\AirBundle\Controller\DefaultController::organizerRegulation
     methods: GET
 
 rapsys_air_terms_of_service:
     path:
-        en-gb: '/en/terms-of-service'
-        fr-fr: '/conditions-generales-d-utilisation'
+        en_gb: '/en/terms-of-service'
+        fr_fr: '/conditions-generales-d-utilisation'
     controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
 rapsys_air_dispute:
     path:
-        en-gb: '/en/dispute'
-        fr-fr: '/contestation'
+        en_gb: '/en/dispute'
+        fr_fr: '/contestation'
     controller: Rapsys\AirBundle\Controller\DefaultController::dispute
     methods: GET|POST
 
 rapsys_air_location:
     path:
-        en-gb: '/en/location'
-        fr-fr: '/emplacement'
+        en_gb: '/en/location'
+        fr_fr: '/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::index
     methods: GET
 
 rapsys_air_location_add:
     path:
-        en-gb: '/en/location'
-        fr-fr: '/emplacement'
+        en_gb: '/en/location'
+        fr_fr: '/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::add
     methods: POST
 
 rapsys_air_location_edit:
     path:
-        en-gb: '/en/location/{id<\d+>}'
-        fr-fr: '/emplacement/{id<\d+>}'
+        en_gb: '/en/location/{id<\d+>}'
+        fr_fr: '/emplacement/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\LocationController::edit
     methods: POST
 
 rapsys_air_location_view:
     path:
-        en-gb: '/en/location/{id<\d+>}'
-        fr-fr: '/emplacement/{id<\d+>}'
+        en_gb: '/en/location/{id<\d+>}'
+        fr_fr: '/emplacement/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
 rapsys_air_application_add:
     path:
-        en-gb: '/en/application'
-        fr-fr: '/reservation'
+        en_gb: '/en/application'
+        fr_fr: '/reservation'
     controller: Rapsys\AirBundle\Controller\ApplicationController::add
     methods: POST
 
 rapsys_air_session:
     path:
-        en-gb: '/en/session'
-        fr-fr: '/seance'
+        en_gb: '/en/session'
+        fr_fr: '/seance'
     controller: Rapsys\AirBundle\Controller\SessionController::index
     methods: GET
 
 rapsys_air_session_edit:
     path:
-        en-gb: '/en/session/{id<\d+>}'
-        fr-fr: '/seance/{id<\d+>}'
+        en_gb: '/en/session/{id<\d+>}'
+        fr_fr: '/seance/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\SessionController::edit
     methods: POST
 
 rapsys_air_session_tangoargentin:
     path:
-        en-gb: '/en/session/tangoargentin'
-        fr-fr: '/seance/tangoargentin'
+        en_gb: '/en/session/tangoargentin'
+        fr_fr: '/seance/tangoargentin'
     format: json
     controller: Rapsys\AirBundle\Controller\SessionController::tangoargentin
     methods: GET
 
 rapsys_air_session_view:
     path:
-        en-gb: '/en/session/{id<\d+>}'
-        fr-fr: '/seance/{id<\d+>}'
+        en_gb: '/en/session/{id<\d+>}'
+        fr_fr: '/seance/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\SessionController::view
     methods: GET
 
 rapsys_air_snippet_add:
     path:
-        en-gb: '/en/snippet'
-        fr-fr: '/extrait'
+        en_gb: '/en/snippet'
+        fr_fr: '/extrait'
     controller: Rapsys\AirBundle\Controller\SnippetController::add
     methods: POST
 
 rapsys_air_snippet_edit:
     path:
-        en-gb: '/en/snippet/{id<\d+>}'
-        fr-fr: '/extrait/{id<\d+>}'
+        en_gb: '/en/snippet/{id<\d+>}'
+        fr_fr: '/extrait/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\SnippetController::edit
     methods: POST
 
 rapsys_air_user:
     path:
-        en-gb: '/en/user'
-        fr-fr: '/utilisateur'
+        en_gb: '/en/user'
+        fr_fr: '/utilisateur'
     controller: Rapsys\AirBundle\Controller\UserController::index
     methods: GET
 
 rapsys_air_user_view:
     path:
-        en-gb: '/en/user/{id<\d+>}'
-        fr-fr: '/utilisateur/{id<\d+>}'
+        en_gb: '/en/user/{id<\d+>}'
+        fr_fr: '/utilisateur/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\UserController::view
+    methods: GET|POST
+
+rapsys_user_confirm:
+    path:
+        en_gb: '/en/confirm/{mail}/{extra}/{hash}'
+        fr_fr: '/confirmer/{mail}/{extra}/{hash}'
+    controller: Rapsys\UserBundle\Controller\DefaultController::confirm
+    requirements:
+        mail: '[a-zA-Z0-9=_-]+'
+        extra: '[a-zA-Z0-9=_-]+'
+        hash: '[a-zA-Z0-9=_-]+'
+    methods: GET|POST
+
+rapsys_user_edit:
+    path:
+        en_gb: '/en/user/{mail}'
+        fr_fr: '/utilisateur/{mail}'
+    controller: Rapsys\UserBundle\Controller\DefaultController::edit
+    requirements:
+        mail: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
 rapsys_user_login:
     path:
-        en-gb: /en/login
-        fr-fr: /connecter
+        en_gb: '/en/login'
+        fr_fr: '/connecter'
     controller: Rapsys\UserBundle\Controller\DefaultController::login
     methods: GET|POST
 
+rapsys_user_logout:
+    path:
+        en_gb: '/en/logout'
+        fr_fr: '/deconnecter'
+    methods: GET
+
 rapsys_user_recover:
     path:
-        en-gb: /en/recover
-        fr-fr: /recuperer
+        en_gb: '/en/recover/{mail}/{pass}/{hash}'
+        fr_fr: '/recuperer/{mail}/{pass}/{hash}'
     controller: Rapsys\UserBundle\Controller\DefaultController::recover
-    methods: GET|POST
-
-rapsys_user_recover_mail:
-    path:
-        en-gb: /en/recover/{recipient}/{hash}
-        fr-fr: /recuperer/{recipient}/{hash}
-    controller: Rapsys\UserBundle\Controller\DefaultController::recoverMail
+    defaults:
+        mail: ~
+        pass: ~
+        hash: ~
     requirements:
-        recipient: '[a-zA-Z0-9=_-]+'
+        mail: '[a-zA-Z0-9=_-]+'
+        pass: '[a-zA-Z0-9=_-]+'
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
 rapsys_user_register:
     path:
-        en-gb: /en/register
-        fr-fr: /enregistrer
+        en_gb: '/en/register/{field}/{hash}'
+        fr_fr: '/enregistrer/{field}/{hash}'
     controller: Rapsys\UserBundle\Controller\DefaultController::register
+    defaults:
+        field: ~
+        hash: ~
+    requirements:
+        field: '[a-zA-Z0-9=_-]+'
+        hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
-
-rapsys_user_logout:
-    path:
-        en-gb: /en/logout
-        fr-fr: /deconnecter
-    methods: GET
