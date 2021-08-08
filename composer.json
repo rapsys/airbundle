@@ -5,7 +5,7 @@
     "type": "symfony-bundle",
     "authors": [{
         "name": "Raphaël Gertz",
-        "email": "airbundle@rapsys.eu"
+        "email": "symfony@rapsys.eu"
     }],
     "autoload": {
         "psr-4": {
@@ -13,28 +13,28 @@
         }
     },
     "require": {
-        "php": "*",
-        "doctrine/doctrine-bundle": "*",
-        "doctrine/orm": "*",
-        "fpdf/fpdf": "*",
-        "symfony/flex": "*",
-        "symfony/form": "*",
-        "symfony/framework-bundle": "*",
-        "symfony/mailer": "*",
-        "symfony/profiler-pack": "*",
-        "symfony/security-bundle": "*",
-        "symfony/translation": "*",
-        "symfony/twig-bundle": "*",
-        "symfony/validator": "*",
+        "doctrine/doctrine-bundle": "^1.12",
+        "doctrine/orm": "^2.7",
+        "fpdf/fpdf": "^1.83.1",
+        "google/apiclient": "^2.9",
+        "symfony/flex": "^1.5",
+        "symfony/form": "^4.4",
+        "symfony/framework-bundle": "^4.4",
+        "symfony/mailer": "^4.4",
+        "symfony/profiler-pack": "^1.0",
+        "symfony/security-bundle": "^4.4",
+        "symfony/translation": "^4.4",
+        "symfony/twig-bundle": "^4.4",
+        "symfony/validator": "^4.4",
         "twig/extensions": "^1.5",
         "twig/html-extra": "^2.12"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "*",
-        "symfony/browser-kit": "*",
-        "symfony/maker-bundle": "*",
-        "symfony/phpunit-bridge": "*",
-        "symfony/web-profiler-bundle": "*"
+        "doctrine/doctrine-fixtures-bundle": "^3.3",
+        "symfony/browser-kit": "^4.3",
+        "symfony/maker-bundle": "^1.14",
+        "symfony/phpunit-bridge": "^4.4",
+        "symfony/web-profiler-bundle": "^4.4"
     },
     "extra": {
         "branch-alias": {
