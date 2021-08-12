@@ -155,29 +155,35 @@ rapsys_air_user_view:
 
 rapsys_user_confirm:
     path:
-        en_gb: '/en/confirm/{mail}/{extra}/{hash}'
-        fr_fr: '/confirmer/{mail}/{extra}/{hash}'
+        en_gb: '/en/confirm/{hash}/{mail}'
+        fr_fr: '/confirmer/{hash}/{mail}'
     controller: Rapsys\UserBundle\Controller\DefaultController::confirm
     requirements:
         mail: '[a-zA-Z0-9=_-]+'
-        extra: '[a-zA-Z0-9=_-]+'
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
 rapsys_user_edit:
     path:
-        en_gb: '/en/user/{mail}'
-        fr_fr: '/utilisateur/{mail}'
+        en_gb: '/en/user/{hash}/{mail}'
+        fr_fr: '/utilisateur/{hash}/{mail}'
     controller: Rapsys\UserBundle\Controller\DefaultController::edit
     requirements:
         mail: '[a-zA-Z0-9=_-]+'
+        hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
 rapsys_user_login:
     path:
-        en_gb: '/en/login'
-        fr_fr: '/connecter'
+        en_gb: '/en/login/{hash}/{mail}'
+        fr_fr: '/connecter/{hash}/{mail}'
     controller: Rapsys\UserBundle\Controller\DefaultController::login
+    defaults:
+        mail: ~
+        hash: ~
+    requirements:
+        mail: '[a-zA-Z0-9=_-]+'
+        hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
 rapsys_user_logout:
@@ -188,8 +194,8 @@ rapsys_user_logout:
 
 rapsys_user_recover:
     path:
-        en_gb: '/en/recover/{mail}/{pass}/{hash}'
-        fr_fr: '/recuperer/{mail}/{pass}/{hash}'
+        en_gb: '/en/recover/{hash}/{pass}/{mail}'
+        fr_fr: '/recuperer/{hash}/{pass}/{mail}'
     controller: Rapsys\UserBundle\Controller\DefaultController::recover
     defaults:
         mail: ~
@@ -203,13 +209,15 @@ rapsys_user_recover:
 
 rapsys_user_register:
     path:
-        en_gb: '/en/register/{field}/{hash}'
-        fr_fr: '/enregistrer/{field}/{hash}'
+        en_gb: '/en/register/{hash}/{field}/{mail}'
+        fr_fr: '/enregistrer/{hash}/{field}/{mail}'
     controller: Rapsys\UserBundle\Controller\DefaultController::register
     defaults:
+        mail: ~
         field: ~
         hash: ~
     requirements:
+        mail: '[a-zA-Z0-9=_-]+'
         field: '[a-zA-Z0-9=_-]+'
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
