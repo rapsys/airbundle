@@ -1,0 +1,41 @@
+<section>
+	<h2><a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a></h2>
+	{{ form_start(forms.register) }}
+		<div>
+			{% if forms.register.mail is defined %}
+				{{ form_row(forms.register.mail) }}
+			{% endif %}
+
+			{% if forms.register.password is defined %}
+				{{ form_row(forms.register.password.first) }}
+
+				{{ form_row(forms.register.password.second) }}
+			{% endif %}
+
+			{% if forms.register.civility is defined %}
+				{{ form_row(forms.register.civility) }}
+			{% endif %}
+
+			{% if forms.register.forename is defined %}
+				{{ form_row(forms.register.forename) }}
+			{% endif %}
+
+			{% if forms.register.surname is defined %}
+				{{ form_row(forms.register.surname) }}
+			{% endif %}
+
+			{% if forms.register.pseudonym is defined %}
+				{{ form_row(forms.register.pseudonym) }}
+			{% endif %}
+
+			{% if forms.register.phone is defined %}
+				{{ form_row(forms.register.phone) }}
+			{% endif %}
+
+			{{ form_row(forms.register.submit) }}
+		</div>
+
+		{# Render CSRF token etc .#}
+		<footer style="display:none">{{ form_rest(forms.register) }}</footer>
+	{{ form_end(forms.register) }}
+</section>
