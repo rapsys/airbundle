@@ -234,6 +234,10 @@ form button {
 }
 
 form .message {
+	margin: 0 0 .5rem 0;
+}
+
+form div .message {
 	margin: .25rem 0 0 0;
 }
 
@@ -605,6 +609,10 @@ form .message {
 	grid-template-columns: repeat(4, 1fr);
 }
 
+.three {
+	grid-template-columns: repeat(3, 1fr);
+}
+
 .two {
 	grid-template-columns: repeat(2, 1fr);
 }
@@ -829,10 +837,10 @@ form .message {
 		margin-bottom: 0;
 	}
 
-	.four {
+	.four,
+	.three {
 		grid-template-columns: repeat(2, 1fr);
 	}
-
 
 	/*#dashboard .seventh:nth-child(n) {
 		width: calc(100% / 2 - .1rem);
@@ -862,10 +870,10 @@ form .message {
 		grid-column: auto;
 	}
 
-	.four {
+	.four,
+	.three {
 		grid-template-columns: repeat(1, 1fr);
 	}
-
 }
 
 @media ( max-width: 260px ) {
