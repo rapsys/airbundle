@@ -132,8 +132,8 @@ class ApplicationController extends DefaultController {
 					$session->setLength(new \DateTime('03:00:00'));
 				//Check if evening
 				} elseif ($slot == 'Evening') {
-					//Set begin at 19h
-					$session->setBegin(new \DateTime('19:30:00'));
+					//Set begin at 20h30
+					$session->setBegin(new \DateTime('20:30:00'));
 
 					//Check if next day is premium
 					if ($premium) {
@@ -417,7 +417,7 @@ class ApplicationController extends DefaultController {
 				//Generate url
 				return $this->redirectToRoute($name, $route);
 			//No route matched
-			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
+			} catch (MethodNotAllowedException|ResourceNotFoundException $e) {
 				//Unset referer to fallback to default route
 				unset($referer);
 			}
