@@ -17,7 +17,7 @@ rapsys_user:
         index:
             name: 'rapsys_air'
     #Translate replacement
-    translate: [ 'title', 'site.title', 'copy.by', 'copy.long', 'copy.short', 'copy.title' ]
+    translate: [ 'title', 'password', 'site.title', 'copy.by', 'copy.long', 'copy.short', 'copy.title' ]
     #Languages replacement
     languages:
         en_gb: 'English'
@@ -46,10 +46,11 @@ rapsys_user:
         route:
             index: 'site.url'
         view:
-            form: 'Rapsys\AirBundle\Form\RegisterType'
-            name: '@RapsysAir/form/register.html.twig'
+            edit: 'Rapsys\AirBundle\Form\RegisterType'
+            name: '@RapsysAir/form/edit.html.twig'
             context:
-                title: 'Modify'
+                title: 'Modify account'
+                password: 'Modify password'
     #Login replacement
     login:
         route:
@@ -72,20 +73,6 @@ rapsys_user:
             html: '@RapsysAir/mail/recover.html.twig'
             text: '@RapsysAir/mail/recover.text.twig'
             context:
-    #Recover mail replacement
-    #recover_mail:
-    #    route:
-    #        index: 'site.url'
-    #        recover_mail: 'recover_url'
-    #    view:
-    #        name: '@RapsysAir/form/recover_mail.html.twig'
-    #        context:
-    #            title: 'Mail recover'
-    #    mail:
-    #        subject: 'Welcome back %%recipient_name%% to %%site.title%%'
-    #        html: '@RapsysAir/mail/recover_mail.html.twig'
-    #        text: '@RapsysAir/mail/recover_mail.text.twig'
-    #        context:
     #Register replacement
     register:
         route:
@@ -156,21 +143,34 @@ security:
             #XXX: https://symfony.com/doc/current/security/form_login_setup.html
             #TODO: https://symfony.com/doc/current/security/guard_authentication.html
             form_login:
+                #Redirect to referer if different from login route
                 use_referer: true
+                #Login path
                 login_path: rapsys_user_login
+                #Check path
                 check_path: rapsys_user_login
+                #Username parameter
                 username_parameter: 'login[mail]'
+                #Password parameter
                 password_parameter: 'login[password]'
 
             #Set logout route
             logout:
+                #Logout route
                 path: rapsys_user_logout
-                #XXX: see https://symfony.com/doc/current/security.html#logging-out
-                success_handler: Rapsys\AirBundle\Security\LogoutSuccessHandler
-                #target: /
+                #Logout default target
+                target: rapsys_air
 
             #Set custom access denied handler
-            access_denied_handler: Rapsys\AirBundle\Security\AccessDeniedHandler
+            access_denied_handler: Rapsys\AirBundle\Handler\AccessDeniedHandler
+
+            #Remember me
+            #XXX: see https://symfony.com/doc/current/security/remember_me.html
+            remember_me:
+                #Use APP_SECRET
+                secret: '%kernel.secret%'
+                #Always remember me
+                always_remember_me: true
 
     #Set role hierarchy
     role_hierarchy:
@@ -191,6 +191,7 @@ framework:
         cookie_secure: 'auto'
         cookie_samesite: 'lax'
     disallow_search_engine_index: false
+    secret: '%env(APP_SECRET)%'
 #framework:
 #    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
 #
@@ -288,11 +289,8 @@ services:
         arguments: [ '@router', '%rapsys_air.locales%' ]
         tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
-    Rapsys\AirBundle\Security\AccessDeniedHandler:
+    Rapsys\AirBundle\Handler\AccessDeniedHandler:
         arguments: [ '@service_container', '@twig', '@router', '@request_stack', '@translator' ]
-    #Register logout success handler
-    Rapsys\AirBundle\Security\LogoutSuccessHandler:
-        arguments: [ '@router' ]
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         tags: [ 'doctrine.fixture.orm' ]
