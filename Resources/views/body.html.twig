@@ -36,24 +36,21 @@
 		{% endstylesheet %}
 	{% endstopwatch %}
 	{% if canonical is defined and canonical %}
-		<link rel="canonical" href="{{ canonical }}"{% if app.request.locale is defined and app.request.locale %} hreflang="{{ app.request.locale }}"{% endif %} />
+		<link rel="canonical" href="{{ canonical }}"{% if locale is defined and locale %} hreflang="{{ locale }}"{% endif %} />
 	{% endif %}
 	{% if alternates is defined and alternates %}
 		{% for lang, alternate in alternates %}
 			<link rel="alternate" href="{{ alternate.absolute }}" hreflang="{{ lang }}" />
 		{% endfor %}
 	{% endif %}
-	{% if ogps is defined and ogps %}
-		{% for property, content in ogps %}
-			<meta property="og:{{ property }}" content="{{ content }}" />
-		{% endfor %}
-		{% for property, contents in facebooks %}
+	{% if facebook['metas'] is defined and facebook['metas'] %}
+		{% for property, contents in facebook['metas'] %}
 			{% if contents is iterable %}
 				{% for content in contents %}
-					<meta property="fb:{{ property }}" content="{{ content }}" />
+					<meta property="{{ property }}" content="{{ content }}" />
 				{% endfor %}
 			{% else %}
-				<meta property="fb:{{ property }}" content="{{ contents }}" />
+				<meta property="{{ property }}" content="{{ contents }}" />
 			{% endif %}
 		{% endfor %}
 	{% endif %}
@@ -84,7 +81,7 @@
 							<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
 						{% endif %}
 						{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-							<li><a href="{{ path('rapsys_air_user_view', {id: app.user.id}) }}">{% trans %}My account{% endtrans %}</a></li>
+							<li><a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a></li>
 							<li><a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a></li>
 						{% else %}
 							<li><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></li>
@@ -142,12 +139,12 @@
 				{% if langs|length > 1 %}
 					<ul>
 						{% for lang in langs %}
-							<li><a href="{{ alternates[lang].relative }}" hreflang="{{ lang }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a></li>
+							<li><a href="{{ alternates[lang].relative }}" hreflang="{{ lang|replace({'_': '-'}) }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
 					{% set lang = langs|first %}
-					<a href="{{ alternates[lang].relative }}" hreflang="{{ lang }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a>
+					<a href="{{ alternates[lang].relative }}" hreflang="{{ lang|replace({'_': '-'}) }}" title="{{ alternates[lang].title }}">{{ alternates[lang].translated }}</a>
 				{% endif %}
 			{% else %}
 				<span>&nbsp;</span>
