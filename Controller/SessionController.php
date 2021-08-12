@@ -43,8 +43,11 @@ class SessionController extends DefaultController {
 		//Get doctrine
 		$doctrine = $this->getDoctrine();
 
+		//Set locale
+		$locale = $request->getLocale();
+
 		//Fetch session
-		$session = $doctrine->getRepository(Session::class)->fetchOneById($id, $request->getLocale());
+		$session = $doctrine->getRepository(Session::class)->fetchOneById($id, $locale);
 
 		//Check if
 		if (
@@ -107,16 +110,13 @@ class SessionController extends DefaultController {
 			$this->context['page']['section'] = $this->translator->trans($session['l_title']);
 
 			//Set localization date formater
-			$intlDate = new \IntlDateFormatter($this->locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
+			$intlDate = new \IntlDateFormatter($locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
 
 			//Set localization time formater
-			$intlTime = new \IntlDateFormatter($this->locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
+			$intlTime = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
 
 			//Set facebook image
-			$this->facebookImage = [
-				//XXX: was facebook/<controller>/<action>/<id>.<locale>.jpeg
-				//XXX: format facebook<pathinfo>.<locale>.jpeg
-				#'destination' => 'facebook/session/view/'.$id.'.'.$locale.'.jpeg',
+			$this->context['facebook'] += [
 				'texts' => [
 					$session['au_pseudonym'] => [
 						'font' => 'irishgrover',
@@ -603,8 +603,11 @@ class SessionController extends DefaultController {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
+		//Set locale
+		$locale = $request->getLocale();
+
 		//Fetch session
-		if (empty($session = $doctrine->getRepository(Session::class)->fetchOneById($id, $this->locale))) {
+		if (empty($session = $doctrine->getRepository(Session::class)->fetchOneById($id, $locale))) {
 			throw $this->createNotFoundException($this->translator->trans('Unable to find session: %id%', ['%id%' => $id]));
 		}
 
@@ -643,7 +646,7 @@ class SessionController extends DefaultController {
 		}
 
 		//Set localization date formater
-		$intl = new \IntlDateFormatter($this->locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
+		$intl = new \IntlDateFormatter($locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
 
 		//Set section
 		$this->context['page']['section'] = $this->translator->trans($session['l_title']);
@@ -658,16 +661,13 @@ class SessionController extends DefaultController {
 		];
 
 		//Set localization date formater
-		$intlDate = new \IntlDateFormatter($this->locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
+		$intlDate = new \IntlDateFormatter($locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
 
 		//Set localization time formater
-		$intlTime = new \IntlDateFormatter($this->locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
+		$intlTime = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
 
 		//Set facebook image
-		$this->facebookImage = [
-			//XXX: was facebook/<controller>/<action>/<id>.<locale>.jpeg
-			//XXX: format facebook<pathinfo>.<locale>.jpeg
-			#'destination' => 'facebook/session/view/'.$id.'.'.$this->locale.'.jpeg',
+		$this->context['facebook'] = [
 			'texts' => [
 				$session['au_pseudonym'] => [
 					'font' => 'irishgrover',
@@ -683,7 +683,7 @@ class SessionController extends DefaultController {
 				]
 			],
 			'updated' => $session['updated']->format('U')
-		];
+		]+$this->context['facebook'];
 
 		//With granted session
 		if (!empty($session['au_id'])) {
