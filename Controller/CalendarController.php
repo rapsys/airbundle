@@ -135,7 +135,10 @@ class CalendarController extends DefaultController {
 	/**
 	 * List all sessions for the organizer
 	 *
-	 * @desc Display all sessions for the user with an application or login form
+	 * Display all sessions for the user with an application or login form
+	 *
+	 * @todo Fetch all google calendar and let user select one
+	 * @todo Then save the calendar fucking id in database ??? with token infos !!!
 	 *
 	 * @param Request $request The request instance
 	 *
