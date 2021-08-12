@@ -2,10 +2,13 @@
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	{% if locale is defined and locale %}<meta http-equiv="Content-Language" content="{{ locale }}" />{% endif %}
 	<style type="text/css">
 		body {background:white;color:#066}
 		a {text-decoration:none;color:#066}
 		a:hover {text-decoration:underline}
+		a.link {word-break:break-all;font-size:1.5rem}
+		h1 {margin: .5rem;font-size: 2rem}
 		table {width: 100%;border-radius: .5rem}
 		table.header {border:.1rem solid #00c3f9;text-align:center}
 		table.content {background:white;border:.1rem solid #00c3f9;margin:.5rem 0}
