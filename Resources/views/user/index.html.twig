@@ -6,16 +6,23 @@
 			<p>{{ description }}</p>
 		</header>
 		<div class="panel">
-			{% if users is defined and users %}
-				<div class="grid two">
-					{% for group, list in users %}
+			{% if groups is defined and groups %}
+				<div class="grid three">
+					{% for group, users in groups %}
 						<article class="cell">
 							<h3>{{ group }}</h3>
 							<ul>
-								{% for id, user in list %}
-									<li><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ user }}</a></li>
+								{% for id, user in users %}
+									<li><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ user.pseudonym }}</a><a href="{{ path('rapsys_user_edit', {'mail': user.mail|short, 'hash': user.mail|short|hash}) }}">{% trans %}Edit{% endtrans %}</a></li>
 								{% endfor %}
-							</ul>
+						</article>
+					{% endfor %}
+				</div>
+			{% elseif users is defined and users %}
+				<div class="grid four">
+					{% for id, user in users %}
+						<article class="cell">
+							<h3><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ user.pseudonym }}</a></h3>
 						</article>
 					{% endfor %}
 					{#{% for date, day in organizers %}
