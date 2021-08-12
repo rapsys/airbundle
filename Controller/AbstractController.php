@@ -10,14 +10,11 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Rapsys\AirBundle\Entity\Slot;
-
 use Rapsys\UserBundle\Utils\Slugger;
 
 /**
  *
  * Provides common features needed in controllers.
- *
- * @todo: pass request_stack, router, slugger_util, path_package as constructor argument ?
  *
  * {@inheritdoc}
  */
@@ -553,29 +550,4 @@ abstract class AbstractController extends BaseAbstractController {
 		//Call parent method
 		return $this->baseRender($view, $parameters, $response);
 	}
-
-	/**
-	 * TODO: define this function to limit subscribed services ???
-	 * XXX: see vendor/symfony/framework-bundle/Controller/AbstractController.php
-	 *
-	public static function getSubscribedServices() {
-		//TODO: add asset.package ?
-        return [
-            'router' => '?'.RouterInterface::class,
-            'request_stack' => '?'.RequestStack::class,
-            'http_kernel' => '?'.HttpKernelInterface::class,
-            'serializer' => '?'.SerializerInterface::class,
-            'session' => '?'.SessionInterface::class,
-            'security.authorization_checker' => '?'.AuthorizationCheckerInterface::class,
-            'templating' => '?'.EngineInterface::class,
-            'twig' => '?'.Environment::class,
-            'doctrine' => '?'.ManagerRegistry::class,
-            'form.factory' => '?'.FormFactoryInterface::class,
-            'security.token_storage' => '?'.TokenStorageInterface::class,
-            'security.csrf.token_manager' => '?'.CsrfTokenManagerInterface::class,
-            'parameter_bag' => '?'.ContainerBagInterface::class,
-            'message_bus' => '?'.MessageBusInterface::class,
-            'messenger.default_bus' => '?'.MessageBusInterface::class,
-        ];
-	}*/
 }
