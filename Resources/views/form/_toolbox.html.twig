@@ -1,12 +1,13 @@
 {# Display login or application form #}
 {% if forms is defined and forms %}
-	{% if forms.login is defined and forms.login %}
-		<aside class="form">
-			{# <header><h2>Toolbox</h2></header> #}
+	<aside class="form">
+		{# <header><h2>Toolbox</h2></header> #}
+		{% if forms.register is defined and forms.register %}
+			{{ include('@RapsysAir/form/_register.html.twig') }}
+		{% endif %}
+		{% if forms.login is defined and forms.login %}
 			{{ include('@RapsysAir/form/_login.html.twig') }}
-		</aside>
-	{% else %}
-		<aside class="form">
+		{% else %}
 			{% if forms.application is defined %}
 				{{ include('@RapsysAir/form/_application.html.twig') }}
 			{% endif %}
@@ -19,6 +20,6 @@
 			{% if forms.user is defined %}
 				{{ include('@RapsysAir/form/_user.html.twig') }}
 			{% endif %}
-		</aside>
-	{% endif %}
+		{% endif %}
+	</aside>
 {% endif %}
