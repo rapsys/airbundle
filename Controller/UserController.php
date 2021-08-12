@@ -28,11 +28,21 @@ class UserController extends DefaultController {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 
-		//Set section
-		$section = $this->translator->trans('Libre Air users');
+		//With admin role
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//Set section
+			$section = $this->translator->trans('Libre Air users');
 
-		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air user list');
+			//Set description
+			$this->context['description'] = $this->translator->trans('Libre Air user list');
+		//Without admin role
+		} else {
+			//Set section
+			$section = $this->translator->trans('Libre Air organizers');
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('Libre Air organizers list');
+		}
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -60,10 +70,14 @@ class UserController extends DefaultController {
 			)
 		);
 
+		//With admin role
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//Display all users
+			$this->context['groups'] = $users;
 		//Without admin role
-		if (!$this->isGranted('ROLE_ADMIN')) {
-			//Remove users
-			unset($users[$this->translator->trans('User')]);
+		} else {
+			//Only display senior organizers
+			$this->context['users'] = $users[$this->translator->trans('Senior')];
 		}
 
 		//Fetch locations
@@ -71,7 +85,7 @@ class UserController extends DefaultController {
 		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
 
 		//Render the view
-		return $this->render('@RapsysAir/user/index.html.twig', ['title' => $title, 'section' => $section, 'users' => $users, 'locations' => $locations]+$this->context);
+		return $this->render('@RapsysAir/user/index.html.twig', ['title' => $title, 'section' => $section, 'locations' => $locations]+$this->context);
 	}
 
 	/**
@@ -150,7 +164,7 @@ class UserController extends DefaultController {
 				//Set the form attribute
 				'attr' => [ 'class' => 'col' ],
 				//Set civility class
-				'class_civility' => Civility::class,
+				'civility_class' => Civility::class,
 				//Disable mail
 				'mail' => $this->isGranted('ROLE_ADMIN'),
 				//Disable password
@@ -279,23 +293,15 @@ class UserController extends DefaultController {
 				}
 
 				//Create SnippetType form
-				#$form = $this->createForm('Rapsys\AirBundle\Form\SnippetType', $snippet, [
 				$form = $this->container->get('form.factory')->createNamed('snipped_'.$request->getLocale().'_'.$locationId, 'Rapsys\AirBundle\Form\SnippetType', $snippet, [
 					//Set the action
-					//TODO: voir si on peut pas faire sauter ça ici
 					'action' =>
 						!empty($snippet->getId()) ?
 						$this->generateUrl('rapsys_air_snippet_edit', ['id' => $snippet->getId()]) :
 						$this->generateUrl('rapsys_air_snippet_add', ['location' => $locationId]),
-					#'action' => $this->generateUrl('rapsys_air_snippet_add'),
 					//Set the form attribute
-					'attr' => [],
-					//Set csrf_token_id
-					//TODO: would maybe need a signature field
-					//'csrf_token_id' => $request->getLocale().'_'.$id.'_'.$locationId
+					'attr' => []
 				]);
-				#return $this->container->get('form.factory')->create($type, $data, $options);
-				#public function createNamed($name, $type = 'Symfony\Component\Form\Extension\Core\Type\FormType', $data = null, array $options = []);
 
 				//Add form to context
 				$this->context['forms']['snippets'][$locationId] = $form->createView();
