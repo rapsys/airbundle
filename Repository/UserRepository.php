@@ -151,17 +151,11 @@ class UserRepository extends \Doctrine\ORM\EntityRepository {
 
 		//Set the request
 		$req = <<<SQL
-SELECT a.id, a.pseudonym, a.g_id, a.g_title
-FROM (
-	SELECT u.id, u.pseudonym, g.id AS g_id, g.title AS g_title
-	FROM RapsysAirBundle:User AS u
-	JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
-	JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
-	ORDER BY g.id DESC
-	LIMIT 0, :limit
-) AS a
-GROUP BY a.id
-ORDER BY a.id ASC
+SELECT u.id, u.mail, u.pseudonym, g.id AS g_id, g.title AS g_title
+FROM RapsysAirBundle:User AS u
+JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
+JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
+ORDER BY g.id DESC, u.id ASC
 SQL;
 
 		//Replace bundle entity name by table name
@@ -175,10 +169,10 @@ SQL;
 		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
 		//addScalarResult($sqlColName, $resColName, $type = 'string');
 		$rsm->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('mail', 'mail', 'string')
 			->addScalarResult('pseudonym', 'pseudonym', 'string')
 			->addScalarResult('g_id', 'g_id', 'integer')
-			->addScalarResult('g_title', 'g_title', 'string')
-			->addIndexByScalar('id');
+			->addScalarResult('g_title', 'g_title', 'string');
 
 		//Fetch result
 		$res = $em
@@ -191,7 +185,7 @@ SQL;
 		//Process result
 		foreach($res as $data) {
 			//Get translated group
-			$group = $translator->trans($data['g_title']?:'User');
+			$group = $translator->trans($data['g_title']);
 
 			//Init group subarray
 			if (!isset($ret[$group])) {
@@ -199,7 +193,10 @@ SQL;
 			}
 
 			//Set data
-			$ret[$group][$data['id']] = $data['pseudonym'];
+			$ret[$group][$data['id']] = [
+				'mail' => $data['mail'],
+				'pseudonym' => $data['pseudonym']
+			];
 		}
 
 		//Send result
