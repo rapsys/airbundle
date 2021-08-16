@@ -42,10 +42,12 @@ class User extends BaseUser {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $mail The user mail
 	 */
-	public function __construct() {
+	public function __construct(string $mail) {
 		//Call parent constructor
-		parent::__construct();
+		parent::__construct($mail);
 
 		//Set collections
 		$this->applications = new \Doctrine\Common\Collections\ArrayCollection();

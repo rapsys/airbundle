@@ -40,6 +40,11 @@ class Snippet {
 	protected $rate;
 
 	/**
+	 * @var bool
+	 */
+	protected $hat;
+
+	/**
 	 * @var string
 	 */
 	protected $contact;
@@ -78,6 +83,13 @@ class Snippet {
 	 * @var \Rapsys\UserBundle\Entity\User
 	 */
 	protected $user;
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->hat = true;
+	}
 
 	/**
 	 * Get id
@@ -198,6 +210,27 @@ class Snippet {
 		return $this->rate;
 	}
 
+	/**
+	 * Set hat
+	 *
+	 * @param bool $hat
+	 *
+	 * @return User
+	 */
+	public function setHat(bool $hat) {
+		$this->hat = $hat;
+
+		return $this;
+	}
+
+	/**
+	 * Get hat
+	 *
+	 * @return bool
+	 */
+	public function getHat(): bool {
+		return $this->hat;
+	}
 	/**
 	 * Set contact
 	 *
