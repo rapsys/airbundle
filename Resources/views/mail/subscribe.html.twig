@@ -1,0 +1,17 @@
+{% extends '@RapsysAir/mail/body.html.twig' %}
+{% block title %}{{ subject }}{% endblock %}
+{% block content %}
+	<table class="content">
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome to %site.title%'|trans({'%site.title%': site.title})|raw}) }}</h2>
+				<h3>{{ 'Hi %recipient_name%,'|trans({'%recipient_name%': recipient_name}) }}</h3>
+				<p>{{ 'Thanks so much for joining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}</p>
+				<p>{% trans %}To create your account you can follow this link:{% endtrans %}</p>
+				<p><a href="{{ subscribe_url|escape('html_attr') }}" class="link">{{ subscribe_url }}</a></p>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+{% endblock %}

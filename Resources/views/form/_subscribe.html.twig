@@ -1,0 +1,13 @@
+<section>
+	<h2><a href="{{ path('rapsys_user_subscribe') }}">{% trans %}Subscribe{% endtrans %}</a></h2>
+	{{ form_start(forms.subscribe) }}
+		<div>
+			{{ form_row(forms.subscribe.mail) }}
+
+			{{ form_row(forms.subscribe.submit) }}
+		</div>
+
+		{# Render CSRF token etc .#}
+		<footer style="display:none">{{ form_rest(forms.subscribe) }}</footer>
+	{{ form_end(forms.subscribe) }}
+</section>

@@ -1,0 +1,58 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block title %}{{ site.title }} - {{ title }}{% endblock %}
+{% block content %}
+	<section id="form">
+		<h2><a href="{{ path('rapsys_user_edit', {'mail': app.user.mail|short, 'hash': app.user.mail|short|hash}) }}">{{ title }}</a></h2>
+		{{ form_start(edit) }}
+			<div>
+				{% if edit.mail is defined %}
+					{{ form_row(edit.mail) }}
+				{% endif %}
+
+				{% if edit.civility is defined %}
+					{{ form_row(edit.civility) }}
+				{% endif %}
+
+				{% if edit.forename is defined %}
+					{{ form_row(edit.forename) }}
+				{% endif %}
+
+				{% if edit.surname is defined %}
+					{{ form_row(edit.surname) }}
+				{% endif %}
+
+				{% if edit.pseudonym is defined %}
+					{{ form_row(edit.pseudonym) }}
+				{% endif %}
+
+				{% if edit.phone is defined %}
+					{{ form_row(edit.phone) }}
+				{% endif %}
+
+				{{ form_row(edit.submit) }}
+			</div>
+
+			{# Render CSRF token etc .#}
+			<footer style="display:none">{{ form_rest(edit) }}</footer>
+		{{ form_end(edit) }}
+	</section>
+	{% if reset is defined %}
+		<section id="form">
+			<h2><a href="{{ path('rapsys_user_register') }}">{{ password }}</a></h2>
+			{{ form_start(reset) }}
+				<div>
+					{% if reset.password is defined %}
+						{{ form_row(reset.password.first) }}
+
+						{{ form_row(reset.password.second) }}
+					{% endif %}
+
+					{{ form_row(reset.submit) }}
+				</div>
+
+				{# Render CSRF token etc .#}
+				<footer style="display:none">{{ form_rest(reset) }}</footer>
+			{{ form_end(reset) }}
+		</section>
+	{% endif %}
+{% endblock %}
