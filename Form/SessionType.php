@@ -5,15 +5,18 @@ namespace Rapsys\AirBundle\Form;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Time;
-use Rapsys\AirBundle\Entity\User;
+
 use Rapsys\AirBundle\Entity\Location;
+use Rapsys\AirBundle\Entity\User;
 
 class SessionType extends AbstractType {
 	//Doctrine instance
@@ -42,6 +45,10 @@ class SessionType extends AbstractType {
 
 		//Is admin or owner
 		if (!empty($options['modify'])) {
+			if (!empty($options['admin'])) {
+				$builder->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => $options['date'], 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Date(['message' => 'Your date doesn\'t seems to be valid'])]]);
+			}
+
 			$builder
 				//TODO: avertissement + minimum et maximum ???
 				->add('begin', TimeType::class, ['attr' => ['placeholder' => 'Your begin', 'class' => 'time'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'data' => $options['begin'], 'constraints' => [new NotBlank(['message' => 'Please provide your begin']), new Time(['message' => 'Your begin doesn\'t seems to be valid'])]])
@@ -92,9 +99,10 @@ class SessionType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null]);
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'date' => null, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null]);
 		$resolver->setAllowedTypes('admin', 'boolean');
 		#TODO: voir si c'est le bon type
+		$resolver->setAllowedTypes('date', 'datetime');
 		$resolver->setAllowedTypes('begin', 'datetime');
 		$resolver->setAllowedTypes('length', 'datetime');
 		$resolver->setAllowedTypes('cancel', 'boolean');
