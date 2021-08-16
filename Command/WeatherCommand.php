@@ -343,11 +343,11 @@ class WeatherCommand extends DoctrineCommand {
 					$hour = $type=='daily'?$type:$time->format('H');
 
 					//Check data availability
-					//XXX: should never happen
-					#if (!isset($data[$zipcode][$dsm][$hour])) {
-					#	//Skip unavailable data
-					#	continue;
-					#}
+					//XXX: sometimes startup delay causes weather data to be unavailable for session first hour
+					if (!isset($data[$zipcode][$dsm][$hour])) {
+						//Skip unavailable data
+						continue;
+					}
 
 					//Set info alias
 					$info = $data[$zipcode][$dsm][$hour];
