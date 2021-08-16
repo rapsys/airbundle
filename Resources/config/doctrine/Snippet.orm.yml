@@ -27,6 +27,11 @@ Rapsys\AirBundle\Entity\Snippet:
             nullable: true
             options:
                 unsigned: true
+        hat:
+            type: boolean
+            nullable: true
+            options:
+                default: true
         contact:
             type: string
             length: 254
