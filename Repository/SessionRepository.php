@@ -339,6 +339,8 @@ SELECT
 	p.donate AS p_donate,
 	p.link AS p_link,
 	p.profile AS p_profile,
+	p.rate AS p_rate,
+	p.hat AS p_hat,
 	p.updated AS p_updated,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
@@ -409,6 +411,8 @@ SQL;
 			->addScalarResult('p_donate', 'p_donate', 'text')
 			->addScalarResult('p_link', 'p_link', 'text')
 			->addScalarResult('p_profile', 'p_profile', 'text')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
+			->addScalarResult('p_hat', 'p_hat', 'boolean')
 			->addScalarResult('p_updated', 'p_updated', 'datetime')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sa_id', 'sa_id', 'string')
@@ -443,7 +447,7 @@ SQL;
 	 * @param $sessionId The session id
 	 * @param $granted The session is granted
 	 */
-	public function fetchCalendarByDatePeriod(TranslatorInterface $translator, $period, $locationId = null, $sessionId = null, $granted = false) {
+	public function fetchCalendarByDatePeriod(TranslatorInterface $translator, $period, $locationId = null, $sessionId = null, $granted = false, $locale = null) {
 		//Get entity manager
 		$em = $this->getEntityManager();
 
@@ -460,6 +464,7 @@ SQL;
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			':afterid' => 4,
 			"\t" => '',
@@ -486,6 +491,7 @@ SQL;
 
 		//Set the request
 		$req = <<<SQL
+
 SELECT
 	s.id,
 	s.date,
@@ -505,6 +511,8 @@ SELECT
 	a.canceled AS a_canceled,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
+	p.rate AS p_rate,
+	p.hat AS p_hat,
 	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
 	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
 FROM RapsysAirBundle:Session AS s
@@ -513,6 +521,7 @@ JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
 ${grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 ${grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
 WHERE s.date BETWEEN :begin AND :end${locationSql}
 GROUP BY s.id
@@ -547,6 +556,8 @@ SQL;
 			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
+			->addScalarResult('p_hat', 'p_hat', 'boolean')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sau_id', 'sau_id', 'string')
 			//XXX: is a string because of \n separator
@@ -557,7 +568,8 @@ SQL;
 		$res = $em
 			->createNativeQuery($req, $rsm)
 			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate());
+			->setParameter('end', $period->getEndDate())
+			->setParameter('locale', $locale);
 
 		//Add optional location id
 		if (!empty($locationId)) {
@@ -724,7 +736,9 @@ SQL;
 						'slottitle' => $translator->trans($session['t_title']),
 						'weather' => $weather,
 						'weathertitle' => implode(' ', $weathertitle),
-						'applications' => $applications
+						'applications' => $applications,
+						'rate' => $session['p_rate'],
+						'hat' => $session['p_hat']
 					];
 				}
 			}
@@ -745,7 +759,7 @@ SQL;
 	 * @param $userId The user id
 	 * @param $sessionId The session id
 	 */
-	public function fetchUserCalendarByDatePeriod(TranslatorInterface $translator, $period, $userId = null, $sessionId = null) {
+	public function fetchUserCalendarByDatePeriod(TranslatorInterface $translator, $period, $userId = null, $sessionId = null, $locale = null) {
 		//Get entity manager
 		$em = $this->getEntityManager();
 
@@ -762,6 +776,7 @@ SQL;
 			'RapsysAirBundle:Group' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Slot' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:Snippet' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($em->getClassMetadata('RapsysAirBundle:User'), $dp),
 			':afterid' => 4,
 			"\t" => '',
@@ -800,12 +815,15 @@ SELECT
 	s.application_id AS a_id,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
+	p.rate AS p_rate,
+	p.hat AS p_hat,
 	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
 	GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
 FROM RapsysAirBundle:Session AS s
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
 ${userJoinSql}LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
@@ -841,6 +859,8 @@ SQL;
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
+			->addScalarResult('p_hat', 'p_hat', 'boolean')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sau_id', 'sau_id', 'string')
 			//XXX: is a string because of \n separator
@@ -853,6 +873,7 @@ SQL;
 			->setParameter('begin', $period->getStartDate())
 			->setParameter('end', $period->getEndDate())
 			->setParameter('uid', $userId)
+			->setParameter('locale', $locale)
 			->getResult();
 
 		//Init calendar
@@ -1015,7 +1036,9 @@ SQL;
 						'slottitle' => $translator->trans($session['t_title']),
 						'weather' => $weather,
 						'weathertitle' => implode(' ', $weathertitle),
-						'applications' => $applications
+						'applications' => $applications,
+						'rate' => $session['p_rate'],
+						'hat' => $session['p_hat']
 					];
 				}
 			}
