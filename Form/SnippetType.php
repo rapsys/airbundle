@@ -3,6 +3,7 @@
 namespace Rapsys\AirBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -33,6 +34,7 @@ class SnippetType extends AbstractType {
 			->add('class', TextareaType::class, ['attr' => ['placeholder' => 'Your class', 'cols' => 50, 'rows' => 10], 'required' => false])
 			->add('short', TextareaType::class, ['attr' => ['placeholder' => 'Your short', 'cols' => 50, 'rows' => 10], 'required' => false])
 			->add('rate', NumberType::class, ['attr' => ['placeholder' => 'Your rate'], 'required' => false])
+			->add('hat', CheckboxType::class, ['attr' => ['placeholder' => 'Your hat'], 'required' => false])
 			->add('contact', UrlType::class, ['attr' => ['placeholder' => 'Your contact'], 'required' => false])
 			->add('donate', UrlType::class, ['attr' => ['placeholder' => 'Your donate'], 'required' => false])
 			->add('link', UrlType::class, ['attr' => ['placeholder' => 'Your link'], 'required' => false])
