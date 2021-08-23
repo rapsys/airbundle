@@ -1,16 +1,35 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys UserBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Controller;
 
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Component\Filesystem\Filesystem;
+use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as BaseAbstractController;
 use Symfony\Bundle\FrameworkBundle\Controller\ControllerTrait;
+use Symfony\Component\Asset\PackageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
+use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Slot;
-use Rapsys\UserBundle\Utils\Slugger;
+use Rapsys\AirBundle\Entity\User;
+use Rapsys\AirBundle\RapsysAirBundle;
 
 /**
  *
@@ -18,10 +37,91 @@ use Rapsys\UserBundle\Utils\Slugger;
  *
  * {@inheritdoc}
  */
-abstract class AbstractController extends BaseAbstractController {
+abstract class AbstractController extends BaseAbstractController implements ServiceSubscriberInterface {
 	use ControllerTrait {
 		//Rename render as baseRender
 		render as protected baseRender;
+	}
+
+	///Config array
+	protected $config;
+
+	///ContainerInterface instance
+	protected $container;
+
+	///Context array
+	protected $context;
+
+	///Router instance
+	protected $router;
+
+	///Translator instance
+	protected $translator;
+
+	/**
+	 * Common constructor
+	 *
+	 * Stores container, router and translator interfaces
+	 * Stores config
+	 * Prepares context tree
+	 *
+	 * @param ContainerInterface $container The container instance
+	 */
+	public function __construct(ContainerInterface $container) {
+		//Retrieve config
+		$this->config = $container->getParameter(RapsysAirBundle::getAlias());
+
+		//Set the container
+		$this->container = $container;
+
+		//Set the router
+		$this->router = $container->get('router');
+
+		//Set the translator
+		$this->translator = $container->get('translator');
+
+		//Set the context
+		$this->context = [
+			'description' => null,
+			'section' => null,
+			'title' => null,
+			'contact' => [
+				'title' => $this->translator->trans($this->config['contact']['title']),
+				'mail' => $this->config['contact']['mail']
+			],
+			'copy' => [
+				'by' => $this->translator->trans($this->config['copy']['by']),
+				'link' => $this->config['copy']['link'],
+				'long' => $this->translator->trans($this->config['copy']['long']),
+				'short' => $this->translator->trans($this->config['copy']['short']),
+				'title' => $this->config['copy']['title']
+			],
+			'site' => [
+				'donate' => $this->config['site']['donate'],
+				'ico' => $this->config['site']['ico'],
+				'logo' => $this->config['site']['logo'],
+				'png' => $this->config['site']['png'],
+				'svg' => $this->config['site']['svg'],
+				'title' => $this->translator->trans($this->config['site']['title']),
+				'url' => $this->router->generate($this->config['site']['url'])
+			],
+			'canonical' => null,
+			'alternates' => [],
+			'facebook' => [
+				'prefixes' => [
+					'og' => 'http://ogp.me/ns#',
+					'fb' => 'http://ogp.me/ns/fb#'
+				],
+				'metas' => [
+					'og:type' => 'article',
+					'og:site_name' => $this->translator->trans($this->config['site']['title']),
+					#'fb:admins' => $this->config['facebook']['admins'],
+					'fb:app_id' => $this->config['facebook']['apps']
+				],
+				'texts' => []
+			],
+			'forms' => []
+		];
 	}
 
 	/**
@@ -334,7 +434,6 @@ abstract class AbstractController extends BaseAbstractController {
 		return [];
 	}
 
-
 	/**
 	 * Renders a view
 	 *
@@ -353,11 +452,8 @@ abstract class AbstractController extends BaseAbstractController {
 		//Set locale
 		$parameters['locale'] = str_replace('_', '-', $locale);
 
-		//Get router
-		$router = $this->container->get('router');
-
 		//Get context path
-		$pathInfo = $router->getContext()->getPathInfo();
+		$pathInfo = $this->router->getContext()->getPathInfo();
 
 		//Iterate on locales excluding current one
 		foreach($this->config['locales'] as $current) {
@@ -370,7 +466,7 @@ abstract class AbstractController extends BaseAbstractController {
 			}
 
 			//Retrieve route matching path
-			$route = $router->match($pathInfo);
+			$route = $this->router->match($pathInfo);
 
 			//Get route name
 			$name = $route['_route'];
@@ -381,12 +477,12 @@ abstract class AbstractController extends BaseAbstractController {
 			//With current locale
 			if ($current == $locale) {
 				//Set locale locales context
-				$parameters['canonical'] = $router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL);
+				$parameters['canonical'] = $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL);
 			} else {
 				//Set locale locales context
 				$parameters['alternates'][str_replace('_', '-', $current)] = [
-					'absolute' => $router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
-					'relative' => $router->generate($name, ['_locale' => $current]+$route),
+					'absolute' => $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
+					'relative' => $this->router->generate($name, ['_locale' => $current]+$route),
 					'title' => implode('/', $titles),
 					'translated' => $this->translator->trans($this->config['languages'][$current], [], null, $current)
 				];
@@ -396,8 +492,8 @@ abstract class AbstractController extends BaseAbstractController {
 			if (empty($parameters['alternates'][$shortCurrent = substr($current, 0, 2)])) {
 				//Set locale locales context
 				$parameters['alternates'][$shortCurrent] = [
-					'absolute' => $router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
-					'relative' => $router->generate($name, ['_locale' => $current]+$route),
+					'absolute' => $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
+					'relative' => $this->router->generate($name, ['_locale' => $current]+$route),
 					'title' => implode('/', $titles),
 					'translated' => $this->translator->trans($this->config['languages'][$current], [], null, $current)
 				];
@@ -409,7 +505,42 @@ abstract class AbstractController extends BaseAbstractController {
 			//Without application form
 			if (empty($parameters['forms']['application'])) {
 				//Fetch doctrine
-				$doctrine = $this->getDoctrine();
+				$doctrine = $this->get('doctrine');
+
+				//Get favorites locations
+				$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+
+				//Set location default
+				$locationDefault = current($locationFavorites);
+
+				//With admin
+				if ($this->isGranted('ROLE_ADMIN')) {
+					//Get locations
+					$locations = $doctrine->getRepository(Location::class)->findAll();
+				//Without admin
+				} else {
+					//Restrict to favorite locations
+					$locations = $locationFavorites;
+
+					//Reset favorites
+					$locationFavorites = [];
+				}
+
+				//With session location id
+				//XXX: set in session controller
+				if (!empty($parameters['session']['location']['id'])) {
+					//Iterate on each location
+					foreach($locations as $location) {
+						//Found location
+						if ($location->getId() == $parameters['session']['location']['id']) {
+							//Set location as default
+							$locationDefault = $location;
+
+							//Stop search
+							break;
+						}
+					}
+				}
 
 				//Create ApplicationType form
 				$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
@@ -417,13 +548,21 @@ abstract class AbstractController extends BaseAbstractController {
 					'action' => $this->generateUrl('rapsys_air_application_add'),
 					//Set the form attribute
 					'attr' => [ 'class' => 'col' ],
-					//Set admin
-					'admin' => $this->isGranted('ROLE_ADMIN'),
+					//Set location choices
+					'location_choices' => $locations,
+					//Set location default
+					'location_default' => $locationDefault,
+					//Set location favorites
+					'location_favorites' => $locationFavorites,
+					//With user
+					'user' => $this->isGranted('ROLE_ADMIN'),
+					//Set user choices
+					'user_choices' => $doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator),
 					//Set default user to current
-					'user' => $this->getUser()->getId(),
-					//Set default slot to evening
+					'user_default' => $this->getUser()->getId(),
+					//Set to session slot or evening by default
 					//XXX: default to Evening (3)
-					'slot' => $doctrine->getRepository(Slot::class)->findOneById(3)
+					'slot_default' => $doctrine->getRepository(Slot::class)->findOneById($parameters['session']['slot']['id']??3)
 				]);
 
 				//Add form to context
@@ -458,6 +597,8 @@ abstract class AbstractController extends BaseAbstractController {
 				'surname' => false,
 				//Without password
 				'password' => false,
+				//Without slug
+				'slug' => false,
 				//Without phone
 				'phone' => false
 			];
@@ -485,14 +626,14 @@ abstract class AbstractController extends BaseAbstractController {
 		}
 
 		//With page infos and without facebook texts
-		if (empty($parameters['facebook']['texts']) && !empty($parameters['site']['title']) && !empty($parameters['page']['title']) && !empty($parameters['canonical'])) {
+		if (empty($parameters['facebook']['texts']) && !empty($parameters['site']['title']) && !empty($parameters['title']) && !empty($parameters['canonical'])) {
 			//Set facebook image
 			$parameters['facebook']['texts'] = [
 				$parameters['site']['title'] => [
 					'font' => 'irishgrover',
 					'size' => 110
 				],
-				$parameters['page']['title'] => [
+				$parameters['title'] => [
 					'align' => 'left'
 				],
 				$parameters['canonical'] => [
@@ -510,16 +651,16 @@ abstract class AbstractController extends BaseAbstractController {
 			$parameters['facebook']['metas']['og:url'] = $parameters['canonical'];
 		}
 
-		//With page title
-		if (!empty($parameters['page']['title'])) {
+		//With empty facebook title and title
+		if (empty($parameters['facebook']['metas']['og:title']) && !empty($parameters['title'])) {
 			//Set facebook title
-			$parameters['facebook']['metas']['og:title'] = $parameters['page']['title'];
+			$parameters['facebook']['metas']['og:title'] = $parameters['title'];
 		}
 
-		//With page description
-		if (!empty($parameters['page']['description'])) {
+		//With empty facebook description and description
+		if (empty($parameters['facebook']['metas']['og:description']) && !empty($parameters['description'])) {
 			//Set facebook description
-			$parameters['facebook']['metas']['og:description'] = $parameters['page']['description'];
+			$parameters['facebook']['metas']['og:description'] = $parameters['description'];
 		}
 
 		//With locale
@@ -549,5 +690,22 @@ abstract class AbstractController extends BaseAbstractController {
 
 		//Call parent method
 		return $this->baseRender($view, $parameters, $response);
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @see vendor/symfony/framework-bundle/Controller/AbstractController.php
+	 */
+	public static function getSubscribedServices(): array {
+		//Return subscribed services
+		return [
+			//'logger' => LoggerInterface::class,
+			'doctrine' => ManagerRegistry::class,
+			'rapsys_pack.path_package' => PackageInterface::class,
+			'request_stack' => RequestStack::class,
+			'router' => RouterInterface::class,
+			'translator' => TranslatorInterface::class
+		];
 	}
 }
