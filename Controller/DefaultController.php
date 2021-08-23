@@ -3,110 +3,18 @@
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Translation\TranslatorInterface;
 
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Pdf\DisputePdf;
 
 class DefaultController extends AbstractController {
-	///Config array
-	protected $config;
-
-	///ContainerInterface instance
-	protected $container;
-
-	///Context array
-	protected $context;
-
-	///Router instance
-	protected $router;
-
-	///Translator instance
-	protected $translator;
-
-	///Request instance
-	protected $request;
-
-	///Locale instance
-	protected $locale;
-
-	/**
-	 * Inject container, router and translator interface
-	 *
-	 * @param ContainerInterface $container The container instance
-	 * @param RouterInterface $router The router instance
-	 * @param TranslatorInterface $translator The translator instance
-	 */
-	public function __construct(ContainerInterface $container, RouterInterface $router, TranslatorInterface $translator) {
-		//Retrieve config
-		$this->config = $container->getParameter(self::getAlias());
-
-		//Set the container
-		$this->container = $container;
-
-		//Set the router
-		$this->router = $router;
-
-		//Set the translator
-		$this->translator = $translator;
-
-		//Set the context
-		$this->context = [
-			'contact' => [
-				'title' => $translator->trans($this->config['contact']['title']),
-				'mail' => $this->config['contact']['mail']
-			],
-			'copy' => [
-				'by' => $translator->trans($this->config['copy']['by']),
-				'link' => $this->config['copy']['link'],
-				'long' => $translator->trans($this->config['copy']['long']),
-				'short' => $translator->trans($this->config['copy']['short']),
-				'title' => $this->config['copy']['title']
-			],
-			'page' => [
-				'description' => null,
-				'section' => null,
-				'title' => null
-			],
-			'site' => [
-				'donate' => $this->config['site']['donate'],
-				'ico' => $this->config['site']['ico'],
-				'logo' => $this->config['site']['logo'],
-				'png' => $this->config['site']['png'],
-				'svg' => $this->config['site']['svg'],
-				'title' => $translator->trans($this->config['site']['title']),
-				'url' => $router->generate($this->config['site']['url'])
-			],
-			'canonical' => null,
-			'alternates' => [],
-			'facebook' => [
-				'heads' => [
-					'og' => 'http://ogp.me/ns#',
-					'fb' => 'http://ogp.me/ns/fb#'
-				],
-				'metas' => [
-					'og:type' => 'article',
-					'og:site_name' => $this->translator->trans($this->config['site']['title']),
-					#'fb:admins' => $this->config['facebook']['admins'],
-					'fb:app_id' => $this->config['facebook']['apps']
-				],
-				'texts' => []
-			],
-			'forms' => []
-		];
-	}
-
 	/**
 	 * The about page
 	 *
@@ -117,10 +25,10 @@ class DefaultController extends AbstractController {
 	 */
 	public function about(Request $request): Response {
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('About');
+		$this->context['title'] = $this->translator->trans('About');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Libre Air about');
+		$this->context['description'] = $this->translator->trans('Libre Air about');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -150,10 +58,10 @@ class DefaultController extends AbstractController {
 	 */
 	public function contact(Request $request, MailerInterface $mailer): Response {
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Contact');
+		$this->context['title'] = $this->translator->trans('Contact');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Contact Libre Air');
+		$this->context['description'] = $this->translator->trans('Contact Libre Air');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -240,10 +148,10 @@ class DefaultController extends AbstractController {
 		$this->denyAccessUnlessGranted('ROLE_USER', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('User')]));
 
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Dispute');
+		$this->context['title'] = $this->translator->trans('Dispute');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Libre Air dispute');
+		$this->context['description'] = $this->translator->trans('Libre Air dispute');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -360,10 +268,10 @@ class DefaultController extends AbstractController {
 		$doctrine = $this->getDoctrine();
 
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Argentine Tango in Paris');
+		$this->context['title'] = $this->translator->trans('Argentine Tango in Paris');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Outdoor Argentine Tango session calendar in Paris');
+		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session calendar in Paris');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -391,7 +299,7 @@ class DefaultController extends AbstractController {
 		);
 
 		//Fetch calendar
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $request->getLocale());
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
@@ -421,10 +329,10 @@ class DefaultController extends AbstractController {
 	 */
 	public function organizerRegulation(Request $request): Response {
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Organizer regulation');
+		$this->context['title'] = $this->translator->trans('Organizer regulation');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Libre Air organizer regulation');
+		$this->context['description'] = $this->translator->trans('Libre Air organizer regulation');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -454,10 +362,10 @@ class DefaultController extends AbstractController {
 	 */
 	public function termsOfService(Request $request): Response {
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Terms of service');
+		$this->context['title'] = $this->translator->trans('Terms of service');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Libre Air terms of service');
+		$this->context['description'] = $this->translator->trans('Libre Air terms of service');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -487,10 +395,10 @@ class DefaultController extends AbstractController {
 	 */
 	public function frequentlyAskedQuestions(Request $request): Response {
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans('Frequently asked questions');
+		$this->context['title'] = $this->translator->trans('Frequently asked questions');
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Libre Air frequently asked questions');
+		$this->context['description'] = $this->translator->trans('Libre Air frequently asked questions');
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -509,15 +417,6 @@ class DefaultController extends AbstractController {
 
 		//Return response
 		return $response;
-	}
-
-	/**
-	 * Return the bundle alias
-	 *
-	 * {@inheritdoc}
-	 */
-	public function getAlias(): string {
-		return 'rapsys_air';
 	}
 
 	/**
