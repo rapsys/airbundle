@@ -11,6 +11,7 @@
 
 namespace Rapsys\AirBundle\Form;
 
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,9 +26,24 @@ class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 		//Call parent build form
 		$form = parent::buildForm($builder, $options);
 
+		//Add extra donate field
+		if (!empty($options['donate'])) {
+			$form->add('donate', UrlType::class, ['attr' => ['placeholder' => 'Your donate'], 'required' => false]);
+		}
+
+		//Add extra link field
+		if (!empty($options['link'])) {
+			$form->add('link', UrlType::class, ['attr' => ['placeholder' => 'Your link'], 'required' => false]);
+		}
+
 		//Add extra phone field
 		if (!empty($options['phone'])) {
 			$form->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'required' => false]);
+		}
+
+		//Add extra profile field
+		if (!empty($options['profile'])) {
+			$form->add('profile', UrlType::class, ['attr' => ['placeholder' => 'Your profile'], 'required' => false]);
 		}
 
 		//Return form
@@ -42,10 +58,19 @@ class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 		parent::configureOptions($resolver);
 
 		//Set defaults
-		$resolver->setDefaults(['phone' => true]);
+		$resolver->setDefaults(['donate' => true, 'link' => true, 'phone' => true, 'profile' => true]);
 
-		//Add extra mail option
+		//Add extra donate option
+		$resolver->setAllowedTypes('donate', 'boolean');
+
+		//Add extra link option
+		$resolver->setAllowedTypes('link', 'boolean');
+
+		//Add extra phone option
 		$resolver->setAllowedTypes('phone', 'boolean');
+
+		//Add extra profile option
+		$resolver->setAllowedTypes('profile', 'boolean');
 	}
 
 
