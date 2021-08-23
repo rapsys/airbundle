@@ -149,7 +149,7 @@ class UserController extends DefaultController {
 
 		//Fetch calendar
 		//TODO: highlight with current session route parameter
-		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $isGuest?$id:null, $request->get('session'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $isGuest?$id:null, $request->get('session'), $request->getLocale());
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
