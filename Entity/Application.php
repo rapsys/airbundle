@@ -1,6 +1,17 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
+
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Application
@@ -42,11 +53,19 @@ class Application {
 	private $user;
 
 	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->session = null;
+		$this->user = null;
+	}
+
+	/**
 	 * Get id
 	 *
 	 * @return integer
 	 */
-	public function getId() {
+	public function getId(): int {
 		return $this->id;
 	}
 
@@ -57,7 +76,7 @@ class Application {
 	 *
 	 * @return Application
 	 */
-	public function setScore($score) {
+	public function setScore(?float $score): Application {
 		$this->score = $score;
 
 		return $this;
@@ -68,7 +87,7 @@ class Application {
 	 *
 	 * @return float
 	 */
-	public function getScore() {
+	public function getScore(): ?float {
 		return $this->score;
 	}
 
@@ -79,7 +98,7 @@ class Application {
 	 *
 	 * @return Application
 	 */
-	public function setCanceled($canceled) {
+	public function setCanceled(?\DateTime $canceled): Application {
 		$this->canceled = $canceled;
 
 		return $this;
@@ -90,7 +109,7 @@ class Application {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCanceled() {
+	public function getCanceled(): ?\DateTime {
 		return $this->canceled;
 	}
 
@@ -101,7 +120,7 @@ class Application {
 	 *
 	 * @return Application
 	 */
-	public function setCreated($created) {
+	public function setCreated(\DateTime $created): Application {
 		$this->created = $created;
 
 		return $this;
@@ -112,7 +131,7 @@ class Application {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCreated() {
+	public function getCreated(): \DateTime {
 		return $this->created;
 	}
 
@@ -123,7 +142,7 @@ class Application {
 	 *
 	 * @return Application
 	 */
-	public function setUpdated($updated) {
+	public function setUpdated(\DateTime $updated): Application {
 		$this->updated = $updated;
 
 		return $this;
@@ -134,18 +153,18 @@ class Application {
 	 *
 	 * @return \DateTime
 	 */
-	public function getUpdated() {
+	public function getUpdated(): \DateTime {
 		return $this->updated;
 	}
 
 	/**
 	 * Set session
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 * @param Session $session
 	 *
 	 * @return Application
 	 */
-	public function setSession(\Rapsys\AirBundle\Entity\Session $session = null) {
+	public function setSession(Session $session): Application {
 		$this->session = $session;
 
 		return $this;
@@ -154,20 +173,20 @@ class Application {
 	/**
 	 * Get session
 	 *
-	 * @return \Rapsys\AirBundle\Entity\Session
+	 * @return Session
 	 */
-	public function getSession() {
+	public function getSession(): Session {
 		return $this->session;
 	}
 
 	/**
 	 * Set user
 	 *
-	 * @param \Rapsys\AirBundle\Entity\User $user
+	 * @param User $user
 	 *
 	 * @return Application
 	 */
-	public function setUser(\Rapsys\AirBundle\Entity\User $user = null) {
+	public function setUser(User $user): Application {
 		$this->user = $user;
 
 		return $this;
@@ -176,9 +195,20 @@ class Application {
 	/**
 	 * Get user
 	 *
-	 * @return \Rapsys\AirBundle\Entity\User
+	 * @return User
 	 */
-	public function getUser() {
+	public function getUser(): User {
 		return $this->user;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function preUpdate(PreUpdateEventArgs $eventArgs) {
+		//Check that we have an application instance
+		if (($user = $eventArgs->getEntity()) instanceof Application) {
+			//Set updated value
+			$user->setUpdated(new \DateTime('now'));
+		}
 	}
 }

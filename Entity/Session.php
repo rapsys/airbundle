@@ -1,6 +1,18 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Session
@@ -24,7 +36,7 @@ class Session {
 	/**
 	 * @var \DateTime
 	 */
-	private $start = null;
+	private $start;
 
 	/**
 	 * @var \DateTime
@@ -34,7 +46,7 @@ class Session {
 	/**
 	 * @var \DateTime
 	 */
-	private $stop = null;
+	private $stop;
 
 	/**
 	 * @var boolean
@@ -67,17 +79,17 @@ class Session {
 	private $realfeelmax;
 
 	/**
-	 * @var integer
+	 * @var float
 	 */
 	private $temperature;
 
 	/**
-	 * @var integer
+	 * @var float
 	 */
 	private $temperaturemin;
 
 	/**
-	 * @var integer
+	 * @var float
 	 */
 	private $temperaturemax;
 
@@ -97,22 +109,27 @@ class Session {
 	private $updated;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\Application
+	 * @var Application
 	 */
 	private $application;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\Location
+	 * @var Dance
+	 */
+	private $dance;
+
+	/**
+	 * @var Location
 	 */
 	private $location;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\Slot
+	 * @var Slot
 	 */
 	private $slot;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var ArrayCollection
 	 */
 	private $applications;
 
@@ -120,7 +137,21 @@ class Session {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->applications = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->begin = null;
+		$this->start = null;
+		$this->length = null;
+		$this->stop = null;
+		$this->rainfall = null;
+		$this->rainrisk = null;
+		$this->realfeel = null;
+		$this->realfeelmin = null;
+		$this->realfeelmax = null;
+		$this->temperature = null;
+		$this->temperaturemin = null;
+		$this->temperaturemax = null;
+		$this->locked = null;
+		$this->premium = null;
+		$this->applications = new ArrayCollection();
 	}
 
 	/**
@@ -128,7 +159,7 @@ class Session {
 	 *
 	 * @return integer
 	 */
-	public function getId() {
+	public function getId(): int {
 		return $this->id;
 	}
 
@@ -139,7 +170,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setDate($date) {
+	public function setDate(\DateTime $date): Session {
 		$this->date = $date;
 
 		return $this;
@@ -150,7 +181,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getDate() {
+	public function getDate(): \DateTime {
 		return $this->date;
 	}
 
@@ -161,7 +192,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setBegin($begin) {
+	public function setBegin(?\DateTime $begin): Session {
 		$this->begin = $begin;
 
 		return $this;
@@ -172,7 +203,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getBegin() {
+	public function getBegin(): ?\DateTime {
 		return $this->begin;
 	}
 
@@ -181,8 +212,8 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getStart() {
-		//Check start
+	public function getStart(): \DateTime {
+		//With start
 		if ($this->start !== null) {
 			return $this->start;
 		}
@@ -197,8 +228,14 @@ class Session {
 			$this->start->add(new \DateInterval('P1D'));
 		}
 
-		//Return date
-		return $this->start->setTime($this->begin->format('H'), $this->begin->format('i'), $this->begin->format('s'));
+		//With begin
+		if ($this->begin !== null) {
+			//Set start time
+			$this->start->setTime(intval($this->begin->format('H')), intval($this->begin->format('i')), intval($this->begin->format('s')));
+		}
+
+		//Return start
+		return $this->start;
 	}
 
 	/**
@@ -208,7 +245,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setLength($length) {
+	public function setLength(?\DateTime $length): Session {
 		$this->length = $length;
 
 		return $this;
@@ -219,7 +256,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getLength() {
+	public function getLength(): ?\DateTime {
 		return $this->length;
 	}
 
@@ -228,7 +265,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getStop() {
+	public function getStop(): \DateTime {
 		//Check start
 		if ($this->stop !== null) {
 			return $this->stop;
@@ -237,8 +274,14 @@ class Session {
 		//Get start clone
 		$this->stop = clone $this->getStart();
 
+		//With length
+		if ($this->length !== null) {
+			//Set stop time
+			$this->stop->add(new \DateInterval('PT'.$this->length->format('H').'H'.$this->length->format('i').'M'.$this->length->format('s').'S'));
+		}
+
 		//Return date
-		return $this->stop->add(new \DateInterval('PT'.$this->length->format('H').'H'.$this->length->format('i').'M'.$this->length->format('s').'S'));
+		return $this->stop;
 	}
 
 	/**
@@ -248,7 +291,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setPremium($premium) {
+	public function setPremium(bool $premium): Session {
 		$this->premium = $premium;
 
 		return $this;
@@ -257,20 +300,20 @@ class Session {
 	/**
 	 * Get premium
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function getPremium() {
+	public function getPremium(): bool {
 		return $this->premium;
 	}
 
 	/**
 	 * Set rainfall
 	 *
-	 * @param boolean $rainfall
+	 * @param float $rainfall
 	 *
 	 * @return Session
 	 */
-	public function setRainfall($rainfall) {
+	public function setRainfall(?float $rainfall): Session {
 		$this->rainfall = $rainfall;
 
 		return $this;
@@ -279,20 +322,20 @@ class Session {
 	/**
 	 * Get rainfall
 	 *
-	 * @return boolean
+	 * @return float
 	 */
-	public function getRainfall() {
+	public function getRainfall(): ?float {
 		return $this->rainfall;
 	}
 
 	/**
 	 * Set rainrisk
 	 *
-	 * @param boolean $rainrisk
+	 * @param float $rainrisk
 	 *
 	 * @return Session
 	 */
-	public function setRainrisk($rainrisk) {
+	public function setRainrisk(?float $rainrisk): Session {
 		$this->rainrisk = $rainrisk;
 
 		return $this;
@@ -301,20 +344,20 @@ class Session {
 	/**
 	 * Get rainrisk
 	 *
-	 * @return boolean
+	 * @return float
 	 */
-	public function getRainrisk() {
+	public function getRainrisk(): ?float {
 		return $this->rainrisk;
 	}
 
 	/**
 	 * Set realfeel
 	 *
-	 * @param integer $realfeel
+	 * @param float $realfeel
 	 *
 	 * @return Session
 	 */
-	public function setRealfeel($realfeel) {
+	public function setRealfeel(?float $realfeel): Session {
 		$this->realfeel = $realfeel;
 
 		return $this;
@@ -323,20 +366,20 @@ class Session {
 	/**
 	 * Get realfeel
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getRealfeel() {
+	public function getRealfeel(): ?float {
 		return $this->realfeel;
 	}
 
 	/**
 	 * Set realfeelmin
 	 *
-	 * @param integer $realfeelmin
+	 * @param float $realfeelmin
 	 *
 	 * @return Session
 	 */
-	public function setRealfeelmin($realfeelmin) {
+	public function setRealfeelmin(?float $realfeelmin): Session {
 		$this->realfeelmin = $realfeelmin;
 
 		return $this;
@@ -345,20 +388,20 @@ class Session {
 	/**
 	 * Get realfeelmin
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getRealfeelmin() {
+	public function getRealfeelmin(): ?float {
 		return $this->realfeelmin;
 	}
 
 	/**
 	 * Set realfeelmax
 	 *
-	 * @param integer $realfeelmax
+	 * @param float $realfeelmax
 	 *
 	 * @return Session
 	 */
-	public function setRealfeelmax($realfeelmax) {
+	public function setRealfeelmax(?float $realfeelmax): Session {
 		$this->realfeelmax = $realfeelmax;
 
 		return $this;
@@ -367,20 +410,20 @@ class Session {
 	/**
 	 * Get realfeelmax
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getRealfeelmax() {
+	public function getRealfeelmax(): ?float {
 		return $this->realfeelmax;
 	}
 
 	/**
 	 * Set temperature
 	 *
-	 * @param integer $temperature
+	 * @param float $temperature
 	 *
 	 * @return Session
 	 */
-	public function setTemperature($temperature) {
+	public function setTemperature(?float $temperature): Session {
 		$this->temperature = $temperature;
 
 		return $this;
@@ -389,20 +432,20 @@ class Session {
 	/**
 	 * Get temperature
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getTemperature() {
+	public function getTemperature(): ?float {
 		return $this->temperature;
 	}
 
 	/**
 	 * Set temperaturemin
 	 *
-	 * @param integer $temperaturemin
+	 * @param float $temperaturemin
 	 *
 	 * @return Session
 	 */
-	public function setTemperaturemin($temperaturemin) {
+	public function setTemperaturemin(?float $temperaturemin): Session {
 		$this->temperaturemin = $temperaturemin;
 
 		return $this;
@@ -411,20 +454,20 @@ class Session {
 	/**
 	 * Get temperaturemin
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getTemperaturemin() {
+	public function getTemperaturemin(): ?float {
 		return $this->temperaturemin;
 	}
 
 	/**
 	 * Set temperaturemax
 	 *
-	 * @param integer $temperaturemax
+	 * @param float $temperaturemax
 	 *
 	 * @return Session
 	 */
-	public function setTemperaturemax($temperaturemax) {
+	public function setTemperaturemax(?float $temperaturemax): Session {
 		$this->temperaturemax = $temperaturemax;
 
 		return $this;
@@ -433,9 +476,9 @@ class Session {
 	/**
 	 * Get temperaturemax
 	 *
-	 * @return integer
+	 * @return float
 	 */
-	public function getTemperaturemax() {
+	public function getTemperaturemax(): ?float {
 		return $this->temperaturemax;
 	}
 
@@ -446,7 +489,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setLocked($locked) {
+	public function setLocked(?\DateTime $locked): Session {
 		$this->locked = $locked;
 
 		return $this;
@@ -457,7 +500,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getLocked() {
+	public function getLocked(): ?\DateTime {
 		return $this->locked;
 	}
 
@@ -468,7 +511,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setCreated($created) {
+	public function setCreated(\DateTime $created): Session {
 		$this->created = $created;
 
 		return $this;
@@ -479,7 +522,7 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCreated() {
+	public function getCreated(): \DateTime {
 		return $this->created;
 	}
 
@@ -490,7 +533,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setUpdated($updated) {
+	public function setUpdated(\DateTime $updated): Session {
 		$this->updated = $updated;
 
 		return $this;
@@ -501,18 +544,18 @@ class Session {
 	 *
 	 * @return \DateTime
 	 */
-	public function getUpdated() {
+	public function getUpdated(): \DateTime {
 		return $this->updated;
 	}
 
 	/**
 	 * Add application
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Application $application
+	 * @param Application $application
 	 *
 	 * @return Session
 	 */
-	public function addApplication(\Rapsys\AirBundle\Entity\Application $application) {
+	public function addApplication(Application $application): Session {
 		$this->applications[] = $application;
 
 		return $this;
@@ -521,29 +564,51 @@ class Session {
 	/**
 	 * Remove application
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Application $application
+	 * @param Application $application
 	 */
-	public function removeApplication(\Rapsys\AirBundle\Entity\Application $application) {
-		$this->applications->removeElement($application);
+	public function removeApplication(Application $application): bool {
+		return $this->applications->removeElement($application);
 	}
 
 	/**
 	 * Get applications
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @return ArrayCollection
 	 */
-	public function getApplications() {
+	public function getApplications(): ArrayCollection {
 		return $this->applications;
+	}
+
+	/**
+	 * Set dance
+	 *
+	 * @param Dance $dance
+	 *
+	 * @return Session
+	 */
+	public function setDance(Dance $dance): Session {
+		$this->dance = $dance;
+
+		return $this;
+	}
+
+	/**
+	 * Get dance
+	 *
+	 * @return Dance
+	 */
+	public function getDance(): Dance {
+		return $this->dance;
 	}
 
 	/**
 	 * Set location
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Location $location
+	 * @param Location $location
 	 *
 	 * @return Session
 	 */
-	public function setLocation(\Rapsys\AirBundle\Entity\Location $location = null) {
+	public function setLocation(Location $location): Session {
 		$this->location = $location;
 
 		return $this;
@@ -552,20 +617,20 @@ class Session {
 	/**
 	 * Get location
 	 *
-	 * @return \Rapsys\AirBundle\Entity\Location
+	 * @return Location
 	 */
-	public function getLocation() {
+	public function getLocation(): Location {
 		return $this->location;
 	}
 
 	/**
 	 * Set slot
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Slot $slot
+	 * @param Slot $slot
 	 *
 	 * @return Session
 	 */
-	public function setSlot(\Rapsys\AirBundle\Entity\Slot $slot = null) {
+	public function setSlot(Slot $slot): Session {
 		$this->slot = $slot;
 
 		return $this;
@@ -574,20 +639,20 @@ class Session {
 	/**
 	 * Get slot
 	 *
-	 * @return \Rapsys\AirBundle\Entity\Slot
+	 * @return Slot
 	 */
-	public function getSlot() {
+	public function getSlot(): Slot {
 		return $this->slot;
 	}
 
 	/**
 	 * Set application
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Application $application
+	 * @param Application $application
 	 *
 	 * @return Session
 	 */
-	public function setApplication(\Rapsys\AirBundle\Entity\Application $application = null) {
+	public function setApplication(Application $application): Session {
 		$this->application = $application;
 
 		return $this;
@@ -596,9 +661,168 @@ class Session {
 	/**
 	 * Get application
 	 *
-	 * @return \Rapsys\AirBundle\Entity\Application
+	 * @return Application
 	 */
-	public function getApplication() {
+	public function getApplication(): ?Application {
 		return $this->application;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function preUpdate(PreUpdateEventArgs $eventArgs) {
+		//Check that we have a session instance
+		if (($user = $eventArgs->getEntity()) instanceof Session) {
+			//Set updated value
+			$user->setUpdated(new \DateTime('now'));
+		}
+	}
+
+	/**
+	 * Wether if session is a premium day
+	 *
+	 * Consider as premium a day off for afternoon, the eve for evening and after
+	 * Store computed result in premium member for afternoon and evening
+	 *
+	 * @return bool Whether the date is day off or not
+	 */
+	public function isPremium(): bool {
+		//Without date
+		if (empty($date = $this->date)) {
+			throw new \LogicException('Property date is empty');
+		}
+
+		//Without slot
+		if (empty($slot = $this->slot) || empty($slotTitle = $slot->getTitle())) {
+			throw new \LogicException('Property slot is empty');
+		}
+
+		//With evening and after slot
+		if ($slotTitle == 'Evening' || $slotTitle == 'After') {
+			//Evening and after session is considered premium when the eve is a day off
+			$date = (clone $date)->add(new \DateInterval('P1D'));
+		}
+
+		//Get day number
+		$w = $date->format('w');
+
+		//Check if weekend day
+		if ($w == 0 || $w == 6) {
+			//With afternoon and evening slot
+			if ($slotTitle == 'Afternoon' || $slotTitle == 'Evening') {
+				//Save premium
+				$this->premium = true;
+			}
+
+			//Date is weekend day
+			return true;
+		}
+
+		//Get date day
+		$d = $date->format('d');
+
+		//Get date month
+		$m = $date->format('m');
+
+		//Check if fixed holiday
+		if (
+			//Check if 1st january
+			($d == 1 && $m == 1) ||
+			//Check if 1st may
+			($d == 1 && $m == 5) ||
+			//Check if 8st may
+			($d == 8 && $m == 5) ||
+			//Check if 14st july
+			($d == 14 && $m == 7) ||
+			//Check if 15st august
+			($d == 15 && $m == 8) ||
+			//Check if 1st november
+			($d == 1 && $m == 11) ||
+			//Check if 11st november
+			($d == 11 && $m == 11) ||
+			//Check if 25st december
+			($d == 25 && $m == 12)
+		) {
+			//With afternoon and evening slot
+			if ($slotTitle == 'Afternoon' || $slotTitle == 'Evening') {
+				//Save premium
+				$this->premium = true;
+			}
+
+			//Date is a fixed holiday
+			return true;
+		}
+
+		//Get eastern
+		$eastern = $this->getEastern($date->format('Y'));
+
+		//Check dynamic holidays
+		if (
+			(clone $eastern)->add(new \DateInterval('P1D')) == $date ||
+			(clone $eastern)->add(new \DateInterval('P39D')) == $date ||
+			(clone $eastern)->add(new \DateInterval('P50D')) == $date
+		) {
+			//With afternoon and evening slot
+			if ($slotTitle == 'Afternoon' || $slotTitle == 'Evening') {
+				//Save premium
+				$this->premium = true;
+			}
+
+			//Date is a dynamic holiday
+			return true;
+		}
+
+		//With afternoon and evening slot
+		if ($slotTitle == 'Afternoon' || $slotTitle == 'Evening') {
+			//Save premium
+			$this->premium = false;
+		}
+
+		//Date is not a holiday and week day
+		return false;
+	}
+
+	/**
+	 * Compute eastern for selected year
+	 *
+	 * @param string $year The eastern year
+	 *
+	 * @return DateTime The eastern date
+	 */
+	private function getEastern(string $year): \DateTime {
+		//Set static
+		static $data = null;
+
+		//Check if already computed
+		if (isset($data[$year])) {
+			//Return computed eastern
+			return $data[$year];
+		//Check if data is null
+		} elseif (is_null($data)) {
+			//Init data array
+			$data = [];
+		}
+
+		$d = (19 * ($year % 19) + 24) % 30;
+
+		$e = (2 * ($year % 4) + 4 * ($year % 7) + 6 * $d + 5) % 7;
+
+		$day = 22 + $d + $e;
+
+		$month = 3;
+
+		if ($day > 31) {
+			$day = $d + $e - 9;
+			$month = 4;
+		} elseif ($d == 29 && $e == 6) {
+			$day = 10;
+			$month = 4;
+		} elseif ($d == 28 && $e == 6) {
+			$day = 18;
+			$month = 4;
+		}
+
+		//Store eastern in data
+		return ($data[$year] = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day)));
 	}
 }

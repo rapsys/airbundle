@@ -1,8 +1,19 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
 
-class Civility extends \Rapsys\UserBundle\Entity\Civility {
+use Rapsys\UserBundle\Entity\Civility as BaseCivility;
+
+class Civility extends BaseCivility {
 	/**
 	 * @var string
 	 */
@@ -15,7 +26,7 @@ class Civility extends \Rapsys\UserBundle\Entity\Civility {
 	 *
 	 * @return Civility
 	 */
-	public function setShort($short) {
+	public function setShort(string $short): Civility {
 		$this->short = $short;
 
 		return $this;
@@ -26,7 +37,7 @@ class Civility extends \Rapsys\UserBundle\Entity\Civility {
 	 *
 	 * @return string
 	 */
-	public function getShort() {
+	public function getShort(): string {
 		return $this->short;
 	}
 

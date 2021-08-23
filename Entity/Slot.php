@@ -1,6 +1,18 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Slot
@@ -27,7 +39,7 @@ class Slot {
 	private $updated;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var ArrayCollection
 	 */
 	private $sessions;
 
@@ -35,7 +47,7 @@ class Slot {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->sessions = new ArrayCollection();
 	}
 
 	/**
@@ -43,7 +55,7 @@ class Slot {
 	 *
 	 * @return integer
 	 */
-	public function getId() {
+	public function getId(): int {
 		return $this->id;
 	}
 
@@ -54,7 +66,7 @@ class Slot {
 	 *
 	 * @return Title
 	 */
-	public function setTitle($title) {
+	public function setTitle(string $title) {
 		$this->title = $title;
 
 		return $this;
@@ -76,7 +88,7 @@ class Slot {
 	 *
 	 * @return Slot
 	 */
-	public function setCreated($created) {
+	public function setCreated(\DateTime $created) {
 		$this->created = $created;
 
 		return $this;
@@ -87,7 +99,7 @@ class Slot {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCreated() {
+	public function getCreated(): \DateTime {
 		return $this->created;
 	}
 
@@ -98,7 +110,7 @@ class Slot {
 	 *
 	 * @return Slot
 	 */
-	public function setUpdated($updated) {
+	public function setUpdated(\DateTime $updated) {
 		$this->updated = $updated;
 
 		return $this;
@@ -109,18 +121,18 @@ class Slot {
 	 *
 	 * @return \DateTime
 	 */
-	public function getUpdated() {
+	public function getUpdated(): \DateTime {
 		return $this->updated;
 	}
 
 	/**
 	 * Add session
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 * @param Session $session
 	 *
 	 * @return Slot
 	 */
-	public function addSession(\Rapsys\AirBundle\Entity\Session $session) {
+	public function addSession(Session $session): Slot {
 		$this->sessions[] = $session;
 
 		return $this;
@@ -129,19 +141,30 @@ class Slot {
 	/**
 	 * Remove session
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 * @param Session $session
 	 */
-	public function removeSession(\Rapsys\AirBundle\Entity\Session $session) {
-		$this->sessions->removeElement($session);
+	public function removeSession(Session $session): bool {
+		return $this->sessions->removeElement($session);
 	}
 
 	/**
 	 * Get sessions
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @return ArrayCollection
 	 */
-	public function getSessions() {
+	public function getSessions(): ArrayCollection {
 		return $this->sessions;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function preUpdate(PreUpdateEventArgs $eventArgs) {
+		//Check that we have a slot instance
+		if (($user = $eventArgs->getEntity()) instanceof Slot) {
+			//Set updated value
+			$user->setUpdated(new \DateTime('now'));
+		}
 	}
 
 	/**

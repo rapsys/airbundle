@@ -1,9 +1,17 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
 
-use Rapsys\AirBundle\Entity\Location;
-use Rapsys\AirBundle\Entity\User;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Snippet
@@ -75,12 +83,12 @@ class Snippet {
 	protected $updated;
 
 	/**
-	 * @var \Rapsys\UserBundle\Entity\Location
+	 * @var Location
 	 */
 	protected $location;
 
 	/**
-	 * @var \Rapsys\UserBundle\Entity\User
+	 * @var User
 	 */
 	protected $user;
 
@@ -88,7 +96,15 @@ class Snippet {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->hat = true;
+		$this->description = null;
+		$this->class = null;
+		$this->short = null;
+		$this->rate = null;
+		$this->hat = null;
+		$this->contact = null;
+		$this->donate = null;
+		$this->link = null;
+		$this->profile = null;
 	}
 
 	/**
@@ -96,7 +112,7 @@ class Snippet {
 	 *
 	 * @return integer
 	 */
-	public function getId() {
+	public function getId(): int {
 		return $this->id;
 	}
 
@@ -107,7 +123,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setLocale($locale) {
+	public function setLocale(string $locale): Snippet {
 		$this->locale = $locale;
 
 		return $this;
@@ -118,7 +134,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getLocale() {
+	public function getLocale(): string {
 		return $this->locale;
 	}
 
@@ -129,7 +145,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setDescription($description) {
+	public function setDescription(?string $description): Snippet {
 		$this->description = $description;
 
 		return $this;
@@ -140,7 +156,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getDescription() {
+	public function getDescription(): ?string {
 		return $this->description;
 	}
 
@@ -151,7 +167,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setClass($class) {
+	public function setClass(?string $class): Snippet {
 		$this->class = $class;
 
 		return $this;
@@ -162,7 +178,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getClass() {
+	public function getClass(): ?string {
 		return $this->class;
 	}
 
@@ -173,7 +189,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setShort($short) {
+	public function setShort(?string $short): Snippet {
 		$this->short = $short;
 
 		return $this;
@@ -184,7 +200,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getShort() {
+	public function getShort(): ?string {
 		return $this->short;
 	}
 
@@ -195,7 +211,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setRate($rate) {
+	public function setRate(?string $rate): Snippet {
 		$this->rate = $rate;
 
 		return $this;
@@ -206,7 +222,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getRate() {
+	public function getRate(): ?string {
 		return $this->rate;
 	}
 
@@ -217,7 +233,7 @@ class Snippet {
 	 *
 	 * @return User
 	 */
-	public function setHat(bool $hat) {
+	public function setHat(bool $hat): Snippet {
 		$this->hat = $hat;
 
 		return $this;
@@ -238,7 +254,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setContact($contact) {
+	public function setContact(?string $contact): Snippet {
 		$this->contact = $contact;
 
 		return $this;
@@ -249,7 +265,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getContact() {
+	public function getContact(): ?string {
 		return $this->contact;
 	}
 
@@ -260,7 +276,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setDonate($donate) {
+	public function setDonate(?string $donate): Snippet {
 		$this->donate = $donate;
 
 		return $this;
@@ -271,7 +287,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getDonate() {
+	public function getDonate(): ?string {
 		return $this->donate;
 	}
 
@@ -282,7 +298,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setLink($link) {
+	public function setLink(?string $link): Snippet {
 		$this->link = $link;
 
 		return $this;
@@ -293,7 +309,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getLink() {
+	public function getLink(): ?string {
 		return $this->link;
 	}
 
@@ -304,7 +320,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setProfile($profile) {
+	public function setProfile(?string $profile): Snippet {
 		$this->profile = $profile;
 
 		return $this;
@@ -315,7 +331,7 @@ class Snippet {
 	 *
 	 * @return string
 	 */
-	public function getProfile() {
+	public function getProfile(): ?string {
 		return $this->profile;
 	}
 
@@ -326,7 +342,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setCreated($created) {
+	public function setCreated(\DateTime $created): Snippet {
 		$this->created = $created;
 
 		return $this;
@@ -337,7 +353,7 @@ class Snippet {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCreated() {
+	public function getCreated(): \DateTime {
 		return $this->created;
 	}
 
@@ -348,7 +364,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setUpdated($updated) {
+	public function setUpdated(\DateTime $updated): Snippet {
 		$this->updated = $updated;
 
 		return $this;
@@ -359,7 +375,7 @@ class Snippet {
 	 *
 	 * @return \DateTime
 	 */
-	public function getUpdated() {
+	public function getUpdated(): \DateTime {
 		return $this->updated;
 	}
 

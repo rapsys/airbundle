@@ -1,6 +1,18 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * this file is part of the rapsys packbundle package.
+ *
+ * (c) raphaël gertz <symfony@rapsys.eu>
+ *
+ * for the full copyright and license information, please view the license
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
  * Location
@@ -62,17 +74,17 @@ class Location {
 	private $updated;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var ArrayCollection
 	 */
 	private $sessions;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var ArrayCollection
 	 */
 	private $snippets;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * @var ArrayCollection
 	 */
 	private $users;
 
@@ -80,9 +92,9 @@ class Location {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->sessions = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->snippets = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->users = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->sessions = new ArrayCollection();
+		$this->snippets = new ArrayCollection();
+		$this->users = new ArrayCollection();
 	}
 
 	/**
@@ -90,7 +102,7 @@ class Location {
 	 *
 	 * @return integer
 	 */
-	public function getId() {
+	public function getId(): int {
 		return $this->id;
 	}
 
@@ -101,7 +113,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setTitle($title) {
+	public function setTitle(string $title): Location {
 		$this->title = $title;
 
 		return $this;
@@ -112,7 +124,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getTitle() {
+	public function getTitle(): string {
 		return $this->title;
 	}
 
@@ -123,7 +135,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setShort($short) {
+	public function setShort(string $short): Location {
 		$this->short = $short;
 
 		return $this;
@@ -134,7 +146,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getShort() {
+	public function getShort(): string {
 		return $this->short;
 	}
 
@@ -145,7 +157,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setAddress($address) {
+	public function setAddress(string $address): Location {
 		$this->address = $address;
 
 		return $this;
@@ -156,7 +168,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getAddress() {
+	public function getAddress(): string {
 		return $this->address;
 	}
 
@@ -167,7 +179,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setZipcode($zipcode) {
+	public function setZipcode(string $zipcode): Location {
 		$this->zipcode = $zipcode;
 
 		return $this;
@@ -178,7 +190,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getZipcode() {
+	public function getZipcode(): string {
 		return $this->zipcode;
 	}
 
@@ -189,7 +201,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setCity($city) {
+	public function setCity(string $city): Location {
 		$this->city = $city;
 
 		return $this;
@@ -200,7 +212,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getCity() {
+	public function getCity(): string {
 		return $this->city;
 	}
 
@@ -211,7 +223,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setLatitude($latitude) {
+	public function setLatitude(string $latitude): Location {
 		$this->latitude = $latitude;
 
 		return $this;
@@ -222,7 +234,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getLatitude() {
+	public function getLatitude(): string {
 		return $this->latitude;
 	}
 
@@ -233,7 +245,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setLongitude($longitude) {
+	public function setLongitude(string $longitude): Location {
 		$this->longitude = $longitude;
 
 		return $this;
@@ -244,7 +256,7 @@ class Location {
 	 *
 	 * @return string
 	 */
-	public function getLongitude() {
+	public function getLongitude(): string {
 		return $this->longitude;
 	}
 
@@ -255,7 +267,7 @@ class Location {
 	 *
 	 * @return Session
 	 */
-	public function setHotspot($hotspot) {
+	public function setHotspot(bool $hotspot): Location {
 		$this->hotspot = $hotspot;
 
 		return $this;
@@ -266,7 +278,7 @@ class Location {
 	 *
 	 * @return boolean
 	 */
-	public function getHotspot() {
+	public function getHotspot(): bool {
 		return $this->hotspot;
 	}
 
@@ -277,7 +289,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setCreated($created) {
+	public function setCreated(\DateTime $created): Location {
 		$this->created = $created;
 
 		return $this;
@@ -288,7 +300,7 @@ class Location {
 	 *
 	 * @return \DateTime
 	 */
-	public function getCreated() {
+	public function getCreated(): \DateTime {
 		return $this->created;
 	}
 
@@ -299,7 +311,7 @@ class Location {
 	 *
 	 * @return Location
 	 */
-	public function setUpdated($updated) {
+	public function setUpdated(\DateTime $updated): Location {
 		$this->updated = $updated;
 
 		return $this;
@@ -310,18 +322,18 @@ class Location {
 	 *
 	 * @return \DateTime
 	 */
-	public function getUpdated() {
+	public function getUpdated(): \DateTime {
 		return $this->updated;
 	}
 
 	/**
 	 * Add session
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 * @param Session $session
 	 *
 	 * @return Location
 	 */
-	public function addSession(\Rapsys\AirBundle\Entity\Session $session) {
+	public function addSession(Session $session): Location {
 		$this->sessions[] = $session;
 
 		return $this;
@@ -330,29 +342,30 @@ class Location {
 	/**
 	 * Remove session
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Session $session
+	 * @param Session $session
+	 * @return boolean
 	 */
-	public function removeSession(\Rapsys\AirBundle\Entity\Session $session) {
-		$this->sessions->removeElement($session);
+	public function removeSession(Session $session): bool {
+		return $this->sessions->removeElement($session);
 	}
 
 	/**
 	 * Get sessions
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @return ArrayCollection
 	 */
-	public function getSessions() {
+	public function getSessions(): ArrayCollection {
 		return $this->sessions;
 	}
 
 	/**
 	 * Add snippet
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 * @param Snippet $snippet
 	 *
 	 * @return Location
 	 */
-	public function addSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
+	public function addSnippet(Snippet $snippet): Location {
 		$this->snippets[] = $snippet;
 
 		return $this;
@@ -361,29 +374,30 @@ class Location {
 	/**
 	 * Remove snippet
 	 *
-	 * @param \Rapsys\AirBundle\Entity\Snippet $snippet
+	 * @param Snippet $snippet
+	 * @return boolean
 	 */
-	public function removeSnippet(\Rapsys\AirBundle\Entity\Snippet $snippet) {
-		$this->snippets->removeElement($snippet);
+	public function removeSnippet(Snippet $snippet): bool {
+		return $this->snippets->removeElement($snippet);
 	}
 
 	/**
 	 * Get snippets
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @return ArrayCollection
 	 */
-	public function getSnippets() {
+	public function getSnippets(): ArrayCollection {
 		return $this->snippets;
 	}
 
 	/**
 	 * Add user
 	 *
-	 * @param \Rapsys\AirBundle\Entity\User $user
+	 * @param User $user
 	 *
 	 * @return Location
 	 */
-	public function addUser(\Rapsys\AirBundle\Entity\User $user) {
+	public function addUser(User $user): Location {
 		$this->users[] = $user;
 
 		return $this;
@@ -392,19 +406,31 @@ class Location {
 	/**
 	 * Remove user
 	 *
-	 * @param \Rapsys\AirBundle\Entity\User $user
+	 * @param User $user
+	 * @return boolean
 	 */
-	public function removeUser(\Rapsys\AirBundle\Entity\User $user) {
-		$this->users->removeElement($user);
+	public function removeUser(User $user): bool {
+		return $this->users->removeElement($user);
 	}
 
 	/**
 	 * Get users
 	 *
-	 * @return \Doctrine\Common\Collections\Collection
+	 * @return ArrayCollection
 	 */
-	public function getUsers() {
+	public function getUsers(): ArrayCollection {
 		return $this->users;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function preUpdate(PreUpdateEventArgs $eventArgs) {
+		//Check that we have a location instance
+		if (($user = $eventArgs->getEntity()) instanceof Location) {
+			//Set updated value
+			$user->setUpdated(new \DateTime('now'));
+		}
 	}
 
 	/**
