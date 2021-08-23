@@ -2,7 +2,7 @@
 
 namespace Rapsys\AirBundle\DataFixtures;
 
-use Rapsys\AirBundle\Entity\Title;
+use Rapsys\AirBundle\Entity\Civility;
 use Rapsys\AirBundle\Entity\Group;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Location;
@@ -24,24 +24,23 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 	public function load(\Doctrine\Common\Persistence\ObjectManager $manager) {
 		$encoder = $this->container->get('security.password_encoder');
 
-		//Title tree
-		$titleTree = array(
+		//Civility tree
+		$civilityTree = array(
 			'Mr.' => 'Mister',
 			'Mrs.' => 'Madam',
 			'Ms.' => 'Miss'
 		);
 
 		//Create titles
-		$titles = array();
-		foreach($titleTree as $shortData => $titleData) {
-			$title = new Title();
-			$title->setShort($shortData);
-			$title->setTitle($titleData);
-			$title->setCreated(new \DateTime('now'));
-			$title->setUpdated(new \DateTime('now'));
-			$manager->persist($title);
-			$titles[$shortData] = $title;
-			unset($title);
+		$civilitys = array();
+		foreach($civilityTree as $shortData => $civilityData) {
+			$civility = new Title($civilityData);
+			$civility->setShort($shortData);
+			$civility->setCreated(new \DateTime('now'));
+			$civility->setUpdated(new \DateTime('now'));
+			$manager->persist($civility);
+			$civilitys[$shortData] = $civility;
+			unset($civility);
 		}
 
 		//Group tree
@@ -115,15 +114,13 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 		//Create users
 		$users = array();
 		foreach($userTree as $userData) {
-			$user = new User();
-			$user->setMail($userData['mail']);
+			$user = new User($userData['mail']);
 			$user->setPseudonym($userData['pseudonym']);
 			$user->setForename($userData['forename']);
 			$user->setSurname($userData['surname']);
 			$user->setPhone($userData['phone']);
 			$user->setPassword($encoder->encodePassword($user, $userData['password']));
-			$user->setActive(true);
-			$user->setTitle($titles[$userData['short']]);
+			$user->setCivility($civilitys[$userData['short']]);
 			$user->addGroup($groups[$userData['group']]);
 			$user->setCreated(new \DateTime('now'));
 			$user->setUpdated(new \DateTime('now'));
