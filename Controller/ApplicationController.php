@@ -2,32 +2,57 @@
 
 namespace Rapsys\AirBundle\Controller;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\RequestContext;
+
+use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Location;
+use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
-use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Application;
 
-class ApplicationController extends DefaultController {
+class ApplicationController extends AbstractController {
 	/**
 	 * Add application
 	 *
 	 * @desc Persist application and all required dependencies in database
 	 *
 	 * @param Request $request The request instance
+	 * @param Registry $manager The doctrine registry
+	 * @param EntityManagerInterface $manager The doctrine entity manager
 	 *
 	 * @return Response The rendered view or redirection
 	 *
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
-	public function add(Request $request) {
+	public function add(Request $request, Registry $doctrine, EntityManagerInterface $manager) {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+
+		//Get favorites locations
+		$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+
+		//Set location default
+		$locationDefault = current($locationFavorites);
+
+		//With admin
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//Get locations
+			$locations = $doctrine->getRepository(Location::class)->findAll();
+		//Without admin
+		} else {
+			//Restrict to favorite locations
+			$locations = $locationFavorites;
+
+			//Reset favorites
+			$locationFavorites = [];
+		}
 
 		//Create ApplicationType form
 		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
@@ -35,13 +60,21 @@ class ApplicationController extends DefaultController {
 			'action' => $this->generateUrl('rapsys_air_application_add'),
 			//Set the form attribute
 			#'attr' => [ 'class' => 'col' ],
-			//Set admin
-			'admin' => $this->isGranted('ROLE_ADMIN'),
+			//Set location choices
+			'location_choices' => $locations,
+			//Set location default
+			'location_default' => $locationDefault,
+			//Set location favorites
+			'location_favorites' => $locationFavorites,
+			//With user
+			'user' => $this->isGranted('ROLE_ADMIN'),
+			//Set user choices
+			'user_choices' => $doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator),
 			//Set default user to current
-			'user' => $this->getUser()->getId(),
+			'user_default' => $this->getUser()->getId(),
 			//Set default slot to evening
 			//XXX: default to Evening (3)
-			'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById(3)
+			'slot_default' => $doctrine->getRepository(Slot::class)->findOneByTitle('Evening')
 		]);
 
 		//Refill the fields in case of invalid form
@@ -49,21 +82,12 @@ class ApplicationController extends DefaultController {
 
 		//Handle invalid form
 		if (!$form->isSubmitted() || !$form->isValid()) {
-			//Set section
-			$section = $this->translator->trans('Application add');
-
 			//Set title
-			$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+			$title = $this->translator->trans('Application add');
 
 			//Render the view
-			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
 		}
-
-		//Get doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Get manager
-		$manager = $doctrine->getManager();
 
 		//Get data
 		$data = $form->getData();
@@ -88,27 +112,9 @@ class ApplicationController extends DefaultController {
 			//Get slot
 			$slot = $data['slot']->getTitle();
 
-			//Set premium
-			$session->setPremium($premium = false);
-
-			//Check if slot is afternoon
+			//Get premium
 			//XXX: premium is stored only for Afternoon and Evening
-			if ($slot == 'Afternoon') {
-				//Compute premium
-				//XXX: a session is considered premium a day off
-				$session->setPremium($premium = $this->isPremium($data['date']));
-			//Check if slot is evening
-			//XXX: premium is stored only for Afternoon and Evening
-			} elseif ($slot == 'Evening') {
-				//Compute premium
-				//XXX: a session is considered premium the eve of a day off
-				$session->setPremium($premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D'))));
-			//Check if slot is after
-			} elseif ($slot == 'After') {
-				//Compute premium
-				//XXX: a session is considered premium the eve of a day off
-				$premium = $this->isPremium((clone $data['date'])->add(new \DateInterval('P1D')));
-			}
+			$premium = $session->isPremium();
 
 			//Set default length at 6h
 			//XXX: date part will be truncated on save
@@ -125,15 +131,21 @@ class ApplicationController extends DefaultController {
 					$session->setLength(new \DateTime('05:00:00'));
 				//Check if afternoon
 				} elseif ($slot == 'Afternoon') {
-					//Set begin at 16h
-					$session->setBegin(new \DateTime('16:00:00'));
+					//Set begin at 18h
+					$session->setBegin(new \DateTime('18:00:00'));
 
-					//Set length at 3h
-					$session->setLength(new \DateTime('03:00:00'));
+					//Set length at 5h
+					$session->setLength(new \DateTime('05:00:00'));
+
+					//Check if next day is premium
+					if ($premium) {
+						//Set length at 5h
+						$session->setLength(new \DateTime('07:00:00'));
+					}
 				//Check if evening
 				} elseif ($slot == 'Evening') {
 					//Set begin at 20h30
-					$session->setBegin(new \DateTime('20:30:00'));
+					$session->setBegin(new \DateTime('20:00:00'));
 
 					//Check if next day is premium
 					if ($premium) {
@@ -142,7 +154,7 @@ class ApplicationController extends DefaultController {
 					}
 
 					//Set length at 4h
-					$session->setLength(new \DateTime('04:30:00'));
+					#$session->setLength(new \DateTime('04:30:00'));
 				//Check if after
 				} else {
 					//Set begin at 1h
@@ -425,109 +437,5 @@ class ApplicationController extends DefaultController {
 
 		//Redirect to cleanup the form
 		return $this->redirectToRoute('rapsys_air', ['session' => $session->getId()]);
-	}
-
-	/**
-	 * Compute eastern for selected year
-	 *
-	 * @param int $year The eastern year
-	 *
-	 * @return DateTime The eastern date
-	 */
-	function getEastern($year) {
-		//Set static
-		static $data = null;
-		//Check if already computed
-		if (isset($data[$year])) {
-			//Return computed eastern
-			return $data[$year];
-		//Check if data is null
-		} elseif (is_null($data)) {
-			//Init data array
-			$data = [];
-		}
-		$d = (19 * ($year % 19) + 24) % 30;
-		$e = (2 * ($year % 4) + 4 * ($year % 7) + 6 * $d + 5) % 7;
-
-		$day = 22 + $d + $e;
-		$month = 3;
-
-		if ($day > 31) {
-			$day = $d + $e - 9;
-			$month = 4;
-		} elseif ($d == 29 && $e == 6) {
-			$day = 10;
-			$month = 4;
-		} elseif ($d == 28 && $e == 6) {
-			$day = 18;
-			$month = 4;
-		}
-
-		//Store eastern in data
-		return ($data[$year] = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day)));
-	}
-
-	/**
-	 * Check if date is a premium day
-	 *
-	 * @desc Consider as premium a day off
-	 *
-	 * @param DateTime $date The date to check
-	 * @return bool Whether the date is off or not
-	 */
-	function isPremium($date) {
-		//Get day number
-		$w = $date->format('w');
-
-		//Check if weekend day
-		if ($w == 0 || $w == 6) {
-			//Date is weekend day
-			return true;
-		}
-
-		//Get date day
-		$d = $date->format('d');
-
-		//Get date month
-		$m = $date->format('m');
-
-		//Check if fixed holiday
-		if (
-			//Check if 1st january
-			($d == 1 && $m == 1) ||
-			//Check if 1st may
-			($d == 1 && $m == 5) ||
-			//Check if 8st may
-			($d == 8 && $m == 5) ||
-			//Check if 14st july
-			($d == 14 && $m == 7) ||
-			//Check if 15st august
-			($d == 15 && $m == 8) ||
-			//Check if 1st november
-			($d == 1 && $m == 11) ||
-			//Check if 11st november
-			($d == 11 && $m == 11) ||
-			//Check if 25st december
-			($d == 25 && $m == 12)
-		) {
-			//Date is a fixed holiday
-			return true;
-		}
-
-		//Get eastern
-		$eastern = $this->getEastern($date->format('Y'));
-
-		//Check dynamic holidays
-		if (
-			(clone $eastern)->add(new \DateInterval('P1D')) == $date ||
-			(clone $eastern)->add(new \DateInterval('P39D')) == $date ||
-			(clone $eastern)->add(new \DateInterval('P50D')) == $date
-		) {
-			//Date is a dynamic holiday
-			return true;
-		}
-
-		//Date is not a holiday and week day
-		return false;
 	}
 }
