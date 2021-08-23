@@ -148,7 +148,7 @@ ORDER BY '.(!empty($userId)?'COUNT(a.id) DESC, ':'').'COUNT(s.id) DESC, l.id'
 		];
 
 		//Set the request
-		$req = 'SELECT l.id, l.title
+		$req = 'SELECT l.id, l.title, l.short
 FROM RapsysAirBundle:UserLocation AS ul
 JOIN RapsysAirBundle:Location AS l ON (l.id = ul.location_id)
 WHERE ul.user_id = :uid';
@@ -164,6 +164,7 @@ WHERE ul.user_id = :uid';
 		$rsm->addEntityResult('RapsysAirBundle:Location', 'l');
 		$rsm->addFieldResult('l', 'id', 'id');
 		$rsm->addFieldResult('l', 'title', 'title');
+		$rsm->addFieldResult('l', 'short', 'short');
 
 		//Send result
 		return $em
