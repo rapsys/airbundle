@@ -1,4 +1,13 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Controller;
 
@@ -19,7 +28,7 @@ use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Location;
 
-class SessionController extends DefaultController {
+class SessionController extends AbstractController {
 	/**
 	 * Edit session
 	 *
@@ -75,6 +84,8 @@ class SessionController extends DefaultController {
 			'admin' => $this->isGranted('ROLE_ADMIN'),
 			//Set default user to current
 			'user' => $this->getUser()->getId(),
+			//Set date
+			'date' => $session['date'],
 			//Set begin
 			'begin' => $session['begin'],
 			//Set length
@@ -97,17 +108,21 @@ class SessionController extends DefaultController {
 		$form->handleRequest($request);
 
 		//Handle invalid data
-		#if (true) { $form->isValid();
-		//TODO: mettre une contrainte sur un des boutons submit, je sais pas encore comment
-		if (!$form->isValid()) {
+		if (!$form->isSubmitted() || !$form->isValid()) {
 			//Set page
-			$this->context['page']['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
+			$this->context['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
 
 			//Set facebook title
-			$this->context['ogps']['title'] = $this->context['page']['title'].' '.$this->translator->trans('at '.$session['l_title']);
+			$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->translator->trans('at '.$session['l_title']);
 
 			//Set section
-			$this->context['page']['section'] = $this->translator->trans($session['l_title']);
+			$this->context['section'] = $this->translator->trans($session['l_title']);
+
+			//Set localization date formater
+			$intl = new \IntlDateFormatter($locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
 
 			//Set localization date formater
 			$intlDate = new \IntlDateFormatter($locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
@@ -215,6 +230,12 @@ class SessionController extends DefaultController {
 			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
 		//With modify
 		} elseif ($action['modify']) {
+			//With admin
+			if ($this->isGranted('ROLE_ADMIN')) {
+				//Set date
+				$session->setDate($data['date']);
+			}
+
 			//Set begin
 			$session->setBegin($data['begin']);
 
@@ -375,27 +396,6 @@ class SessionController extends DefaultController {
 				$session->setLocked($datetime);
 			}
 
-#			//Get applications
-#			$applications = $doctrine->getRepository(Application::class)->findBySession($session);
-#
-#			//Not empty
-#			if (!empty($applications)) {
-#				//Iterate on each applications
-#				foreach($applications as $application) {
-#					//Cancel application
-#					$application->setCanceled($canceled);
-#
-#					//Update time
-#					$application->setUpdated($datetime);
-#
-#					//Queue application save
-#					$manager->persist($application);
-#
-#					//Add notice in flash message
-#					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-#				}
-#			}
-
 			//Update time
 			$session->setUpdated($datetime);
 
@@ -508,7 +508,7 @@ class SessionController extends DefaultController {
 
 		//Fetch calendar
 		//TODO: highlight with current session route parameter
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $request->getLocale());
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
@@ -552,7 +552,8 @@ class SessionController extends DefaultController {
 		//Iterate on sessions
 		foreach($sessions as $sessionId => $session) {
 			//Set title
-			$title = $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_short']);
+			$title = $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']);
+
 			//Use Transliterator if available
 			if (class_exists('Transliterator')) {
 				$trans = \Transliterator::create('Any-Latin; Latin-ASCII; Upper()');
@@ -560,18 +561,41 @@ class SessionController extends DefaultController {
 			} else {
 				$title = strtoupper($title);
 			}
+
+			//Set rate
+			$rate = 'Au chapeau';
+
+			//Without hat
+			if ($session['p_hat'] === null) {
+				//Set rate
+				$rate = 'Gratuit';
+
+				//With rate
+				if ($session['p_rate'] !== null) {
+					//Set rate
+					$rate = $session['p_rate'].' €';
+				}
+			//With hat
+			} else {
+				//With rate
+				if ($session['p_rate'] !== null) {
+					//Set rate
+					$rate .= ', idéalement '.$session['p_rate'].' €';
+				}
+			}
+
 			//Store session data
 			$ret[$sessionId] = [
 				'start' => $session['start']->format(\DateTime::ISO8601),
 				'stop' => $session['start']->format(\DateTime::ISO8601),
 				'title' => $title,
 				'short' => $session['p_short'],
-				'rate' => is_null($session['p_rate'])?'Au chapeau':$session['p_rate'].' euro'.($session['p_rate']>1?'s':''),
+				'rate' => $rate,
 				'location' => implode(' ', [$session['l_address'], $session['l_zipcode'], $session['l_city']]),
 				'status' => (empty($session['a_canceled']) && empty($session['locked']))?'confirmed':'cancelled',
 				'updated' => $session['updated']->format(\DateTime::ISO8601),
 				'organizer' => $session['au_forename'],
-				'website' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId], UrlGeneratorInterface::ABSOLUTE_URL)
+				'source' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId], UrlGeneratorInterface::ABSOLUTE_URL)
 			];
 		}
 
@@ -649,10 +673,10 @@ class SessionController extends DefaultController {
 		$intl = new \IntlDateFormatter($locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
 
 		//Set section
-		$this->context['page']['section'] = $this->translator->trans($session['l_title']);
+		$this->context['section'] = $this->translator->trans($session['l_title']);
 
 		//Set description
-		$this->context['page']['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
+		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -687,36 +711,17 @@ class SessionController extends DefaultController {
 
 		//With granted session
 		if (!empty($session['au_id'])) {
-			$this->context['keywords'][0] = $session['au_pseudonym'];
+			array_unshift($this->context['keywords'], $session['au_pseudonym']);
 		}
 
 		//Set page
-		$this->context['page']['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
+		$this->context['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
 
 		//Set facebook title
-		$this->context['ogps']['title'] = $this->context['page']['title'].' '.$this->translator->trans('at '.$session['l_title']);
+		$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->translator->trans('at '.$session['l_title']);
 
 		//Create application form for role_guest
 		if ($this->isGranted('ROLE_GUEST')) {
-			//Create ApplicationType form
-			$applicationForm = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_air_application_add'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ],
-				//Set admin
-				'admin' => $this->isGranted('ROLE_ADMIN'),
-				//Set default user to current
-				'user' => $this->getUser()->getId(),
-				//Set default slot to current
-				'slot' => $this->getDoctrine()->getRepository(Slot::class)->findOneById($session['t_id']),
-				//Set default location to current
-				'location' => $this->getDoctrine()->getRepository(Location::class)->findOneById($session['l_id']),
-			]);
-
-			//Add form to context
-			$this->context['forms']['application'] = $applicationForm->createView();
-
 			//Set now
 			$now = new \DateTime('now');
 
@@ -730,6 +735,8 @@ class SessionController extends DefaultController {
 				'admin' => $this->isGranted('ROLE_ADMIN'),
 				//Set default user to current
 				'user' => $this->getUser()->getId(),
+				//Set date
+				'date' => $session['date'],
 				//Set begin
 				'begin' => $session['begin'],
 				//Set length
@@ -776,7 +783,6 @@ class SessionController extends DefaultController {
 			'location' => [
 				'id' => $session['l_id'],
 				'at' => $this->translator->trans('at '.$session['l_title']),
-				'short' => $this->translator->trans($session['l_short']),
 				'title' => $this->translator->trans($session['l_title']),
 				'address' => $session['l_address'],
 				'zipcode' => $session['l_zipcode'],
@@ -795,7 +801,9 @@ class SessionController extends DefaultController {
 				'contact' => $session['p_contact'],
 				'donate' => $session['p_donate'],
 				'link' => $session['p_link'],
-				'profile' => $session['p_profile']
+				'profile' => $session['p_profile'],
+				'rate' => $session['p_rate'],
+				'hat' => $session['p_hat']
 			],
 			'applications' => null
 		];
