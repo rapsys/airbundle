@@ -2,10 +2,6 @@ Rapsys\AirBundle\Entity\Civility:
     type: entity
     #repositoryClass: Rapsys\AirBundle\Repository\CivilityRepository
     table: civilities
-    fields:
-        short:
-            type: string
-            length: 16
     oneToMany:
         users:
             targetEntity: User
