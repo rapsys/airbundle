@@ -2,7 +2,7 @@
 {% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
 	<section id="form">
-		<h2><a href="{{ path('rapsys_user_edit', {'mail': app.user.mail|short, 'hash': app.user.mail|short|hash}) }}">{{ title }}</a></h2>
+		<h2><a href="{{ app.request.requesturi }}">{{ title }}</a></h2>
 		{{ form_start(edit) }}
 			<div>
 				{% if edit.mail is defined %}
@@ -42,7 +42,7 @@
 	</section>
 	{% if reset is defined %}
 		<section id="form">
-			<h2><a href="{{ path('rapsys_user_register') }}">{{ password }}</a></h2>
+			<h2><a href="{{ app.request.requesturi }}">{{ password }}</a></h2>
 			{{ form_start(reset) }}
 				<div>
 					{% if reset.password is defined %}
