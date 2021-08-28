@@ -207,11 +207,11 @@ class Snippet {
 	/**
 	 * Set rate
 	 *
-	 * @param string $rate
+	 * @param int $rate
 	 *
 	 * @return Snippet
 	 */
-	public function setRate(?string $rate): Snippet {
+	public function setRate(?int $rate): Snippet {
 		$this->rate = $rate;
 
 		return $this;
@@ -220,9 +220,9 @@ class Snippet {
 	/**
 	 * Get rate
 	 *
-	 * @return string
+	 * @return int
 	 */
-	public function getRate(): ?string {
+	public function getRate(): ?int {
 		return $this->rate;
 	}
 
@@ -233,7 +233,7 @@ class Snippet {
 	 *
 	 * @return User
 	 */
-	public function setHat(bool $hat): Snippet {
+	public function setHat(?bool $hat): Snippet {
 		$this->hat = $hat;
 
 		return $this;
@@ -244,7 +244,7 @@ class Snippet {
 	 *
 	 * @return bool
 	 */
-	public function getHat(): bool {
+	public function getHat(): ?bool {
 		return $this->hat;
 	}
 	/**
