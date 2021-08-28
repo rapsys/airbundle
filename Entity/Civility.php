@@ -14,39 +14,4 @@ namespace Rapsys\AirBundle\Entity;
 use Rapsys\UserBundle\Entity\Civility as BaseCivility;
 
 class Civility extends BaseCivility {
-	/**
-	 * @var string
-	 */
-	private $short;
-
-	/**
-	 * Set short
-	 *
-	 * @param string $short
-	 *
-	 * @return Civility
-	 */
-	public function setShort(string $short): Civility {
-		$this->short = $short;
-
-		return $this;
-	}
-
-	/**
-	 * Get short
-	 *
-	 * @return string
-	 */
-	public function getShort(): string {
-		return $this->short;
-	}
-
-	/**
-	 * Returns a string representation of the civility
-	 *
-	 * @return string
-	 */
-	public function __toString(): string {
-		return $this->short;
-	}
 }
