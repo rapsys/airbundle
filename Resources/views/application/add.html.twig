@@ -1,12 +1,14 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 	<section id="form">
-		<h2>{{ section }}</h2>
+		<h2>{{ title }}</h2>
 		{{ form_start(form) }}
 			<div>
 				{% if form.user is defined %}
 					{{ form_row(form.user) }}
 				{% endif %}
+
+				{{ form_row(form.dance) }}
 
 				{{ form_row(form.location) }}
 
