@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * This file is part of the Rapsys PackBundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
  * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
