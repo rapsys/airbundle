@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\Dance:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\DanceRepository
+    repositoryClass: Rapsys\AirBundle\Repository\DanceRepository
     table: dances
     id:
         id:
