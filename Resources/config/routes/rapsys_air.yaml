@@ -94,7 +94,7 @@ rapsys_air_application_add:
         en_gb: '/en/application'
         fr_fr: '/reservation'
     controller: Rapsys\AirBundle\Controller\ApplicationController::add
-    methods: POST
+    methods: GET|POST
 
 rapsys_air_session:
     path:
@@ -125,6 +125,13 @@ rapsys_air_session_view:
     controller: Rapsys\AirBundle\Controller\SessionController::view
     methods: GET
 
+rapsys_air_session_view2:
+    path:
+        en_gb: '/en/session2/{id<\d+>}'
+        fr_fr: '/seance2/{id<\d+>}'
+    controller: Rapsys\AirBundle\Controller\SessionController::view2
+    methods: GET
+
 rapsys_air_snippet_add:
     path:
         en_gb: '/en/snippet'
@@ -143,14 +150,14 @@ rapsys_air_user:
     path:
         en_gb: '/en/user'
         fr_fr: '/utilisateur'
-    controller: Rapsys\AirBundle\Controller\UserController::index
+    controller: Rapsys\AirBundle\Controller\DefaultController::userIndex
     methods: GET
 
 rapsys_air_user_view:
     path:
         en_gb: '/en/user/{id<\d+>}'
         fr_fr: '/utilisateur/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\UserController::view
+    controller: Rapsys\AirBundle\Controller\DefaultController::userView
     methods: GET|POST
 
 rapsys_user_confirm:
@@ -167,7 +174,7 @@ rapsys_user_edit:
     path:
         en_gb: '/en/user/{hash}/{mail}'
         fr_fr: '/utilisateur/{hash}/{mail}'
-    controller: Rapsys\UserBundle\Controller\DefaultController::edit
+    controller: Rapsys\AirBundle\Controller\UserController::edit
     requirements:
         mail: '[a-zA-Z0-9=_-]+'
         hash: '[a-zA-Z0-9=_-]+'
