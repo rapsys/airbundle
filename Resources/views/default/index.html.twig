@@ -2,8 +2,8 @@
 {% block content %}
 	<article id="dashboard">
 		<header>
-			<h2><a href="{{ path('rapsys_air') }}">{{ page.title }}</a></h2>
-			<p>{{ page.description }}</p>
+			<h2><a href="{{ path('rapsys_air') }}">{{ title }}</a></h2>
+			<p>{{ description }}</p>
 		</header>
 		<div class="panel">
 			{% if calendar is defined and calendar %}
@@ -24,9 +24,11 @@
 													{% endif %}
 													<span title="{{ session.slottitle }}">{{ session.slot }}</span>
 												</span>
+												<span>{{ session.stop|localizeddate('none', 'short') }}</span>
 												{% if session.pseudonym is defined and session.pseudonym %}
-													<span class="reducible pseudonym">{{ session.pseudonym }}</span>
+													<span class="reducible{% if session.rate is not defined and session.hat is not defined %} pseudonym{% endif %}">{{ session.pseudonym }}</span>
 												{% endif %}
+												{% if session.rate is defined %}<span class="info">{{ session.rate }} {% if session.hat is defined and session.hat %}🎩{% else %}€{% endif %}</span>{% endif %}
 											</a>
 										</li>
 									{% endfor %}
