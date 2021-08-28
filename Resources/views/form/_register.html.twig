@@ -28,6 +28,10 @@
 				{{ form_row(forms.register.pseudonym) }}
 			{% endif %}
 
+			{% if forms.register.slug is defined %}
+				{{ form_row(forms.register.slug) }}
+			{% endif %}
+
 			{% if forms.register.phone is defined %}
 				{{ form_row(forms.register.phone) }}
 			{% endif %}
