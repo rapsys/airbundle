@@ -21,12 +21,17 @@ Rapsys\AirBundle\Entity\Application:
         updated:
             type: datetime
     manyToOne:
+        dance:
+            targetEntity: Rapsys\AirBundle\Entity\Dance
+            inversedBy: applications
         session:
             targetEntity: Rapsys\AirBundle\Entity\Session
             inversedBy: applications
         user:
             targetEntity: Rapsys\AirBundle\Entity\User
             inversedBy: applications
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']
 #    oneToMany:
 #        votes:
 #            targetEntity: Rapsys\AirBundle\Entity\Vote
