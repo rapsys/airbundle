@@ -24,9 +24,11 @@
 													{% endif %}
 													<span title="{{ session.slottitle }}">{{ session.slot }}</span>
 												</span>
+												<span>{{ session.stop|localizeddate('none', 'short') }}</span>
 												{% if session.pseudonym is defined and session.pseudonym %}
-													<span class="reducible pseudonym">{{ session.pseudonym }}</span>
+													<span class="reducible{% if session.rate is not defined and session.hat is not defined %} pseudonym{% endif %}">{{ session.pseudonym }}</span>
 												{% endif %}
+												{% if session.rate is defined %}<span class="info">{% if session.hat is defined and session.hat %}🎩{% else %}{{ session.rate }} €{% endif %}</span>{% endif %}
 											</a>
 										</li>
 									{% endfor %}
