@@ -9,7 +9,7 @@
 				{% endif %}
 				<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
 			</h2>
-			<p>{{ page.description }}</p>
+			<p>{{ description }}</p>
 		</header>
 		<div class="panel">
 			<div class="grid four">
@@ -60,6 +60,19 @@
 							<dt>{% trans %}Social network{% endtrans %}</dt>
 							<dd><a href="{{ session.snippet.profile }}">{{ 'Consult %pseudonym% profile'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
 						</dl>
+					{% endif %}
+					{% if session.snippet.rate is defined and session.snippet.rate %}
+						{% if session.snippet.hat is defined and session.snippet.hat %}
+							<dl>
+								<dt>{% trans %}Contribution{% endtrans %}</dt>
+								<dd>{% if session.snippet.rate == 0 %}{% trans %}To the hat, to cover the costs: talc, electricity, bicycle, server{% endtrans %}{% else %}{{ 'To the hat, ideally %rate% €, to cover the costs: talc, electricity, bicycle, server'|trans({'%rate%': session.snippet.rate}) }}{% endif %}</dd>
+							</dl>
+						{% else %}
+							<dl>
+								<dt>{% trans %}Rate{% endtrans %}</dt>
+								<dd>{% if session.snippet.rate == 0 %}{% trans %}Free{% endtrans %}{% else %}{{ session.snippet.rate }} €{% endif %}</dd>
+							</dl>
+						{% endif %}
 					{% endif %}
 				</section>
 				<section class="cell">
