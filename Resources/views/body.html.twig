@@ -4,8 +4,8 @@
 {% endblock %}
 {% block stylesheets %}
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	{% if page.description is defined and page.description %}
-		<meta name="description" content="{{ page.description }}" />
+	{% if description is defined and description %}
+		<meta name="description" content="{{ description }}" />
 	{% endif %}
 	{% if keywords is defined and keywords %}
 		<meta name="keywords" content="{{ keywords|join(', ') }}" />
@@ -62,7 +62,7 @@
 		{% endjavascript %}#}
 	{% endstopwatch %}
 {% endblock %}
-{% block title %}{{ [site.title, page.section, page.title]|filter(v => v)|join(' - ') }}{% endblock %}
+{% block title %}{{ [site.title, section, title]|filter(v => v)|join(' - ') }}{% endblock %}
 {% block body %}
 	{% block header %}
 		<header id="header">
@@ -76,7 +76,9 @@
 						<li><a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a></li>
 						<li><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a></li>
+						{% if is_granted('ROLE_ADMIN') %}
+							<li><a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a></li>
+						{% endif %}
 						{% if is_granted('ROLE_GUEST') %}
 							<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
 						{% endif %}
