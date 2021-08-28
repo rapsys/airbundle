@@ -25,6 +25,10 @@
 					{{ form_row(edit.pseudonym) }}
 				{% endif %}
 
+				{% if edit.slug is defined %}
+					{{ form_row(edit.slug) }}
+				{% endif %}
+
 				{% if edit.phone is defined %}
 					{{ form_row(edit.phone) }}
 				{% endif %}
