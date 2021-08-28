@@ -3,9 +3,18 @@ Rapsys\AirBundle\Entity\User:
     repositoryClass: Rapsys\AirBundle\Repository\UserRepository
     table: users
     fields:
+        pseudonym:
+            type: string
+            length: 32
+            nullable: true
         phone:
             type: string
             length: 16
+            nullable: true
+        slug:
+            type: string
+            unique: true
+            length: 32
             nullable: true
     oneToMany:
         applications:
@@ -15,6 +24,17 @@ Rapsys\AirBundle\Entity\User:
             targetEntity: Rapsys\AirBundle\Entity\Snippet
             mappedBy: user
     manyToMany:
+        dances:
+            targetEntity: Rapsys\AirBundle\Entity\Dance
+            inversedBy: users
+            joinTable:
+                name: users_dances
+                joinColumns:
+                    id:
+                        name: user_id
+                inverseJoinColumns:
+                    id:
+                        name: dance_id
         subscribers:
             targetEntity: Rapsys\AirBundle\Entity\User
             inversedBy: subscriptions
