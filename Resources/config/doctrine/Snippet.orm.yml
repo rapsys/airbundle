@@ -30,8 +30,6 @@ Rapsys\AirBundle\Entity\Snippet:
         hat:
             type: boolean
             nullable: true
-            options:
-                default: true
         contact:
             type: string
             length: 254
