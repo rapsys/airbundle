@@ -4,6 +4,10 @@
 		{{ form_start(forms.session) }}
 			{% if forms.session.modify is defined %}
 				<div>
+					{% if forms.session.date is defined %}
+						{{ form_row(forms.session.date) }}
+					{% endif %}
+
 					{{ form_row(forms.session.begin) }}
 
 					{{ form_row(forms.session.length) }}
