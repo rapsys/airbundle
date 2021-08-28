@@ -35,25 +35,25 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 		$this->dm = $doctrine;
 	}
 
-    /**
+	/**
 	 * Configure options
 	 *
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver) {
+	 * {@inheritdoc}
+	 */
+	public function configureOptions(OptionsResolver $resolver) {
 		//Call parent
-        parent::configureOptions($resolver);
+		parent::configureOptions($resolver);
 
-        // Derive "data_class" option from passed "data" object
-        $class = function (Options $options) {
-            return isset($options['data']) && \is_object($options['data']) ? \get_class($options['data']) : null;
-        };
+		//Derive "data_class" option from passed "data" object
+		$class = function (Options $options) {
+			return isset($options['data']) && \is_object($options['data']) ? \get_class($options['data']) : null;
+		};
 
-        $resolver->setDefaults([
-            'class' => $class
+		$resolver->setDefaults([
+			#'data_class' => null,
+			'class' => $class
 		]);
 	}
-
 
 	/**
 	 * Build form
@@ -64,10 +64,17 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 		//Set class from options['class']
 		$this->class = $options['class'];
 
-		//Check class
+		//Without class
 		if (empty($this->class)) {
 			//Set class from namespace and field name
 			$this->class = str_replace('Form\\Extension\\Type', 'Entity\\' ,__NAMESPACE__).ucfirst($builder->getName());
+		//With bundle named entity
+		} elseif (
+			($pos = strpos($this->class, ':')) !== false &&
+			!empty($entity = substr($this->class, $pos + 1))
+		) {
+			//Set class from namespace and entity name
+			$this->class = str_replace('Form\\Extension\\Type', 'Entity\\' ,__NAMESPACE__).$entity;
 		}
 
 		//Set this as model transformer
@@ -82,7 +89,7 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 	 * @return string The object id
 	 */
 	public function transform($data): string {
-		// Modified from comments to use instanceof so that base classes or interfaces can be specified
+		//Modified from comments to use instanceof so that base classes or interfaces can be specified
 		if ($data === null || !$data instanceof $this->class) {
 			return '';
 		}
