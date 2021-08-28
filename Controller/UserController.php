@@ -1,314 +1,168 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys UserBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Controller;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-use Rapsys\AirBundle\Entity\Civility;
-use Rapsys\AirBundle\Entity\Location;
-use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Slot;
-use Rapsys\AirBundle\Entity\Snippet;
-use Rapsys\AirBundle\Entity\User;
+use Rapsys\PackBundle\Util\SluggerUtil;
+
+use Rapsys\UserBundle\Controller\DefaultController;
 
 class UserController extends DefaultController {
 	/**
-	 * List all users
-	 *
-	 * @desc Display all user with a group listed as users
-	 *
-	 * @param Request $request The request instance
-	 *
-	 * @return Response The rendered view
+	 * {@inheritdoc}
 	 */
-	public function index(Request $request): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
-
-		//With admin role
-		if ($this->isGranted('ROLE_ADMIN')) {
-			//Set section
-			$section = $this->translator->trans('Libre Air users');
-
-			//Set description
-			$this->context['description'] = $this->translator->trans('Libre Air user list');
-		//Without admin role
-		} else {
-			//Set section
-			$section = $this->translator->trans('Libre Air organizers');
-
-			//Set description
-			$this->context['description'] = $this->translator->trans('Libre Air organizers list');
+	public function edit(Request $request, Registry $doctrine, UserPasswordEncoderInterface $encoder, EntityManagerInterface $manager, SluggerUtil $slugger, $mail, $hash): Response {
+		//With invalid hash
+		if ($hash != $slugger->hash($mail)) {
+			//Throw bad request
+			throw new BadRequestHttpException($this->translator->trans('Invalid %field% field: %value%', ['%field%' => 'hash', '%value%' => $hash]));
 		}
 
-		//Set keywords
-		$this->context['keywords'] = [
-			$this->translator->trans('users'),
-			$this->translator->trans('user list'),
-			$this->translator->trans('listing'),
-			$this->translator->trans('Libre Air')
-		];
+		//Get mail
+		$mail = $slugger->unshort($smail = $mail);
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-		//Fetch users
-		$users = $doctrine->getRepository(User::class)->findUserGroupedByTranslatedGroup($this->translator);
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
-			)
-		);
-
-		//With admin role
-		if ($this->isGranted('ROLE_ADMIN')) {
-			//Display all users
-			$this->context['groups'] = $users;
-		//Without admin role
-		} else {
-			//Only display senior organizers
-			$this->context['users'] = $users[$this->translator->trans('Senior')];
+		//With existing subscriber
+		if (empty($user = $doctrine->getRepository($this->config['class']['user'])->findOneByMail($mail))) {
+			//Throw not found
+			//XXX: prevent slugger reverse engineering by not displaying decoded mail
+			throw $this->createNotFoundException($this->translator->trans('Unable to find account %mail%', ['%mail%' => $smail]));
 		}
-
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
-
-		//Render the view
-		return $this->render('@RapsysAir/user/index.html.twig', ['title' => $title, 'section' => $section, 'locations' => $locations]+$this->context);
-	}
-
-	/**
-	 * List all sessions for the user
-	 *
-	 * @desc Display all sessions for the user with an application or login form
-	 *
-	 * @param Request $request The request instance
-	 * @param int $id The user id
-	 *
-	 * @return Response The rendered view
-	 */
-	public function view(Request $request, $id): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Fetch user
-		if (empty($user = $doctrine->getRepository(User::class)->findOneById($id))) {
-			throw $this->createNotFoundException($this->translator->trans('Unable to find user: %id%', ['%id%' => $id]));
-		}
-
-		//Get user token
-		$token = new UsernamePasswordToken($user, null, 'none', $user->getRoles());
-
-		//Check if guest
-		$isGuest = $this->get('rapsys_user.access_decision_manager')->decide($token, ['ROLE_GUEST']);
 
 		//Prevent access when not admin, user is not guest and not currently logged user
-		if (!$this->isGranted('ROLE_ADMIN') && empty($isGuest) && $user != $this->getUser()) {
-			throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %id%', ['%id%' => $id]));
+		if (!$this->isGranted('ROLE_ADMIN') && $user != $this->getUser() || !$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+			//Throw access denied
+			//XXX: prevent slugger reverse engineering by not displaying decoded mail
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %mail%', ['%mail%' => $smail]));
 		}
 
-		//Set section
-		$section = $user->getPseudonym();
+		//With admin
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//With pseudonym and without slug
+			if (!empty($pseudonym = $user->getPseudonym()) && empty($user->getSlug())) {
+				//Preset slug
+				$user->setSlug($slugger->slug($pseudonym));
+			}
+		}
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+		//Create the RegisterType form and give the proper parameters
+		$edit = $this->createForm($this->config['edit']['view']['edit'], $user, [
+			//Set action to register route name and context
+			'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']),
+			//Set civility class
+			'civility_class' => $this->config['class']['civility'],
+			//Set civility default
+			'civility_default' => $doctrine->getRepository($this->config['class']['civility'])->findOneByTitle($this->config['default']['civility']),
+			//Disable mail
+			'mail' => $this->isGranted('ROLE_ADMIN'),
+			//Disable pseudonym
+			'pseudonym' => $this->isGranted('ROLE_GUEST'),
+			//Disable slug
+			'slug' => $this->isGranted('ROLE_ADMIN'),
+			//Disable password
+			'password' => false,
+			//Set method
+			'method' => 'POST'
+		]+$this->config['edit']['field']);
 
-		//Set description
-		$this->context['description'] = $this->translator->trans('%pseudonym% outdoor Argentine Tango session calendar', [ '%pseudonym%' => $user->getPseudonym() ]);
-
-		//Set keywords
-		$this->context['keywords'] = [
-			$user->getPseudonym(),
-			$this->translator->trans('outdoor'),
-			$this->translator->trans('Argentine Tango'),
-			$this->translator->trans('calendar')
-		];
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
-			)
-		);
-
-		//Fetch calendar
-		//TODO: highlight with current session route parameter
-		$calendar = $doctrine->getRepository(Session::class)->fetchUserCalendarByDatePeriod($this->translator, $period, $isGuest?$id:null, $request->get('session'), $request->getLocale());
-
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period, $id);
-
-		//Create user form for admin or current user
-		if ($this->isGranted('ROLE_ADMIN') || $user == $this->getUser()) {
-			//Create SnippetType form
-			$userForm = $this->createForm('Rapsys\AirBundle\Form\RegisterType', $user, [
-				//Set action
-				'action' => $this->generateUrl('rapsys_air_user_view', ['id' => $id]),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ],
-				//Set civility class
-				'civility_class' => Civility::class,
+		//With admin role
+		if ($this->isGranted('ROLE_ADMIN')) {
+			//Create the LoginType form and give the proper parameters
+			$reset = $this->createForm($this->config['edit']['view']['reset'], $user, [
+				//Set action to register route name and context
+				'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']),
 				//Disable mail
-				'mail' => $this->isGranted('ROLE_ADMIN'),
-				//Disable password
-				'password' => false
+				'mail' => false,
+				//Set method
+				'method' => 'POST'
 			]);
 
-			//Init user to context
-			$this->context['forms']['user'] = $userForm->createView();
-
-			//Check if submitted
+			//With post method
 			if ($request->isMethod('POST')) {
 				//Refill the fields in case the form is not valid.
-				$userForm->handleRequest($request);
+				$reset->handleRequest($request);
 
-				//Handle invalid form
-				if (!$userForm->isSubmitted() || !$userForm->isValid()) {
-					//Render the view
-					return $this->render('@RapsysAir/user/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+				//With reset submitted and valid
+				if ($reset->isSubmitted() && $reset->isValid()) {
+					//Set data
+					$data = $reset->getData();
+
+					//Set password
+					$data->setPassword($encoder->encodePassword($data, $data->getPassword()));
+
+					//Queue snippet save
+					$manager->persist($data);
+
+					//Flush to get the ids
+					$manager->flush();
+
+					//Add notice
+					$this->addFlash('notice', $this->translator->trans('Account %mail% password updated', ['%mail%' => $mail = $data->getMail()]));
+
+					//Redirect to cleanup the form
+					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $slugger->short($mail), 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']);
 				}
+			}
 
-				//Get data
-				$data = $userForm->getData();
+			//Add reset view
+			$this->config['edit']['view']['context']['reset'] = $reset->createView();
+		//Without admin role
+		//XXX: prefer a reset on login to force user unspam action
+		} else {
+			//Add notice
+			$this->addFlash('notice', $this->translator->trans('To change your password login with your mail and any password then follow the procedure'));
+		}
 
-				//Get manager
-				$manager = $doctrine->getManager();
+		//With post method
+		if ($request->isMethod('POST')) {
+			//Refill the fields in case the form is not valid.
+			$edit->handleRequest($request);
+
+			//With edit submitted and valid
+			if ($edit->isSubmitted() && $edit->isValid()) {
+				//Set data
+				$data = $edit->getData();
 
 				//Queue snippet save
 				$manager->persist($data);
 
-				//Flush to get the ids
-				$manager->flush();
+				//Try saving in database
+				try {
+					//Flush to get the ids
+					$manager->flush();
 
-				//Add notice
-				$this->addFlash('notice', $this->translator->trans('User %id% updated', ['%id%' => $id]));
+					//Add notice
+					$this->addFlash('notice', $this->translator->trans('Account %mail% updated', ['%mail%' => $mail = $data->getMail()]));
 
-				//Extract and process referer
-				if ($referer = $request->headers->get('referer')) {
-					//Create referer request instance
-					$req = Request::create($referer);
-
-					//Get referer path
-					$path = $req->getPathInfo();
-
-					//Get referer query string
-					$query = $req->getQueryString();
-
-					//Remove script name
-					$path = str_replace($request->getScriptName(), '', $path);
-
-					//Try with referer path
-					try {
-						//Save old context
-						$oldContext = $this->router->getContext();
-
-						//Force clean context
-						//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
-						$this->router->setContext(new RequestContext());
-
-						//Retrieve route matching path
-						$route = $this->router->match($path);
-
-						//Reset context
-						$this->router->setContext($oldContext);
-
-						//Clear old context
-						unset($oldContext);
-
-						//Extract name
-						$name = $route['_route'];
-
-						//Remove route and controller from route defaults
-						unset($route['_route'], $route['_controller']);
-
-						//Check if user view route
-						if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
-							//Replace id
-							$route['id'] = $data->getId();
-						//Other routes
-						} else {
-							//Set user
-							$route['user'] = $data->getId();
-						}
-
-						//Generate url
-						return $this->redirectToRoute($name, $route);
-					//No route matched
-					} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
-						//Unset referer to fallback to default route
-						unset($referer);
-					}
+					//Redirect to cleanup the form
+					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $slugger->short($mail), 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']);
+				//Catch double slug or mail
+				} catch (UniqueConstraintViolationException $e) {
+					//Add error message mail already exists
+					$this->addFlash('error', $this->translator->trans('Account %mail% or with slug %slug% already exists', ['%mail%' => $data->getMail(), '%slug%' => $slug]));
 				}
-
-				//Redirect to cleanup the form
-				return $this->redirectToRoute('rapsys_air', ['user' => $data->getId()]);
 			}
 		}
 
-		//Create snippet forms for role_guest
-		if ($this->isGranted('ROLE_ADMIN') || ($this->isGranted('ROLE_GUEST') && $user == $this->getUser())) {
-			//Fetch all user snippet
-			$snippets = $doctrine->getRepository(Snippet::class)->findByLocaleUserId($request->getLocale(), $id);
-
-			//Rekey by location id
-			$snippets = array_reduce($snippets, function($carry, $item){$carry[$item->getLocation()->getId()] = $item; return $carry;}, []);
-
-			//Init snippets to context
-			$this->context['forms']['snippets'] = [];
-
-			//Iterate on locations
-			foreach($locations as $locationId => $location) {
-				//Init snippet
-				$snippet = new Snippet();
-
-				//Set default locale
-				$snippet->setLocale($request->getLocale());
-
-				//Set default user
-				$snippet->setUser($user);
-
-				//Set default location
-				$snippet->setLocation($doctrine->getRepository(Location::class)->findOneById($locationId));
-
-				//Get snippet
-				if (!empty($snippets[$locationId])) {
-					$snippet = $snippets[$locationId];
-				}
-
-				//Create SnippetType form
-				$form = $this->container->get('form.factory')->createNamed('snipped_'.$request->getLocale().'_'.$locationId, 'Rapsys\AirBundle\Form\SnippetType', $snippet, [
-					//Set the action
-					'action' =>
-						!empty($snippet->getId()) ?
-						$this->generateUrl('rapsys_air_snippet_edit', ['id' => $snippet->getId()]) :
-						$this->generateUrl('rapsys_air_snippet_add', ['location' => $locationId]),
-					//Set the form attribute
-					'attr' => []
-				]);
-
-				//Add form to context
-				$this->context['forms']['snippets'][$locationId] = $form->createView();
-			}
-		}
-
-		//Render the view
-		return $this->render('@RapsysAir/user/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+		//Render view
+		return $this->render(
+			//Template
+			$this->config['edit']['view']['name'],
+			//Context
+			['edit' => $edit->createView(), 'sent' => $request->query->get('sent', 0)]+$this->config['edit']['view']['context']
+		);
 	}
 }
