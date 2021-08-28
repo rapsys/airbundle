@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html{% if locale is defined and locale %} lang="{{ locale }}"{% endif %}>
-	<head{% if facebook is defined and facebook and facebook['heads'] is defined and facebook['heads'] %} prefix="{{ facebook['heads']|map((value, key) => "#{key}: #{value}")|join(' ') }}"{% endif %}>
+	<head{% if facebook is defined and facebook and facebook['prefixes'] is defined and facebook['prefixes'] %} prefix="{{ facebook['prefixes']|map((value, key) => "#{key}: #{value}")|join(' ') }}"{% endif %}>
 		{% block metas %}<meta charset="UTF-8">{% endblock %}
 		<title>{% block title %}Welcome!{% endblock %}</title>
 		{% block stylesheets %}{% endblock %}
