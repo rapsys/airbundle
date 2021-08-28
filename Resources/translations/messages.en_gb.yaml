@@ -11,7 +11,6 @@
 'Account %mail% already exists': 'Account %mail% already exists'
 'Account %mail% created but unable to contact': 'Account %mail% created but unable to contact'
 'Account %mail% do not exists': 'Account %mail% do not exists'
-'Account %mail% or with slug %slug% already exists': 'Account %mail% or with slug %slug% already exists'
 'Account %mail% password updated': 'Account %mail% password updated'
 'Account %mail% updated but unable to contact': 'Account %mail% updated but unable to contact'
 'Account %mail% updated': 'Account %mail% updated'

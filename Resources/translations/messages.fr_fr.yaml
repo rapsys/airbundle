@@ -11,7 +11,6 @@
 'Account %mail% already exists': 'Compte %mail% déjà existant'
 'Account %mail% created but unable to contact': 'Compte %mail% créé mais impossible à contacter'
 'Account %mail% do not exists': 'Compte %mail% n''existe pas'
-'Account %mail% or with slug %slug% already exists': 'Compte %mail% ou avec limace %slug% déjà existant'
 'Account %mail% password updated': 'Mot de passe du compte %mail% mis à jour'
 'Account %mail% updated but unable to contact': 'Compte %mail% mis à jour mais impossible à contacter'
 'Account %mail% updated': 'Compte %mail% mis à jour'
