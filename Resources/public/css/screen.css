@@ -290,7 +290,7 @@ form div .message {
 
 #header h1 {
 	padding: 0;
-	margin: 0;
+	margin: auto;
 	white-space: nowrap;
 	width: 171px;
 	height: 32px;
@@ -595,10 +595,11 @@ form div .message {
 
 .calendar .info {
 	line-height: 1rem;
+	text-align: right;
 }
 
 .calendar .pseudonym {
-	grid-column: span 3;
+	grid-column: span 2;
 }
 
 .seven {
