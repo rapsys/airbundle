@@ -2,27 +2,48 @@
 {% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
 	<section id="form">
-		<h2><a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a></h2>
-		{% if sent %}
-			<p class="message notice">{% trans %}Your account has been created{% endtrans %}</p>
+		<h2><a href="{{ path('rapsys_user_register') }}">{{ title }}</a></h2>
+		{% if disabled is defined and disabled %}
+			<p class="message error">{% trans %}Your account has been disabled{% endtrans %}</p>
+		{% elseif sent is defined and sent %}
+			<p class="message notice">{% trans %}Your verification mail has been sent, to activate your account you must follow the confirmation link inside{% endtrans %}</p>
+			<p class="message warning">{% trans %}If you did not receive a verification mail, check your Spam or Junk mail folders{% endtrans %}</p>
 		{% else %}
 			{{ form_start(form) }}
 				<div>
-					{{ form_row(form.mail) }}
+					{% if form.mail is defined %}
+						{{ form_row(form.mail) }}
+					{% endif %}
 
-					{{ form_row(form.password.first) }}
+					{% if form.password is defined %}
+						{{ form_row(form.password.first) }}
 
-					{{ form_row(form.password.second) }}
+						{{ form_row(form.password.second) }}
+					{% endif %}
 
-					{{ form_row(form.civility) }}
+					{% if form.civility is defined %}
+						{{ form_row(form.civility) }}
+					{% endif %}
 
-					{{ form_row(form.forename) }}
+					{% if form.forename is defined %}
+						{{ form_row(form.forename) }}
+					{% endif %}
 
-					{{ form_row(form.surname) }}
+					{% if form.surname is defined %}
+						{{ form_row(form.surname) }}
+					{% endif %}
 
-					{{ form_row(form.pseudonym) }}
+					{% if form.pseudonym is defined %}
+						{{ form_row(form.pseudonym) }}
+					{% endif %}
 
-					{{ form_row(form.phone) }}
+					{% if form.slug is defined %}
+						{{ form_row(form.slug) }}
+					{% endif %}
+
+					{% if form.phone is defined %}
+						{{ form_row(form.phone) }}
+					{% endif %}
 
 					{{ form_row(form.submit) }}
 				</div>
