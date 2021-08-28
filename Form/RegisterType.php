@@ -15,7 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 	/**
@@ -32,7 +31,7 @@ class RegisterType extends \Rapsys\UserBundle\Form\RegisterType {
 
 		//Add extra pseudonym field
 		if (!empty($options['pseudonym'])) {
-			$form->add('pseudonym', TextType::class, ['attr' => ['placeholder' => 'Your pseudonym'], 'constraints' => [new NotBlank(['message' => 'Please provide your pseudonym'])]]);
+			$form->add('pseudonym', TextType::class, ['attr' => ['placeholder' => 'Your pseudonym'], 'required' => false]);
 		}
 
 		//Add extra slug field
