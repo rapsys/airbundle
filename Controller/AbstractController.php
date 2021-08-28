@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * This file is part of the Rapsys UserBundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
  * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
@@ -26,13 +26,13 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
+use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\RapsysAirBundle;
 
 /**
- *
  * Provides common features needed in controllers.
  *
  * {@inheritdoc}
@@ -507,18 +507,33 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				//Fetch doctrine
 				$doctrine = $this->get('doctrine');
 
+				//Get favorites dances
+				$danceFavorites = $doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+
+				//Set dance default
+				$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
+
 				//Get favorites locations
 				$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
 
 				//Set location default
-				$locationDefault = current($locationFavorites);
+				$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
 
 				//With admin
 				if ($this->isGranted('ROLE_ADMIN')) {
+					//Get dances
+					$dances = $doctrine->getRepository(Dance::class)->findAll();
+
 					//Get locations
 					$locations = $doctrine->getRepository(Location::class)->findAll();
 				//Without admin
 				} else {
+					//Restrict to favorite dances
+					$dances = $danceFavorites;
+
+					//Reset favorites
+					$danceFavorites = [];
+
 					//Restrict to favorite locations
 					$locations = $locationFavorites;
 
@@ -548,6 +563,12 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 					'action' => $this->generateUrl('rapsys_air_application_add'),
 					//Set the form attribute
 					'attr' => [ 'class' => 'col' ],
+					//Set dance choices
+					'dance_choices' => $dances,
+					//Set dance default
+					'dance_default' => $danceDefault,
+					//Set dance favorites
+					'dance_favorites' => $danceFavorites,
 					//Set location choices
 					'location_choices' => $locations,
 					//Set location default
