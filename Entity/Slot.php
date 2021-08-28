@@ -161,9 +161,9 @@ class Slot {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have a slot instance
-		if (($user = $eventArgs->getEntity()) instanceof Slot) {
+		if (($slot = $eventArgs->getEntity()) instanceof Slot) {
 			//Set updated value
-			$user->setUpdated(new \DateTime('now'));
+			$slot->setUpdated(new \DateTime('now'));
 		}
 	}
 

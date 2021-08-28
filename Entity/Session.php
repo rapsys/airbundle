@@ -114,11 +114,6 @@ class Session {
 	private $application;
 
 	/**
-	 * @var Dance
-	 */
-	private $dance;
-
-	/**
 	 * @var Location
 	 */
 	private $location;
@@ -580,28 +575,6 @@ class Session {
 	}
 
 	/**
-	 * Set dance
-	 *
-	 * @param Dance $dance
-	 *
-	 * @return Session
-	 */
-	public function setDance(Dance $dance): Session {
-		$this->dance = $dance;
-
-		return $this;
-	}
-
-	/**
-	 * Get dance
-	 *
-	 * @return Dance
-	 */
-	public function getDance(): Dance {
-		return $this->dance;
-	}
-
-	/**
 	 * Set location
 	 *
 	 * @param Location $location
@@ -672,9 +645,9 @@ class Session {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have a session instance
-		if (($user = $eventArgs->getEntity()) instanceof Session) {
+		if (($session = $eventArgs->getEntity()) instanceof Session) {
 			//Set updated value
-			$user->setUpdated(new \DateTime('now'));
+			$session->setUpdated(new \DateTime('now'));
 		}
 	}
 

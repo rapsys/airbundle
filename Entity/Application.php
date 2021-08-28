@@ -23,6 +23,11 @@ class Application {
 	private $id;
 
 	/**
+	 * @var Dance
+	 */
+	private $dance;
+
+	/**
 	 * @var float
 	 */
 	private $score;
@@ -67,6 +72,28 @@ class Application {
 	 */
 	public function getId(): int {
 		return $this->id;
+	}
+
+	/**
+	 * Set dance
+	 *
+	 * @param Dance $dance
+	 *
+	 * @return Session
+	 */
+	public function setDance(Dance $dance): Session {
+		$this->dance = $dance;
+
+		return $this;
+	}
+
+	/**
+	 * Get dance
+	 *
+	 * @return Dance
+	 */
+	public function getDance(): Dance {
+		return $this->dance;
 	}
 
 	/**
@@ -206,9 +233,9 @@ class Application {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have an application instance
-		if (($user = $eventArgs->getEntity()) instanceof Application) {
+		if (($application = $eventArgs->getEntity()) instanceof Application) {
 			//Set updated value
-			$user->setUpdated(new \DateTime('now'));
+			$application->setUpdated(new \DateTime('now'));
 		}
 	}
 }
