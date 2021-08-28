@@ -1,10 +1,13 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
 	<section id="form">
-		<h2>
-			<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
-			<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
-		</h2>
+		<header>
+			<h2>
+				<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
+				<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
+			</h2>
+			<p>{{ description }}</p>
+		</header>
 		{% if form.modify is defined or form.move is defined or form.cancel is defined or form.raincancel is defined or form.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 			{{ form_start(form) }}
 				{% if form.modify is defined %}
