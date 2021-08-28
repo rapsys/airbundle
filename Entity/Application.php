@@ -61,6 +61,11 @@ class Application {
 	 * Constructor
 	 */
 	public function __construct() {
+		//Set defaults
+		$this->score = null;
+		$this->canceled = null;
+		$this->created = new \DateTime('now');
+		$this->updated = new \DateTime('now');
 		$this->session = null;
 		$this->user = null;
 	}
@@ -79,9 +84,9 @@ class Application {
 	 *
 	 * @param Dance $dance
 	 *
-	 * @return Session
+	 * @return Application
 	 */
-	public function setDance(Dance $dance): Session {
+	public function setDance(Dance $dance): Application {
 		$this->dance = $dance;
 
 		return $this;

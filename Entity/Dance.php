@@ -52,6 +52,9 @@ class Dance {
 	 * Constructor
 	 */
 	public function __construct() {
+		//Set defaults
+		$this->created = new \DateTime('now');
+		$this->updated = new \DateTime('now');
 		$this->applications = new ArrayCollection();
 		$this->users = new ArrayCollection();
 	}

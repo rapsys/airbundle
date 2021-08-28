@@ -132,10 +132,12 @@ class Session {
 	 * Constructor
 	 */
 	public function __construct() {
+		//Set defaults
 		$this->begin = null;
 		$this->start = null;
 		$this->length = null;
 		$this->stop = null;
+		$this->premium = null;
 		$this->rainfall = null;
 		$this->rainrisk = null;
 		$this->realfeel = null;
@@ -145,7 +147,8 @@ class Session {
 		$this->temperaturemin = null;
 		$this->temperaturemax = null;
 		$this->locked = null;
-		$this->premium = null;
+		$this->created = new \DateTime('now');
+		$this->updated = new \DateTime('now');
 		$this->applications = new ArrayCollection();
 	}
 
