@@ -43,6 +43,9 @@ rapsys_user:
             url: '%rapsys_air.site.url%'
     #Edit replacement
     edit:
+        field:
+            pseudonym: false
+            slug: false
         route:
             index: 'site.url'
         view:
@@ -75,6 +78,9 @@ rapsys_user:
             context:
     #Register replacement
     register:
+        field:
+            pseudonym: false
+            slug: false
         route:
             index: 'site.url'
             confirm: 'confirm_url'
@@ -290,7 +296,7 @@ services:
         tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Handler\AccessDeniedHandler:
-        arguments: [ '@service_container', '@twig', '@router', '@request_stack', '@translator' ]
+        arguments: [ '@service_container', '@router', '@translator' ]
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         tags: [ 'doctrine.fixture.orm' ]
