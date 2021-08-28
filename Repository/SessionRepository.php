@@ -183,7 +183,6 @@ SELECT
 	l.address AS l_address,
 	l.zipcode AS l_zipcode,
 	l.city AS l_city,
-	l.short AS l_short,
 	l.title AS l_title,
 	l.latitude AS l_latitude,
 	l.longitude AS l_longitude,
@@ -232,7 +231,6 @@ SQL;
 			->addScalarResult('l_city', 'l_city', 'string')
 			->addScalarResult('l_latitude', 'l_latitude', 'float')
 			->addScalarResult('l_longitude', 'l_longitude', 'float')
-			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
@@ -317,7 +315,6 @@ SELECT
 	s.created,
 	s.updated,
 	s.location_id AS l_id,
-	l.short AS l_short,
 	l.title AS l_title,
 	l.address AS l_address,
 	l.zipcode AS l_zipcode,
@@ -389,7 +386,6 @@ SQL;
 			->addScalarResult('created', 'created', 'datetime')
 			->addScalarResult('updated', 'updated', 'datetime')
 			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('l_address', 'l_address', 'string')
 			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
@@ -503,7 +499,6 @@ SELECT
 	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
 	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
 	s.location_id AS l_id,
-	l.short AS l_short,
 	l.title AS l_title,
 	s.slot_id AS t_id,
 	t.title AS t_title,
@@ -550,7 +545,6 @@ SQL;
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
@@ -729,7 +723,7 @@ SQL;
 						'id' => $session['id'],
 						'start' => $session['start'],
 						'stop' => $session['stop'],
-						'location' => $translator->trans($session['l_short']),
+						'location' => $translator->trans($session['l_title']),
 						'pseudonym' => $pseudonym,
 						'class' => $class,
 						'slot' => self::GLYPHS[$session['t_title']],
@@ -808,7 +802,6 @@ SELECT
 	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
 	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
 	s.location_id AS l_id,
-	l.short AS l_short,
 	l.title AS l_title,
 	s.slot_id AS t_id,
 	t.title AS t_title,
@@ -854,7 +847,6 @@ SQL;
 			->addScalarResult('t_id', 't_id', 'integer')
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_short', 'l_short', 'string')
 			->addScalarResult('l_title', 'l_title', 'string')
 			->addScalarResult('a_id', 'a_id', 'integer')
 			->addScalarResult('au_id', 'au_id', 'integer')
@@ -1029,7 +1021,7 @@ SQL;
 						'id' => $session['id'],
 						'start' => $session['start'],
 						'stop' => $session['stop'],
-						'location' => $translator->trans($session['l_short']),
+						'location' => $translator->trans($session['l_title']),
 						'pseudonym' => $pseudonym,
 						'class' => $class,
 						'slot' => self::GLYPHS[$session['t_title']],
