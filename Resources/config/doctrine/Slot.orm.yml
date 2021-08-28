@@ -21,3 +21,5 @@ Rapsys\AirBundle\Entity\Slot:
         sessions:
             targetEntity: Rapsys\AirBundle\Entity\Session
             mappedBy: slot
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']
