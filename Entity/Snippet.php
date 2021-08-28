@@ -96,6 +96,7 @@ class Snippet {
 	 * Constructor
 	 */
 	public function __construct() {
+		//Set defaults
 		$this->description = null;
 		$this->class = null;
 		$this->short = null;
@@ -105,6 +106,9 @@ class Snippet {
 		$this->donate = null;
 		$this->link = null;
 		$this->profile = null;
+		$this->created = new \DateTime('now');
+		$this->updated = new \DateTime('now');
+		$this->location = null;
 	}
 
 	/**
