@@ -20,6 +20,7 @@ Rapsys\AirBundle\Entity\Session:
             nullable: true
         premium:
             type: boolean
+            nullable: true
         rainfall:
             type: float
             nullable: true
@@ -87,3 +88,5 @@ Rapsys\AirBundle\Entity\Session:
 #        #XXX: tried for SessionRepository::findBestApplicationById(s4)
 #        location_application_locked_date:
 #            columns: [ location_id, application_id, locked, date ]
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']
