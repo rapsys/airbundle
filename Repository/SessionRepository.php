@@ -195,6 +195,7 @@ SELECT
 	p.description AS p_description,
 	p.class AS p_class,
 	p.short AS p_short,
+	p.hat AS p_hat,
 	p.rate AS p_rate,
 	p.contact AS p_contact,
 	p.donate AS p_donate,
@@ -243,6 +244,7 @@ SQL;
 			->addScalarResult('p_description', 'p_description', 'string')
 			->addScalarResult('p_class', 'p_class', 'string')
 			->addScalarResult('p_short', 'p_short', 'string')
+			->addScalarResult('p_hat', 'p_hat', 'integer')
 			->addScalarResult('p_rate', 'p_rate', 'integer')
 			->addScalarResult('p_contact', 'p_contact', 'string')
 			->addScalarResult('p_donate', 'p_donate', 'string')
