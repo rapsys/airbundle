@@ -13,7 +13,7 @@
 							<h3>{{ group }}</h3>
 							<ul>
 								{% for id, user in users %}
-									<li><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ user.pseudonym }}</a><a href="{{ path('rapsys_user_edit', {'mail': user.mail|short, 'hash': user.mail|short|hash}) }}">{% trans %}Edit{% endtrans %}</a></li>
+									<li><a href="{{ path('rapsys_air_user_view', {'id': id}) }}">{{ user.pseudonym }}</a><a href="{{ path('rapsys_user_edit', {'mail': user.mail|short, 'hash': user.mail|short|hash}) }}">{% trans %}Modify{% endtrans %}</a></li>
 								{% endfor %}
 						</article>
 					{% endfor %}
