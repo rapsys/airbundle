@@ -8,15 +8,29 @@
 					{{ form_row(form.mail) }}
 				{% endif %}
 
-				{{ form_row(form.civility) }}
+				{% if form.civility is defined %}
+					{{ form_row(form.civility) }}
+				{% endif %}
 
-				{{ form_row(form.forename) }}
+				{% if form.forename is defined %}
+					{{ form_row(form.forename) }}
+				{% endif %}
 
-				{{ form_row(form.surname) }}
+				{% if form.surname is defined %}
+					{{ form_row(form.surname) }}
+				{% endif %}
 
-				{{ form_row(form.pseudonym) }}
+				{% if form.pseudonym is defined %}
+					{{ form_row(form.pseudonym) }}
+				{% endif %}
 
-				{{ form_row(form.phone) }}
+				{% if form.slug is defined %}
+					{{ form_row(form.slug) }}
+				{% endif %}
+
+				{% if form.phone is defined %}
+					{{ form_row(form.phone) }}
+				{% endif %}
 
 				{{ form_row(form.submit) }}
 			</div>
