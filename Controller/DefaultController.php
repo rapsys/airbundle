@@ -18,9 +18,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
+use Rapsys\AirBundle\Entity\Civility;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Snippet;
+use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Pdf\DisputePdf;
 
 /**
