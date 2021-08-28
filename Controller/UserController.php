@@ -49,15 +49,6 @@ class UserController extends DefaultController {
 			throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %mail%', ['%mail%' => $smail]));
 		}
 
-		//With admin
-		if ($this->isGranted('ROLE_ADMIN')) {
-			//With pseudonym and without slug
-			if (!empty($pseudonym = $user->getPseudonym()) && empty($user->getSlug())) {
-				//Preset slug
-				$user->setSlug($slugger->slug($pseudonym));
-			}
-		}
-
 		//Create the RegisterType form and give the proper parameters
 		$edit = $this->createForm($this->config['edit']['view']['edit'], $user, [
 			//Set action to register route name and context
@@ -119,11 +110,6 @@ class UserController extends DefaultController {
 
 			//Add reset view
 			$this->config['edit']['view']['context']['reset'] = $reset->createView();
-		//Without admin role
-		//XXX: prefer a reset on login to force user unspam action
-		} else {
-			//Add notice
-			$this->addFlash('notice', $this->translator->trans('To change your password login with your mail and any password then follow the procedure'));
 		}
 
 		//With post method
@@ -135,6 +121,15 @@ class UserController extends DefaultController {
 			if ($edit->isSubmitted() && $edit->isValid()) {
 				//Set data
 				$data = $edit->getData();
+
+				//With admin
+				if ($this->isGranted('ROLE_ADMIN')) {
+					//With pseudonym and without slug
+					if (!empty($pseudonym = $data->getPseudonym()) && empty($data->getSlug())) {
+						//Set slug
+						$data->setSlug($slugger->slug($pseudonym));
+					}
+				}
 
 				//Queue snippet save
 				$manager->persist($data);
@@ -152,9 +147,14 @@ class UserController extends DefaultController {
 				//Catch double slug or mail
 				} catch (UniqueConstraintViolationException $e) {
 					//Add error message mail already exists
-					$this->addFlash('error', $this->translator->trans('Account %mail% or with slug %slug% already exists', ['%mail%' => $data->getMail(), '%slug%' => $slug]));
+					$this->addFlash('error', $this->translator->trans('Account %mail% already exists', ['%mail%' => $data->getMail()]));
 				}
 			}
+		//Without admin role
+		//XXX: prefer a reset on login to force user unspam action
+		} elseif (!$this->isGranted('ROLE_ADMIN')) {
+			//Add notice
+			$this->addFlash('notice', $this->translator->trans('To change your password login with your mail and any password then follow the procedure'));
 		}
 
 		//Render view
