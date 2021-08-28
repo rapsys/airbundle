@@ -1,9 +1,20 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Controller;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMInvalidArgumentException;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,11 +23,15 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 
 use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 
+/**
+ * {@inheritdoc}
+ */
 class ApplicationController extends AbstractController {
 	/**
 	 * Add application
@@ -35,18 +50,34 @@ class ApplicationController extends AbstractController {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
+		//Get favorites dances
+		$danceFavorites = $doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+
+		//Set dance default
+		$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
+
+
 		//Get favorites locations
 		$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
 
 		//Set location default
-		$locationDefault = current($locationFavorites);
+		$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
 
 		//With admin
 		if ($this->isGranted('ROLE_ADMIN')) {
+			//Get dances
+			$dances = $doctrine->getRepository(Dance::class)->findAll();
+
 			//Get locations
 			$locations = $doctrine->getRepository(Location::class)->findAll();
 		//Without admin
 		} else {
+			//Restrict to favorite dances
+			$dances = $danceFavorites;
+
+			//Reset favorites
+			$danceFavorites = [];
+
 			//Restrict to favorite locations
 			$locations = $locationFavorites;
 
@@ -60,6 +91,12 @@ class ApplicationController extends AbstractController {
 			'action' => $this->generateUrl('rapsys_air_application_add'),
 			//Set the form attribute
 			#'attr' => [ 'class' => 'col' ],
+			//Set dance choices
+			'dance_choices' => $dances,
+			//Set dance default
+			'dance_default' => $danceDefault,
+			//Set dance favorites
+			'dance_favorites' => $danceFavorites,
 			//Set location choices
 			'location_choices' => $locations,
 			//Set location default
@@ -97,17 +134,15 @@ class ApplicationController extends AbstractController {
 			//Fetch session
 			$session = $doctrine->getRepository(Session::class)->findOneByLocationSlotDate($data['location'], $data['slot'], $data['date']);
 		//Catch no session case
-		} catch (\Doctrine\ORM\NoResultException $e) {
+		} catch (NoResultException $e) {
 			//Create the session
 			$session = new Session();
 			$session->setLocation($data['location']);
 			$session->setDate($data['date']);
 			$session->setSlot($data['slot']);
-			$session->setCreated(new \DateTime('now'));
-			$session->setUpdated(new \DateTime('now'));
 
-			//Get short location
-			$short = $data['location']->getShort();
+			//Get location
+			$location = $data['location']->getTitle();
 
 			//Get slot
 			$slot = $data['slot']->getTitle();
@@ -132,29 +167,20 @@ class ApplicationController extends AbstractController {
 				//Check if afternoon
 				} elseif ($slot == 'Afternoon') {
 					//Set begin at 18h
-					$session->setBegin(new \DateTime('18:00:00'));
+					$session->setBegin(new \DateTime('14:00:00'));
 
 					//Set length at 5h
 					$session->setLength(new \DateTime('05:00:00'));
-
-					//Check if next day is premium
-					if ($premium) {
-						//Set length at 5h
-						$session->setLength(new \DateTime('07:00:00'));
-					}
 				//Check if evening
 				} elseif ($slot == 'Evening') {
-					//Set begin at 20h30
-					$session->setBegin(new \DateTime('20:00:00'));
+					//Set begin at 19h00
+					$session->setBegin(new \DateTime('19:00:00'));
 
 					//Check if next day is premium
 					if ($premium) {
 						//Set length at 7h
 						$session->setLength(new \DateTime('07:00:00'));
 					}
-
-					//Set length at 4h
-					#$session->setLength(new \DateTime('04:30:00'));
 				//Check if after
 				} else {
 					//Set begin at 1h
@@ -172,9 +198,8 @@ class ApplicationController extends AbstractController {
 						$session->setLength(new \DateTime('03:00:00'));
 					}
 				}
-			//Docks => 14h -> 19h | 19h -> 01/02h
-			//XXX: remove Garnier from here to switch back to 21h
-			} elseif (in_array($short, ['Docks', 'Garnier']) && in_array($slot, ['Afternoon', 'Evening', 'After'])) {
+			//Tino-Rossi garden => 14h -> 19h | 19h -> 01/02h
+			} elseif (in_array($location, ['Tino-Rossi garden']) && in_array($slot, ['Afternoon', 'Evening', 'After'])) {
 				//Check if afternoon
 				if ($slot == 'Afternoon') {
 					//Set begin at 14h
@@ -209,8 +234,8 @@ class ApplicationController extends AbstractController {
 						$session->setLength(new \DateTime('03:00:00'));
 					}
 				}
-			//Garnier => 21h -> 01/02h
-			} elseif ($short == 'Garnier' && in_array($slot, ['Evening', 'After'])) {
+			//Garnier opera => 21h -> 01/02h
+			} elseif ($location == 'Garnier opera' && in_array($slot, ['Evening', 'After'])) {
 				//Check if evening
 				if ($slot == 'Evening') {
 					//Set begin at 21h
@@ -241,8 +266,8 @@ class ApplicationController extends AbstractController {
 						$session->setLength(new \DateTime('03:00:00'));
 					}
 				}
-			//Trocadero|Tokyo|Swan|Honore|Orsay => 19h -> 01/02h
-			} elseif (in_array($short, ['Trocadero', 'Tokyo', 'Swan', 'Honore', 'Orsay']) && in_array($slot, ['Evening', 'After'])) {
+			//Trocadero esplanade|Tokyo palace|Swan island|Saint-Honore market|Orsay museum => 19h -> 01/02h
+			} elseif (in_array($location, ['Trocadero esplanade', 'Tokyo palace', 'Swan island', 'Saint-Honore market', 'Orsay museum']) && in_array($slot, ['Evening', 'After'])) {
 				//Check if evening
 				if ($slot == 'Evening') {
 					//Set begin at 19h
@@ -270,63 +295,59 @@ class ApplicationController extends AbstractController {
 						$session->setLength(new \DateTime('03:00:00'));
 					}
 				}
-			//La Villette => 14h -> 19h
-			} elseif ($short == 'Villette' && $slot == 'Afternoon') {
+			//Drawings' garden (Villette) => 14h -> 19h
+			} elseif ($location == 'Drawings\' garden' && $slot == 'Afternoon') {
 				//Set begin at 14h
 				$session->setBegin(new \DateTime('14:00:00'));
 
 				//Set length at 5h
 				$session->setLength(new \DateTime('05:00:00'));
-			//Place Colette => 14h -> 21h
+			//Colette place => 14h -> 21h
 			//TODO: add check here that it's a millegaux account ?
-			} elseif ($short == 'Colette' && $slot == 'Afternoon') {
+			} elseif ($location == 'Colette place' && $slot == 'Afternoon') {
 				//Set begin at 14h
 				$session->setBegin(new \DateTime('14:00:00'));
 
 				//Set length at 7h
 				$session->setLength(new \DateTime('07:00:00'));
-			//Galerie d'Orléans => 14h -> 18h
-			} elseif ($short == 'Orleans' && $slot == 'Afternoon') {
+			//Orleans gallery => 14h -> 18h
+			} elseif ($location == 'Orleans gallery' && $slot == 'Afternoon') {
 				//Set begin at 14h
 				$session->setBegin(new \DateTime('14:00:00'));
 
 				//Set length at 4h
 				$session->setLength(new \DateTime('04:00:00'));
-			//Jardin du Monde => 14h -> 15h
-			} elseif ($short == 'Monde' && $slot == 'Morning') {
+			//Monde garden => 14h -> 19h
+			//TODO: add check here that it's a raphael account ?
+			} elseif ($location == 'Monde garden' && $slot == 'Afternoon') {
 				//Set begin at 14h
 				$session->setBegin(new \DateTime('14:00:00'));
 
 				//Set length at 4h
-				$session->setLength(new \DateTime('01:00:00'));
+				$session->setLength(new \DateTime('05:00:00'));
 			//Combination not supported
+			//TODO: add Madeleine place|Bastille place|Vendome place ?
 			} else {
 				//Add error in flash message
-				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-
-				//Set section
-				$section = $this->translator->trans('Application add');
+				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 
 				//Set title
-				$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+				$title = $this->translator->trans('Application add');
 
 				//Render the view
-				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
 			}
 
 			//Check if admin
 			if (!$this->isGranted('ROLE_ADMIN') && $session->getStart() < new \DateTime('00:00:00')) {
 				//Add error in flash message
-				$this->addFlash('error', $this->translator->trans('Session in the past on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
-
-				//Set section
-				$section = $this->translator->trans('Application add');
+				$this->addFlash('error', $this->translator->trans('Session in the past on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 
 				//Set title
-				$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+				$title = $this->translator->trans('Application add');
 
 				//Render the view
-				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
 			}
 
 			//Queue session save
@@ -335,7 +356,7 @@ class ApplicationController extends AbstractController {
 			//Flush to get the ids
 			#$manager->flush();
 
-			$this->addFlash('notice', $this->translator->trans('Session on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+			$this->addFlash('notice', $this->translator->trans('Session on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 		}
 
 		//Set user
@@ -352,15 +373,14 @@ class ApplicationController extends AbstractController {
 			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
 			//Add warning in flash message
-			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 		//Catch no application and session without identifier (not persisted&flushed) cases
-		} catch (\Doctrine\ORM\NoResultException|\Doctrine\ORM\ORMInvalidArgumentException $e) {
+		} catch (NoResultException|ORMInvalidArgumentException $e) {
 			//Create the application
 			$application = new Application();
+			$application->setDance($data['dance']);
 			$application->setSession($session);
 			$application->setUser($user);
-			$application->setCreated(new \DateTime('now'));
-			$application->setUpdated(new \DateTime('now'));
 
 			//Refresh session updated field
 			$session->setUpdated(new \DateTime('now'));
@@ -375,7 +395,7 @@ class ApplicationController extends AbstractController {
 			$manager->flush();
 
 			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower($data['slot'])), '%date%' => $data['date']->format('Y-m-d')]));
+			$this->addFlash('notice', $this->translator->trans('Application on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 		}
 
 		//Extract and process referer
