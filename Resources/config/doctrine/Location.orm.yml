@@ -13,9 +13,6 @@ Rapsys\AirBundle\Entity\Location:
         title:
             type: string
             length: 32
-        short:
-            type: string
-            length: 16
         address:
             type: string
             length: 32
@@ -54,3 +51,5 @@ Rapsys\AirBundle\Entity\Location:
         #XXX: used in SessionRepository::(findAllPendingDailyWeather|findAllPendingHourlyWeather)
         zipcode:
             columns: [ zipcode ]
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']

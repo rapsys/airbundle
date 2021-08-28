@@ -31,11 +31,6 @@ class Location {
 	/**
 	 * @var string
 	 */
-	private $short;
-
-	/**
-	 * @var string
-	 */
 	private $address;
 
 	/**
@@ -126,28 +121,6 @@ class Location {
 	 */
 	public function getTitle(): string {
 		return $this->title;
-	}
-
-	/**
-	 * Set short
-	 *
-	 * @param string $short
-	 *
-	 * @return Location
-	 */
-	public function setShort(string $short): Location {
-		$this->short = $short;
-
-		return $this;
-	}
-
-	/**
-	 * Get short
-	 *
-	 * @return string
-	 */
-	public function getShort(): string {
-		return $this->short;
 	}
 
 	/**
