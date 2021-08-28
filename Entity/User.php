@@ -23,12 +23,7 @@ class User extends BaseUser {
 	/**
 	 * @var string
 	 */
-	protected $donate;
-
-	/**
-	 * @var string
-	 */
-	protected $link;
+	protected $pseudonym;
 
 	/**
 	 * @var string
@@ -38,7 +33,7 @@ class User extends BaseUser {
 	/**
 	 * @var string
 	 */
-	protected $profile;
+	protected $slug;
 
 	/**
 	 * @var ArrayCollection
@@ -79,6 +74,11 @@ class User extends BaseUser {
 		//Call parent constructor
 		parent::__construct($mail);
 
+		//Set defaults
+		$this->pseudonym = null;
+		$this->phone = null;
+		$this->slug = null;
+
 		//Set collections
 		$this->applications = new ArrayCollection();
 		$this->dances = new ArrayCollection();
@@ -89,47 +89,25 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Set donate
+	 * Set pseudonym
 	 *
-	 * @param string $donate
+	 * @param string $pseudonym
 	 *
 	 * @return User
 	 */
-	public function setDonate(?string $donate): User {
-		$this->donate = $donate;
+	public function setPseudonym(?string $pseudonym): User {
+		$this->pseudonym = $pseudonym;
 
 		return $this;
 	}
 
 	/**
-	 * Get donate
+	 * Get pseudonym
 	 *
 	 * @return string
 	 */
-	public function getDonate(): ?string {
-		return $this->donate;
-	}
-
-	/**
-	 * Set link
-	 *
-	 * @param string $link
-	 *
-	 * @return User
-	 */
-	public function setLink(?string $link): User {
-		$this->link = $link;
-
-		return $this;
-	}
-
-	/**
-	 * Get link
-	 *
-	 * @return string
-	 */
-	public function getLink(): ?string {
-		return $this->link;
+	public function getPseudonym(): ?string {
+		return $this->pseudonym;
 	}
 
 	/**
@@ -155,25 +133,25 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Set profile
+	 * Set slug
 	 *
-	 * @param string $profile
+	 * @param string $slug
 	 *
 	 * @return User
 	 */
-	public function setProfile(string $profile): User {
-		$this->profile = $profile;
+	public function setSlug(?string $slug): User {
+		$this->slug = $slug;
 
 		return $this;
 	}
 
 	/**
-	 * Get profile
+	 * Get slug
 	 *
 	 * @return string
 	 */
-	public function getProfile(): ?string {
-		return $this->profile;
+	public function getSlug(): ?string {
+		return $this->slug;
 	}
 
 	/**
