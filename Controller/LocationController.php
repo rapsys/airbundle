@@ -384,29 +384,6 @@ class LocationController extends DefaultController {
 		//Set title
 		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
-		//Create application form for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
-			//Create ApplicationType form
-			$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_air_application_add'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ],
-				//Set admin
-				'admin' => $this->isGranted('ROLE_ADMIN'),
-				//Set default user to current
-				'user' => $this->getUser()->getId(),
-				//Set default slot to evening
-				//XXX: default to Evening (3)
-				'slot' => $doctrine->getRepository(Slot::class)->findOneById(3),
-				//Set default location to current one
-				'location' => $location
-			]);
-
-			//Add form to context
-			$this->context['forms']['application'] = $application->createView();
-		}
-
 		//Compute period
 		$period = new \DatePeriod(
 			//Start from first monday of week
@@ -420,7 +397,7 @@ class LocationController extends DefaultController {
 		);
 
 		//Fetch calendar
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
+		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $request->getLocale());
 
 		//Fetch locations
 		//XXX: we want to display all active locations anyway
