@@ -7,8 +7,8 @@
 			<td>
 				<h2>{{ 'Subject: %subject%'|trans({'%subject%': subject})|raw }}</h2>
 				<p>{{ 'Thanks so much for rejoining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}</p>
-				<p>{{ 'To recover your account you can follow this link: '|trans }}</p>
-				<p><a href="{{ recover_url|escape('html_attr') }}">{{ recover_url }}</a></p>
+				<p>{% trans %}To recover your account follow this link:{% endtrans %}</p>
+				<p><a href="{{ recover_url|escape('html_attr') }}" class="link">{{ recover_url }}</a></p>
 			</td>
 			<td>&nbsp;</td>
 		</tr>

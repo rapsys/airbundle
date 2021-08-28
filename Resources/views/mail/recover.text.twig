@@ -4,7 +4,8 @@
 
 *{{ 'Thanks so much for rejoining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}*
 
-{{ 'To recover your account you can follow this link: %recover_url%'|trans({'%recover_url%': recover_url}) }}
+{% trans %}To recover your account follow this link:{% endtrans %}
+{{ recover_url }}
 
 --
 

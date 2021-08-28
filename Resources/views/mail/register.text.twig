@@ -4,6 +4,9 @@
 
 *{{ 'Thanks so much for joining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}*
 
+{% trans %}To create your account you must follow this link:{% endtrans %}
+{{ confirm_url }}
+
 --
 
 {{ copy.long }} - {{ copy.short }}

@@ -6,8 +6,10 @@
 			<td>&nbsp;</td>
 			<td>
 				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome to %site.title%'|trans({'%site.title%': site.title})|raw}) }}</h2>
-				<h3>{{ 'Hi %recipient_name%,'|trans({'%recipient_name%': recipient_name}) }}</h3>
+				<h3>{% if recipient_name %}{{ 'Hi %recipient_name%,'|trans({'%recipient_name%': recipient_name}) }}{% else %}{% trans %}Hi,{% endtrans %}{% endif %}</h3>
 				<p>{{ 'Thanks so much for joining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}</p>
+				<p>{% trans %}To create your account you must follow this link:{% endtrans %}</p>
+				<p><a href="{{ confirm_url|escape('html_attr') }}" class="link">{{ confirm_url }}</a></p>
 			</td>
 			<td>&nbsp;</td>
 		</tr>
