@@ -55,6 +55,8 @@ class Dance {
 		//Set defaults
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+
+		//Set collections
 		$this->applications = new ArrayCollection();
 		$this->users = new ArrayCollection();
 	}
@@ -204,7 +206,7 @@ class Dance {
 	 * {@inheritdoc}
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
-		//Check that we have an session instance
+		//Check that we have a dance instance
 		if (($dance = $eventArgs->getEntity()) instanceof Dance) {
 			//Set updated value
 			$dance->setUpdated(new \DateTime('now'));
