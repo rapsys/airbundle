@@ -186,37 +186,6 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Add snippet
-	 *
-	 * @param Snippet $snippet
-	 *
-	 * @return User
-	 */
-	public function addSnippet(Snippet $snippet): User {
-		$this->snippets[] = $snippet;
-
-		return $this;
-	}
-
-	/**
-	 * Remove snippet
-	 *
-	 * @param Snippet $snippet
-	 */
-	public function removeSnippet(Snippet $snippet): bool {
-		return $this->snippets->removeElement($snippet);
-	}
-
-	/**
-	 * Get snippets
-	 *
-	 * @return ArrayCollection
-	 */
-	public function getSnippets(): ArrayCollection {
-		return $this->snippets;
-	}
-
-	/**
 	 * Add dance
 	 *
 	 * @param Dance $dance
@@ -278,6 +247,37 @@ class User extends BaseUser {
 	 */
 	public function getLocations(): ArrayCollection {
 		return $this->locations;
+	}
+
+	/**
+	 * Add snippet
+	 *
+	 * @param Snippet $snippet
+	 *
+	 * @return User
+	 */
+	public function addSnippet(Snippet $snippet): User {
+		$this->snippets[] = $snippet;
+
+		return $this;
+	}
+
+	/**
+	 * Remove snippet
+	 *
+	 * @param Snippet $snippet
+	 */
+	public function removeSnippet(Snippet $snippet): bool {
+		return $this->snippets->removeElement($snippet);
+	}
+
+	/**
+	 * Get snippets
+	 *
+	 * @return ArrayCollection
+	 */
+	public function getSnippets(): ArrayCollection {
+		return $this->snippets;
 	}
 
 	/**
