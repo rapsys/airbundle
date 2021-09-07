@@ -14,7 +14,8 @@
     },
     "require": {
         "doctrine/doctrine-bundle": "^1.0|^2.0",
-        "doctrine/orm": "^2.7",
+        "doctrine/orm": "^2.0",
+        "erusev/parsedown": "^1.7",
         "rapsys/userbundle": "dev-master",
         "rapsys/packbundle": "dev-master",
         "fpdf/fpdf": "^1.83",
