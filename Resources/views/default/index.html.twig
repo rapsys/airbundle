@@ -15,8 +15,8 @@
 								<ul>
 									{% for session in day.sessions %}
 										<li class="{{ session.class|join(' ') }}">
-											<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}" title="{{ session.applications|join('\n') }}">
-												<span>{{ session.start|localizeddate('none', 'short') }}</span>
+											<a href="{{ session.link }}" title="{{ session.applications|join('\n') }}">
+												<span>{{ session.start|intldate('none', 'short') }}</span>
 												<span class="reducible">{{ session.location }}</span>
 												<span class="info">
 													{% if session.weather is defined and session.weather %}
@@ -24,7 +24,7 @@
 													{% endif %}
 													<span title="{{ session.slottitle }}">{{ session.slot }}</span>
 												</span>
-												<span>{{ session.stop|localizeddate('none', 'short') }}</span>
+												<span>{{ session.stop|intldate('none', 'short') }}</span>
 												{% if session.pseudonym is defined and session.pseudonym %}
 													<span class="reducible{% if session.rate is not defined and session.hat is not defined %} pseudonym{% endif %}">{{ session.pseudonym }}</span>
 												{% endif %}
