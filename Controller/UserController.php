@@ -11,13 +11,8 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-
-use Rapsys\PackBundle\Util\SluggerUtil;
 
 use Rapsys\UserBundle\Controller\DefaultController;
 
@@ -25,18 +20,18 @@ class UserController extends DefaultController {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function edit(Request $request, Registry $doctrine, UserPasswordEncoderInterface $encoder, EntityManagerInterface $manager, SluggerUtil $slugger, $mail, $hash): Response {
+	public function edit(Request $request, string $hash, string $mail): Response {
 		//With invalid hash
-		if ($hash != $slugger->hash($mail)) {
+		if ($hash != $this->slugger->hash($mail)) {
 			//Throw bad request
 			throw new BadRequestHttpException($this->translator->trans('Invalid %field% field: %value%', ['%field%' => 'hash', '%value%' => $hash]));
 		}
 
 		//Get mail
-		$mail = $slugger->unshort($smail = $mail);
+		$mail = $this->slugger->unshort($smail = $mail);
 
 		//With existing subscriber
-		if (empty($user = $doctrine->getRepository($this->config['class']['user'])->findOneByMail($mail))) {
+		if (empty($user = $this->doctrine->getRepository($this->config['class']['user'])->findOneByMail($mail))) {
 			//Throw not found
 			//XXX: prevent slugger reverse engineering by not displaying decoded mail
 			throw $this->createNotFoundException($this->translator->trans('Unable to find account %mail%', ['%mail%' => $smail]));
@@ -52,17 +47,21 @@ class UserController extends DefaultController {
 		//Create the RegisterType form and give the proper parameters
 		$edit = $this->createForm($this->config['edit']['view']['edit'], $user, [
 			//Set action to register route name and context
-			'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']),
+			'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']),
 			//Set civility class
 			'civility_class' => $this->config['class']['civility'],
 			//Set civility default
-			'civility_default' => $doctrine->getRepository($this->config['class']['civility'])->findOneByTitle($this->config['default']['civility']),
+			'civility_default' => $this->doctrine->getRepository($this->config['class']['civility'])->findOneByTitle($this->config['default']['civility']),
+			//Set country class
+			'country_class' => $this->config['class']['country'],
+			//Set country default
+			'country_default' => $this->doctrine->getRepository($this->config['class']['country'])->findOneByTitle($this->config['default']['country']),
+			//Set country favorites
+			'country_favorites' => $this->doctrine->getRepository($this->config['class']['country'])->findByTitle($this->config['default']['country_favorites']),
 			//Disable mail
 			'mail' => $this->isGranted('ROLE_ADMIN'),
 			//Disable pseudonym
 			'pseudonym' => $this->isGranted('ROLE_GUEST'),
-			//Disable slug
-			'slug' => $this->isGranted('ROLE_ADMIN'),
 			//Disable password
 			'password' => false,
 			//Set method
@@ -74,7 +73,7 @@ class UserController extends DefaultController {
 			//Create the LoginType form and give the proper parameters
 			$reset = $this->createForm($this->config['edit']['view']['reset'], $user, [
 				//Set action to register route name and context
-				'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']),
+				'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']),
 				//Disable mail
 				'mail' => false,
 				//Set method
@@ -92,19 +91,19 @@ class UserController extends DefaultController {
 					$data = $reset->getData();
 
 					//Set password
-					$data->setPassword($encoder->encodePassword($data, $data->getPassword()));
+					$data->setPassword($this->hasher->hashPassword($data, $data->getPassword()));
 
 					//Queue snippet save
-					$manager->persist($data);
+					$this->manager->persist($data);
 
 					//Flush to get the ids
-					$manager->flush();
+					$this->manager->flush();
 
 					//Add notice
 					$this->addFlash('notice', $this->translator->trans('Account %mail% password updated', ['%mail%' => $mail = $data->getMail()]));
 
 					//Redirect to cleanup the form
-					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $slugger->short($mail), 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']);
+					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $this->slugger->short($mail), 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']);
 				}
 			}
 
@@ -122,28 +121,19 @@ class UserController extends DefaultController {
 				//Set data
 				$data = $edit->getData();
 
-				//With admin
-				if ($this->isGranted('ROLE_ADMIN')) {
-					//With pseudonym and without slug
-					if (!empty($pseudonym = $data->getPseudonym()) && empty($data->getSlug())) {
-						//Set slug
-						$data->setSlug($slugger->slug($pseudonym));
-					}
-				}
-
 				//Queue snippet save
-				$manager->persist($data);
+				$this->manager->persist($data);
 
 				//Try saving in database
 				try {
 					//Flush to get the ids
-					$manager->flush();
+					$this->manager->flush();
 
 					//Add notice
 					$this->addFlash('notice', $this->translator->trans('Account %mail% updated', ['%mail%' => $mail = $data->getMail()]));
 
 					//Redirect to cleanup the form
-					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $slugger->short($mail), 'hash' => $slugger->hash($smail)]+$this->config['route']['edit']['context']);
+					return $this->redirectToRoute($this->config['route']['edit']['name'], ['mail' => $smail = $this->slugger->short($mail), 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']);
 				//Catch double slug or mail
 				} catch (UniqueConstraintViolationException $e) {
 					//Add error message mail already exists
