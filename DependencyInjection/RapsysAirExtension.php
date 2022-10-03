@@ -75,7 +75,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 
 		//Store flattened array in parameters
 		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
-		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
+		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png', 'rapsys_air.site.icon', 'rapsys_air.site.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
 	}
