@@ -3,10 +3,12 @@
 namespace Rapsys\AirBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Command\DoctrineCommand;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+
 use Rapsys\AirBundle\Entity\Session;
 
 class WeatherCommand extends DoctrineCommand {
@@ -35,6 +37,7 @@ class WeatherCommand extends DoctrineCommand {
 			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/hourly-weather-forecast/179142_pc?day=',
 			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/hourly-weather-forecast/179145_pc?day=',
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/hourly-weather-forecast/179146_pc?day=',
+			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/hourly-weather-forecast/179147_pc?day=',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/hourly-weather-forecast/179148_pc?day=',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/hourly-weather-forecast/179150_pc?day=',
 			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/hourly-weather-forecast/179154_pc?day=',
@@ -47,6 +50,7 @@ class WeatherCommand extends DoctrineCommand {
 			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/daily-weather-forecast/179142_pc',
 			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/daily-weather-forecast/179145_pc',
 			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/daily-weather-forecast/179146_pc',
+			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/daily-weather-forecast/179147_pc',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/daily-weather-forecast/179148_pc',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/daily-weather-forecast/179150_pc',
 			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/daily-weather-forecast/179154_pc',
@@ -58,6 +62,23 @@ class WeatherCommand extends DoctrineCommand {
 
 	///Set curl handler
 	private $ch = null;
+
+	///Set manager registry
+	private $doctrine;
+
+	///Set filesystem
+	private $filesystem;
+
+	///Weather command constructor
+	public function __construct(ManagerRegistry $doctrine, Filesystem $filesystem) {
+		parent::__construct($doctrine);
+
+		//Set entity manager
+		$this->doctrine = $doctrine;
+
+		//Set filesystem
+		$this->filesystem = $filesystem;
+	}
 
 	///Configure attribute command
 	protected function configure() {
@@ -75,11 +96,29 @@ class WeatherCommand extends DoctrineCommand {
 
 	///Process the attribution
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
+		//Kernel object
+		$kernel = $this->getApplication()->getKernel();
 
-		//Get manager
-		$manager = $doctrine->getManager();
+		//Tmp directory
+		$tmpdir = $kernel->getContainer()->getParameter('kernel.project_dir').'/var/cache/weather';
+
+		//Set tmpdir
+		//XXX: worst case scenario we have 3 files per zipcode plus daily
+		if (!is_dir($tmpdir)) {
+			try {
+				//Create dir
+				$this->filesystem->mkdir($tmpdir, 0775);
+			} catch (IOException $exception) {
+				//Display error
+				echo 'Create dir '.$exception->getPath().' failed'."\n";
+
+				//Exit with failure
+				exit(self::FAILURE);
+			}
+		}
+
+		//Cleanup kernel
+		unset($kernel);
 
 		//Tidy object
 		$tidy = new \tidy();
@@ -93,7 +132,7 @@ class WeatherCommand extends DoctrineCommand {
 		//Process hourly accuweather
 		if (($command = $input->getFirstArgument()) == 'rapsysair:weather:hourly' || $command == 'rapsysair:weather') {
 			//Fetch hourly sessions to attribute
-			$types['hourly'] = $doctrine->getRepository(Session::class)->findAllPendingHourlyWeather();
+			$types['hourly'] = $this->doctrine->getRepository(Session::class)->findAllPendingHourlyWeather();
 
 			//Iterate on each session
 			foreach($types['hourly'] as $sessionId => $session) {
@@ -136,7 +175,7 @@ class WeatherCommand extends DoctrineCommand {
 		//Process daily accuweather
 		if ($command == 'rapsysair:weather:daily' || $command == 'rapsysair:weather') {
 			//Fetch daily sessions to attribute
-			$types['daily'] = $doctrine->getRepository(Session::class)->findAllPendingDailyWeather();
+			$types['daily'] = $this->doctrine->getRepository(Session::class)->findAllPendingDailyWeather();
 
 			//Iterate on each session
 			foreach($types['daily'] as $sessionId => $session) {
@@ -160,24 +199,6 @@ class WeatherCommand extends DoctrineCommand {
 				} else {
 					$zipcodes[$zipcode][$day][$sessionId] = $sessionId;
 				}
-			}
-		}
-
-		//Get filesystem
-		$filesystem = new Filesystem();
-
-		//Set tmpdir
-		//XXX: worst case scenario we have 3 files per zipcode
-		if (!is_dir($tmpdir = sys_get_temp_dir().'/accuweather')) {
-			try {
-				//Create dir
-			    $filesystem->mkdir($tmpdir, 0775);
-			} catch (IOExceptionInterface $exception) {
-				//Display error
-				echo 'Create dir '.$exception->getPath().' failed'."\n";
-
-				//Exit with failure
-				exit(self::FAILURE);
 			}
 		}
 
@@ -228,7 +249,7 @@ class WeatherCommand extends DoctrineCommand {
 				//Process daily
 				if ($day == 'daily') {
 					//Iterate on each link containing data
-					foreach($sx->xpath('//a[@class="daily-forecast-card"]') as $node) {
+					foreach($sx->xpath('//a[contains(@class,"daily-forecast-card")]') as $node) {
 						//Get date
 						$dsm = trim($node->div[0]->h2[0]->span[1]);
 
@@ -251,25 +272,26 @@ class WeatherCommand extends DoctrineCommand {
 					#/html/body/div[1]/div[5]/div[1]/div[1]/div[1]/div[1]/div[1]/div/h2/span[1]
 					foreach($sx->xpath('//div[@data-shared="false"]') as $node) {
 						//Get hour
-						$hour = trim($node->div[0]->div[0]->h2[0]->span[0]);
+						$hour = trim(str_replace(' h', '', $node->div[0]->div[0]->div[0]->h2[0]->span[0]));
 
-						//Get dsm
-						$dsm = trim($node->div[0]->div[0]->h2[0]->span[1]);
+						//Compute dsm from day (1=d,2=d+1,3=d+2)
+						$dsm = (new \DateTime('+'.($day - 1).' day'))->format('d/m');
 
 						//Get temperature
-						$temperature = str_replace('°', '', $node->div[0]->div[0]->div[0]);
+						$temperature = str_replace('°', '', $node->div[0]->div[0]->div[0]->div[0]);
 
 						//Get realfeel
-						$realfeel = str_replace(['RealFeel® ', '°'], '', trim($node->div[0]->div[0]->span[0]));
+						$realfeel = trim(str_replace(['RealFeel®', '°'], '', $node->div[0]->div[0]->div[1]->div[0]->div[0]->div[0]));
 
 						//Get rainrisk
-						$rainrisk = str_replace('%', '', trim($node->div[0]->div[0]->div[1]))/100;
+						$rainrisk = floatval(str_replace('%', '', trim($node->div[0]->div[0]->div[2]->div[0]))/100);
 
 						//Set rainfall to 0 (mm)
 						$rainfall = 0;
 
 						//Iterate on each entry
-						foreach($node->div[1]->div[0]->div[0]->div[1]->p as $p) {
+						//TODO: wind and other infos are present in $node->div[1]->div[0]->div[1]->div[0]->p
+						foreach($node->div[1]->div[0]->div[1]->div[1]->p as $p) {
 							//Lookup for rain entry if present
 							if (trim($p) == 'Rain') {
 								//Get rainfall
@@ -462,7 +484,7 @@ class WeatherCommand extends DoctrineCommand {
 		}
 
 		//Flush to get the ids
-		$manager->flush();
+		$this->doctrine->getManager()->flush();
 
 		//Close curl handler
 		$this->curl_close();
