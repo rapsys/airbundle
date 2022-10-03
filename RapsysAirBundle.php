@@ -14,7 +14,7 @@ namespace Rapsys\AirBundle;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class RapsysAirBundle extends Bundle{
+class RapsysAirBundle extends Bundle {
 	/**
 	 * Return bundle alias
 	 *
