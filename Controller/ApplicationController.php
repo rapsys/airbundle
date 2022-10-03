@@ -11,8 +11,6 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMInvalidArgumentException;
 use Symfony\Component\Form\FormError;
@@ -46,19 +44,19 @@ class ApplicationController extends AbstractController {
 	 *
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
-	public function add(Request $request, Registry $doctrine, EntityManagerInterface $manager) {
+	public function add(Request $request) {
 		//Prevent non-guest to access here
 		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
 
 		//Get favorites dances
-		$danceFavorites = $doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+		$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
 
 		//Set dance default
 		$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
 
 
 		//Get favorites locations
-		$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+		$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
 
 		//Set location default
 		$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
@@ -66,10 +64,10 @@ class ApplicationController extends AbstractController {
 		//With admin
 		if ($this->isGranted('ROLE_ADMIN')) {
 			//Get dances
-			$dances = $doctrine->getRepository(Dance::class)->findAll();
+			$dances = $this->doctrine->getRepository(Dance::class)->findAll();
 
 			//Get locations
-			$locations = $doctrine->getRepository(Location::class)->findAll();
+			$locations = $this->doctrine->getRepository(Location::class)->findAll();
 		//Without admin
 		} else {
 			//Restrict to favorite dances
@@ -106,12 +104,12 @@ class ApplicationController extends AbstractController {
 			//With user
 			'user' => $this->isGranted('ROLE_ADMIN'),
 			//Set user choices
-			'user_choices' => $doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator),
+			'user_choices' => $this->doctrine->getRepository(User::class)->findIndexByGroupPseudonym(),
 			//Set default user to current
 			'user_default' => $this->getUser()->getId(),
 			//Set default slot to evening
 			//XXX: default to Evening (3)
-			'slot_default' => $doctrine->getRepository(Slot::class)->findOneByTitle('Evening')
+			'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneByTitle('Evening')
 		]);
 
 		//Refill the fields in case of invalid form
@@ -132,7 +130,7 @@ class ApplicationController extends AbstractController {
 		//Protect session fetching
 		try {
 			//Fetch session
-			$session = $doctrine->getRepository(Session::class)->findOneByLocationSlotDate($data['location'], $data['slot'], $data['date']);
+			$session = $this->doctrine->getRepository(Session::class)->findOneByLocationSlotDate($data['location'], $data['slot'], $data['date']);
 		//Catch no session case
 		} catch (NoResultException $e) {
 			//Create the session
@@ -175,6 +173,9 @@ class ApplicationController extends AbstractController {
 				} elseif ($slot == 'Evening') {
 					//Set begin at 19h00
 					$session->setBegin(new \DateTime('19:00:00'));
+
+					//Set length at 5h
+					$session->setLength(new \DateTime('06:00:00'));
 
 					//Check if next day is premium
 					if ($premium) {
@@ -351,10 +352,10 @@ class ApplicationController extends AbstractController {
 			}
 
 			//Queue session save
-			$manager->persist($session);
+			$this->manager->persist($session);
 
 			//Flush to get the ids
-			#$manager->flush();
+			#$this->manager->flush();
 
 			$this->addFlash('notice', $this->translator->trans('Session on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 		}
@@ -370,7 +371,7 @@ class ApplicationController extends AbstractController {
 		//Protect application fetching
 		try {
 			//Retrieve application
-			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
+			$application = $this->doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
 
 			//Add warning in flash message
 			$this->addFlash('warning', $this->translator->trans('Application on %date% %location% %slot% already exists', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
@@ -386,13 +387,13 @@ class ApplicationController extends AbstractController {
 			$session->setUpdated(new \DateTime('now'));
 
 			//Queue session save
-			$manager->persist($session);
+			$this->manager->persist($session);
 
 			//Queue application save
-			$manager->persist($application);
+			$this->manager->persist($application);
 
 			//Flush to get the ids
-			$manager->flush();
+			$this->manager->flush();
 
 			//Add notice in flash message
 			$this->addFlash('notice', $this->translator->trans('Application on %date% %location% %slot% created', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
