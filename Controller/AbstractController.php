@@ -11,19 +11,23 @@
 
 namespace Rapsys\AirBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as BaseAbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\ControllerTrait;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Asset\PackageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 use Rapsys\AirBundle\Entity\Dance;
@@ -32,16 +36,19 @@ use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\RapsysAirBundle;
 
+use Rapsys\PackBundle\Util\FacebookUtil;
+use Rapsys\PackBundle\Util\ImageUtil;
+use Rapsys\PackBundle\Util\MapUtil;
+use Rapsys\PackBundle\Util\SluggerUtil;
+
 /**
  * Provides common features needed in controllers.
  *
  * {@inheritdoc}
  */
 abstract class AbstractController extends BaseAbstractController implements ServiceSubscriberInterface {
-	use ControllerTrait {
-		//Rename render as baseRender
-		render as protected baseRender;
-	}
+	///AuthorizationCheckerInterface instance
+	protected $checker;
 
 	///Config array
 	protected $config;
@@ -52,39 +59,186 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 	///Context array
 	protected $context;
 
+	///AccessDecisionManagerInterface instance
+	protected $decision;
+
+	///ManagerRegistry instance
+	protected $doctrine;
+
+	///FacebookUtil instance
+	protected $facebook;
+
+	///FormFactoryInterface instance
+	protected $factory;
+
+	///Image util instance
+	protected $image;
+
+	///Locale string
+	protected $locale;
+
+	///MailerInterface instance
+	protected $mailer;
+
+	///EntityManagerInterface instance
+	protected $manager;
+
+	///Map util instance
+	protected $map;
+
+	///Modified DateTime
+	protected $modified;
+
+	///PackageInterface instance
+	protected $package;
+
+	///DatePeriod instance
+	protected $period;
+
+	///Request instance
+	protected $request;
+
+	///Route string
+	protected $route;
+
+	///Route params array
+	protected $routeParams;
+
 	///Router instance
 	protected $router;
+
+	///Slugger util instance
+	protected $slugger;
+
+	///RequestStack instance
+	protected $stack;
 
 	///Translator instance
 	protected $translator;
 
 	/**
-	 * Common constructor
+	 * Abstract constructor
 	 *
-	 * Stores container, router and translator interfaces
-	 * Stores config
-	 * Prepares context tree
-	 *
+	 * @param AuthorizationCheckerInterface $checker The container instance
 	 * @param ContainerInterface $container The container instance
+	 * @param AccessDecisionManagerInterface $decision The decision instance
+	 * @param ManagerRegistry $doctrine The doctrine instance
+	 * @param FacebookUtil $facebook The facebook instance
+	 * @param FormFactoryInterface $factory The factory instance
+	 * @param ImageUtil $image The image instance
+	 * @param MailerInterface $mailer The mailer instance
+	 * @param EntityManagerInterface $manager The manager instance
+	 * @param MapUtil $map The map instance
+	 * @param PackageInterface $package The package instance
+	 * @param RouterInterface $router The router instance
+	 * @param SluggerUtil $slugger The slugger instance
+	 * @param RequestStack $stack The stack instance
+	 * @param TranslatorInterface $translator The translator instance
+	 *
+	 * @TODO move all that stuff to setSlugger('@slugger') setters with a calls: [ setSlugger: [ '@slugger' ] ] to unbload classes ???
+	 * @TODO add a calls: [ ..., prepare: ['@???'] ] that do all the logic that can't be done in constructor because various things are not available
 	 */
-	public function __construct(ContainerInterface $container) {
+	public function __construct(AuthorizationCheckerInterface $checker, ContainerInterface $container, AccessDecisionManagerInterface $decision, ManagerRegistry $doctrine, FacebookUtil $facebook, FormFactoryInterface $factory, ImageUtil $image, MailerInterface $mailer, EntityManagerInterface $manager, MapUtil $map, PackageInterface $package, RouterInterface $router, SluggerUtil $slugger, RequestStack $stack, TranslatorInterface $translator) {
+		//Set checker
+		$this->checker = $checker;
+
 		//Retrieve config
 		$this->config = $container->getParameter(RapsysAirBundle::getAlias());
 
 		//Set the container
 		$this->container = $container;
 
-		//Set the router
-		$this->router = $container->get('router');
+		//Set decision
+		$this->decision = $decision;
 
-		//Set the translator
-		$this->translator = $container->get('translator');
+		//Set doctrine
+		$this->doctrine = $doctrine;
+
+		//Set facebook
+		$this->facebook = $facebook;
+
+		//Set factory
+		$this->factory = $factory;
+
+		//Set image
+		$this->image = $image;
+
+		//Set mailer
+		$this->mailer = $mailer;
+
+		//Set manager
+		$this->manager = $manager;
+
+		//Set map
+		$this->map = $map;
+
+		//Set package
+		$this->package = $package;
+
+		//Set period
+		$this->period = new \DatePeriod(
+			//Start from first monday of week
+			new \DateTime('Monday this week'),
+			//Iterate on each day
+			new \DateInterval('P1D'),
+			//End with next sunday and 4 weeks
+			//XXX: we can't use isGranted here as AuthenticatedVoter deny access because user is likely not authenticated yet :'(
+			new \DateTime('Monday this week + 2 week')
+		);
+
+
+		//Set router
+		$this->router = $router;
+
+		//Set slugger
+		$this->slugger = $slugger;
+
+		//Set stack
+		$this->stack = $stack;
+
+		//Set translator
+		$this->translator = $translator;
+
+		//Get main request
+		$this->request = $this->stack->getMainRequest();
+
+		//Get current locale
+		$this->locale = $this->request->getLocale();
+
+		//Set canonical
+		$canonical = null;
+
+		//Set alternates
+		$alternates = [];
+
+		//Set route
+		//TODO: default to not found route ???
+		//TODO: pour une url not found, cet attribut n'est pas défini, comment on fait ???
+		//XXX: on génère une route bidon par défaut ???
+		$this->route = $this->request->attributes->get('_route');
+
+		//Set route params
+		$this->routeParams = $this->request->attributes->get('_route_params');
+
+		//With route and routeParams
+		if ($this->route !== null && $this->routeParams !== null) {
+			//Set canonical
+			$canonical = $this->router->generate($this->route, $this->routeParams, UrlGeneratorInterface::ABSOLUTE_URL);
+
+			//Set alternates
+			$alternates = [
+				substr($this->locale, 0, 2) => [
+					'absolute' => $canonical
+				]
+			];
+		}
 
 		//Set the context
 		$this->context = [
 			'description' => null,
 			'section' => null,
 			'title' => null,
+			'locale' => str_replace('_', '-', $this->locale),
 			'contact' => [
 				'title' => $this->translator->trans($this->config['contact']['title']),
 				'mail' => $this->config['contact']['mail']
@@ -98,340 +252,31 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			],
 			'site' => [
 				'donate' => $this->config['site']['donate'],
-				'ico' => $this->config['site']['ico'],
+				'icon' => $this->config['site']['icon'],
 				'logo' => $this->config['site']['logo'],
 				'png' => $this->config['site']['png'],
-				'svg' => $this->config['site']['svg'],
-				'title' => $this->translator->trans($this->config['site']['title']),
+				'title' => $title = $this->translator->trans($this->config['site']['title']),
 				'url' => $this->router->generate($this->config['site']['url'])
 			],
-			'canonical' => null,
-			'alternates' => [],
+			'canonical' => $canonical,
+			'alternates' => $alternates,
 			'facebook' => [
-				'prefixes' => [
-					'og' => 'http://ogp.me/ns#',
-					'fb' => 'http://ogp.me/ns/fb#'
-				],
 				'metas' => [
 					'og:type' => 'article',
-					'og:site_name' => $this->translator->trans($this->config['site']['title']),
+					'og:site_name' => $title,
+					'og:url' => $canonical,
 					#'fb:admins' => $this->config['facebook']['admins'],
 					'fb:app_id' => $this->config['facebook']['apps']
 				],
-				'texts' => []
+				'texts' => [
+					$this->translator->trans($this->config['site']['title']) => [
+						'font' => 'irishgrover',
+						'size' => 110
+					]
+				]
 			],
 			'forms' => []
 		];
-	}
-
-	/**
-	 * Return the facebook image
-	 *
-	 * @desc Generate image in jpeg format or load it from cache
-	 *
-	 * @param string $pathInfo The request path info
-	 * @param array $parameters The image parameters
-	 * @return array The image array
-	 */
-	protected function getFacebookImage(string $pathInfo, array $parameters = []): array {
-		//Get asset package
-		//XXX: require asset package to be public
-		$package = $this->container->get('rapsys_pack.path_package');
-
-		//Set texts
-		$texts = $parameters['texts'] ?? [];
-
-		//Set default source
-		$source = $parameters['source'] ?? 'png/facebook.png';
-
-		//Set default source
-		$updated = $parameters['updated'] ?? strtotime('last week');
-
-		//Set source path
-		$src = $this->config['path']['public'].'/'.$source;
-
-		//Set cache path
-		//XXX: remove extension and store as png anyway
-		$cache = $this->config['path']['cache'].'/facebook/'.substr($source, 0, strrpos($source, '.')).'.'.$this->config['facebook']['width'].'x'.$this->config['facebook']['height'].'.png';
-
-		//Set destination path
-		//XXX: format <public>/facebook<pathinfo>.jpeg
-		//XXX: was <public>/facebook/<controller>/<action>.<locale>.jpeg
-		$dest = $this->config['path']['public'].'/facebook'.$pathInfo.'.jpeg';
-
-		//With up to date generated image
-		if (
-			is_file($dest) &&
-			($stat = stat($dest)) &&
-			$stat['mtime'] >= $updated
-		) {
-			//Get image size
-			list ($width, $height) = getimagesize($dest);
-
-			//Iterate each text
-			foreach($texts as $text => $data) {
-				//With canonical text
-				if (!empty($data['canonical'])) {
-					//Prevent canonical to finish in alt
-					unset($texts[$text]);
-				}
-			}
-
-			//Return image data
-			return [
-				'og:image' => $package->getAbsoluteUrl('@RapsysAir/facebook/'.$stat['mtime'].$pathInfo.'.jpeg'),
-				'og:image:alt' => str_replace("\n", ' ', implode(' - ', array_keys($texts))),
-				'og:image:height' => $height,
-				'og:image:width' => $width
-			];
-		//With image candidate
-		} elseif (is_file($src)) {
-			//Create image object
-			$image = new \Imagick();
-
-			//With cache image
-			if (is_file($cache)) {
-				//Read image
-				$image->readImage($cache);
-			//Without we generate it
-			} else {
-				//Check target directory
-				if (!is_dir($dir = dirname($cache))) {
-					//Create filesystem object
-					$filesystem = new Filesystem();
-
-					try {
-						//Create dir
-						//XXX: set as 0775, symfony umask (0022) will reduce rights (0755)
-						$filesystem->mkdir($dir, 0775);
-					} catch (IOExceptionInterface $e) {
-						//Throw error
-						throw new \Exception(sprintf('Output directory "%s" do not exists and unable to create it', $dir), 0, $e);
-					}
-				}
-
-				//Read image
-				$image->readImage($src);
-
-				//Crop using aspect ratio
-				//XXX: for better result upload image directly in aspect ratio :)
-				$image->cropThumbnailImage($this->config['facebook']['width'], $this->config['facebook']['height']);
-
-				//Strip image exif data and properties
-				$image->stripImage();
-
-				//Save cache image
-				if (!$image->writeImage($cache)) {
-					//Throw error
-					throw new \Exception(sprintf('Unable to write image "%s"', $cache));
-				}
-			}
-			//Check target directory
-			if (!is_dir($dir = dirname($dest))) {
-				//Create filesystem object
-				$filesystem = new Filesystem();
-
-				try {
-					//Create dir
-					//XXX: set as 0775, symfony umask (0022) will reduce rights (0755)
-					$filesystem->mkdir($dir, 0775);
-				} catch (IOExceptionInterface $e) {
-					//Throw error
-					throw new \Exception(sprintf('Output directory "%s" do not exists and unable to create it', $dir), 0, $e);
-				}
-			}
-
-			//Get image width
-			$width = $image->getImageWidth();
-
-			//Get image height
-			$height = $image->getImageHeight();
-
-			//Create draw
-			$draw = new \ImagickDraw();
-
-			//Set stroke antialias
-			$draw->setStrokeAntialias(true);
-
-			//Set text antialias
-			$draw->setTextAntialias(true);
-
-			//Set font aliases
-			$fonts = [
-				'irishgrover' => $this->config['path']['public'].'/ttf/irishgrover.v10.ttf',
-				'droidsans' => $this->config['path']['public'].'/ttf/droidsans.regular.ttf',
-				'dejavusans' => $this->config['path']['public'].'/ttf/dejavusans.2.37.ttf',
-				'labelleaurore' => $this->config['path']['public'].'/ttf/labelleaurore.v10.ttf'
-			];
-
-			//Set align aliases
-			$aligns = [
-				'left' => \Imagick::ALIGN_LEFT,
-				'center' => \Imagick::ALIGN_CENTER,
-				'right' => \Imagick::ALIGN_RIGHT
-			];
-
-			//Set default font
-			$defaultFont = 'dejavusans';
-
-			//Set default align
-			$defaultAlign = 'center';
-
-			//Set default size
-			$defaultSize = 60;
-
-			//Set default stroke
-			$defaultStroke = '#00c3f9';
-
-			//Set default width
-			$defaultWidth = 15;
-
-			//Set default fill
-			$defaultFill = 'white';
-
-			//Init counter
-			$i = 1;
-
-			//Set text count
-			$count = count($texts);
-
-			//Draw each text stroke
-			foreach($texts as $text => $data) {
-				//Set font
-				$draw->setFont($fonts[$data['font']??$defaultFont]);
-
-				//Set font size
-				$draw->setFontSize($data['size']??$defaultSize);
-
-				//Set stroke width
-				$draw->setStrokeWidth($data['width']??$defaultWidth);
-
-				//Set text alignment
-				$draw->setTextAlignment($align = ($aligns[$data['align']??$defaultAlign]));
-
-				//Get font metrics
-				$metrics = $image->queryFontMetrics($draw, $text);
-
-				//Without y
-				if (empty($data['y'])) {
-					//Position verticaly each text evenly
-					$texts[$text]['y'] = $data['y'] = (($height + 100) / (count($texts) + 1) * $i) - 50;
-				}
-
-				//Without x
-				if (empty($data['x'])) {
-					if ($align == \Imagick::ALIGN_CENTER) {
-						$texts[$text]['x'] = $data['x'] = $width/2;
-					} elseif ($align == \Imagick::ALIGN_LEFT) {
-						$texts[$text]['x'] = $data['x'] = 50;
-					} elseif ($align == \Imagick::ALIGN_RIGHT) {
-						$texts[$text]['x'] = $data['x'] = $width - 50;
-					}
-				}
-
-				//Center verticaly
-				//XXX: add ascender part then center it back by half of textHeight
-				//TODO: maybe add a boundingbox ???
-				$texts[$text]['y'] = $data['y'] += $metrics['ascender'] - $metrics['textHeight']/2;
-
-				//Set stroke color
-				$draw->setStrokeColor(new \ImagickPixel($data['stroke']??$defaultStroke));
-
-				//Set fill color
-				$draw->setFillColor(new \ImagickPixel($data['stroke']??$defaultStroke));
-
-				//Add annotation
-				$draw->annotation($data['x'], $data['y'], $text);
-
-				//Increase counter
-				$i++;
-			}
-
-			//Create stroke object
-			$stroke = new \Imagick();
-
-			//Add new image
-			$stroke->newImage($width, $height, new \ImagickPixel('transparent'));
-
-			//Draw on image
-			$stroke->drawImage($draw);
-
-			//Blur image
-			//XXX: blur the stroke canvas only
-			$stroke->blurImage(5,3);
-
-			//Set opacity to 0.5
-			//XXX: see https://www.php.net/manual/en/image.evaluateimage.php
-			$stroke->evaluateImage(\Imagick::EVALUATE_DIVIDE, 1.5, \Imagick::CHANNEL_ALPHA);
-
-			//Compose image
-			$image->compositeImage($stroke, \Imagick::COMPOSITE_OVER, 0, 0);
-
-			//Clear stroke
-			$stroke->clear();
-
-			//Destroy stroke
-			unset($stroke);
-
-			//Clear draw
-			$draw->clear();
-
-			//Set text antialias
-			$draw->setTextAntialias(true);
-
-			//Draw each text
-			foreach($texts as $text => $data) {
-				//Set font
-				$draw->setFont($fonts[$data['font']??$defaultFont]);
-
-				//Set font size
-				$draw->setFontSize($data['size']??$defaultSize);
-
-				//Set text alignment
-				$draw->setTextAlignment($aligns[$data['align']??$defaultAlign]);
-
-				//Set fill color
-				$draw->setFillColor(new \ImagickPixel($data['fill']??$defaultFill));
-
-				//Add annotation
-				$draw->annotation($data['x'], $data['y'], $text);
-
-				//With canonical text
-				if (!empty($data['canonical'])) {
-					//Prevent canonical to finish in alt
-					unset($texts[$text]);
-				}
-			}
-
-			//Draw on image
-			$image->drawImage($draw);
-
-			//Strip image exif data and properties
-			$image->stripImage();
-
-			//Set image format
-			$image->setImageFormat('jpeg');
-
-			//Save image
-			if (!$image->writeImage($dest)) {
-				//Throw error
-				throw new \Exception(sprintf('Unable to write image "%s"', $dest));
-			}
-
-			//Get dest stat
-			$stat = stat($dest);
-
-			//Return image data
-			return [
-				'og:image' => $package->getAbsoluteUrl('@RapsysAir/facebook/'.$stat['mtime'].$pathInfo.'.jpeg'),
-				'og:image:alt' => str_replace("\n", ' ', implode(' - ', array_keys($texts))),
-				'og:image:height' => $height,
-				'og:image:width' => $width
-			];
-		}
-
-		//Return empty array without image
-		return [];
 	}
 
 	/**
@@ -440,92 +285,29 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 	 * {@inheritdoc}
 	 */
 	protected function render(string $view, array $parameters = [], Response $response = null): Response {
-		//Get request stack
-		$stack = $this->container->get('request_stack');
-
-		//Get current request
-		$request = $stack->getCurrentRequest();
-
-		//Get current locale
-		$locale = $request->getLocale();
-
-		//Set locale
-		$parameters['locale'] = str_replace('_', '-', $locale);
-
-		//Get context path
-		$pathInfo = $this->router->getContext()->getPathInfo();
-
-		//Iterate on locales excluding current one
-		foreach($this->config['locales'] as $current) {
-			//Set titles
-			$titles = [];
-
-			//Iterate on other locales
-			foreach(array_diff($this->config['locales'], [$current]) as $other) {
-				$titles[$other] = $this->translator->trans($this->config['languages'][$current], [], null, $other);
-			}
-
-			//Retrieve route matching path
-			$route = $this->router->match($pathInfo);
-
-			//Get route name
-			$name = $route['_route'];
-
-			//Unset route name
-			unset($route['_route']);
-
-			//With current locale
-			if ($current == $locale) {
-				//Set locale locales context
-				$parameters['canonical'] = $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL);
-			} else {
-				//Set locale locales context
-				$parameters['alternates'][str_replace('_', '-', $current)] = [
-					'absolute' => $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
-					'relative' => $this->router->generate($name, ['_locale' => $current]+$route),
-					'title' => implode('/', $titles),
-					'translated' => $this->translator->trans($this->config['languages'][$current], [], null, $current)
-				];
-			}
-
-			//Add shorter locale
-			if (empty($parameters['alternates'][$shortCurrent = substr($current, 0, 2)])) {
-				//Set locale locales context
-				$parameters['alternates'][$shortCurrent] = [
-					'absolute' => $this->router->generate($name, ['_locale' => $current]+$route, UrlGeneratorInterface::ABSOLUTE_URL),
-					'relative' => $this->router->generate($name, ['_locale' => $current]+$route),
-					'title' => implode('/', $titles),
-					'translated' => $this->translator->trans($this->config['languages'][$current], [], null, $current)
-				];
-			}
-		}
-
 		//Create application form for role_guest
 		if ($this->isGranted('ROLE_GUEST')) {
 			//Without application form
 			if (empty($parameters['forms']['application'])) {
-				//Fetch doctrine
-				$doctrine = $this->get('doctrine');
-
 				//Get favorites dances
-				$danceFavorites = $doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
 
 				//Set dance default
 				$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
 
 				//Get favorites locations
-				$locationFavorites = $doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+				$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
 
 				//Set location default
 				$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
 
 				//With admin
-				if ($this->isGranted('ROLE_ADMIN')) {
+				if ($this->checker->isGranted('ROLE_ADMIN')) {
 					//Get dances
-					$dances = $doctrine->getRepository(Dance::class)->findAll();
+					$dances = $this->doctrine->getRepository(Dance::class)->findAll();
 
 					//Get locations
-					$locations = $doctrine->getRepository(Location::class)->findAll();
+					$locations = $this->doctrine->getRepository(Location::class)->findAll();
 				//Without admin
 				} else {
 					//Restrict to favorite dances
@@ -541,8 +323,24 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 					$locationFavorites = [];
 				}
 
+				//With session application dance id
+				if (!empty($parameters['session']['application']['dance']['id'])) {
+					//Iterate on each dance
+					foreach($dances as $dance) {
+						//Found dance
+						if ($dance->getId() == $parameters['session']['application']['dance']['id']) {
+							//Set dance as default
+							$danceDefault = $dance;
+
+							//Stop search
+							break;
+						}
+					}
+				}
+
 				//With session location id
 				//XXX: set in session controller
+				//TODO: with new findAll that key by id, it should be as simple as isset($locations[$id]) ?
 				if (!empty($parameters['session']['location']['id'])) {
 					//Iterate on each location
 					foreach($locations as $location) {
@@ -576,21 +374,24 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 					//Set location favorites
 					'location_favorites' => $locationFavorites,
 					//With user
-					'user' => $this->isGranted('ROLE_ADMIN'),
+					'user' => $this->checker->isGranted('ROLE_ADMIN'),
 					//Set user choices
-					'user_choices' => $doctrine->getRepository(User::class)->findAllWithTranslatedGroupAndCivility($this->translator),
+					'user_choices' => $this->doctrine->getRepository(User::class)->findIndexByGroupPseudonym(),
 					//Set default user to current
 					'user_default' => $this->getUser()->getId(),
 					//Set to session slot or evening by default
 					//XXX: default to Evening (3)
-					'slot_default' => $doctrine->getRepository(Slot::class)->findOneById($parameters['session']['slot']['id']??3)
+					'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneById($parameters['session']['slot']['id']??3)
 				]);
 
 				//Add form to context
 				$parameters['forms']['application'] = $application->createView();
 			}
+		}/*
+		#XXX: removed because it fucks up the seo by displaying register and login form instead of content
+		#XXX: until we find a better way, removed !!!
 		//Create login form for anonymous
-		} elseif (!$this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		elseif (!$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Create LoginType form
 			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
 				//Set the action
@@ -624,18 +425,15 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				'phone' => false
 			];
 
-			//Get slugger
-			$slugger = $this->container->get('rapsys_pack.slugger_util');
-
 			//Create RegisterType form
 			$register = $this->createForm('Rapsys\AirBundle\Form\RegisterType', null, $field+[
 				//Set the action
 				'action' => $this->generateUrl(
 					'rapsys_user_register',
 					[
-						'mail' => $smail = $slugger->short(''),
-						'field' => $sfield = $slugger->serialize($field),
-						'hash' => $slugger->hash($smail.$sfield)
+						'mail' => $smail = $this->slugger->short(''),
+						'field' => $sfield = $this->slugger->serialize($field),
+						'hash' => $this->slugger->hash($smail.$sfield)
 					]
 				),
 				//Set the form attribute
@@ -644,26 +442,71 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 
 			//Add form to context
 			$parameters['forms']['register'] = $register->createView();
+		}*/
+
+		//Without alternates
+		if (count($parameters['alternates']) <= 1) {
+			//Set routeParams
+			$routeParams = $this->routeParams;
+
+			//Iterate on locales excluding current one
+			foreach($this->config['locales'] as $locale) {
+				//With current locale
+				if ($locale !== $this->locale) {
+					//Set titles
+					$titles = [];
+
+					//Set route params locale
+					$routeParams['_locale'] = $locale;
+
+					//Iterate on other locales
+					foreach(array_diff($this->config['locales'], [$locale]) as $other) {
+						//Set other locale title
+						$titles[$other] = $this->translator->trans($this->config['languages'][$locale], [], null, $other);
+					}
+
+					//Set locale locales context
+					$parameters['alternates'][str_replace('_', '-', $locale)] = [
+						'absolute' => $this->router->generate($this->route, $routeParams, UrlGeneratorInterface::ABSOLUTE_URL),
+						'relative' => $this->router->generate($this->route, $routeParams),
+						'title' => implode('/', $titles),
+						'translated' => $this->translator->trans($this->config['languages'][$locale], [], null, $locale)
+					];
+
+					//Add shorter locale
+					if (empty($parameters['alternates'][$shortCurrent = substr($locale, 0, 2)])) {
+						//Set locale locales context
+						$parameters['alternates'][$shortCurrent] = $parameters['alternates'][str_replace('_', '-', $locale)];
+					}
+				}
+			}
 		}
 
 		//With page infos and without facebook texts
-		if (empty($parameters['facebook']['texts']) && !empty($parameters['site']['title']) && !empty($parameters['title']) && !empty($parameters['canonical'])) {
-			//Set facebook image
-			$parameters['facebook']['texts'] = [
-				$parameters['site']['title'] => [
-					'font' => 'irishgrover',
-					'size' => 110
-				],
+		if (count($parameters['facebook']['texts']) <= 1 && isset($parameters['title']) && isset($this->route) && isset($this->routeParams)) {
+			//Append facebook image texts
+			$parameters['facebook']['texts'] += [
 				$parameters['title'] => [
 					'align' => 'left'
-				],
-				$parameters['canonical'] => [
+				]/*XXX: same problem as url, too long :'(,
+				$parameters['description'] => [
 					'align' => 'right',
 					'canonical' => true,
 					'font' => 'labelleaurore',
 					'size' => 50
-				]
+				]*/
 			];
+
+			/*With short path info
+			We don't add this stupid url in image !!!
+			if (strlen($pathInfo = $this->router->generate($this->route, $this->routeParams)) <= 64) {
+				 => [
+					'align' => 'right',
+					'canonical' => true,
+					'font' => 'labelleaurore',
+					'size' => 50
+				 ]
+			}*/
 		}
 
 		//With canonical
@@ -685,9 +528,9 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		}
 
 		//With locale
-		if (!empty($locale)) {
+		if (!empty($this->locale)) {
 			//Set facebook locale
-			$parameters['facebook']['metas']['og:locale'] = $locale;
+			$parameters['facebook']['metas']['og:locale'] = $this->locale;
 
 			//With alternates
 			//XXX: locale change when fb_locale=xx_xx is provided is done in FacebookSubscriber
@@ -704,13 +547,13 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		}
 
 		//Without facebook image defined and texts
-		if (empty($parameters['facebook']['metas']['og:image']) && !empty($parameters['facebook']['texts'])) {
+		if (empty($parameters['facebook']['metas']['og:image']) && !empty($this->request) && !empty($parameters['facebook']['texts']) && !empty($this->modified)) {
 			//Get facebook image
-			$parameters['facebook']['metas'] += $this->getFacebookImage($pathInfo, $parameters['facebook']);
+			$parameters['facebook']['metas'] += $this->facebook->getImage($this->request->getPathInfo(), $parameters['facebook']['texts'], $this->modified->getTimestamp());
 		}
 
 		//Call parent method
-		return $this->baseRender($view, $parameters, $response);
+		return parent::render($view, $parameters, $response);
 	}
 
 	/**
@@ -721,11 +564,20 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 	public static function getSubscribedServices(): array {
 		//Return subscribed services
 		return [
-			//'logger' => LoggerInterface::class,
 			'doctrine' => ManagerRegistry::class,
+			'doctrine.orm.default_entity_manager' => EntityManagerInterface::class,
+			'form.factory' => FormFactoryInterface::class,
+			'mailer.mailer' => MailerInterface::class,
+			'rapsys_air.facebook_util' => FacebookUtil::class,
+			'rapsys_pack.image_util' => ImageUtil::class,
+			'rapsys_pack.map_util' => MapUtil::class,
 			'rapsys_pack.path_package' => PackageInterface::class,
+			'rapsys_pack.slugger_util' => SluggerUtil::class,
+			'rapsys_user.access_decision_manager' => AccessDecisionManagerInterface::class,
 			'request_stack' => RequestStack::class,
 			'router' => RouterInterface::class,
+			'security.authorization_checker' => AuthorizationCheckerInterface::class,
+			'service_container' => ContainerInterface::class,
 			'translator' => TranslatorInterface::class
 		];
 	}
