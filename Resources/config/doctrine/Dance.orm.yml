@@ -10,7 +10,10 @@ Rapsys\AirBundle\Entity\Dance:
             options:
                 unsigned: true
     fields:
-        title:
+        name:
+            type: string
+            length: 32
+        type:
             type: string
             length: 32
         created:
@@ -25,5 +28,8 @@ Rapsys\AirBundle\Entity\Dance:
         users:
             targetEntity: Rapsys\AirBundle\Entity\User
             mappedBy: dances
+    uniqueConstraints:
+        name_type:
+            columns: [ name, type ]
     lifecycleCallbacks:
         preUpdate: ['preUpdate']
