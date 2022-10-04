@@ -1,27 +1,33 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Repository;
-
-use Symfony\Component\Translation\TranslatorInterface;
-use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * SnippetRepository
  */
 class SnippetRepository extends \Doctrine\ORM\EntityRepository {
 	/**
-	 * Find snippets by locale and user id
+	 * Find snippets by user id, locale and index by location id
 	 *
+	 * @param int $user The user
 	 * @param string $locale The locale
-	 * @param User|int $user The user
-	 * @return array The snippets or empty array
+	 * @return array The snippets array
 	 */
-	public function findByLocaleUserId($locale, $user) {
+	public function findByUserIdLocaleIndexByLocationId(int $userId, string $locale): array {
 		//Fetch snippets
-		$ret = $this->getEntityManager()
-			->createQuery('SELECT s FROM RapsysAirBundle:Snippet s WHERE s.locale = :locale and s.user = :user')
+		$ret = $this->_em
+			->createQuery('SELECT s FROM RapsysAirBundle:Snippet s INDEX BY s.location WHERE s.locale = :locale and s.user = :user')
+			->setParameter('user', $userId)
 			->setParameter('locale', $locale)
-			->setParameter('user', $user)
 			->getResult();
 
 		//Send result
