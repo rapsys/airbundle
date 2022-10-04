@@ -2,7 +2,8 @@
 
 namespace Rapsys\AirBundle\Form;
 
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -11,9 +12,8 @@ use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Translation\TranslatorInterface;
-use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Time;
 
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\User;
@@ -25,11 +25,16 @@ class SessionType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __construct(RegistryInterface $doctrine) {
+	public function __construct(ManagerRegistry $doctrine) {
 		$this->doctrine = $doctrine;
 	}
 
 	/**
+	 * @todo: clean that shit
+	 * @todo: mapped => false for each button not related with session !!!!
+	 * @todo: set stuff in the SessionController, no loggic here please !!!
+	 * @todo: add the dance link stuff
+	 *
 	 * {@inheritdoc}
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options) {
@@ -46,14 +51,14 @@ class SessionType extends AbstractType {
 		//Is admin or owner
 		if (!empty($options['modify'])) {
 			if (!empty($options['admin'])) {
-				$builder->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => $options['date'], 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Date(['message' => 'Your date doesn\'t seems to be valid'])]]);
+				$builder->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => $options['date'], 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
 			}
 
 			$builder
 				//TODO: avertissement + minimum et maximum ???
-				->add('begin', TimeType::class, ['attr' => ['placeholder' => 'Your begin', 'class' => 'time'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'data' => $options['begin'], 'constraints' => [new NotBlank(['message' => 'Please provide your begin']), new Time(['message' => 'Your begin doesn\'t seems to be valid'])]])
+				->add('begin', TimeType::class, ['attr' => ['placeholder' => 'Your begin', 'class' => 'time'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'data' => $options['begin'], 'constraints' => [new NotBlank(['message' => 'Please provide your begin']), new Type(['type' => \DateTime::class, 'message' => 'Your begin doesn\'t seems to be valid'])]])
 				//TODO: avertissement + minimum et maximum ???
-				->add('length', TimeType::class, ['attr' => ['placeholder' => 'Your length', 'class' => 'time'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'data' => $options['length'], 'constraints' => [new NotBlank(['message' => 'Please provide your length']), new Time(['message' => 'Your length doesn\'t seems to be valid'])]])
+				->add('length', TimeType::class, ['attr' => ['placeholder' => 'Your length', 'class' => 'time'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'data' => $options['length'], 'constraints' => [new NotBlank(['message' => 'Please provide your length']), new Type(['type' => \DateTime::class, 'message' => 'Your length doesn\'t seems to be valid'])]])
 				->add('modify', SubmitType::class, ['label' => 'Modify', 'attr' => ['class' => 'submit']]);
 		}
 
@@ -75,7 +80,7 @@ class SessionType extends AbstractType {
 		//Add extra user field
 		if (!empty($options['admin'])) {
 			//Load users
-			$users = $this->doctrine->getRepository(User::class)->findAllApplicantBySession($options['session']);
+			$users = $this->doctrine->getRepository(User::class)->findBySessionId($options['session']);
 			//Add admin fields
 			$builder
 				//TODO: class admin en rouge ???
