@@ -13,13 +13,24 @@ namespace Rapsys\AirBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
-use Rapsys\AirBundle\Entity\Application;
-use Rapsys\AirBundle\Entity\Group;
-use Rapsys\AirBundle\Entity\Link;
-use Rapsys\AirBundle\Entity\Snippet;
 use Rapsys\UserBundle\Entity\User as BaseUser;
 
 class User extends BaseUser {
+	/**
+	 * @var string
+	 */
+	protected $city;
+
+	/**
+	 * @var string
+	 */
+	protected $phone;
+
+	/**
+	 * @var Country
+	 */
+	protected $country;
+
 	/**
 	 * @var string
 	 */
@@ -28,12 +39,7 @@ class User extends BaseUser {
 	/**
 	 * @var string
 	 */
-	protected $phone;
-
-	/**
-	 * @var string
-	 */
-	protected $slug;
+	protected $zipcode;
 
 	/**
 	 * @var ArrayCollection
@@ -75,9 +81,11 @@ class User extends BaseUser {
 		parent::__construct($mail);
 
 		//Set defaults
-		$this->pseudonym = null;
+		$this->city = null;
+		$this->country = null;
 		$this->phone = null;
-		$this->slug = null;
+		$this->pseudonym = null;
+		$this->zipcode = null;
 
 		//Set collections
 		$this->applications = new ArrayCollection();
@@ -89,25 +97,47 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Set pseudonym
+	 * Set country
 	 *
-	 * @param string $pseudonym
+	 * @param Country $country
 	 *
-	 * @return User
+	 * @return Snippet
 	 */
-	public function setPseudonym(?string $pseudonym): User {
-		$this->pseudonym = $pseudonym;
+	public function setCountry(Country $country) {
+		$this->country = $country;
 
 		return $this;
 	}
 
 	/**
-	 * Get pseudonym
+	 * Get country
+	 *
+	 * @return Country
+	 */
+	public function getCountry() {
+		return $this->country;
+	}
+
+	/**
+	 * Set city
+	 *
+	 * @param string $city
+	 *
+	 * @return User
+	 */
+	public function setCity(?string $city): User {
+		$this->city = $city;
+
+		return $this;
+	}
+
+	/**
+	 * Get city
 	 *
 	 * @return string
 	 */
-	public function getPseudonym(): ?string {
-		return $this->pseudonym;
+	public function getCity(): ?string {
+		return $this->city;
 	}
 
 	/**
@@ -133,25 +163,47 @@ class User extends BaseUser {
 	}
 
 	/**
-	 * Set slug
+	 * Set pseudonym
 	 *
-	 * @param string $slug
+	 * @param string $pseudonym
 	 *
 	 * @return User
 	 */
-	public function setSlug(?string $slug): User {
-		$this->slug = $slug;
+	public function setPseudonym(?string $pseudonym): User {
+		$this->pseudonym = $pseudonym;
 
 		return $this;
 	}
 
 	/**
-	 * Get slug
+	 * Get pseudonym
 	 *
 	 * @return string
 	 */
-	public function getSlug(): ?string {
-		return $this->slug;
+	public function getPseudonym(): ?string {
+		return $this->pseudonym;
+	}
+
+	/**
+	 * Set zipcode
+	 *
+	 * @param string $zipcode
+	 *
+	 * @return User
+	 */
+	public function setZipcode(?string $zipcode): User {
+		$this->zipcode = $zipcode;
+
+		return $this;
+	}
+
+	/**
+	 * Get zipcode
+	 *
+	 * @return string
+	 */
+	public function getZipcode(): ?string {
+		return $this->zipcode;
 	}
 
 	/**
