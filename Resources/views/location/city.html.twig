@@ -1,0 +1,45 @@
+{% extends '@RapsysAir/body.html.twig' %}
+{% block content %}
+	<article id="dashboard">
+		<header>
+			<h2><a href="{{ canonical }}">{{ title }}</a></h2>
+			<p>{{ description }}</p>
+		</header>
+		<div class="panel">
+			{% if calendar is defined and calendar %}
+				<div class="grid calendar seven">
+					{% for date, day in calendar %}
+						<section class="{{ day.class|join(' ') }}">
+							<h3>{{ day.title }}</h3>
+							{% if day.sessions is not empty %}
+								<ul>
+									{% for session in day.sessions %}
+										<li class="{{ session.class|join(' ') }}">
+											<a href="{{ session.link }}" title="{{ session.title }}">
+												<span>{{ session.start|intldate('none', 'short') }}</span>
+												<span class="reducible">{{ session.location.title }}</span>
+												<span class="temperature"{% if session.temperature.title is defined and session.temperature.title %} title="{{ session.temperature.title }}"{% endif %}><span class="glyph">{{ session.temperature.glyph }}</span></span>
+												<span>{{ session.stop|intldate('none', 'short') }}</span>
+												<span class="reducible">{% if session.application.user.title is defined and session.application.user.title %}{{ session.application.user.title }}{% endif %}</span>
+												<span class="rain"{% if session.rain.title is defined and session.rain.title %} title="{{ session.rain.title }}"{% endif %}><span class="glyph">{{ session.rain.glyph }}</span></span>
+												{% if session.rate is defined and session.rate %}
+													<span class="rate" title="{{ session.rate.title }}">{% if session.rate.rate is defined and session.rate.rate %}{{ session.rate.rate }} {% endif %}<span class="glyph">{{ session.rate.glyph }}</span></span>
+												{% else %}
+													<span></span>
+												{% endif %}
+												<span class="reducible">{{ session.location.zipcode }} {{ session.location.city }}</span>
+												<span></span>
+											</a>
+										</li>
+									{% endfor %}
+								</ul>
+							{% endif %}
+						</section>
+					{% endfor %}
+				</div>
+			{% endif %}
+			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
+		</div>
+	</article>
+	{{ include('@RapsysAir/default/_location.html.twig') }}
+{% endblock %}
