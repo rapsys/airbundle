@@ -1,260 +1,233 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Rapsys\AirBundle\Entity\Slot;
-use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Location;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RequestContext;
 
+use Rapsys\AirBundle\Entity\Dance;
+use Rapsys\AirBundle\Entity\Location;
+use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Slot;
+
+/**
+ * {@inheritdoc}
+ */
 class LocationController extends DefaultController {
 	/**
-	 * Add location
-	 *
-	 * @desc Persist location in database
+	 * List all cities
 	 *
 	 * @param Request $request The request instance
-	 *
-	 * @return Response The rendered view or redirection
-	 *
-	 * @throws \RuntimeException When user has not at least admin role
+	 * @return Response The rendered view
 	 */
-	public function add(Request $request) {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_ADMIN', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+	public function cities(Request $request): Response {
+		//Add cities
+		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period);
 
-		//Create LocationType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\LocationType', null, [
-			//Set the action
-			'action' => $this->generateUrl('rapsys_air_location_add'),
-			//Set the form attribute
-			'attr' => []
-		]);
+		//Add dances
+		$this->context['dances'] = $this->doctrine->getRepository(Dance::class)->findNamesAsArray();
 
-		//Refill the fields in case of invalid form
-		$form->handleRequest($request);
+		//Create response
+		$response = new Response();
 
-		//Handle invalid form
-		if (!$form->isSubmitted() || !$form->isValid()) {
-			//Set section
-			$section = $this->translator->trans('Location add');
+		//Set modified
+		$this->modified = max(array_map(function ($v) { return $v['modified']; }, array_merge($this->context['cities'], $this->context['dances'])));
 
-			//Set title
-			$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-			//Render the view
-			return $this->render('@RapsysAir/location/add.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+		//Add city multi
+		foreach($this->context['cities'] as $id => $city) {
+			//Add city multi
+			#$this->osm->getMultiImage($city['link'], $city['osm'], $this->modified->getTimestamp(), $city['latitude'], $city['longitude'], $city['locations'], $this->osm->getMultiZoom($city['latitude'], $city['longitude'], $city['locations'], 16));
+			$this->context['cities'][$id]['multimap'] = $this->map->getMultiMap($city['multimap'], $this->modified->getTimestamp(), $city['latitude'], $city['longitude'], $city['locations'], $this->map->getMultiZoom($city['latitude'], $city['longitude'], $city['locations']));
 		}
 
-		//Get doctrine
-		$doctrine = $this->getDoctrine();
+		//With logged user
+		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Set last modified
+			$response->setLastModified(new \DateTime('-1 year'));
 
-		//Get manager
-		$manager = $doctrine->getManager();
+			//Set as private
+			$response->setPrivate();
+		//Without logged user
+		} else {
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize(array_merge($this->context['cities'], $this->context['dances']))));
 
-		//Get location
-		$location = $form->getData();
+			//Set last modified
+			$response->setLastModified($this->modified);
 
-		//Set created
-		$location->setCreated(new \DateTime('now'));
+			//Set as public
+			$response->setPublic();
 
-		//Set updated
-		$location->setUpdated(new \DateTime('now'));
-
-		//Queue location save
-		$manager->persist($location);
-
-		//Flush to get the ids
-		$manager->flush();
-
-		//Add notice
-		$this->addFlash('notice', $this->translator->trans('Location %id% created', ['%id%' => $location->getId()]));
-
-		//Extract and process referer
-		if ($referer = $request->headers->get('referer')) {
-			//Create referer request instance
-			$req = Request::create($referer);
-
-			//Get referer path
-			$path = $req->getPathInfo();
-
-			//Get referer query string
-			$query = $req->getQueryString();
-
-			//Remove script name
-			$path = str_replace($request->getScriptName(), '', $path);
-
-			//Try with referer path
-			try {
-				//Save old context
-				$oldContext = $this->router->getContext();
-
-				//Force clean context
-				//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
-				$this->router->setContext(new RequestContext());
-
-				//Retrieve route matching path
-				$route = $this->router->match($path);
-
-				//Reset context
-				$this->router->setContext($oldContext);
-
-				//Clear old context
-				unset($oldContext);
-
-				//Extract name
-				$name = $route['_route'];
-
-				//Remove route and controller from route defaults
-				unset($route['_route'], $route['_controller']);
-
-				//Check if location view route
-				if ($name == 'rapsys_air_location_view' && !empty($route['id'])) {
-					//Replace id
-					$route['id'] = $location->getId();
-				//Other routes
-				} else {
-					//Set location
-					$route['location'] = $location->getId();
-				}
-
-				//Generate url
-				return $this->redirectToRoute($name, $route);
-			//No route matched
-			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
-				//Unset referer to fallback to default route
-				unset($referer);
+			//Without role and modification
+			if ($response->isNotModified($request)) {
+				//Return 304 response
+				return $response;
 			}
 		}
 
-		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air', ['location' => $location->getId()]);
+		//Set section
+		$this->context['title'] = $this->translator->trans('Libre Air cities');
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('Libre Air city list');
+
+		//Set cities
+		$cities = array_map(function ($v) { return $v['in']; }, $this->context['cities']);
+
+		//Set dances
+		$dances = array_map(function ($v) { return $v['name']; }, $this->context['dances']);
+
+		//Set indoors
+		$indoors = array_reduce($this->context['cities'], function ($c, $v) { return array_merge($c, $v['indoors']); }, []);
+
+		//Set keywords
+		$this->context['keywords'] = array_values(
+			array_merge(
+				[
+					$this->translator->trans('Cities'),
+					$this->translator->trans('City list'),
+					$this->translator->trans('Listing'),
+				],
+				$cities,
+				$indoors,
+				[
+					$this->translator->trans('calendar'),
+					$this->translator->trans('Libre Air')
+				]
+			)
+		);
+
+		//Render the view
+		return $this->render('@RapsysAir/location/cities.html.twig', $this->context, $response);
 	}
 
 	/**
-	 * Edit location
+	 * Display city
 	 *
-	 * @desc Persist location in database
+	 * @todo XXX: TODO: add <link rel="prev|next" for sessions or classes ? />
+	 * @todo XXX: TODO: like described in: https://www.alsacreations.com/article/lire/1400-attribut-rel-relations.html#xnf-rel-attribute
+	 * @todo XXX: TODO: or here: http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions
 	 *
 	 * @param Request $request The request instance
-	 *
-	 * @return Response The rendered view or redirection
-	 *
-	 * @throws \RuntimeException When user has not at least guest role
+	 * @param float $latitude The city latitude
+	 * @param float $longitude The city longitude
+	 * @return Response The rendered view
 	 */
-	public function edit(Request $request, $id) {
-		//Prevent non-admin to access here
-		$this->denyAccessUnlessGranted('ROLE_ADMIN', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
-
-		//Get doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Get location
-		if (empty($location = $doctrine->getRepository(Location::class)->findOneById($id))) {
-			throw $this->createNotFoundException($this->translator->trans('Unable to find location: %id%', ['%id%' => $id]));
+	public function city(Request $request, float $latitude, float $longitude, string $city): Response {
+		//Get city
+		if (!($this->context['city'] = $this->doctrine->getRepository(Location::class)->findCityByLatitudeLongitudeAsArray(floatval($latitude), floatval($longitude)))) {
+			throw $this->createNotFoundException($this->translator->trans('Unable to find city: %latitude%,%longitude%', ['%latitude%' => $latitude, '%longitude%' => $longitude]));
 		}
 
-		//Create LocationType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\LocationType', $location, [
-			//Set the action
-			'action' => $this->generateUrl('rapsys_air_location_edit', ['id' => $id]),
-			//Set the form attribute
-			'attr' => []
-		]);
+		//Add calendar
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsArray($this->period, $request->getLocale(), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
 
-		//Refill the fields in case of invalid form
-		$form->handleRequest($request);
+		//Set dances
+		$this->context['dances'] = [];
 
-		//Handle invalid form
-		if (!$form->isSubmitted() || !$form->isValid()) {
-			//Set section
-			$section = $this->translator->trans('Location %id%', ['%id%' => $id]);
-
-			//Set title
-			$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-			//Render the view
-			return $this->render('@RapsysAir/location/edit.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
-		}
-
-		//Get manager
-		$manager = $doctrine->getManager();
-
-		//Set updated
-		$location->setUpdated(new \DateTime('now'));
-
-		//Queue location save
-		$manager->persist($location);
-
-		//Flush to get the ids
-		$manager->flush();
-
-		//Add notice
-		$this->addFlash('notice', $this->translator->trans('Location %id% updated', ['%id%' => $id]));
-
-		//Extract and process referer
-		if ($referer = $request->headers->get('referer')) {
-			//Create referer request instance
-			$req = Request::create($referer);
-
-			//Get referer path
-			$path = $req->getPathInfo();
-
-			//Get referer query string
-			$query = $req->getQueryString();
-
-			//Remove script name
-			$path = str_replace($request->getScriptName(), '', $path);
-
-			//Try with referer path
-			try {
-				//Save old context
-				$oldContext = $this->router->getContext();
-
-				//Force clean context
-				//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
-				$this->router->setContext(new RequestContext());
-
-				//Retrieve route matching path
-				$route = $this->router->match($path);
-
-				//Reset context
-				$this->router->setContext($oldContext);
-
-				//Clear old context
-				unset($oldContext);
-
-				//Extract name
-				$name = $route['_route'];
-
-				//Remove route and controller from route defaults
-				unset($route['_route'], $route['_controller']);
-
-				//Check if location view route
-				if ($name == 'rapsys_air_location_view' && !empty($route['id'])) {
-					//Replace id
-					$route['id'] = $location->getId();
-				//Other routes
-				} else {
-					//Set location
-					$route['location'] = $location->getId();
+		//Iterate on each calendar
+		foreach($this->context['calendar'] as $date => $calendar) {
+			//Iterate on each session
+			foreach($calendar['sessions'] as $sessionId => $session) {
+				//Session with application dance
+				if (!empty($session['application']['dance'])) {
+					//Add dance
+					$this->context['dances'][$session['application']['dance']['id']] = $session['application']['dance'];
 				}
-
-				//Generate url
-				return $this->redirectToRoute($name, $route);
-			//No route matched
-			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
-				//Unset referer to fallback to default route
-				unset($referer);
 			}
 		}
 
-		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air', ['location' => $location->getId()]);
+		//Add locations
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByLatitudeLongitudeAsArray(floatval($latitude), floatval($longitude), $this->period);
+
+		//Set modified
+		//XXX: dance modified is already computed inside calendar modified
+		$this->modified = max(array_merge([$this->context['city']['updated']], array_map(function ($v) { return $v['modified']; }, array_merge($this->context['calendar'], $this->context['locations']))));
+
+		//Create response
+		$response = new Response();
+
+		//With logged user
+		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Set last modified
+			$response->setLastModified(new \DateTime('-1 year'));
+
+			//Set as private
+			$response->setPrivate();
+		//Without logged user
+		} else {
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize(array_merge($this->context['city'], $this->context['dances'], $this->context['calendar'], $this->context['locations']))));
+
+			//Set last modified
+			$response->setLastModified($this->modified);
+
+			//Set as public
+			$response->setPublic();
+
+			//Without role and modification
+			if ($response->isNotModified($request)) {
+				//Return 304 response
+				return $response;
+			}
+		}
+
+		//Add multi
+		$this->context['multimap'] = $this->map->getMultiMap($this->context['city']['multimap'], $this->modified->getTimestamp(), $latitude, $longitude, $this->context['locations'], $this->map->getMultiZoom($latitude, $longitude, $this->context['locations']));
+
+		//Set keywords
+		$this->context['keywords'] = [
+			$this->context['city']['city'],
+			$this->translator->trans('Indoor'),
+			$this->translator->trans('Outdoor'),
+			$this->translator->trans('Calendar'),
+			$this->translator->trans('Libre Air')
+		];
+
+		//With context dances
+		if (!empty($this->context['dances'])) {
+			//Set dances
+			$dances = array_map(function ($v) { return $v['name']; }, $this->context['dances']);
+
+			//Insert dances in keywords
+			array_splice($this->context['keywords'], 1, 0, $dances);
+
+			//Get textual dances
+			$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
+
+			//Set title
+			$this->context['title'] = $this->translator->trans('%dances% %city%', ['%dances%' => $dances, '%city%' => $this->context['city']['in']]);
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor calendar %city%', ['%dances%' => $dances, '%city%' => $this->context['city']['in']]);
+		} else {
+			//Set title
+			$this->context['title'] = $this->translator->trans('Dance %city%', ['%city%' => $this->context['city']['in']]);
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %city%', ['%city%' => $this->context['city']['in']]);
+		}
+
+		//Set locations description
+		$this->context['locations_description'] = $this->translator->trans('Libre Air location list %city%', ['%city%' => $this->context['city']['in']]);
+
+		//Render the view
+		return $this->render('@RapsysAir/location/city.html.twig', $this->context, $response);
 	}
 
 	/**
@@ -267,11 +240,58 @@ class LocationController extends DefaultController {
 	 * @return Response The rendered view
 	 */
 	public function index(Request $request): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
+		//Get locations
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllAsArray($this->period);
 
-		//Set section
-		$section = $this->translator->trans('Libre Air locations');
+		//Set modified
+		$this->modified = max(array_map(function ($v) { return $v['updated']; }, $this->context['locations']));
+
+		//Create response
+		$response = new Response();
+
+		//With logged user
+		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Set last modified
+			$response->setLastModified(new \DateTime('-1 year'));
+
+			//Set as private
+			$response->setPrivate();
+		//Without logged user
+		} else {
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize($this->context['locations'])));
+
+			//Set last modified
+			$response->setLastModified($this->modified);
+
+			//Set as public
+			$response->setPublic();
+
+			//Without role and modification
+			if ($response->isNotModified($request)) {
+				//Return 304 response
+				return $response;
+			}
+		}
+
+		//Set latitudes
+		$latitudes = array_map(function ($v) { return $v['latitude']; }, $this->context['locations']);
+
+		//Set latitude
+		$latitude = round(array_sum($latitudes)/count($latitudes), 6);
+
+		//Set longitudes
+		$longitudes = array_map(function ($v) { return $v['longitude']; }, $this->context['locations']);
+
+		//Set longitude
+		$longitude = round(array_sum($longitudes)/count($longitudes), 6);
+
+		//Add multi map
+		$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air locations sector map'), $this->modified->getTimestamp(), $latitude, $longitude, $this->context['locations'], $this->map->getMultiZoom($latitude, $longitude, $this->context['locations']));
+
+		//Set title
+		$this->context['title'] = $this->translator->trans('Libre Air locations');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air location list');
@@ -284,126 +304,214 @@ class LocationController extends DefaultController {
 			$this->translator->trans('Libre Air')
 		];
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
-			)
-		);
-
 		//Create location forms for role_admin
 		if ($this->isGranted('ROLE_ADMIN')) {
 			//Fetch all locations
-			$locations = $doctrine->getRepository(Location::class)->findAll();
-
-			//Rekey by id
-			$locations = array_reduce($locations, function($carry, $item){$carry[$item->getId()] = $item; return $carry;}, []);
+			$locations = $this->doctrine->getRepository(Location::class)->findAll();
 
 			//Init locations to context
 			$this->context['forms']['locations'] = [];
 
 			//Iterate on locations
-			foreach($locations as $locationId => $location) {
+			foreach($this->context['locations'] as $id => $location) {
 				//Create LocationType form
-				$form = $this->createForm('Rapsys\AirBundle\Form\LocationType', $location, [
-					//Set the action
-					'action' => $this->generateUrl('rapsys_air_location_edit', ['id' => $location->getId()]),
-					//Set the form attribute
-					'attr' => [],
-					//Set block prefix
-					//TODO: make this shit works to prevent label collision
-					//XXX: see https://stackoverflow.com/questions/8703016/adding-a-prefix-to-a-form-label-for-translation
-					'label_prefix' => 'location_'.$locationId
-				]);
+				$form = $this->factory->createNamed(
+					//Set form id
+					'locations_'.$id,
+					//Set form type
+					'Rapsys\AirBundle\Form\LocationType',
+					//Set form data
+					$locations[$location['id']],
+					//Set the form attributes
+					['attr' => []]
+				);
+
+				//Refill the fields in case of invalid form
+				$form->handleRequest($request);
+
+				//Handle valid form
+				if ($form->isSubmitted() && $form->isValid()) {
+					//Get data
+					$data = $form->getData();
+
+					//Set updated
+					$data->setUpdated(new \DateTime('now'));
+
+					//Queue location save
+					$this->manager->persist($data);
+
+					//Flush to get the ids
+					$this->manager->flush();
+
+					//Add notice
+					$this->addFlash('notice', $this->translator->trans('Location %id% updated', ['%id%' => $location['id']]));
+
+					//Redirect to cleanup the form
+					return $this->redirectToRoute('rapsys_air_location', ['location' => $location['id']]);
+				}
 
 				//Add form to context
-				$this->context['forms']['locations'][$locationId] = $form->createView();
+				$this->context['forms']['locations'][$id] = $form->createView();
 			}
 
 			//Create LocationType form
-			$form = $this->createForm('Rapsys\AirBundle\Form\LocationType', null, [
-				//Set the action
-				'action' => $this->generateUrl('rapsys_air_location_add'),
-				//Set the form attribute
-				'attr' => [ 'class' => 'col' ]
-			]);
+			$form = $this->factory->createNamed(
+				//Set form id
+				'locations',
+				//Set form type
+				'Rapsys\AirBundle\Form\LocationType',
+				//Set form data
+				new Location(),
+				//Set the form attributes
+				['attr' => ['class' => 'col']]
+			);
+
+			//Refill the fields in case of invalid form
+			$form->handleRequest($request);
+
+			//Handle valid form
+			if ($form->isSubmitted() && $form->isValid()) {
+				//Get data
+				$data = $form->getData();
+
+				//Queue location save
+				$this->manager->persist($data);
+
+				//Flush to get the ids
+				$this->manager->flush();
+
+				//Add notice
+				$this->addFlash('notice', $this->translator->trans('Location created'));
+
+				//Redirect to cleanup the form
+				return $this->redirectToRoute('rapsys_air_location', ['location' => $data->getId()]);
+			}
 
 			//Add form to context
 			$this->context['forms']['location'] = $form->createView();
 		}
 
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
-
 		//Render the view
-		return $this->render('@RapsysAir/location/index.html.twig', ['title' => $title, 'section' => $section, 'locations' => $locations]+$this->context);
+		return $this->render('@RapsysAir/location/index.html.twig', $this->context);
 	}
 
 	/**
 	 * List all sessions for the location
 	 *
-	 * @desc Display all sessions for the location with an application or login form
+	 * Display all sessions for the location with an application or login form
+	 *
+	 * @TODO: add location edit form ???
 	 *
 	 * @param Request $request The request instance
 	 * @param int $id The location id
 	 *
 	 * @return Response The rendered view
 	 */
-	public function view(Request $request, $id): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Fetch location
-		if (empty($location = $doctrine->getRepository(Location::class)->findOneById($id))) {
+	public function view(Request $request, int $id): Response {
+		//Without location
+		if (empty($this->context['location'] = $this->doctrine->getRepository(Location::class)->findOneByIdAsArray($id, $this->locale))) {
+			//Throw 404
 			throw $this->createNotFoundException($this->translator->trans('Unable to find location: %id%', ['%id%' => $id]));
 		}
 
-		//Set section
-		$section = $this->translator->trans('Argentine Tango at '.$location);
+		//Fetch calendar
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsArray($this->period, $this->locale, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $this->context['location']['latitude'], $this->context['location']['longitude']);
 
-		//Set description
-		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session calendar %location%', [ '%location%' => $this->translator->trans('at '.$location) ]);
+		//Set dances
+		$this->context['dances'] = [];
+
+		//Iterate on each calendar
+		foreach($this->context['calendar'] as $date => $calendar) {
+			//Iterate on each session
+			foreach($calendar['sessions'] as $sessionId => $session) {
+				//Session with application dance
+				if (!empty($session['application']['dance'])) {
+					//Add dance
+					$this->context['dances'][$session['application']['dance']['id']] = $session['application']['dance'];
+				}
+			}
+		}
+
+		//Get locations at less than 2 km
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByLatitudeLongitudeAsArray($this->context['location']['latitude'], $this->context['location']['longitude'], $this->period, 2);
+
+		//Set modified
+		//XXX: dance modified is already computed inside calendar modified
+		$this->modified = max(array_merge([$this->context['location']['updated']], array_map(function ($v) { return $v['modified']; }, array_merge($this->context['calendar'], $this->context['locations']))));
+
+		//Create response
+		$response = new Response();
+
+		//With logged user
+		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Set last modified
+			$response->setLastModified(new \DateTime('-1 year'));
+
+			//Set as private
+			$response->setPrivate();
+		//Without logged user
+		} else {
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize(array_merge($this->context['location'], $this->context['calendar'], $this->context['locations']))));
+
+			//Set last modified
+			$response->setLastModified($this->modified);
+
+			//Set as public
+			$response->setPublic();
+
+			//Without role and modification
+			if ($response->isNotModified($request)) {
+				//Return 304 response
+				return $response;
+			}
+		}
+
+		//Add multi map
+		$this->context['multimap'] = $this->map->getMultiMap($this->context['location']['multimap'], $this->modified->getTimestamp(), $this->context['location']['latitude'], $this->context['location']['longitude'], $this->context['locations'], $this->map->getMultiZoom($this->context['location']['latitude'], $this->context['location']['longitude'], $this->context['locations']));
 
 		//Set keywords
 		$this->context['keywords'] = [
-			$this->translator->trans($location),
-			$this->translator->trans('outdoor'),
-			$this->translator->trans('Argentine Tango'),
-			$this->translator->trans('calendar')
+			$this->context['location']['title'],
+			$this->context['location']['city'],
+			$this->translator->trans($this->context['location']['indoor']?'Indoor':'Outdoor'),
+			$this->translator->trans('Calendar'),
+			$this->translator->trans('Libre Air')
 		];
 
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+		//With dances
+		if (!empty($this->context['dances'])) {
+			//Set dances
+			$dances = array_map(function ($v) { return $v['name']; }, $this->context['dances']);
 
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
-			)
-		);
+			//Insert dances in keywords
+			array_splice($this->context['keywords'], 2, 0, $dances);
 
-		//Fetch calendar
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, $id, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $request->getLocale());
+			//Get textual dances
+			$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
 
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
+			//Set title
+			$this->context['title'] = $this->translator->trans('%dances% %location%', ['%dances%' => $dances, '%location%' => $this->context['location']['atin']]);
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor calendar %location%', ['%dances%' => $dances, '%location%' => $this->context['location']['at']]);
+		//Without dances
+		} else {
+			//Set title
+			$this->context['title'] = $this->translator->trans('Dance %location%', ['%location%' => $this->context['location']['atin']]);
+
+			//Set description
+			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %location%', [ '%location%' => $this->context['location']['at'] ]);
+		}
+
+		//Set locations description
+		$this->context['locations_description'] = $this->translator->trans('Libre Air location list %location%', ['%location%' => $this->context['location']['atin']]);
+
+		//Set alternates
+		$this->context['alternates'] += $this->context['location']['alternates'];
 
 		//Render the view
-		return $this->render('@RapsysAir/location/view.html.twig', ['id' => $id, 'title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+		return $this->render('@RapsysAir/location/view.html.twig', $this->context, $response);
 	}
 }
