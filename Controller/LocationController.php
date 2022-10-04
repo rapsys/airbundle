@@ -13,15 +13,10 @@ namespace Rapsys\AirBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\RequestContext;
 
 use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
-use Rapsys\AirBundle\Entity\Slot;
 
 /**
  * {@inheritdoc}
