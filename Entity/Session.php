@@ -49,7 +49,7 @@ class Session {
 	private $stop;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 */
 	private $premium;
 
@@ -149,6 +149,7 @@ class Session {
 		$this->locked = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+		$this->application = null;
 		$this->applications = new ArrayCollection();
 	}
 
@@ -285,7 +286,7 @@ class Session {
 	/**
 	 * Set premium
 	 *
-	 * @param boolean $premium
+	 * @param bool $premium
 	 *
 	 * @return Session
 	 */
@@ -628,7 +629,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setApplication(Application $application): Session {
+	public function setApplication(?Application $application): Session {
 		$this->application = $application;
 
 		return $this;
