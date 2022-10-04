@@ -26,7 +26,12 @@ class Dance {
 	/**
 	 * @var string
 	 */
-	protected $title;
+	protected $name;
+
+	/**
+	 * @var string
+	 */
+	protected $type;
 
 	/**
 	 * @var \DateTime
@@ -50,9 +55,14 @@ class Dance {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $name The dance name
+	 * @param string $type The dance type
 	 */
-	public function __construct() {
+	public function __construct(string $name, string $type) {
 		//Set defaults
+		$this->name = $name;
+		$this->type = $type;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 
@@ -71,25 +81,47 @@ class Dance {
 	}
 
 	/**
-	 * Set title
+	 * Set name
 	 *
-	 * @param string $title
+	 * @param string $name
 	 *
 	 * @return Dance
 	 */
-	public function setTitle(string $title): Dance {
-		$this->title = $title;
+	public function setName(string $name): Dance {
+		$this->name = $name;
 
 		return $this;
 	}
 
 	/**
-	 * Get title
+	 * Get name
 	 *
 	 * @return string
 	 */
-	public function getTitle(): string {
-		return $this->title;
+	public function getName(): string {
+		return $this->name;
+	}
+
+	/**
+	 * Set type
+	 *
+	 * @param string $type
+	 *
+	 * @return Dance
+	 */
+	public function setType(string $type): Dance {
+		$this->type = $type;
+
+		return $this;
+	}
+
+	/**
+	 * Get type
+	 *
+	 * @return string
+	 */
+	public function getType(): string {
+		return $this->type;
 	}
 
 	/**
@@ -219,6 +251,6 @@ class Dance {
 	 * @return string
 	 */
 	public function __toString(): string {
-		return $this->title;
+		return $this->name.' '.lcfirst($this->type);
 	}
 }
