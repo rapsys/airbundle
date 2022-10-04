@@ -101,7 +101,7 @@ class User extends BaseUser {
 	 *
 	 * @param Country $country
 	 *
-	 * @return Snippet
+	 * @return User
 	 */
 	public function setCountry(Country $country) {
 		$this->country = $country;
