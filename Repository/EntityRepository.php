@@ -110,11 +110,41 @@ class EntityRepository extends BaseEntityRepository {
 			'RapsysAirBundle:Group' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Session' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Session'), $dp),
+			'RapsysAirBundle:Slot' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Slot'), $dp),
+			'RapsysAirBundle:Snippet' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Snippet'), $dp),
 			'RapsysAirBundle:User' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:User'), $dp),
-
+			//Set accuweather max number of daily pages
+			':accudaily' => 12,
+			//Set accuweather max number of hourly pages
+			':accuhourly' => 3,
+			//Set guest delay
+			':guestdelay' => 2 * 24 * 3600,
+			//Set regular delay
+			':regulardelay' => 3 * 24 * 3600,
+			//Set senior delay
+			':seniordelay' => 4 * 24 * 3600,
+			//Set guest group id
+			':guestid' => 2,
+			//Set regular group id
+			':regularid' => 3,
+			//Set senior group id
+			':seniorid' => 4,
+			//Set afternoon slot id
+			':afternoonid' => 2,
+			//Set evening slot id
+			':eveningid' => 3,
+			//Set after slot id
+			':afterid' => 4,
+			//XXX: days since last session after which guest regain normal priority
+			':guestwait' => 30,
+			//XXX: session count until considered at regular delay
+			':scount' => 5,
+			//XXX: pn_ratio over which considered at regular delay
+			':pnratio' => 1,
+			//XXX: tr_ratio diff over which considered at regular delay
+			':trdiff' => 5,
 			//XXX: Set limit used to workaround mariadb subselect optimization
 			':limit' => PHP_INT_MAX,
-			':afterid' => 4,
 			"\t" => '',
 			"\n" => ' '
 		];
