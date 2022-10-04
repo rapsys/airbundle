@@ -3,18 +3,21 @@ Rapsys\AirBundle\Entity\User:
     repositoryClass: Rapsys\AirBundle\Repository\UserRepository
     table: users
     fields:
-        pseudonym:
+        city:
             type: string
-            length: 32
+            length: 64
             nullable: true
         phone:
             type: string
             length: 16
             nullable: true
-        slug:
+        pseudonym:
             type: string
-            unique: true
             length: 32
+            nullable: true
+        zipcode:
+            type: string
+            length: 5
             nullable: true
     oneToMany:
         applications:
@@ -60,6 +63,10 @@ Rapsys\AirBundle\Entity\User:
                 inverseJoinColumns:
                     id:
                         name: location_id
+    manyToOne:
+        country:
+            targetEntity: Rapsys\AirBundle\Entity\Country
+            inversedBy: users
 #    manyToMany:
 #        groups:
 #            targetEntity: Group
