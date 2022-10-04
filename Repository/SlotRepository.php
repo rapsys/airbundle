@@ -1,30 +1,34 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\Repository;
 
-use Symfony\Component\Translation\TranslatorInterface;
 use Doctrine\ORM\Query\ResultSetMapping;
 
 /**
  * SlotRepository
  */
-class SlotRepository extends \Doctrine\ORM\EntityRepository {
+class SlotRepository extends EntityRepository {
 	/**
 	 * Find slots with translated title
 	 *
-	 * @param $translator The TranslatorInterface instance
+	 * @return array The slots id keyed by translated title
 	 */
-	public function findAllWithTranslatedTitle(TranslatorInterface $translator) {
-		//Get entity manager
-		$em = $this->getEntityManager();
-
-		//Get quote strategy
-		$qs = $em->getConfiguration()->getQuoteStrategy();
-		$dp = $em->getConnection()->getDatabasePlatform();
-
+	public function findAllWithTranslatedTitle(): array {
 		//Set the request from quoted table name
 		//XXX: this allow to make this code table name independent
-		$req = 'SELECT s.id, s.title FROM '.$qs->getTableName($em->getClassMetadata('RapsysAirBundle:Slot'), $dp).' AS s';
+		$req = 'SELECT s.id, s.title FROM RapsysAirBundle:Slot AS s';
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
 
 		//Get result set mapping instance
 		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
@@ -38,7 +42,7 @@ class SlotRepository extends \Doctrine\ORM\EntityRepository {
 			->addIndexByScalar('id');
 
 		//Fetch result
-		$res = $em
+		$res = $this->_em
 			->createNativeQuery($req, $rsm)
 			->getResult();
 
@@ -48,7 +52,7 @@ class SlotRepository extends \Doctrine\ORM\EntityRepository {
 		//Process result
 		foreach($res as $data) {
 			//Get translated slot
-			$slot = $translator->trans($data['title']);
+			$slot = $this->translator->trans($data['title']);
 			//Set data
 			//XXX: ChoiceType use display string as key
 			$ret[$slot] = $data['id'];
