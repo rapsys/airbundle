@@ -31,6 +31,11 @@ class Location {
 	/**
 	 * @var string
 	 */
+	protected $description;
+
+	/**
+	 * @var string
+	 */
 	private $address;
 
 	/**
@@ -54,7 +59,12 @@ class Location {
 	private $longitude;
 
 	/**
-	 * @var boolean
+	 * @var bool
+	 */
+	private $indoor;
+
+	/**
+	 * @var bool
 	 */
 	private $hotspot;
 
@@ -88,6 +98,7 @@ class Location {
 	 */
 	public function __construct() {
 		//Set defaults
+		$this->description = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 		$this->sessions = new ArrayCollection();
@@ -124,6 +135,28 @@ class Location {
 	 */
 	public function getTitle(): string {
 		return $this->title;
+	}
+
+	/**
+	 * Set description
+	 *
+	 * @param string $description
+	 *
+	 * @return Location
+	 */
+	public function setDescription(?string $description): Location {
+		$this->description = $description;
+
+		return $this;
+	}
+
+	/**
+	 * Get description
+	 *
+	 * @return string
+	 */
+	public function getDescription(): ?string {
+		return $this->description;
 	}
 
 	/**
@@ -237,9 +270,31 @@ class Location {
 	}
 
 	/**
+	 * Set indoor
+	 *
+	 * @param bool $indoor
+	 *
+	 * @return Session
+	 */
+	public function setIndoor(bool $indoor): Location {
+		$this->indoor = $indoor;
+
+		return $this;
+	}
+
+	/**
+	 * Get indoor
+	 *
+	 * @return bool
+	 */
+	public function getIndoor(): bool {
+		return $this->indoor;
+	}
+
+	/**
 	 * Set hotspot
 	 *
-	 * @param boolean $hotspot
+	 * @param bool $hotspot
 	 *
 	 * @return Session
 	 */
@@ -252,7 +307,7 @@ class Location {
 	/**
 	 * Get hotspot
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getHotspot(): bool {
 		return $this->hotspot;
@@ -319,7 +374,7 @@ class Location {
 	 * Remove session
 	 *
 	 * @param Session $session
-	 * @return boolean
+	 * @return bool
 	 */
 	public function removeSession(Session $session): bool {
 		return $this->sessions->removeElement($session);
@@ -351,7 +406,7 @@ class Location {
 	 * Remove snippet
 	 *
 	 * @param Snippet $snippet
-	 * @return boolean
+	 * @return bool
 	 */
 	public function removeSnippet(Snippet $snippet): bool {
 		return $this->snippets->removeElement($snippet);
@@ -383,7 +438,7 @@ class Location {
 	 * Remove user
 	 *
 	 * @param User $user
-	 * @return boolean
+	 * @return bool
 	 */
 	public function removeUser(User $user): bool {
 		return $this->users->removeElement($user);
