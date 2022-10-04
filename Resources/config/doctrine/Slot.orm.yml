@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\Slot:
     type: entity
-    repositoryClass: Rapsys\AirBundle\Repository\SlotRepository
+    #repositoryClass: Rapsys\AirBundle\Repository\SlotRepository
     table: slots
     id:
         id:
