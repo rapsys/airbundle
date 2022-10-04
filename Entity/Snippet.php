@@ -106,9 +106,9 @@ class Snippet {
 		$this->donate = null;
 		$this->link = null;
 		$this->profile = null;
+		$this->location = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
-		$this->location = null;
 	}
 
 	/**
@@ -430,7 +430,7 @@ class Snippet {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function preUpdate(\Doctrine\ORM\Event\PreUpdateEventArgs  $eventArgs) {
+	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have an snippet instance
 		if (($snippet = $eventArgs->getEntity()) instanceof Snippet) {
 			//Set updated value
