@@ -1,0 +1,39 @@
+Rapsys\AirBundle\Entity\Country:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\CountryRepository
+    table: countries
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        code:
+            type: string
+            length: 2
+            nullable: false
+        alpha:
+            type: string
+            length: 3
+            nullable: false
+        title:
+            type: string
+            length: 64
+            nullable: false
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    oneToMany:
+        users:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            mappedBy: country
+    uniqueConstraints:
+        code:
+            columns: [ code ]
+        alpha:
+            columns: [ alpha ]
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']
