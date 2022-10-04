@@ -101,6 +101,7 @@ class EntityRepository extends BaseEntityRepository {
 		//XXX: this allow to make this code table name independent
 		//XXX: remember to place longer prefix before shorter to avoid strange replacings
 		$tables = [
+			'RapsysAirBundle:UserDance' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('dances'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:UserGroup' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:UserLocation' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('locations'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Application' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Application'), $dp),
