@@ -22,50 +22,49 @@ a::first-letter {
 html, body, dd, li, p, td {
 	/* DejaVu Sans/FreeSans/FreeSerif/Linux Libertine/Symbola/Unifont*/
 	font-family: 'Droid Sans', 'Symbola', 'DejaVu Sans', 'FreeSans', sans-serif;
-	font-display: swap;
 }
 
 button, code, input, option, optgroup, pre, select, textarea {
 	font-family: 'Droid Sans Mono', monospace;
-	font-display: swap;
 }
 
 dt, h1, h2, h3, h4, h5, h6, label, legend, th, details {
 	font-family: 'Droid Serif', serif;
-	font-display: swap;
 }
 
 /* Default styling */
 h1 {
-	font-size: 2rem;
-}
-
-h2 {
 	font-size: 1.5rem;
 	margin: 0 0 .5rem;
 	padding: .5rem;
 }
 
-h3 {
+h2 {
 	font-size: 1.17rem;
 	margin: 0 0 .5rem;
 	padding: .4rem;
 }
 
-h4 {
+h3 {
 	font-size: 1rem;
 	margin: 0 0 .5rem;
 	padding: .3rem;
 }
 
-h5 {
+h4 {
 	font-size: .85rem;
 	margin: 0 0 .5rem;
 	padding: .2rem;
 }
 
-h6 {
+h5 {
 	font-size: .67rem;
+	margin: 0 0 .5rem;
+	padding: .1rem;
+}
+
+h6 {
+	font-size: .5rem;
 	margin: 0 0 .5rem;
 	padding: .1rem;
 }
@@ -74,9 +73,13 @@ header {
 	margin: 0 0 .5rem;
 }
 
-header h2 {
+header h1 {
 	margin: 0;
 	padding: .5rem .5rem .3rem;
+	border-bottom: 0 none;
+}
+
+header h2 {
 	border-bottom: 0 none;
 }
 
@@ -87,7 +90,7 @@ nav strong {
 	padding: .4rem;
 }
 
-h2, h3, h4, h5, header, nav strong {
+h1, h2, h3, h4, header {
 	background-color: #cff;
 	border-bottom: .1rem solid #00c3f9;
 }
@@ -124,6 +127,47 @@ dt {
 dd {
 	font-size: .9rem;
 	margin-left: 1rem;
+}
+
+.map figure,
+.multimap figure,
+.thumb figure {
+	text-align: center;
+}
+
+.map img,
+.multimap img,
+.thumb img {
+	border-radius: .2rem;
+	border: .1rem solid #00c3f9;
+	aspect-ratio: 1;
+}
+
+.map dd {
+	margin: 0;
+}
+
+.map dd img {
+	width: 100%;
+	width: calc(100% - .2rem);
+	height: auto;
+}
+
+.thumb img {
+	width: 100%;
+	width: calc(100% - 1.2rem);
+}
+
+.four .multimap {
+	grid-column: span 4;
+}
+
+.three .multimap {
+	grid-column: span 3;
+}
+
+.two .multimap {
+	grid-column: span 2;
 }
 
 body {
@@ -207,8 +251,17 @@ form div:last-of-type {
 
 form label {
 	width: 12rem;
+	line-height: 1.3rem;
 	padding-right: 1rem;
 	text-align: right;
+}
+
+form label.captcha {
+	line-height: normal;
+}
+
+form label.captcha img {
+	height: 1.325rem;
 }
 
 form input,
@@ -242,6 +295,7 @@ form div .message {
 }
 
 /* Vertical form */
+.location .col label,
 .col label {
 	width: 8rem;
 	padding-right: 0;
@@ -250,6 +304,8 @@ form div .message {
 	margin: 0 auto;
 }
 
+.location .col input,
+.location .col textarea,
 .col input,
 .col option,
 .col optgroup,
@@ -282,22 +338,19 @@ form div .message {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	justify-content: space-between;
-	line-height: 32px;
+	line-height: 45px;
 	font-size: 32px;
 	padding: .5rem;
 	gap: .5rem;
 }
 
-#header h1 {
+#logo {
+	font-size: 2rem;
 	padding: 0;
 	margin: auto;
 	white-space: nowrap;
-	width: 171px;
-	height: 32px;
-}
-
-#header h2 {
-	display: none;
+	width: 100px;
+	height: 45px;
 }
 
 #header nav {
@@ -459,7 +512,6 @@ form div .message {
 .grid article,
 .grid section {
 	border-collapse: inherit;
-	border-color: inherit;
 	border-radius: inherit;
 	border-style: inherit;
 	border-width: .1rem;
@@ -468,6 +520,10 @@ form div .message {
 	margin: 0;
 	min-height: 5rem;
 	overflow: hidden;
+}
+
+.grid section {
+	border-color: inherit;
 }
 
 .grid h3 {
@@ -508,6 +564,9 @@ form div .message {
 }
 
 .grid a {
+	/*TODO: voir pourquoi on a besoin d'un overflow-y de merde, sans une putain de scrollbar s'affiche dans certaines conditions sur chrome, depuis le passage de deux lignes de grid à 3 !!!*/
+	/*Est-ce parce que le city est pas expanded ???*/
+	overflow-y: clip;
 	overflow-x: hidden;
 	text-overflow: ellipsis;
 }
@@ -569,9 +628,14 @@ form div .message {
 }
 
 .highlight,
-.highlight a {
+.highlight a,
+.highlight h3 {
 	border-color: #3333c3;
 	background-color: #c3c3f9;
+	color: #606;
+}
+
+.highlight h3::first-letter {
 	color: #3333c3;
 }
 
@@ -585,11 +649,28 @@ form div .message {
 	grid-template-columns: max-content 1fr max-content;
 	flex: 1 1 auto;
 	grid-gap: .1rem;
+	/*XXX: reset to visible to prevent scroll*/
+	overflow-x: visible;
 }
 
 .calendar .reducible {
 	overflow-x: hidden;
 	text-overflow: ellipsis;
+	text-align: center;
+}
+
+.calendar .glyph {
+	font-family: 'Noto Color Emoji', 'Noto Emoji', 'Droid Sans', 'Symbola', 'DejaVu Sans', 'FreeSans', sans-serif;
+}
+
+.calendar .temperature,
+.calendar .rain,
+.calendar .rate {
+	line-height: 1rem;
+	text-align: right;
+}
+
+.calendar .rate {
 	text-align: center;
 }
 
@@ -618,21 +699,26 @@ form div .message {
 	grid-template-columns: repeat(2, 1fr);
 }
 
-.location h3 {
+.city .grid h3,
+.location .grid h3,
+.city .grid h4,
+.location .grid h4 {
 	border-style: none;
+	margin: 0;
 	flex: 1 1 auto;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.location p {
-	margin: 0 .5rem .5rem;
+.city .grid article,
+.location .grid article {
+	min-height: auto;
+	height: fit-content;
 }
 
-.location .grid article,
-.location .grid section {
-	min-height: auto;
+.city .grid {
+	gap: .5rem;
 }
 
 .location form {
@@ -699,6 +785,7 @@ form div .message {
 	display: flex;
 	justify-content: space-between;
 	background-color: #cff;
+	gap: .5rem;
 }
 
 #footer summary::after {
@@ -721,13 +808,28 @@ form div .message {
 	.location textarea {
 		width: 12rem;
 	}
+
+	.location .two {
+		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.session .three {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
-@media ( max-width: 900px ) {
+@media ( max-width: 950px ) {
 	.panel {
+		/*flex-flow: column-reverse wrap;*/
 		flex-flow: column wrap;
 	}
 
+	.location .two {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media ( max-width: 900px ) {
 	.form {
 		flex-direction: row;
 	}
@@ -735,6 +837,12 @@ form div .message {
 	form label {
 		width: 6rem;
 		line-height: 2rem;
+	}
+
+	form label.captcha img {
+		height: auto;
+		width: 6rem;
+		padding: .25rem 0;
 	}
 
 	form input,
@@ -781,6 +889,26 @@ form div .message {
 		grid-template-columns: repeat(3, 1fr);
 	}
 
+	.three {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.two {
+		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.four .multimap {
+		grid-column: span 3;
+	}
+
+	.three .multimap {
+		grid-column: span 2;
+	}
+
+	.two .multimap {
+		grid-column: span 1;
+	}
+
 	/*#dashboard .seventh:nth-child(7n+1),
 	#dashboard .seventh:nth-child(7n+2),
 	#dashboard .seventh:nth-child(7n+3),
@@ -793,6 +921,18 @@ form div .message {
 	#dashboard .seventh:nth-child(7n+7) {
 		width: calc(100% / 3 - (2/3*.1rem));
 	}*/
+}
+
+@media ( max-width: 700px ) {
+	.session .three {
+		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.multimap img {
+		width: 100%;
+		width: calc(100% - .2rem);
+		height: auto;
+	}
 }
 
 @media ( max-width: 600px ) {
@@ -838,9 +978,24 @@ form div .message {
 		margin-bottom: 0;
 	}
 
-	.four,
-	.three {
+	.four {
 		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.three {
+		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.four .multimap {
+		grid-column: span 2;
+	}
+
+	.three .multimap {
+		grid-column: span 1;
+	}
+
+	.location .two {
+		grid-template-columns: repeat(1, 1fr);
 	}
 
 	/*#dashboard .seventh:nth-child(n) {
@@ -850,14 +1005,42 @@ form div .message {
 	#dashboard .seventh:nth-child(7n) {
 		width: calc(100%);
 	}*/
+
+	/*.city .two,
+	.location .two {
+		grid-template-columns: 1fr;
+	}
+
+	.city .grid article,
+	.location .grid article {
+		overflow: hidden;
+	}*/
 }
 
 @media ( max-width: 450px ) {
+	dd, p, #footer {
+		font-size: 110%;
+	}
+
+	a, dd, figcaption, #footer {
+		/*XXX: required to validate Tap targets are sized appropriately*/
+		line-height: 3rem;
+	}
+
+	figure,
+	.calendar a {
+		line-height: normal;
+	}
+
 	form .row,
 	.grid,
 	.form,
 	#footer {
 		flex-direction: column;
+	}
+
+	form label {
+		text-align: center;
 	}
 
 	.seven {
@@ -871,9 +1054,12 @@ form div .message {
 		grid-column: auto;
 	}
 
-	.four,
-	.three {
+	.four {
 		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.four .multimap {
+		grid-column: span 1;
 	}
 }
 
