@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- License http://creativecommons.org/licenses/by-nc-sa/4.0/ -->
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveAspectRatio="xMidYMid slice" viewBox="0 0 684 128" width="684" height="128">
+	<defs>
+		<radialGradient id="radial" cx=".5" cy=".55" fx=".5" fy=".5" r=".5">
+			<stop offset="0%" stop-color="#00c3f9" stop-opacity="0" />
+			<stop offset="40%" stop-color="#00c3f9" stop-opacity="0.33" />
+			<stop offset="100%" stop-color="#00c3f9" stop-opacity="1" />
+		</radialGradient>
+		<radialGradient id="radial2" cx=".55" cy=".5" fx=".5" fy=".5" r=".5">
+			<stop offset="0%" stop-color="#00c3f9" stop-opacity="0" />
+			<stop offset="40%" stop-color="#00c3f9" stop-opacity="0.33" />
+			<stop offset="100%" stop-color="#00c3f9" stop-opacity="0.66" />
+		</radialGradient>
+	</defs>
+	<text x="0" y="126" textLength="128px" fill="url('#radial')" font-family="Arial, Helvetica, Regular, sans-serif" font-size="184px" transform="scale(1.02425 1)" transform-origin="0 0">A</text>
+	<text x="140" y="126" textLength="100px" fill="#000" font-family="Arial, Helvetica, Regular, sans-serif" font-size="150px">ir</text>
+	<text x="280" y="126" textLength="108px" fill="url('#radial2')" font-family="Arial, Helvetica, Regular, sans-serif" font-size="184px" transform="scale(1.02425 1)" transform-origin="0 0">L</text>
+	<text x="400" y="126" textLength="290px" fill="#000" font-family="Arial, Helvetica, Regular, sans-serif" font-size="150px">ibre</text>
+</svg>
