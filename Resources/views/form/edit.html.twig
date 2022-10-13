@@ -1,8 +1,10 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
-	<section id="form">
-		<h2><a href="{{ app.request.requesturi }}">{{ title }}</a></h2>
+	<article>
+		<header>
+			<h2><a href="{{ app.request.requesturi }}">{{ title }}</a></h2>
+		</header>
 		{{ form_start(edit) }}
 			<div>
 				{% if edit.mail is defined %}
@@ -25,8 +27,16 @@
 					{{ form_row(edit.pseudonym) }}
 				{% endif %}
 
-				{% if edit.slug is defined %}
-					{{ form_row(edit.slug) }}
+				{% if edit.zipcode is defined %}
+					{{ form_row(edit.zipcode) }}
+				{% endif %}
+
+				{% if edit.city is defined %}
+					{{ form_row(edit.city) }}
+				{% endif %}
+
+				{% if edit.country is defined %}
+					{{ form_row(edit.country) }}
 				{% endif %}
 
 				{% if edit.phone is defined %}
@@ -39,10 +49,12 @@
 			{# Render CSRF token etc .#}
 			<footer style="display:none">{{ form_rest(edit) }}</footer>
 		{{ form_end(edit) }}
-	</section>
+	</article>
 	{% if reset is defined %}
-		<section id="form">
-			<h2><a href="{{ app.request.requesturi }}">{{ password }}</a></h2>
+		<article>
+			<header>
+				<h2><a href="{{ app.request.requesturi }}">{{ password }}</a></h2>
+			</header>
 			{{ form_start(reset) }}
 				<div>
 					{% if reset.password is defined %}
@@ -57,6 +69,6 @@
 				{# Render CSRF token etc .#}
 				<footer style="display:none">{{ form_rest(reset) }}</footer>
 			{{ form_end(reset) }}
-		</section>
+		</article>
 	{% endif %}
 {% endblock %}
