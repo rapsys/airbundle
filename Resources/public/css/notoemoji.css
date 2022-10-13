@@ -1,0 +1,7 @@
+@font-face {
+	font-family: 'Noto Emoji';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Noto Emoji'), local('Noto-Emoji'), url(/bundles/rapsysair/woff2/notoemoji.woff2) format('woff2');
+	font-display: swap;
+}
