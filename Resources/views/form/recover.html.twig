@@ -1,8 +1,10 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
-	<section id="form">
-		<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+	<article>
+		<header>
+			<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+		</header>
 		{% if sent %}
 			<p class="message notice">{% trans %}Your recover account message has been sent{% endtrans %}</p>
 		{% else %}
@@ -23,5 +25,5 @@
 				<footer style="display:none">{{ form_rest(form) }}</footer>
 			{{ form_end(form) }}
 		{% endif %}
-	</section>
+	</article>
 {% endblock %}
