@@ -3,54 +3,118 @@
 	<article class="location">
 		<header>
 			<h2><a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a></h2>
-			{% if forms.snippets is defined %}
+			{% if locations_description is defined %}
+				<p>{{ locations_description }}</p>
+			{% elseif forms.snippets is defined %}
 				<p>{% trans %}Organizer's snippet by dance space{% endtrans %}</p>
 			{% else %}
 				<p>{% trans %}Libre Air location list{% endtrans %}</p>
 			{% endif %}
 		</header>
 		<div class="panel">
-			<div class="grid four">
-				{% for id, title in locations %}
-					<article class="cell">
-						<h3><a href="{{ path('rapsys_air_location_view', {'id': id}) }}">{{ title }}</a></h3>
-						{% if forms.snippets is defined and forms.snippets[id] is defined and forms.snippets[id] %}
-							{{ form_start(forms.snippets[id]) }}
-								<div>
-									{{ form_row(forms.snippets[id].description) }}
+			{% if multimap is defined and multimap %}
+				<div class="multimap">
+					<a href="{{ multimap.link }}" title="{{ multimap.caption }}">
+						<figure>
+							<img src="{{ multimap.src }}" alt="{{ multimap.caption }}" width="{{ multimap.width }}" height="{{ multimap.height }}" />
+							<figcaption>{{ multimap.caption }}</figcaption>
+						</figure>
+					</a>
+				</div>
+			{% endif %}
+			{% if forms.snippets is defined %}
+				<div class="grid">
+					{% for i, l in locations %}
+						<article class="cell{% if l.count is defined and l.count or location.id is defined and location.id == l.id or session.location.id is defined and session.location.id == l.id %} highlight{% endif %}">
+							<header>
+								{# TODO XXX virer le if l.link id defined when user view is fixed !!! #}
+								<h3>{% if multimap is defined and multimap %}{{ i }} {% endif %}<a href="{{ l.link }}">{{ l.title }}</a></h3>
+							</header>
+							{% if forms.snippets[i] is defined and forms.snippets[i] %}
+								{{ form_start(forms.snippets[i]) }}
+									<div>
+										{% if forms.snippets[i].description is defined %}
+											{{ form_row(forms.snippets[i].description) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].class) }}
+										{% if forms.snippets[i].class is defined %}
+											{{ form_row(forms.snippets[i].class) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].short) }}
+										{% if forms.snippets[i].short is defined %}
+											{{ form_row(forms.snippets[i].short) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].rate) }}
+										{% if forms.snippets[i].rate is defined %}
+											{{ form_row(forms.snippets[i].rate) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].hat) }}
+										{% if forms.snippets[i].hat is defined %}
+											{{ form_row(forms.snippets[i].hat) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].contact) }}
+										{% if forms.snippets[i].contact is defined %}
+											{{ form_row(forms.snippets[i].contact) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].donate) }}
+										{% if forms.snippets[i].donate is defined %}
+											{{ form_row(forms.snippets[i].donate) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].link) }}
+										{% if forms.snippets[i].link is defined %}
+											{{ form_row(forms.snippets[i].link) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].profile) }}
+										{% if forms.snippets[i].profile is defined %}
+											{{ form_row(forms.snippets[i].profile) }}
+										{% endif %}
 
-									{{ form_row(forms.snippets[id].image) }}
+										{{ form_row(forms.snippets[i].submit) }}
+									</div>
 
-									{{ form_row(forms.snippets[id].submit) }}
-
-									{% if forms.snippets[id].delete is defined %}
-										{{ form_row(forms.snippets[id].delete) }}
-									{% endif %}
+									{# render csrf token etc .#}
+									<footer style="display:none">{{ form_rest(forms.snippets[i]) }}</footer>
+								{{ form_end(forms.snippets[i]) }}
+							{% endif %}
+							{% if l.image is defined and l.image %}
+								<div class="thumb">
+									<a href="{{ l.image.link }}" title="{{ l.image.caption }}">
+										<figure>
+											<img src="{{ l.image.src }}" alt="{{ l.image.caption }}" width="{{ l.image.width }}" height="{{ l.image.height }}" />
+											<figcaption>{{ l.image.caption }}</figcaption>
+										</figure>
+									</a>
 								</div>
+							{% endif %}
+							{% if forms.images is defined and forms.images[i] is defined and forms.images[i] %}
+								{{ form_start(forms.images[i]) }}
+									<div>
+										{% if forms.images[i].image is defined %}
+											{{ form_row(forms.images[i].image) }}
+										{% endif %}
 
-								{# render csrf token etc .#}
-								<footer style="display:none">{{ form_rest(forms.snippets[id]) }}</footer>
-							{{ form_end(forms.snippets[id]) }}
-						{% endif %}
-					</article>
-				{% endfor %}
-			</div>
+										{{ form_row(forms.images[i].submit) }}
+
+										{% if forms.images[i].delete is defined %}
+											{{ form_row(forms.images[i].delete) }}
+										{% endif %}
+									</div>
+
+									{# render csrf token etc .#}
+									<footer style="display:none">{{ form_rest(forms.images[i]) }}</footer>
+								{{ form_end(forms.images[i]) }}
+							{% endif %}
+						</article>
+					{% endfor %}
+				</div>
+			{% else %}
+				<ul class="grid{% if locations|length > 1 %} two{% endif %}">
+					{% for i, l in locations %}
+						{# TODO XXX virer le if l.link id defined when user view is fixed !!! #}
+						<li>{% if multimap is defined and multimap %}{{ i }} {% endif %}<a href="{{ l.link }}">{{ l.title }}</a></li>
+					{% endfor %}
+				</ul>
+			{% endif %}
 		</div>
 	</article>
 {% endif %}
