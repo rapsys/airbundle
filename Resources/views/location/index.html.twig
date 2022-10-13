@@ -2,56 +2,65 @@
 {% block content %}
 	<article id="dashboard" class="location">
 		<header>
-			<h2><a href="{{ canonical }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
 			{% if locations is defined and locations %}
-				<div class="grid{% if locations|length > 2%} three{% elseif locations|length > 1%} two{% endif %}">
-					{% if multimap is defined and multimap %}
-						<div class="multimap">
-							<a href="{{ multimap.link }}" title="{{ multimap.caption }}">
-								<figure>
-									<img src="{{ multimap.src }}" alt="{{ multimap.caption }}"{# width="{{ multimap.width }}" height="{{ multimap.height }}" #} />
-									<figcaption>{{ multimap.caption }}</figcaption>
-								</figure>
-							</a>
-						</div>
-					{% endif %}
-					{% for id, location in locations %}
-						<article class="cell">
-							<h3>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}" title="{{ location.title }}">{{ location.title }}</a></h3>
-							{% if forms.locations is defined and forms.locations[id] is defined and forms.locations[id] %}
-								{{ form_start(forms.locations[id]) }}
-									<div>
-										{{ form_row(forms.locations[id].title) }}
+				{% if multimap is defined and multimap %}
+					<div class="multimap">
+						<a href="{{ multimap.link }}" title="{{ multimap.caption }}">
+							<figure>
+								<img src="{{ multimap.src }}" alt="{{ multimap.caption }}"{# width="{{ multimap.width }}" height="{{ multimap.height }}" #} />
+								<figcaption>{{ multimap.caption }}</figcaption>
+							</figure>
+						</a>
+					</div>
+				{% endif %}
+				{% if forms.locations is defined %}
+					<div class="grid{% if locations|length > 1%} two{% endif %}">
+						{% for id, location in locations %}
+							<article class="cell">
+								<header>
+									<h3>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}" title="{{ location.title }}">{{ location.title }}</a></h3>
+								</header>
+								{% if forms.locations[id] is defined and forms.locations[id] %}
+									{{ form_start(forms.locations[id]) }}
+										<div>
+											{{ form_row(forms.locations[id].title) }}
 
-										{{ form_row(forms.locations[id].description) }}
+											{{ form_row(forms.locations[id].description) }}
 
-										{{ form_row(forms.locations[id].address) }}
+											{{ form_row(forms.locations[id].address) }}
 
-										{{ form_row(forms.locations[id].zipcode) }}
+											{{ form_row(forms.locations[id].zipcode) }}
 
-										{{ form_row(forms.locations[id].city) }}
+											{{ form_row(forms.locations[id].city) }}
 
-										{{ form_row(forms.locations[id].latitude) }}
+											{{ form_row(forms.locations[id].latitude) }}
 
-										{{ form_row(forms.locations[id].longitude) }}
+											{{ form_row(forms.locations[id].longitude) }}
 
-										{{ form_row(forms.locations[id].indoor) }}
+											{{ form_row(forms.locations[id].indoor) }}
 
-										{{ form_row(forms.locations[id].hotspot) }}
+											{{ form_row(forms.locations[id].hotspot) }}
 
-										{{ form_row(forms.locations[id].submit) }}
-									</div>
+											{{ form_row(forms.locations[id].submit) }}
+										</div>
 
-									{# render csrf token etc .#}
-									<footer style="display:none">{{ form_rest(forms.locations[id]) }}</footer>
-								{{ form_end(forms.locations[id]) }}
-							{% endif %}
-						</article>
-					{% endfor %}
-				</div>
+										{# render csrf token etc .#}
+										<footer style="display:none">{{ form_rest(forms.locations[id]) }}</footer>
+									{{ form_end(forms.locations[id]) }}
+								{% endif %}
+							</article>
+						{% endfor %}
+					</div>
+				{% else %}
+					<ul class="grid{% if locations|length > 2%} three{% elseif locations|length > 1%} two{% endif %}">
+						{% for id, location in locations %}
+							<li>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}" title="{{ location.title }}">{{ location.title }}</a></li>
+						{% endfor %}
+					</ul>
+				{% endif %}
 			{% endif %}
 			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 		</div>
