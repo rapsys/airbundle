@@ -1,5 +1,9 @@
+#https://symfony.com/doc/current/controller.html#controller-request-argument
+#CRUD: edit, index, new, show, _delete_form, _form
 #https://symfony.com/doc/current/routing.html#localized-routes-i18n
 #SCRUD: index, add, edit, delete, view
+
+#TODO: rename view in show ???
 rapsys_air:
     path:
         en_gb: '/en'
@@ -16,8 +20,8 @@ rapsys_air_about:
 
 rapsys_air_contact:
     path:
-        en_gb: '/en/contact'
-        fr_fr: '/contacter'
+        en_gb: '/en/contact/{id<\d*>?}/{user<[\w-]*>?}'
+        fr_fr: '/contacter/{id<\d*>?}/{user<[\w-]*>?}'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
@@ -32,6 +36,41 @@ rapsys_air_calendar_callback:
     path: '/calendar/callback'
     controller: Rapsys\AirBundle\Controller\CalendarController::callback
     methods: GET
+
+rapsys_air_city:
+    path:
+        'en_gb': '/en/city'
+        'fr_fr': '/ville'
+    controller: Rapsys\AirBundle\Controller\LocationController::cities
+    methods: GET|POST
+
+rapsys_air_city_view:
+    path:
+        'en_gb': '/en/city/{latitude<-?(?:\d*\.)?\d+>}/{longitude<-?(?:\d*\.)?\d+>}/{city<[\w-]+>}'
+        'fr_fr': '/ville/{latitude<-?(?:\d*\.)?\d+>}/{longitude<-?(?:\d*\.)?\d+>}/{city<[\w-]+>}'
+    controller: Rapsys\AirBundle\Controller\LocationController::city
+    methods: GET|POST
+
+rapsys_air_dance:
+    path:
+        'en_gb': '/en/dance'
+        'fr_fr': '/danse'
+    controller: Rapsys\AirBundle\Controller\DanceController::index
+    methods: GET|POST
+
+rapsys_air_dance_view:
+    path:
+        'en_gb': '/en/dance/{id<[0-9]+>}/{name<[\w-]+>}/{type<[\w-]+>}'
+        'fr_fr': '/danse/{id<[0-9]+>}/{name<[\w-]+>}/{type<[\w-]+>}'
+    controller: Rapsys\AirBundle\Controller\DanceController::view
+    methods: GET|POST
+
+rapsys_air_dance_name:
+    path:
+        'en_gb': '/en/dance/{name<[a-zA-Z0-9=_-]+>}/{dance<[\w-]+>}'
+        'fr_fr': '/danse/{name<[a-zA-Z0-9=_-]+>}/{dance<[\w-]+>}'
+    controller: Rapsys\AirBundle\Controller\DanceController::name
+    methods: GET|POST
 
 rapsys_air_frequently_asked_questions:
     path:
@@ -66,26 +105,12 @@ rapsys_air_location:
         en_gb: '/en/location'
         fr_fr: '/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::index
-    methods: GET
-
-rapsys_air_location_add:
-    path:
-        en_gb: '/en/location'
-        fr_fr: '/emplacement'
-    controller: Rapsys\AirBundle\Controller\LocationController::add
-    methods: POST
-
-rapsys_air_location_edit:
-    path:
-        en_gb: '/en/location/{id<\d+>}'
-        fr_fr: '/emplacement/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\LocationController::edit
-    methods: POST
+    methods: GET|POST
 
 rapsys_air_location_view:
     path:
-        en_gb: '/en/location/{id<\d+>}'
-        fr_fr: '/emplacement/{id<\d+>}'
+        en_gb: '/en/location/{id<\d+>}/{location<[\w-]+>?}'
+        fr_fr: '/emplacement/{id<\d+>}/{location<[\w-]+>?}'
     controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
@@ -103,13 +128,6 @@ rapsys_air_session:
     controller: Rapsys\AirBundle\Controller\SessionController::index
     methods: GET
 
-rapsys_air_session_edit:
-    path:
-        en_gb: '/en/session/{id<\d+>}'
-        fr_fr: '/seance/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\SessionController::edit
-    methods: POST
-
 rapsys_air_session_tangoargentin:
     path:
         en_gb: '/en/session/tangoargentin'
@@ -120,17 +138,10 @@ rapsys_air_session_tangoargentin:
 
 rapsys_air_session_view:
     path:
-        en_gb: '/en/session/{id<\d+>}'
-        fr_fr: '/seance/{id<\d+>}'
+        en_gb: '/en/session/{id<\d+>}/{location<[\w-]+>}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
+        fr_fr: '/seance/{id<\d+>}/{location<[\w-]+>}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
     controller: Rapsys\AirBundle\Controller\SessionController::view
-    methods: GET
-
-rapsys_air_session_view2:
-    path:
-        en_gb: '/en/session2/{id<\d+>}'
-        fr_fr: '/seance2/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\SessionController::view2
-    methods: GET
+    methods: GET|POST
 
 rapsys_air_snippet_add:
     path:
@@ -155,10 +166,22 @@ rapsys_air_user:
 
 rapsys_air_user_view:
     path:
-        en_gb: '/en/user/{id<\d+>}'
-        fr_fr: '/utilisateur/{id<\d+>}'
-    controller: Rapsys\AirBundle\Controller\DefaultController::userView
+        en_gb: '/en/user/{id<\d+>}/{user<[\w-]+>?}'
+        fr_fr: '/utilisateur/{id<\d+>}/{user<[\w-]+>?}'
+    #TODO: changer pour DefaultController::organizer ou DefaultController::user et dropper cette classe useless
+    controller: Rapsys\AirBundle\Controller\OrganizerController::view
     methods: GET|POST
+
+rapsys_air_user_milongaraphael:
+    path:
+        en_gb: '/en/milonga-raphael'
+        fr_fr: '/milonga-raphael'
+    #TODO: changer pour DefaultController::organizer ou DefaultController::user et dropper cette classe useless
+    controller: Rapsys\AirBundle\Controller\OrganizerController::view
+    defaults:
+        # default parameters
+        id: 1
+        user: 'milonga-raphael'
 
 rapsys_user_confirm:
     path:
