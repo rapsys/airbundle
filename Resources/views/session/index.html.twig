@@ -1,9 +1,8 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<article id="dashboard">
+	<article>
 		<header>
-			<h2><a href="{{ path('rapsys_air_session') }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
 			{% if calendar is defined and calendar %}
