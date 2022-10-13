@@ -1,123 +1,165 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<article id="dashboard"{% if session.application.canceled is defined and session.application.canceled %} class="canceled"{% endif %}>
+	<article id="dashboard" class="session{% if session.locked is defined and session.locked %} locked{% elseif session.application.canceled is defined and session.application.canceled %} canceled{% endif %}">
 		<header>
-			<h2>
-				<a href="{{ path('rapsys_air_session_view', {'id': session.id}) }}">{{ session.title }}</a>
+			{#<h2>
 				{% if session.application.id is defined and session.application.id %}
-					<a href="{{ path('rapsys_air_user_view', {'id': session.application.user.id}) }}">{{ session.application.user.by }}</a>
+					<a href="{{ session.link }}">{{ session.application.dance.title ~ ' ' ~ session.id }}</a>
+					<a href="{{ session.application.user.link }}">{{ session.application.user.by }}</a>
+				{% else %}
+					<a href="{{ session.link }}">{{ title }}</a>
 				{% endif %}
-				<a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.at }}</a>
-			</h2>
-			<p>{{ description }}</p>
+				<a href="{{ session.location.link }}">{{ session.location.at }}</a>
+			</h2>#}
+			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
-			<div class="grid four">
+			<div class="grid three">
 				<section class="cell">
-					<h3>{% trans %}Organizer{% endtrans %}</h3>
+					<header>
+						<h3>{% trans %}Program{% endtrans %}</h3>
+					</header>
 					<dl>
-						<dt>{% trans %}Attributed to{% endtrans %}</dt>
-						<dd>
-							{% if session.application is null %}
-								{% trans %}None{% endtrans %}
-							{% else %}
-								<a href="{{ path('rapsys_air_user_view', {'id': session.application.user.id}) }}">{{ session.application.user.title }}</a>
-							{% endif %}
-						</dd>
+						<dt>{% trans %}Date and schedule{% endtrans %}</dt>
+						<dd>{{ 'The %date% around %start% until %stop%'|trans({'%date%': session.start|intldate('long', 'none'), '%start%': session.start|intldate('none', 'medium'), '%stop%': session.stop|intldate('none', 'medium')}) }}</dd>
 					</dl>
-					{% if session.snippet.description is defined and session.snippet.description %}
-						<dl>
-							<dt>{% trans %}Description{% endtrans %}</dt>
-							<dd>{{ session.snippet.description|striptags|markdown_to_html }}</dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.class is defined and session.snippet.class %}
-						<dl>
-							<dt>{% trans %}Class{% endtrans %}</dt>
-							<dd>{{ session.snippet.class|striptags|markdown_to_html }}</dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.contact is defined and session.snippet.contact %}
-						<dl>
-							<dt>{% trans %}Contact{% endtrans %}</dt>
-							<dd><a href="{{ session.snippet.contact }}">{{ 'Send a message to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.donate is defined and session.snippet.donate %}
-						<dl>
-							<dt>{% trans %}Donate{% endtrans %}</dt>
-							<dd><a href="{{ session.snippet.donate }}">{{ 'Donate to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.link is defined and session.snippet.link %}
-						<dl>
-							<dt>{% trans %}Link{% endtrans %}</dt>
-							<dd><a href="{{ session.snippet.link }}">{{ 'Link to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.profile is defined and session.snippet.profile %}
-						<dl>
-							<dt>{% trans %}Social network{% endtrans %}</dt>
-							<dd><a href="{{ session.snippet.profile }}">{{ 'Consult %pseudonym% profile'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
-						</dl>
-					{% endif %}
-					{% if session.snippet.rate is defined and session.snippet.rate %}
-						{% if session.snippet.hat is defined and session.snippet.hat %}
+					{% if session.application is defined and session.application %}
+						{% if session.application.dance is defined and session.application.dance %}
 							<dl>
-								<dt>{% trans %}Contribution{% endtrans %}</dt>
-								<dd>{% if session.snippet.rate == 0 %}{% trans %}To the hat, to cover the costs: talc, electricity, bicycle, server{% endtrans %}{% else %}{{ 'To the hat, ideally %rate% €, to cover the costs: talc, electricity, bicycle, server'|trans({'%rate%': session.snippet.rate}) }}{% endif %}</dd>
-							</dl>
-						{% else %}
-							<dl>
-								<dt>{% trans %}Rate{% endtrans %}</dt>
-								<dd>{% if session.snippet.rate == 0 %}{% trans %}Free{% endtrans %}{% else %}{{ session.snippet.rate }} €{% endif %}</dd>
+								<dt>{% trans %}Activity{% endtrans %}</dt>
+								{#<dd>{{ session.application.dance.title }}</dd>#}
+								<dd><a href="{{ session.application.dance.link }}">{{ session.application.dance.title }}</a></dd>
 							</dl>
 						{% endif %}
-					{% endif %}
-				</section>
-				<section class="cell">
-					<h3>{% trans %}Schedule{% endtrans %}</h3>
-					<dl>
-						<dt>{% trans %}Date{% endtrans %}</dt>
-						<dd>{{ session.start|localizeddate('long', 'none') }}</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Start{% endtrans %}</dt>
-						<dd>{{ session.start|localizeddate('none', 'medium') }}</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Stop{% endtrans %}</dt>
-						<dd>{{ session.stop|localizeddate('none', 'medium') }}</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Length{% endtrans %}</dt>
-						<dd>{{ session.length|localizeddate('none', 'short', null, null, 'HH:mm') }}</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Slot{% endtrans %}</dt>
-						<dd>{{ session.slot.title }}</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Locked{% endtrans %}</dt>
-						<dd>
-							{% if session.locked is null %}
-								{% trans %}None{% endtrans %}
-							{% else %}
-								{{ session.locked|localizeddate('long', 'medium') }}
+						{% if session.application.user is defined and session.application.user %}
+							<dl>
+								<dt>{% trans %}Organizer{% endtrans %}</dt>
+								<dd><a href="{{ session.application.user.link }}">{{ session.application.user.title }}</a></dd>
+							</dl>
+						{% endif %}
+						{% if session.snippet is defined and session.snippet %}
+							{% if session.snippet.description is defined and session.snippet.description %}
+								<dl>
+									<dt>{% trans %}Description{% endtrans %}</dt>
+									<dd>{{ session.snippet.description|striptags|markdown_to_html }}</dd>
+								</dl>
 							{% endif %}
-						</dd>
-					</dl>
+							{% if session.snippet.class is defined and session.snippet.class %}
+								<dl>
+									<dt>{% trans %}Class{% endtrans %}</dt>
+									<dd>{{ session.snippet.class|striptags|markdown_to_html }}</dd>
+								</dl>
+							{% endif %}
+							{% if session.snippet.contact is defined and session.snippet.contact %}
+								<dl>
+									<dt>{% trans %}Contact{% endtrans %}</dt>
+									<dd><a href="{{ session.application.user.contact }}">{{ 'Send a message to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
+								</dl>
+							{% endif %}
+							{% if session.snippet.donate is defined and session.snippet.donate %}
+								<dl>
+									<dt>{% trans %}Donate{% endtrans %}</dt>
+									<dd><a href="{{ session.snippet.donate }}">{{ 'Donate to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
+								</dl>
+							{% endif %}
+							{% if session.snippet.link is defined and session.snippet.link %}
+								<dl>
+									<dt>{% trans %}Link{% endtrans %}</dt>
+									<dd><a href="{{ session.snippet.link }}">{{ 'Link to %pseudonym%'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
+								</dl>
+							{% endif %}
+							{% if session.snippet.profile is defined and session.snippet.profile %}
+								<dl>
+									<dt>{% trans %}Social network{% endtrans %}</dt>
+									<dd><a href="{{ session.snippet.profile }}">{{ 'Consult %pseudonym% profile'|trans({'%pseudonym%': session.application.user.title}) }}</a></dd>
+								</dl>
+							{% endif %}
+							{% if session.snippet.rate is defined and session.snippet.rate %}
+								{% if session.snippet.hat is defined and session.snippet.hat %}
+									<dl>
+										<dt>{% trans %}Contribution to costs{% endtrans %}</dt>
+										<dd>{% if session.snippet.rate == 0 %}{% trans %}To the hat, to cover: talc, electricity, bicycle, website, ...{% endtrans %}{% else %}{{ 'To the hat, ideally %rate% €, to cover: talc, electricity, bicycle, website, ...'|trans({'%rate%': session.snippet.rate}) }}{% endif %}</dd>
+									</dl>
+								{% else %}
+									<dl>
+										<dt>{% trans %}Contribution{% endtrans %}</dt>
+										<dd>{% if session.snippet.rate == 0 %}{% trans %}Free{% endtrans %}{% else %}{{ session.snippet.rate }} €{% endif %}</dd>
+									</dl>
+								{% endif %}
+							{% endif %}
+						{% endif %}
+					{% endif %}
+					{% if session.locked is defined and session.locked %}
+						<dl>
+							<dt>{% trans %}Locked{% endtrans %}</dt>
+							<dd>{{ session.locked|intldate('long', 'medium') }}</dd>
+						</dl>
+					{% endif %}
 					<dl>
 						<dt>{% trans %}Created{% endtrans %}</dt>
-						<dd>{{ session.created|localizeddate('long', 'medium') }}</dd>
+						<dd>{{ session.created|intldate('long', 'medium') }}</dd>
 					</dl>
 					<dl>
 						<dt>{% trans %}Updated{% endtrans %}</dt>
-						<dd>{{ session.updated|localizeddate('long', 'medium') }}</dd>
+						<dd>{{ session.updated|intldate('long', 'medium') }}</dd>
 					</dl>
 				</section>
 				<section class="cell">
-					<h3>{% trans %}Weather{% endtrans %}</h3>
+					<header>
+						<h3>{% trans %}Location{% endtrans %}</h3>
+					</header>
+					<dl>
+						<dt>{% trans %}Place{% endtrans %}</dt>
+						<dd><a href="{{ session.location.link }}">{{ session.location.title }}</a></dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Description{% endtrans %}</dt>
+						<dd>{{ session.location.description }}</dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Interiority{% endtrans %}</dt>
+						<dd>{% if session.location.indoor is defined and session.location.indoor%}{% trans %}Indoor{% endtrans %}{% else %}{% trans %}Outdoor{% endtrans %}{% endif %}</dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Address{% endtrans %}</dt>
+						<dd>
+							{{ session.location.address }}
+							{{ session.location.zipcode }} {{ session.location.city }}
+						</dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}GPS coordinates{% endtrans %}</dt>
+						<dd>
+							{{ session.location.latitude }},{{ session.location.longitude }}
+						</dd>
+					</dl>
+					<dl>
+						<dt>{% trans %}Maps{% endtrans %}</dt>
+						<dd>
+							<a href="https://www.google.fr/maps/@{{ session.location.latitude }},{{ session.location.longitude }},19z">Google Maps</a>
+						</dd>
+						<dd>
+							<a href="https://www.openstreetmap.org/#map=19/{{ session.location.latitude }}/{{ session.location.longitude }}">OpenStreetMap</a>
+						</dd>
+					</dl>
+					{% if map is defined and map %}
+						<dl class="map">
+							<dt>{% trans %}Access map{% endtrans %}</dt>
+							<dd>
+								<a href="{{ map.link }}" title="{{ map.caption }}">
+									<figure>
+										<img src="{{ map.src }}" alt="{{ map.caption }}" width="{{ map.width }}" height="{{ map.height }}" />
+										<figcaption>{{ map.caption }}</figcaption>
+									</figure>
+								</a>
+							</dd>
+						</dl>
+					{% endif %}
+				</section>
+				<section class="cell">
+					<header>
+						<h3>{% trans %}Weather{% endtrans %}</h3>
+					</header>
 					{% if session.rainrisk is not null %}
 						<dl>
 							<dt>{% trans %}Rainrisk{% endtrans %}</dt>
@@ -167,77 +209,60 @@
 						</dl>
 					{% endif %}
 				</section>
-				<section class="cell">
-					<h3>{% trans %}Location{% endtrans %}</h3>
-					<dl>
-						{# infos #}
-						<dt>{% trans %}Location{% endtrans %}</dt>
-						<dd><a href="{{ path('rapsys_air_location_view', {'id': session.location.id}) }}">{{ session.location.title }}</a></dd>
-					</dl>
-					<dl>
-						{# location #}
-						<dt>{% trans %}Address{% endtrans %}</dt>
-						<dd>
-							{{ session.location.address }}
-							{{ session.location.zipcode }} {{ session.location.city }}
-						</dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Maps{% endtrans %}</dt>
-						<dd><a href="https://www.google.fr/maps/@{{ session.location.latitude }},{{ session.location.longitude }},19z">Google Maps</a></dd>
-						<dd><a href="https://www.openstreetmap.org/#map=19/{{ session.location.latitude }}/{{ session.location.longitude }}">OpenStreetMap</a></dd>
-					</dl>
-					<dl>
-						<dt>{% trans %}Minimap{% endtrans %}</dt>
-						<dd>TODO: minimap</dd>
-					</dl>
-				</section>
+				{% if is_granted('ROLE_GUEST') %}
+					<section class="cell">
+						<header>
+							<h3>{% trans %}Candidates{% endtrans %}</h3>
+						</header>
+						<div class="panel grid{% if session.applications is defined %}{% if session.applications|length >= 4 %} four{% elseif session.applications|length >= 3 %} three{% elseif session.applications|length >= 2 %} two{% endif %}{% endif %}">
+							{% if session.applications is defined and session.applications %}
+								{% for application in session.applications %}
+									<section class="cell">
+										{% if application.user.id == 1 and application.user.title|slug == 'milonga-raphael' %}
+											<h3><a href="{{ path('rapsys_air_user_milongaraphael') }}">{{ application.user.title }}</a></h3>
+										{% else %}
+											<h3><a href="{{ path('rapsys_air_user_view', {'id': application.user.id, 'user': application.user.title|slug}) }}">{{ application.user.title }}</a></h3>
+										{% endif %}
+										<dl>
+											<dt>{% trans %}Score{% endtrans %}</dt>
+											<dd>
+												{% if application.score is null %}
+													{% trans %}None{% endtrans %}
+												{% else %}
+													{{ application.score }}</dd>
+												{% endif %}
+										</dl>
+										<dl>
+											<dt>{% trans %}Created{% endtrans %}</dt>
+											<dd>{{ application.created|intldate('long', 'medium') }}</dd>
+										</dl>
+										<dl>
+											<dt>{% trans %}Updated{% endtrans %}</dt>
+											<dd>{{ application.updated|intldate('long', 'medium') }}</dd>
+										</dl>
+										<dl>
+											<dt>{% trans %}Canceled{% endtrans %}</dt>
+											<dd>
+												{% if application.canceled is null %}
+													{% trans %}None{% endtrans %}
+												{% else %}
+													{{ application.canceled|intldate('long', 'medium') }}
+												{% endif %}
+											</dd>
+										</dl>
+									</section>
+								{% endfor %}
+							{% else %}
+								<section class="cell">
+									{% trans %}None{% endtrans %}
+								</section>
+							{% endif %}
+						</div>
+					</section>
+				{% endif %}
 			</div>
 			{{ include('@RapsysAir/form/_toolbox.html.twig') }}
 		</div>
-		<article>
-			<h3>{% trans %}Candidates{% endtrans %}</h3>
-			<div class="panel grid four">
-				{% if session.applications is null %}
-					<section class="cell">
-						{% trans %}None{% endtrans %}
-					</section>
-				{% else %}
-					{% for application in session.applications %}
-						<article class="cell">
-							<h4><a href="{{ path('rapsys_air_user_view', {'id': application.user.id} ) }}">{{ application.user.title }}</a></h4>
-							<dl>
-								<dt>{% trans %}Score{% endtrans %}</dt>
-								<dd>
-									{% if application.score is null %}
-										{% trans %}None{% endtrans %}
-									{% else %}
-										{{ application.score }}</dd>
-									{% endif %}
-							</dl>
-							<dl>
-								<dt>{% trans %}Created{% endtrans %}</dt>
-								<dd>{{ application.created|localizeddate('long', 'medium') }}</dd>
-							</dl>
-							<dl>
-								<dt>{% trans %}Updated{% endtrans %}</dt>
-								<dd>{{ application.updated|localizeddate('long', 'medium') }}</dd>
-							</dl>
-							<dl>
-								<dt>{% trans %}Canceled{% endtrans %}</dt>
-								<dd>
-									{% if application.canceled is null %}
-										{% trans %}None{% endtrans %}
-									{% else %}
-										{{ application.canceled|localizeddate('long', 'medium') }}
-									{% endif %}
-								</dd>
-							</dl>
-						</article>
-					{% endfor %}
-				{% endif %}
-			</div>
-		</article>
 	</article>
 	{{ include('@RapsysAir/default/_location.html.twig') }}
 {% endblock %}
