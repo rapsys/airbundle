@@ -11,8 +11,8 @@
 		<meta name="keywords" content="{{ keywords|join(', ') }}" />
 	{% endif %}
 	{% if site is defined and site %}
-		<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site.ico) }}" />
-		<link rel="icon" type="image/svg+xml" href="{{ asset(site.svg) }}" />
+		<link rel="shortcut icon" type="image/x-icon" href="{{ asset(site.icon.ico) }}" />
+		<link rel="icon" type="image/svg+xml" href="{{ asset(site.icon.svg) }}" />
 		{% for size, icon in site.png %}
 			{# Apple #}
 			{% if size in [120, 152, 167, 180] %}
@@ -31,7 +31,7 @@
 	{% endif %}
 	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
 	{% stopwatch 'stylesheet' %}
-		{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,screen}.css' %}
+		{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,lemon,notoemoji,screen}.css' %}
 			<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
 		{% endstylesheet %}
 	{% endstopwatch %}
@@ -66,33 +66,34 @@
 {% block body %}
 	{% block header %}
 		<header id="header">
-			{% if site is defined and site %}
-				{% block header_title %}<h1><a href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo) }}" alt="{{ site.title }}" width="171" height="32" /></a></h1>{% endblock %}
-			{% endif %}
+			<div>
+				{% if site is defined and site %}
+					{% block header_title %}<a id="logo" href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo.svg) }}?v=1" srcset="{{ asset(site.logo.png) }}?v=1 200w, {{ asset(site.logo.svg) }}?v=1 400w" sizes="(min-width:400px) 400px, 200px" alt="{{ site.title }}" width="100" height="45" /><span>{{ site.title }}</span></a>{% endblock %}
+				{% endif %}
+				<h1 id="title"><a href="{{ canonical }}">{{ title }}</a></h1>
+			</div>
 			{% block header_nav %}
-				<nav>
-					<h2>{% trans %}Navigation{% endtrans %}</h2>
-					<ul>
-						<li><a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a></li>
-						<li><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a></li>
+				<nav id="nav">
+					{#<h2>{% trans %}Navigation{% endtrans %}</h2>#}
+						<a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a>
+						<a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a>
+						<a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a>
 						{% if is_granted('ROLE_ADMIN') %}
-							<li><a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a></li>
+							<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
 						{% endif %}
 						{% if is_granted('ROLE_GUEST') %}
-							<li><a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a></li>
+							<a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a>
 						{% endif %}
 						{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-							<li><a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a></li>
-							<li><a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a></li>
+							<a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a>
+							<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
 						{% else %}
-							<li><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></li>
-							<li><a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a></li>
+							<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
+							<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
 						{% endif %}
-					</ul>
 				</nav>
 			{% endblock %}
-{#
+	{#
 			{% block site_subtitle %}{% endblock %}
 			{% block site_tagline %}
 				{% if tags is defined and tags %}
@@ -103,7 +104,7 @@
 					</ul>
 				{% endif %}
 			{% endblock %}
-#}
+	#}
 		</header>
 	{% endblock %}
 	{% block message %}
@@ -124,10 +125,11 @@
 	{% block sidebar %}<aside id="sidebar"></aside>{% endblock %}
 #}
 	{% block content %}
-		<section id="content">
-			<h2><a href="{{ path('rapsys_air_homepage') }}">{{ section }}</a></h2>
-			<p>{% trans %}Outdoor space reservation system{% endtrans %}</p>
-		</section>
+		<article>
+			<header>
+				<h2>{% trans %}Outdoor space reservation system{% endtrans %}</h2>
+			</header>
+		</article>
 	{% endblock %}
 	{% block footer %}
 		<footer id="footer">
