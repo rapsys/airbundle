@@ -2,45 +2,78 @@
 
 namespace Rapsys\AirBundle\DataFixtures;
 
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 use Rapsys\AirBundle\Entity\Civility;
 use Rapsys\AirBundle\Entity\Group;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Slot;
 
-class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Symfony\Component\DependencyInjection\ContainerAwareInterface {
+class AirFixtures extends Fixture implements ContainerAwareInterface {
 	/**
 	 * @var ContainerInterface
 	 */
 	private $container;
 
-	public function setContainer(\Symfony\Component\DependencyInjection\ContainerInterface $container = null) {
+	/**
+	 * @var UserPasswordHasherInterface
+	 */
+	private $hasher;
+
+	public function setContainer(ContainerInterface $container = null) {
 		$this->container = $container;
+		$this->hasher = $this->container->get('security.password_hasher_factory');
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public function load(\Doctrine\Common\Persistence\ObjectManager $manager) {
-		$encoder = $this->container->get('security.password_encoder');
-
+	public function load(ObjectManager $manager) {
 		//Civility tree
 		$civilityTree = array(
-			'Mr.' => 'Mister',
-			'Mrs.' => 'Madam',
-			'Ms.' => 'Miss'
+			'Mister',
+			'Madam',
+			'Miss'
 		);
 
 		//Create titles
 		$civilitys = array();
-		foreach($civilityTree as $shortData => $civilityData) {
-			$civility = new Title($civilityData);
-			$civility->setShort($shortData);
+		foreach($civilityTree as $civilityData) {
+			$civility = new Civility();
+			$civility->setTitle($civilityData);
 			$civility->setCreated(new \DateTime('now'));
 			$civility->setUpdated(new \DateTime('now'));
 			$manager->persist($civility);
-			$civilitys[$shortData] = $civility;
+			$civilitys[$civilityData] = $civility;
 			unset($civility);
+		}
+
+		//TODO: insert countries from https://raw.githubusercontent.com/raramuridesign/mysql-country-list/master/country-lists/mysql-country-list-detailed-info.sql
+		#CREATE TABLE `countries` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `code` varchar(2) NOT NULL, `alpha` varchar(3) NOT NULL, `title` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL, `created` datetime NOT NULL, `updated` datetime NOT NULL, PRIMARY KEY (`id`), UNIQUE KEY `code` (`code`), UNIQUE KEY `alpha` (`alpha`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+		#insert into countries (code, alpha, title, created, updated) select countryCode, isoAlpha3, countryName, NOW(), NOW() FROM apps_countries_detailed ORDER BY countryCode ASC, isoAlpha3 ASC;
+
+		//Dance tree
+		$danceTree = array(
+			'Argentine Tango' => [
+			   'Milonga', 'Class and milonga', 'Public class', 'Private class'
+			]
+		);
+
+		//Create titles
+		$dances = array();
+		foreach($danceTree as $danceTitle => $danceData) {
+			foreach($danceData as $danceType) {
+				$dance = new Dance($danceTitle, $danceType);
+				$dance->setCreated(new \DateTime('now'));
+				$dance->setUpdated(new \DateTime('now'));
+				$manager->persist($dance);
+				unset($dance);
+			}
 		}
 
 		//Group tree
@@ -119,7 +152,7 @@ class AirFixtures extends \Doctrine\Bundle\FixturesBundle\Fixture implements \Sy
 			$user->setForename($userData['forename']);
 			$user->setSurname($userData['surname']);
 			$user->setPhone($userData['phone']);
-			$user->setPassword($encoder->encodePassword($user, $userData['password']));
+			$user->setPassword($this->hasher->hashPassword($user, $userData['password']));
 			$user->setCivility($civilitys[$userData['short']]);
 			$user->addGroup($groups[$userData['group']]);
 			$user->setCreated(new \DateTime('now'));
