@@ -1,9 +1,8 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<section id="form">
+	<article>
 		<header>
-			<h2><a href="{{ path('rapsys_air_contact') }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		{% if sent %}
 			<p class="message notice">{% trans %}Your message has been sent{% endtrans %}</p>
@@ -18,6 +17,8 @@
 
 					{{ form_row(form.message) }}
 
+					{{ form_row(form.captcha) }}
+
 					{{ form_row(form.submit) }}
 				</div>
 
@@ -25,5 +26,5 @@
 				<footer style="display:none">{{ form_rest(form) }}</footer>
 			{{ form_end(form) }}
 		{% endif %}
-	</section>
+	</article>
 {% endblock %}
