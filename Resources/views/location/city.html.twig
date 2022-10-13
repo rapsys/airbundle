@@ -2,15 +2,16 @@
 {% block content %}
 	<article id="dashboard">
 		<header>
-			<h2><a href="{{ canonical }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
 			{% if calendar is defined and calendar %}
 				<div class="grid calendar seven">
 					{% for date, day in calendar %}
 						<section class="{{ day.class|join(' ') }}">
-							<h3>{{ day.title }}</h3>
+							<header>
+								<h3>{{ day.title }}</h3>
+							</header>
 							{% if day.sessions is not empty %}
 								<ul>
 									{% for session in day.sessions %}
