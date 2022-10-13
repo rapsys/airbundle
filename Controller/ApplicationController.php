@@ -165,22 +165,22 @@ class ApplicationController extends AbstractController {
 				//Check if afternoon
 				} elseif ($slot == 'Afternoon') {
 					//Set begin at 18h
-					$session->setBegin(new \DateTime('14:00:00'));
+					$session->setBegin(new \DateTime('15:30:00'));
 
 					//Set length at 5h
-					$session->setLength(new \DateTime('05:00:00'));
+					$session->setLength(new \DateTime('05:30:00'));
 				//Check if evening
 				} elseif ($slot == 'Evening') {
 					//Set begin at 19h00
-					$session->setBegin(new \DateTime('19:00:00'));
+					$session->setBegin(new \DateTime('19:30:00'));
 
 					//Set length at 5h
-					$session->setLength(new \DateTime('06:00:00'));
+					$session->setLength(new \DateTime('05:30:00'));
 
 					//Check if next day is premium
 					if ($premium) {
 						//Set length at 7h
-						$session->setLength(new \DateTime('07:00:00'));
+						$session->setLength(new \DateTime('06:30:00'));
 					}
 				//Check if after
 				} else {
