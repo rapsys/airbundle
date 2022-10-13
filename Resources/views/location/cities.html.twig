@@ -2,8 +2,7 @@
 {% block content %}
 	<article id="dashboard" class="city">
 		<header>
-			<h2><a href="{{ canonical }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
 			{% if cities is defined and cities %}
@@ -13,7 +12,7 @@
 							<header>
 								<h3><a href="{{ city.link }}">{{ city.city }} ({{ city.id }})</a></h3>
 							</header>
-							<div class="panel grid{% if cities|length > 1%} two{% else %} three{% endif %}">
+							<div class="panel">
 								{% if city.multimap is defined and city.multimap %}
 									<div class="multimap">
 										<a href="{{ city.multimap.link }}" title="{{ city.multimap.caption }}">
@@ -24,11 +23,11 @@
 										</a>
 									</div>
 								{% endif %}
-								{% for id, location in city.locations %}
-									<article class="cell">
-										<h4>{% if city.multimap is defined and city.multimap %}{{ id }} {% endif %}<a href="{{ location.link }}">{{ location.title }}</a></h4>
-									</article>
-								{% endfor %}
+								<ul class="grid{% if city.locations|length > 1 %} two{% endif %}">
+									{% for id, location in city.locations %}
+										<li>{% if city.multimap is defined and city.multimap %}{{ id }} {% endif %}<a href="{{ location.link }}">{{ location.title }}</a></li>
+									{% endfor %}
+								</ul>
 							</div>
 						</article>
 					{% endfor %}
