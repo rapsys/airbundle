@@ -1,6 +1,8 @@
 {% if forms.session.modify is defined or forms.session.move is defined or forms.session.cancel is defined or forms.session.raincancel is defined or forms.session.forcecancel is defined or is_granted('ROLE_ADMIN') %}
 	<section>
-		<h2>{% trans %}Modify{% endtrans %}</h2>
+		<header>
+			<h3>{% trans %}Modify{% endtrans %}</h3>
+		</header>
 		{{ form_start(forms.session) }}
 			{% if forms.session.modify is defined %}
 				<div>
