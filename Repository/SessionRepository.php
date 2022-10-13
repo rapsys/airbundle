@@ -2070,7 +2070,7 @@ FROM (
 		d.l_previous,
 		d.g_score,
 		d.o_tr_ratio,
-		MAX(gu.group_id) AS group_id,
+		MAX(ug.group_id) AS group_id,
 		d.remaining,
 		d.premium,
 		d.hotspot,
@@ -2146,7 +2146,7 @@ FROM (
 		ORDER BY NULL
 		LIMIT 0, :limit
 	) AS d
-	LEFT JOIN RapsysAirBundle:GroupUser AS gu ON (gu.user_id = d.user_id)
+	LEFT JOIN RapsysAirBundle:UserGroup AS ug ON (ug.user_id = d.user_id)
 	GROUP BY d.id
 	LIMIT 0, :limit
 ) AS e
