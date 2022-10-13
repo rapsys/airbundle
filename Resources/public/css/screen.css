@@ -617,7 +617,7 @@ form div .message {
 	white-space: nowrap;
 	padding: .1rem;
 	display: flex;
-	margin: 0 0 .1rem;
+	margin: 0 0 auto;
 	flex-direction: row;
 	justify-content: space-between;
 	overflow-x: hidden;
@@ -625,11 +625,11 @@ form div .message {
 }
 
 /*XXX: required by ul display:block for overflow:hidden*/
-.grid li:only-child,
+/*.grid li:only-child,
 .grid li:last-child,
 .grid li:last-of-type {
 	margin: 0;
-}
+}*/
 
 .grid a {
 	/*TODO: voir pourquoi on a besoin d'un overflow-y de merde, sans une putain de scrollbar s'affiche dans certaines conditions sur chrome, depuis le passage de deux lignes de grid à 3 !!!*/
