@@ -1,0 +1,46 @@
+{# Display cities #}
+{% if cities is defined and cities %}
+	<article class="city">
+		<header>
+			<h2><a href="{{ path('rapsys_air_city') }}" title="{% trans %}Libre Air cities{% endtrans %}">{% trans %}Cities{% endtrans %}</a></h2>
+			<p>{% trans %}Libre Air city list{% endtrans%}
+		</header>
+		<div class="panel">
+			{% if multimap is defined and multimap %}
+				<div class="multimap">
+					<a href="{{ multimap.link }}" title="{{ multimap.caption }}">
+						<figure>
+							<img src="{{ multimap.src }}" alt="{{ multimap.caption }}" width="{{ multimap.width }}" height="{{ multimap.height }}" />
+							<figcaption>{{ multimap.caption }}</figcaption>
+						</figure>
+					</a>
+				</div>
+			{% endif %}
+			<div class="grid{% if cities|length > 1 %} two{% endif %}">
+				{% for id, city in cities %}
+					<article class="cell">
+						<header>
+							<h3><a href="{{ city.link }}">{{ city.city }} ({{ city.id }})</a></h3>
+						</header>
+						{# {% if city.locations is defined and city.locations %}
+							<div class="panel grid">
+								{% for id, location in city.locations %}
+									<article class="cell">
+										<h4>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}">{{ location.title }}</a></h4>
+									</article>
+								{% endfor %}
+							</div>
+						{% endif %} #}
+						{% if city.locations is defined and city.locations %}
+							<ul>
+								{% for id, location in city.locations %}
+									<li>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}">{{ location.title }}</a></li>
+								{% endfor %}
+							</ul>
+						{% endif %}
+					</article>
+				{% endfor %}
+			</div>
+		</div>
+	</article>
+{% endif %}
