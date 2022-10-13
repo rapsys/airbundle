@@ -1,5 +1,7 @@
 <section>
-	<h2>{% trans %}Application{% endtrans %}</h2>
+	<header>
+		<h3>{% trans %}Application{% endtrans %}</h3>
+	</header>
 	{{ form_start(forms.application) }}
 		<div>
 			{% if forms.application.user is defined %}
