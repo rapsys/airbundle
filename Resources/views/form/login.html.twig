@@ -1,8 +1,10 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block title %}{{ site.title }} - {{ title }}{% endblock %}
 {% block content %}
-	<section id="form">
-		<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
+	<article id="form">
+		<header>
+			<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
+		</header>
 		{{ form_start(login) }}
 			<div>
 				{{ form_row(login.mail) }}
@@ -15,10 +17,12 @@
 			{# Render CSRF token etc .#}
 			<footer style="display:none">{{ form_rest(login) }}</footer>
 		{{ form_end(login) }}
-	</section>
+	</article>
 	{% if recover is defined %}
-		<section id="recover">
-			<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+		<article id="recover">
+			<header>
+				<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+			</header>
 			{{ form_start(recover) }}
 
 				<div>
@@ -30,6 +34,6 @@
 				{# Render CSRF token etc .#}
 				<footer style="display:none">{{ form_rest(recover) }}</footer>
 			{{ form_end(recover) }}
-		</section>
+		</article>
 	{% endif %}
 {% endblock %}
