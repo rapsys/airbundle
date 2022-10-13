@@ -353,7 +353,7 @@ services:
     #Register facebook util service
     rapsys_air.facebook_util:
         class: 'Rapsys\PackBundle\Util\FacebookUtil'
-        arguments: [ '@router',  '%kernel.project_dir%/var/cache', '%rapsys_pack.path%', 'facebook', '%rapsys_air.public.path%/png/facebook.png', { irishgrover: '%rapsys_air.public.path%/ttf/irishgrover.v10.ttf', labelleaurore: '%rapsys_air.public.path%/ttf/labelleaurore.v10.ttf', dejavusans: '%rapsys_air.public.path%/ttf/dejavusans.2.37.ttf', droidsans: '%rapsys_air.public.path%/ttf/droidsans.regular.ttf' } ]
+        arguments: [ '@router',  '%kernel.project_dir%/var/cache', '%rapsys_pack.path%', 'facebook', '%rapsys_air.path%/png/facebook.png', { irishgrover: '%rapsys_air.path%/ttf/irishgrover.v10.ttf', labelleaurore: '%rapsys_air.path%/ttf/labelleaurore.v10.ttf', dejavusans: '%rapsys_air.path%/ttf/dejavusans.2.37.ttf', droidsans: '%rapsys_air.path%/ttf/droidsans.regular.ttf' } ]
         public: true
 
 #Twig Configuration
