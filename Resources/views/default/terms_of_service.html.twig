@@ -1,12 +1,13 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<section id="dashboard">
+	<article>
 		<header>
-			<h2><a href="{{ path('rapsys_air_terms_of_service') }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<nav>
-			<strong>{% trans %}Table of contents{% endtrans %}</strong>
+			<header>
+				<h3>{% trans %}Table of contents{% endtrans %}</h3>
+			</header>
 			<ul>
 				<li><a href="#preamble">{% trans %}Preamble{% endtrans %}</a></li>
 				<li><a href="#article1">Article 1 : Présentation</a></li>
@@ -32,7 +33,9 @@
 			</ul>
 		</nav>
 		<section>
-			<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			<header>
+				<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			</header>
 			<p>Préalablement à la visite du site <a href="//airlibre.eu/" title="Air Libre">airlibre.eu</a> (ci-après dénommé « le Site ») et de l'utilisation des services qui y sont proposés, il convient de procéder à la lecture des conditions générales d'utilisations ci-dessous exposées.</p>
 			<p>Ces conditions générales ont pour objet de définir les modalités de mise à disposition du service de réservation d'espace en plein air, du service d'affichage, du service d'attribution, des services connexes sur le Site et les conditions d'utilisation de ces derniers par l'utilisateur. Tout accès au Site ou toute utilisation de ces services suppose le respect préalable de l'ensemble des dispositions ci-dessous ainsi que leur acceptation inconditionnelle.</p>
 			<p>Les conditions générales d'utilisation pourront être modifiées en début d'année, début d'été et fin d'été par la personne en charge du Site, ci-après dénommé « le Responsable », après consultation des utilisateurs et référendum pour toute modification substantielle.</p>
@@ -41,23 +44,31 @@
 			<p>Le préambule fait partie des conditions générales d'utilisation.</p>
 		</section>
 		<section>
-			<h3 id="article1">Article 1 : Présentation</h3>
+			<header>
+				<h3 id="article1">Article 1 : Présentation</h3>
+			</header>
 			<p>Le service d'affichage du Site est ouvert à toute personne souhaitant consulter les séances de Tango Argentin attribuées à un organisateur sur les espaces de danse public, ci-après « le Service Affichage ».</p>
 			<p>Le service réservation du Site est ouvert à toute personne ayant la volonté d'assurer une séance de Tango Argentin sur un espace de danse en public tant au niveau artistique, logistique, réglementaire et sans exclure l'aspect sécurité, ci-après « le Service Réservation ».</p>
 			<p>Le service d'attribution du Site assure une répartition équitable entre les différents organisateurs des séances sur un créneau et un lieu, ci-après « le Service Attribution ».</p>
 			<p>Les services connexes sont mis à disposition pour améliorer l'expérience utilisateur du Site.</p>
 		</section>
 		<section>
-			<h3 id="article2">Article 2 : Accès, disponibilité et utilisation</h3>
+			<header>
+				<h3 id="article2">Article 2 : Accès, disponibilité et utilisation</h3>
+			</header>
 			<section>
-				<h4 id="article2_1">Article 2.1 : Accès</h4>
+				<header>
+					<h4 id="article2_1">Article 2.1 : Accès</h4>
+				</header>
 				<p>Le Site est accessible gratuitement, via le réseau Internet, à toute personne souhaitant consulter le service d'affichage d'affichage des réservations, ci-après dénommée « l'Utilisateur ».</p>
 				<p>Le Site est accessible contre participation aux frais de fonctionnement annuels, via le réseau Internet, à toute personne souhaitant utiliser le service de réservation, ci-après dénommée « l'Organisateur ».</p>
 				<p>Le Responsable ne peut être tenu responsable des dysfonctionnements du réseau et des serveurs ainsi que des événements échappant au contrôle raisonnable qui empêcheraient ou dégraderaient l'accès au service.</p>
 				<p>Néanmoins, le Responsable se réserve le droit, pour des raisons de maintenance, de compléter, changer ou effacer tous les contenus du Site.</p>
 			</section>
 			<section>
-				<h4 id="article2_2">Article 2.2 : Disponibilité</h4>
+				<header>
+					<h4 id="article2_2">Article 2.2 : Disponibilité</h4>
+				</header>
 				<p>Le Responsable propose un service disponible 7 jours sur 7 et 24 heures sur 24.</p>
 				<p>Le Responsable pourra cependant et à tout moment suspendre, interrompre ou annuler la mise à disposition du service auprès des utilisateurs sans que sa responsabilité ne puisse être engagée dans les cas suivants :</p>
 				<ul>
@@ -68,7 +79,9 @@
 				</ul>
 			</section>
 			<section>
-				<h4 id="article2_3">Article 2.3 : Utilisation</h4>
+				<header>
+					<h4 id="article2_3">Article 2.3 : Utilisation</h4>
+				</header>
 				<p>L'utilisation du service suppose que l'Utilisateur :</p>
 				<ul>
 					<li>possède un accès Internet dont les coûts éventuels sont à sa charge, ainsi que le matériel et logiciel requis ;</li>
@@ -91,12 +104,16 @@
 				</ul>
 			</section>
 			<section>
-				<h4 id="article2_4">Article 2.4 : Dates d'accessibilité</h4>
+				<header>
+					<h4 id="article2_4">Article 2.4 : Dates d'accessibilité</h4>
+				</header>
 				<p>Le service sera accessible aux Utilisateurs à partir du 1 janvier 2021 et ce pour une durée de 12 (douze) mois, soit jusqu'au 31 décembre 2021 à 23h59m59s, renouvelable par tacite reconduction.</p>
 				<p>Le service sera accessible aux Organisateurs à partir du 1 janvier 2021, après réception de leur participation aux frais de fonctionnement et ce pour une durée de 12 (douze) mois, soit jusqu'au 31 décembre 2021 à 23h59m59s, renouvelable par tacite reconduction sur participation aux frais de fonctionnement pour la nouvelle période.</p>
 			</section>
 			<section>
-				<h4 id="article2_5">Article 2.5 : Configuration minimale requise</h4>
+				<header>
+					<h4 id="article2_5">Article 2.5 : Configuration minimale requise</h4>
+				</header>
 				<p>Un ordinateur PC ou MAC ayant une connexion internet et un navigateur :</p>
 				<ul>
 					<li>Chrome 86 ;</li>
@@ -107,12 +124,16 @@
 			</section>
 		</section>
 		<section>
-			<h3 id="article3">Article 3 : Connexion</h3>
+			<header>
+				<h3 id="article3">Article 3 : Connexion</h3>
+			</header>
 			<p>Pour se connecter à la plateforme, l'Utilisateur ou l'Organisateur devra se rendre sur le Site <a href="//airlibre.eu/" title="Air Libre">airlibre.eu</a>.</p>
 			<p>Pour réserver l'Organisateur devra accepter le cookie technique nécessaire aux services connectés puis s'identifier à l'aide de son adresse de courriel et de son mot de passe personnel.</p>
 		</section>
 		<section>
-			<h3 id="article4">Article 4 : Exclusion du site par le Responsable</h3>
+			<header>
+				<h3 id="article4">Article 4 : Exclusion du site par le Responsable</h3>
+			</header>
 			<p>Le responsable se réserve le droit de procéder au blocage définitif de tout accès au Site à l'encontre de tout Utilisateur ou Organisateur qui contreviendrait aux présentes conditions générales d'utilisation et notamment qui :</p>
 			<ul>
 				<li>se livrerait à une tentative et/ou à un acte de contournement des mesures techniques de protection des différents services ;</li>
@@ -120,7 +141,9 @@
 			</ul>
 		</section>
 		<section>
-			<h3 id="article5">Article 5 : Procédure d'alerte et signalement d'abus</h3>
+			<header>
+				<h3 id="article5">Article 5 : Procédure d'alerte et signalement d'abus</h3>
+			</header>
 			<p>Les Utilisateurs sont invités à signaler au Responsable, dans le cadre de la procédure d'alerte ci-dessous décrite, toute utilisation frauduleuse du Site dont il aurait connaissance et notamment tout message dont le contenu contreviendrait aux présentes conditions générales d'utilisation ou plus généralement aux lois et dispositions réglementaires en vigueur.</p>
 			<p>De même, toute personne estimant qu'il y a violation sur le Site d'un droit dont il serait titulaire a la possibilité de le signaler au Responsable (conformément à l'article 6-1-5 de la loi du 21 juin 2004 n°2004-575) par le formulaire de contact, précisant l'ensemble des informations suivantes :</p>
 			<ul>
@@ -130,20 +153,28 @@
 			</ul>
 		</section>
 		<section>
-			<h3 id="article6">Article 6 : Liens hypertexte</h3>
+			<header>
+				<h3 id="article6">Article 6 : Liens hypertexte</h3>
+			</header>
 			<p>Le Site propose des liens hypertextes vers des sites Internet édités et/ou gérés par des tiers sans que sa responsabilité ne puisse toutefois être engagée à quelque titre que ce soit en raison de leur contenu et notamment des publicités, produits, services et/ou tout autre matériel disponible sur et à partir de ces sites tiers.</p>
 		</section>
 		<section>
-			<h3 id="article7">Article 7 : Modification du site et des services</h3>
+			<header>
+				<h3 id="article7">Article 7 : Modification du site et des services</h3>
+			</header>
 			<p>Le Responsable se réserve le droit de faire évoluer le service notamment par la mise à disposition de nouvelles fonctionnalités ou par la modification et/ou la suppression de fonctionnalités à ce jour proposées à l'utilisateur à partir du Site.</p>
 		</section>
 		<section>
-			<h3 id="article8">Article 8 : Propriété intellectuelle</h3>
+			<header>
+				<h3 id="article8">Article 8 : Propriété intellectuelle</h3>
+			</header>
 			<p>Le Responsable est propriétaire exclusif des droits de propriété intellectuelle sur le Site aussi bien sur sa structure que sur son contenu. Toute reproduction, représentation, modification ou exploitation qu'elles soient intégrales ou partielles, de quelque façon que ce soit et à quelque fin que ce soit, faites sans le consentement du Responsable est illicite et constitue une contrefaçon sanctionnée par les articles L. 335-2 et suivants du Code de la propriété intellectuelle.</p>
 			<p>Les marques du Responsable et des partenaires du Responsable ainsi que les logos figurant sur le site sont des marques déposées. Toute reproduction totale ou partielle de ces marques ou de ces logos, sans le consentement du Responsable ou de ses partenaires est prohibée.</p>
 		</section>
 		<section>
-			<h3 id="article9">Article 9 : Responsabilité</h3>
+			<header>
+				<h3 id="article9">Article 9 : Responsabilité</h3>
+			</header>
 			<p>Le Responsable ne saurait être tenu pour responsable vis-à-vis de l'Utilisateur ou de l'Organisateur des conséquences liées à l'utilisation du contenu ou de tout autre élément du service et notamment :</p>
 			<ul>
 				<li>en cas d'utilisation illégale et contrevenante par les Utilisateurs ou Organisateurs des œuvres de l'esprit reproduites sur le Site ;</li>
@@ -171,13 +202,17 @@
 			<p>En l'absence de faute de sa part, le Responsable ne pourra être tenu responsable si le Service proposé par le Site s'avère incompatible ou présente des dysfonctionnements avec certains logiciels, configurations, systèmes d'exploitation ou équipements de l'Utilisateur ou l'Organisateur.</p>
 		</section>
 		<section>
-			<h3 id="article10">Article 10 : Durée</h3>
+			<header>
+				<h3 id="article10">Article 10 : Durée</h3>
+			</header>
 			<p>Les présentes conditions générales d'utilisation ont vocation à s'appliquer pendant toute la durée d'accessibilité au Service soit à partir du 1er janvier 2021 et ce pour une durée de 12 (douze) mois, soit jusqu'au 31 décembre 2021 à 23h59m59s, renouvelable par tacite reconduction.</p>
 		</section>
 		<section>
-			<h3 id="article11">Article 11 : Droit applicable et juridiction compétente</h3>
+			<header>
+				<h3 id="article11">Article 11 : Droit applicable et juridiction compétente</h3>
+			</header>
 			<p>L'intégralité des dispositions des présentes conditions générales d'utilisation est régie par le droit français.</p>
 			<p>Les parties s'efforceront de résoudre à l'amiable tout litige qui surviendrait à l'occasion de l'exécution des présentes. En cas de désaccord définitif, les Tribunaux de Paris seront seuls compétents.</p>
 		</section>
-	</section>
+	</article>
 {% endblock %}
