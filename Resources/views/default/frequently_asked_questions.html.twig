@@ -1,12 +1,13 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<section id="dashboard">
+	<article id="dashboard">
 		<header>
-			<h2><a href="{{ path('rapsys_air_frequently_asked_questions') }}">{{ title }}</a></h2>
-			<p>{{ description }}</p>
+			<h2>{{ description }}</h2>
 		</header>
 		<nav>
-			<strong>{% trans %}Table of contents{% endtrans %}</strong>
+			<header>
+				<h3>{% trans %}Table of contents{% endtrans %}</h3>
+			</header>
 			<ul>
 				<li><a href="#preamble">{% trans %}Preamble{% endtrans %}</a></li>
 				<li><a href="#whatisit">{% trans %}What is it ?{% endtrans %}</a></li>
@@ -23,16 +24,22 @@
 			</ul>
 		</nav>
 		<section>
-			<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			<header>
+				<h3 id="preamble">{% trans %}Preamble{% endtrans %}</h3>
+			</header>
 			<p>{% trans %}On this page you will find the most recurring questions of Libre Air users.{% endtrans %}</p>
 			<p>{% trans %}Questions asked via the contact form will be added to this page as they arise.{% endtrans %}</p>
 		</section>
 		<section>
-			<h3 id="whatisit">{% trans %}What is it ?{% endtrans %}</h3>
+			<header>
+				<h3 id="whatisit">{% trans %}What is it ?{% endtrans %}</h3>
+			</header>
 			<p>{% trans %}Libre Air is an initiative to have a powerful and shared calendar for outdoor Argentine Tango sessions.{% endtrans %}</p>{# sur paris dans un premier temps #}
 		</section>
 		<section>
-			<h3 id="whocancreateanaccount">{% trans %}Who can create an account ?{% endtrans %}</h3>
+			<header>
+				<h3 id="whocancreateanaccount">{% trans %}Who can create an account ?{% endtrans %}</h3>
+			</header>
 			<p>{% trans %}Anyone can create an account on Air Libre, dancer or organizer.{% endtrans %}</p>
 			<p>{% trans %}The dancer can follow an organizer by email.{% endtrans %}</p>
 			<p>{% trans %}The organizer will have a convenient way to automatically notify subscribers with minimum effort.{% endtrans %}</p>
@@ -42,5 +49,5 @@
 			<h3 id="">{% trans %}{% endtrans %}</h3>
 			<p>{% trans %}{% endtrans %}</p>
 		</section>#}
-	</section>
+	</article>
 {% endblock %}
