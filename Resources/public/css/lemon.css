@@ -1,0 +1,8 @@
+@font-face {
+	font-family: 'Lemon';
+	font-style: normal;
+	font-weight: 400;
+	/*src: url(https://fonts.gstatic.com/s/lemon/v14/HI_EiYEVKqRMq3jGQ5E.ttf) format('truetype');*/
+	src: local('Lemon'), url(/bundles/rapsysair/woff2/lemon.woff2) format('woff2');
+	font-display: swap;
+}
