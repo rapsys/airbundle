@@ -1,16 +1,7 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<article id="dashboard" class="session{% if session.locked is defined and session.locked %} locked{% elseif session.application.canceled is defined and session.application.canceled %} canceled{% endif %}">
+	<article class="session{% if session.locked is defined and session.locked %} locked{% elseif session.application.canceled is defined and session.application.canceled %} canceled{% endif %}">
 		<header>
-			{#<h2>
-				{% if session.application.id is defined and session.application.id %}
-					<a href="{{ session.link }}">{{ session.application.dance.title ~ ' ' ~ session.id }}</a>
-					<a href="{{ session.application.user.link }}">{{ session.application.user.by }}</a>
-				{% else %}
-					<a href="{{ session.link }}">{{ title }}</a>
-				{% endif %}
-				<a href="{{ session.location.link }}">{{ session.location.at }}</a>
-			</h2>#}
 			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
