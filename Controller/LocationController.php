@@ -30,7 +30,7 @@ class LocationController extends DefaultController {
 	 */
 	public function cities(Request $request): Response {
 		//Add cities
-		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period);
+		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period, 0);
 
 		//Add dances
 		$this->context['dances'] = $this->doctrine->getRepository(Dance::class)->findNamesAsArray();
@@ -44,8 +44,7 @@ class LocationController extends DefaultController {
 		//Add city multi
 		foreach($this->context['cities'] as $id => $city) {
 			//Add city multi
-			#$this->osm->getMultiImage($city['link'], $city['osm'], $this->modified->getTimestamp(), $city['latitude'], $city['longitude'], $city['locations'], $this->osm->getMultiZoom($city['latitude'], $city['longitude'], $city['locations'], 16));
-			$this->context['cities'][$id]['multimap'] = $this->map->getMultiMap($city['multimap'], $this->modified->getTimestamp(), $city['latitude'], $city['longitude'], $city['locations'], $this->map->getMultiZoom($city['latitude'], $city['longitude'], $city['locations']));
+			$this->context['cities'][$id]['multimap'] = $this->map->getMultiMap($city['multimap'], $this->modified->getTimestamp(), $city['locations']);
 		}
 
 		//With logged user
@@ -129,7 +128,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Add calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsArray($this->period, $request->getLocale(), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
 
 		//Set dances
 		$this->context['dances'] = [];
@@ -147,7 +146,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Add locations
-		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByLatitudeLongitudeAsArray(floatval($latitude), floatval($longitude), $this->period);
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByLatitudeLongitudeAsArray(floatval($latitude), floatval($longitude), $this->period, 0);
 
 		//Set modified
 		//XXX: dance modified is already computed inside calendar modified
@@ -183,7 +182,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Add multi
-		$this->context['multimap'] = $this->map->getMultiMap($this->context['city']['multimap'], $this->modified->getTimestamp(), $latitude, $longitude, $this->context['locations'], $this->map->getMultiZoom($latitude, $longitude, $this->context['locations']));
+		$this->context['multimap'] = $this->map->getMultiMap($this->context['city']['multimap'], $this->modified->getTimestamp(), $this->context['locations']);
 
 		//Set keywords
 		$this->context['keywords'] = [
@@ -270,20 +269,8 @@ class LocationController extends DefaultController {
 			}
 		}
 
-		//Set latitudes
-		$latitudes = array_map(function ($v) { return $v['latitude']; }, $this->context['locations']);
-
-		//Set latitude
-		$latitude = round(array_sum($latitudes)/count($latitudes), 6);
-
-		//Set longitudes
-		$longitudes = array_map(function ($v) { return $v['longitude']; }, $this->context['locations']);
-
-		//Set longitude
-		$longitude = round(array_sum($longitudes)/count($longitudes), 6);
-
 		//Add multi map
-		$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air locations sector map'), $this->modified->getTimestamp(), $latitude, $longitude, $this->context['locations'], $this->map->getMultiZoom($latitude, $longitude, $this->context['locations']));
+		$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air locations sector map'), $this->modified->getTimestamp(), $this->context['locations']);
 
 		//Set title
 		$this->context['title'] = $this->translator->trans('Libre Air locations');
@@ -399,18 +386,25 @@ class LocationController extends DefaultController {
 	 *
 	 * @param Request $request The request instance
 	 * @param int $id The location id
+	 * @param ?string $location The location slug
 	 *
 	 * @return Response The rendered view
 	 */
-	public function view(Request $request, int $id): Response {
+	public function view(Request $request, int $id, ?string $location): Response {
 		//Without location
 		if (empty($this->context['location'] = $this->doctrine->getRepository(Location::class)->findOneByIdAsArray($id, $this->locale))) {
 			//Throw 404
 			throw $this->createNotFoundException($this->translator->trans('Unable to find location: %id%', ['%id%' => $id]));
 		}
 
+		//With invalid slug
+		if ($location !== $this->context['location']['slug']) {
+			//Redirect on correctly spelled location
+			return $this->redirectToRoute('rapsys_air_location_view', ['id' => $this->context['location']['id'], 'location' => $this->context['location']['slug']], Response::HTTP_MOVED_PERMANENTLY);
+		}
+
 		//Fetch calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsArray($this->period, $this->locale, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $this->context['location']['latitude'], $this->context['location']['longitude']);
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $this->context['location']['latitude'], $this->context['location']['longitude']);
 
 		//Set dances
 		$this->context['dances'] = [];
@@ -464,12 +458,12 @@ class LocationController extends DefaultController {
 		}
 
 		//Add multi map
-		$this->context['multimap'] = $this->map->getMultiMap($this->context['location']['multimap'], $this->modified->getTimestamp(), $this->context['location']['latitude'], $this->context['location']['longitude'], $this->context['locations'], $this->map->getMultiZoom($this->context['location']['latitude'], $this->context['location']['longitude'], $this->context['locations']));
+		$this->context['multimap'] = $this->map->getMultiMap($this->context['location']['multimap'], $this->modified->getTimestamp(), $this->context['locations']);
 
 		//Set keywords
 		$this->context['keywords'] = [
 			$this->context['location']['title'],
-			$this->context['location']['city'],
+			$this->context['location']['city']['title'],
 			$this->translator->trans($this->context['location']['indoor']?'Indoor':'Outdoor'),
 			$this->translator->trans('Calendar'),
 			$this->translator->trans('Libre Air')
@@ -497,11 +491,17 @@ class LocationController extends DefaultController {
 			$this->context['title'] = $this->translator->trans('Dance %location%', ['%location%' => $this->context['location']['atin']]);
 
 			//Set description
-			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %location%', [ '%location%' => $this->context['location']['at'] ]);
+			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %location%', ['%location%' => $this->context['location']['at']]);
 		}
 
 		//Set locations description
-		$this->context['locations_description'] = $this->translator->trans('Libre Air location list %location%', ['%location%' => $this->context['location']['atin']]);
+		$this->context['locations_description'] = $this->translator->trans('Libre Air location list %location% %city%', ['%location%' => $this->context['location']['around'], '%city%' => $this->context['location']['city']['in']]);
+
+		//Set locations link
+		$this->context['locations_link'] = $this->context['location']['city']['link'];
+
+		//Set locations title
+		$this->context['locations_title'] = $this->context['location']['city']['title'].' ('.$this->context['location']['city']['id'].')';
 
 		//Set alternates
 		$this->context['alternates'] += $this->context['location']['alternates'];
