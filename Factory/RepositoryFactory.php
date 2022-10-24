@@ -26,14 +26,14 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 	/**
 	 * The list of EntityRepository instances
 	 *
-	 * @var ObjectRepository[]
+	 * @var array
 	 */
 	private array $repositoryList = [];
 
 	/**
 	 * The list of languages
 	 *
-	 * @var string[]
+	 * @var array
 	 */
 	private array $languages = [];
 
@@ -94,7 +94,7 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getRepository(EntityManagerInterface $entityManager, $entityName): ObjectRepository {
+	public function getRepository(EntityManagerInterface $entityManager, mixed $entityName): ObjectRepository {
 		//Set repository hash
 		$repositoryHash = $entityManager->getClassMetadata($entityName)->getName() . spl_object_hash($entityManager);
 
@@ -122,7 +122,7 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 		$repositoryClass = $metadata->customRepositoryClassName ?: $entityManager->getConfiguration()->getDefaultRepositoryClassName();
 
 		//Return repository class instance
-		//XXX: router, slugger, translator and languages arguments will be ignored by default
+		//XXX: router, slugger, translator, languages and locale arguments will be ignored by default
 		return new $repositoryClass($entityManager, $metadata, $this->router, $this->slugger, $this->translator, $this->languages, $this->locale);
 	}
 }
