@@ -32,7 +32,7 @@
 	{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
 	{% stopwatch 'stylesheet' %}
 		{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,lemon,notoemoji,screen}.css' %}
-			<link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+			<link rel="stylesheet" type="text/css" href="{{ asset_url }}?20221024100144" />
 		{% endstylesheet %}
 	{% endstopwatch %}
 	{% if canonical is defined and canonical %}
@@ -68,7 +68,7 @@
 		<header id="header">
 			<div>
 				{% if site is defined and site %}
-					{% block header_title %}<a id="logo" href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo.svg) }}?v=1" srcset="{{ asset(site.logo.png) }}?v=1 200w, {{ asset(site.logo.svg) }}?v=1 400w" sizes="(min-width:400px) 400px, 200px" alt="{{ site.title }}" width="100" height="45" /><span>{{ site.title }}</span></a>{% endblock %}
+					{% block header_title %}<a id="logo" href="{{ site.url }}" title="{{ site.title }}"><img src="{{ asset(site.logo.svg) }}?20221024100144" srcset="{{ asset(site.logo.png) }}?20221024100144 200w, {{ asset(site.logo.svg) }}?20221024100144 400w" sizes="(min-width:400px) 400px, 200px" alt="{{ site.title }}" width="100" height="45" /><span>{{ site.title }}</span></a>{% endblock %}
 				{% endif %}
 				<h1 id="title"><a href="{{ canonical }}">{{ title }}</a></h1>
 			</div>
