@@ -509,6 +509,18 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			}*/
 		}
 
+		//With empty locations link
+		if (empty($parameters['locations_link'])) {
+			//Set locations link
+			$parameters['locations_link'] = $this->router->generate('rapsys_air_location');
+		}
+
+		//With empty locations title
+		if (empty($parameters['locations_title'])) {
+			//Set locations title
+			$parameters['locations_title'] = $this->translator->trans('Locations', [], null, $this->locale);
+		}
+
 		//With canonical
 		if (!empty($parameters['canonical'])) {
 			//Set facebook url
