@@ -130,9 +130,8 @@ rapsys_air_session:
 
 rapsys_air_session_tangoargentin:
     path:
-        en_gb: '/en/session/tangoargentin'
-        fr_fr: '/seance/tangoargentin'
-    format: json
+        en_gb: '/en/session/tangoargentin.{!_format?json}'
+        fr_fr: '/seance/tangoargentin.{!_format?json}'
     controller: Rapsys\AirBundle\Controller\SessionController::tangoargentin
     methods: GET
 
@@ -168,16 +167,14 @@ rapsys_air_user_view:
     path:
         en_gb: '/en/user/{id<\d+>}/{user<[\w-]+>?}'
         fr_fr: '/utilisateur/{id<\d+>}/{user<[\w-]+>?}'
-    #TODO: changer pour DefaultController::organizer ou DefaultController::user et dropper cette classe useless
-    controller: Rapsys\AirBundle\Controller\OrganizerController::view
+    controller: Rapsys\AirBundle\Controller\DefaultController::userView
     methods: GET|POST
 
 rapsys_air_user_milongaraphael:
     path:
         en_gb: '/en/milonga-raphael'
         fr_fr: '/milonga-raphael'
-    #TODO: changer pour DefaultController::organizer ou DefaultController::user et dropper cette classe useless
-    controller: Rapsys\AirBundle\Controller\OrganizerController::view
+    controller: Rapsys\AirBundle\Controller\DefaultController::userView
     defaults:
         # default parameters
         id: 1
