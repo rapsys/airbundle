@@ -28,35 +28,42 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 	 *
 	 * @var ObjectRepository[]
 	 */
-	private $repositoryList = [];
+	private array $repositoryList = [];
 
 	/**
 	 * The list of languages
 	 *
 	 * @var string[]
 	 */
-	private $languages = [];
+	private array $languages = [];
+
+	/**
+	 * The current locale
+	 *
+	 * @var string
+	 */
+	private string $locale;
 
 	/**
 	 * The RouterInterface instance
 	 *
 	 * @var RouterInterface
 	 */
-	private $router;
+	private RouterInterface $router;
 
 	/**
 	 * The SluggerUtil instance
 	 *
 	 * @var SluggerUtil
 	 */
-	private $slugger;
+	private SluggerUtil $slugger;
 
 	/**
 	 * The TranslatorInterface instance
 	 *
 	 * @var TranslatorInterface
 	 */
-	private $translator;
+	private TranslatorInterface $translator;
 
 	/**
 	 * Initializes a new RepositoryFactory instance
@@ -65,8 +72,9 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 	 * @param SluggerUtil $slugger The SluggerUtil instance
 	 * @param TranslatorInterface $translator The TranslatorInterface instance
 	 * @param array $languages The languages list
+	 * @param string $locale The current locale
 	 */
-	public function __construct(RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, array $languages) {
+	public function __construct(RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, array $languages, string $locale) {
 		//Set router
 		$this->router = $router;
 
@@ -78,6 +86,9 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 
 		//Set languages
 		$this->languages = $languages;
+
+		//Set locale
+		$this->locale = $locale;
 	}
 
 	/**
@@ -112,6 +123,6 @@ final class RepositoryFactory implements RepositoryFactoryInterface {
 
 		//Return repository class instance
 		//XXX: router, slugger, translator and languages arguments will be ignored by default
-		return new $repositoryClass($entityManager, $metadata, $this->router, $this->slugger, $this->translator, $this->languages);
+		return new $repositoryClass($entityManager, $metadata, $this->router, $this->slugger, $this->translator, $this->languages, $this->locale);
 	}
 }
