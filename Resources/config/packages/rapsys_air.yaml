@@ -286,10 +286,6 @@ services:
     Rapsys\AirBundle\Controller\LocationController:
         arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
         tags: [ 'controller.service_arguments' ]
-    #Register organizer controller
-    Rapsys\AirBundle\Controller\OrganizerController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
-        tags: [ 'controller.service_arguments' ]
     #Register user controller
     Rapsys\AirBundle\Controller\UserController:
         arguments: [ '@service_container', '@doctrine', '@security.user_password_hasher', '@logger', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
@@ -349,11 +345,17 @@ services:
         arguments: [ '@doctrine', '@filesystem' ]
         tags: [ 'console.command' ]
     Rapsys\AirBundle\Factory\RepositoryFactory:
-        arguments: [ '@router', '@rapsys_pack.slugger_util', '@translator', '%rapsys_air.languages%' ]
+        arguments: [ '@router', '@rapsys_pack.slugger_util', '@translator', '%rapsys_air.languages%', '%kernel.default_locale%' ]
     #Register facebook util service
     rapsys_air.facebook_util:
         class: 'Rapsys\PackBundle\Util\FacebookUtil'
         arguments: [ '@router',  '%kernel.project_dir%/var/cache', '%rapsys_pack.path%', 'facebook', '%rapsys_air.path%/png/facebook.png', { irishgrover: '%rapsys_air.path%/ttf/irishgrover.v10.ttf', labelleaurore: '%rapsys_air.path%/ttf/labelleaurore.v10.ttf', dejavusans: '%rapsys_air.path%/ttf/dejavusans.2.37.ttf', droidsans: '%rapsys_air.path%/ttf/droidsans.regular.ttf' } ]
+        public: true
+    #Register security password_hasher_factory as public
+    #XXX: required for command `php bin/console doctrine:`
+    security.password_hasher_factory:
+        class: 'Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory'
+        arguments: [ { 'Rapsys\AirBundle\Entity\User': { class: 'Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher', arguments: [ ~, ~, ~, '2y'] } } ]
         public: true
 
 #Twig Configuration
