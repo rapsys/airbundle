@@ -487,6 +487,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			//Append facebook image texts
 			$parameters['facebook']['texts'] += [
 				$parameters['title'] => [
+					'font' => 'irishgrover',
 					'align' => 'left'
 				]/*XXX: same problem as url, too long :'(,
 				$parameters['description'] => [
