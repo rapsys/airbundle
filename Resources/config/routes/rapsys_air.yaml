@@ -137,8 +137,8 @@ rapsys_air_session_tangoargentin:
 
 rapsys_air_session_view:
     path:
-        en_gb: '/en/session/{id<\d+>}/{location<[\w-]+>}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
-        fr_fr: '/seance/{id<\d+>}/{location<[\w-]+>}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
+        en_gb: '/en/session/{id<\d+>}/{location<[\w-]+>?}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
+        fr_fr: '/seance/{id<\d+>}/{location<[\w-]+>?}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
     controller: Rapsys\AirBundle\Controller\SessionController::view
     methods: GET|POST
 
