@@ -1,14 +1,14 @@
 {% extends '@RapsysAir/body.html.twig' %}
 {% block content %}
-	<article id="dashboard" class="city">
+	<article>
 		<header>
 			<h2>{{ description }}</h2>
 		</header>
 		<div class="panel">
 			{% if cities is defined and cities %}
-				<div class="grid{% if cities|length > 1%} two{% endif %}">
+				<div class="grid">
 					{% for id, city in cities %}
-						<article class="cell">
+						<article>
 							<header>
 								<h3><a href="{{ city.link }}">{{ city.city }} ({{ city.id }})</a></h3>
 							</header>
@@ -23,9 +23,9 @@
 										</a>
 									</div>
 								{% endif %}
-								<ul class="grid{% if city.locations|length > 1 %} two{% endif %}">
+								<ul class="grid">
 									{% for id, location in city.locations %}
-										<li>{% if city.multimap is defined and city.multimap %}{{ id }} {% endif %}<a href="{{ location.link }}">{{ location.title }}</a></li>
+										<li><a href="{{ location.link }}">{% if city.multimap is defined and city.multimap %}{{ id }} {% endif %}{{ location.title }}</a></li>
 									{% endfor %}
 								</ul>
 							</div>
