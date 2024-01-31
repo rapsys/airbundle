@@ -205,49 +205,53 @@
 						<header>
 							<h3>{% trans %}Candidates{% endtrans %}</h3>
 						</header>
-						<div class="panel grid{% if session.applications is defined %}{% if session.applications|length >= 4 %} four{% elseif session.applications|length >= 3 %} three{% elseif session.applications|length >= 2 %} two{% endif %}{% endif %}">
-							{% if session.applications is defined and session.applications %}
-								{% for application in session.applications %}
+						<div class="panel">
+							<div class="grid{% if session.applications is defined %}{% if session.applications|length >= 4 %} four{% elseif session.applications|length >= 3 %} three{% elseif session.applications|length >= 2 %} two{% endif %}{% endif %}">
+								{% if session.applications is defined and session.applications %}
+									{% for application in session.applications %}
+										<section class="cell">
+											<header>
+												{% if application.user.id == 1 and application.user.title|slug == 'milonga-raphael' %}
+													<h3><a href="{{ path('rapsys_air_user_milongaraphael') }}">{{ application.user.title }}</a></h3>
+												{% else %}
+													<h3><a href="{{ path('rapsys_air_user_view', {'id': application.user.id, 'user': application.user.title|slug}) }}">{{ application.user.title }}</a></h3>
+												{% endif %}
+											</header>
+											<dl>
+												<dt>{% trans %}Score{% endtrans %}</dt>
+												<dd>
+													{% if application.score is null %}
+														{% trans %}None{% endtrans %}
+													{% else %}
+														{{ application.score }}</dd>
+													{% endif %}
+											</dl>
+											<dl>
+												<dt>{% trans %}Created{% endtrans %}</dt>
+												<dd>{{ application.created|intldate('long', 'medium') }}</dd>
+											</dl>
+											<dl>
+												<dt>{% trans %}Updated{% endtrans %}</dt>
+												<dd>{{ application.updated|intldate('long', 'medium') }}</dd>
+											</dl>
+											<dl>
+												<dt>{% trans %}Canceled{% endtrans %}</dt>
+												<dd>
+													{% if application.canceled is null %}
+														{% trans %}None{% endtrans %}
+													{% else %}
+														{{ application.canceled|intldate('long', 'medium') }}
+													{% endif %}
+												</dd>
+											</dl>
+										</section>
+									{% endfor %}
+								{% else %}
 									<section class="cell">
-										{% if application.user.id == 1 and application.user.title|slug == 'milonga-raphael' %}
-											<h3><a href="{{ path('rapsys_air_user_milongaraphael') }}">{{ application.user.title }}</a></h3>
-										{% else %}
-											<h3><a href="{{ path('rapsys_air_user_view', {'id': application.user.id, 'user': application.user.title|slug}) }}">{{ application.user.title }}</a></h3>
-										{% endif %}
-										<dl>
-											<dt>{% trans %}Score{% endtrans %}</dt>
-											<dd>
-												{% if application.score is null %}
-													{% trans %}None{% endtrans %}
-												{% else %}
-													{{ application.score }}</dd>
-												{% endif %}
-										</dl>
-										<dl>
-											<dt>{% trans %}Created{% endtrans %}</dt>
-											<dd>{{ application.created|intldate('long', 'medium') }}</dd>
-										</dl>
-										<dl>
-											<dt>{% trans %}Updated{% endtrans %}</dt>
-											<dd>{{ application.updated|intldate('long', 'medium') }}</dd>
-										</dl>
-										<dl>
-											<dt>{% trans %}Canceled{% endtrans %}</dt>
-											<dd>
-												{% if application.canceled is null %}
-													{% trans %}None{% endtrans %}
-												{% else %}
-													{{ application.canceled|intldate('long', 'medium') }}
-												{% endif %}
-											</dd>
-										</dl>
+										{% trans %}None{% endtrans %}
 									</section>
-								{% endfor %}
-							{% else %}
-								<section class="cell">
-									{% trans %}None{% endtrans %}
-								</section>
-							{% endif %}
+								{% endif %}
+							</div>
 						</div>
 					</section>
 				{% endif %}
