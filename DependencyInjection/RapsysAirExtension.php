@@ -1,4 +1,13 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys PackBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\DependencyInjection;
 
@@ -6,6 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\Translation\Loader\ArrayLoader;
+
+use Rapsys\AirBundle\RapsysAirBundle;
 
 /**
  * This is the class that loads and manages your bundle configuration.
@@ -89,8 +100,8 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getAlias() {
-		return 'rapsys_air';
+	public function getAlias(): string {
+		return RapsysAirBundle::getAlias();
 	}
 
 	/**
