@@ -15,6 +15,11 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Location;
+use Rapsys\AirBundle\Entity\Session;
+use Rapsys\AirBundle\Entity\Slot;
+
 /**
  * SessionRepository
  */
@@ -47,10 +52,9 @@ class SessionRepository extends EntityRepository {
 	 * Find session as array by id
 	 *
 	 * @param int $id The session id
-	 * @param string $locale The locale
 	 * @return array The session data
 	 */
-	public function findOneByIdAsArray(int $id, string $locale): ?array {
+	public function findOneByIdAsArray(int $id): ?array {
 		//Set the request
 		$req =<<<SQL
 SELECT
@@ -197,7 +201,6 @@ SQL;
 		$result = $this->_em
 			->createNativeQuery($req, $rsm)
 			->setParameter('id', $id)
-			->setParameter('locale', $locale)
 			->getOneOrNullResult();
 
 		//Without result
@@ -369,9 +372,9 @@ SQL;
 			}
 
 			//With current locale
-			if ($fallback === $locale) {
+			if ($fallback === $this->locale) {
 				//Set current locale title
-				$titles[$locale] = $this->translator->trans($this->languages[$locale]);
+				$titles[$this->locale] = $this->translator->trans($this->languages[$this->locale]);
 			//Without current locale
 			} else {
 				//Iterate on other locales
@@ -409,38 +412,13 @@ SQL;
 	 * Find sessions as calendar array by date period
 	 *
 	 * @param DatePeriod $period The date period
-	 * @param string $locale The locale
 	 * @param ?bool $granted The session is granted
 	 * @param ?float $latitude The latitude
 	 * @param ?float $longitude The longitude
 	 * @param ?int $userId The user id
 	 * @return array The session data
 	 */
-
-	//TODO: calculer un titre de la page intelligent ?
-	//(utiliser la liste des villes par exemple ???)
-
-	//TODO: finir cette merde pour toutes les pages de listing !!!
-
-	//TODO: compute a max updated ???
-
-	//TODO: à priori si l'userId est fourni, qu'on veut pas juste les granted et que l'userId correspond pas à l'utilisateur à qui ça a été attribué et que la personne a demandé la session, on a envie de lui afficher le disputed ???
-	//(ce serait même plus un refused, voir le cas où c'est pas encore attribué, comment ça se passe ???)
-
-	//TODO: la gestion des sessions pas granted et contestées est à faire au niveau du contrôleur userView si l'user est connecté
-	//On peut utiliser le système des applications, l'id user dans application et l'id utilisateur connecté pour faire la détection
-	//Ça se résume à coller un $class[] = 'disputed' ou 'lost' ? sur la session ???
-
-	#TODO: mettre en grisé les sessions pas granted
-	#TODO: mettre en highlight (violet) les sessions de la location ou de l'user si fourni
-		//TODO: penser au cas où on est sur un utilisateur, on veut mettre
-						//TODO: faire la détection des séances perdues par l'utilisateur ???
-						//XXX: à priori ça va se jouer au niveau du contrôleur où on va setter ça
-							/*} elseif (!empty($userId) && $session['au_id'] != $userId) {
-							$class[] = 'disputed';*/
-
-
-	public function findAllByPeriodAsArray(\DatePeriod $period, string $locale, ?bool $granted = null, ?float $latitude = null, ?float $longitude = null, ?int $userId = null) {
+	public function findAllByPeriodAsCalendarArray(\DatePeriod $period, ?bool $granted = null, ?float $latitude = null, ?float $longitude = null, ?int $userId = null): array {
 		//Init granted sql
 		$grantSql = '';
 
@@ -554,6 +532,7 @@ SELECT
 	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
 	s.location_id AS l_id,
 	l.title AS l_title,
+	l.address AS l_address,
 	l.zipcode AS l_zipcode,
 	l.city AS l_city,
 	l.latitude AS l_latitude,
@@ -568,8 +547,9 @@ SELECT
 	ad.type AS ad_type,
 	a.user_id AS au_id,
 	au.pseudonym AS au_pseudonym,
-	p.rate AS p_rate,
 	p.hat AS p_hat,
+	p.rate AS p_rate,
+	p.short AS p_short,
 	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
 	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym,
 	GROUP_CONCAT(sa.dance_id ORDER BY sa.user_id SEPARATOR "\\n") AS sad_id,
@@ -579,14 +559,14 @@ SELECT
 FROM RapsysAirBundle:Session AS s
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-${grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-${grantSql}JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-${grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+{$grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+{$grantSql}JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
+{$grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:Dance AS sad ON (sad.id = sa.dance_id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-WHERE s.date BETWEEN :begin AND :end${locationSql}
+WHERE s.date BETWEEN :begin AND :end{$locationSql}
 GROUP BY s.id
 ORDER BY NULL
 SQL;
@@ -615,6 +595,7 @@ SQL;
 			->addScalarResult('t_title', 't_title', 'string')
 			->addScalarResult('l_id', 'l_id', 'integer')
 			->addScalarResult('l_title', 'l_title', 'string')
+			->addScalarResult('l_address', 'l_address', 'string')
 			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
 			->addScalarResult('l_city', 'l_city', 'string')
 			->addScalarResult('l_latitude', 'l_latitude', 'float')
@@ -627,8 +608,9 @@ SQL;
 			->addScalarResult('ad_type', 'ad_type', 'string')
 			->addScalarResult('au_id', 'au_id', 'integer')
 			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('p_rate', 'p_rate', 'integer')
 			->addScalarResult('p_hat', 'p_hat', 'boolean')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
+			->addScalarResult('p_short', 'p_short', 'string')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sau_id', 'sau_id', 'string')
 			//XXX: is a string because of \n separator
@@ -645,8 +627,7 @@ SQL;
 		$res = $this->_em
 			->createNativeQuery($req, $rsm)
 			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->setParameter('locale', $locale);
+			->setParameter('end', $period->getEndDate());
 
 		//Add optional location ids
 		if (!empty($locationIds)) {
@@ -847,6 +828,7 @@ SQL;
 						$rate = [
 							'glyph' => self::GLYPHS['Free'],
 							'rate' => null,
+							'short' => $session['p_short'],
 							'title' => $this->translator->trans('Free')
 						];
 
@@ -861,7 +843,7 @@ SQL;
 								$rate['rate'] = $session['p_rate'];
 
 								//Set title
-								$rate['title'] = $this->translator->trans('To the hat, ideally %rate% €', ['%rate%' => $session['p_rate']]);
+								$rate['title'] = $this->translator->trans('%rate%€ to the hat', ['%rate%' => $session['p_rate']]);
 							//Without rate
 							} else {
 								//Set title
@@ -920,6 +902,7 @@ SQL;
 						'location' => [
 							'id' => $session['l_id'],
 							'title' => $this->translator->trans($session['l_title']),
+							'address' => $session['l_address'],
 							'latitude' => $session['l_latitude'],
 							'longitude' => $session['l_longitude'],
 							'indoor' => $session['l_indoor'],
@@ -935,6 +918,7 @@ SQL;
 							'title' => $this->translator->trans($session['t_title'])
 						],
 						'rate' => $rate,
+						'modified' => $session['modified'],
 						'applications' => $applications
 					];
 				}
@@ -951,11 +935,12 @@ SQL;
 	/**
 	 * Find session by location, slot and date
 	 *
-	 * @param $location The location
-	 * @param $slot The slot
-	 * @param $date The datetime
+	 * @param Location $location The location
+	 * @param Slot $slot The slot
+	 * @param DateTime $date The datetime
+	 * @return ?Session The found session
 	 */
-	public function findOneByLocationSlotDate($location, $slot, $date) {
+	public function findOneByLocationSlotDate(Location $location, Slot $slot, \DateTime $date): ?Session {
 		//Return sessions
 		return $this->getEntityManager()
 			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.slot = :slot AND s.date = :date)')
@@ -966,78 +951,14 @@ SQL;
 	}
 
 	/**
-	 * Find sessions by date period
-	 *
-	 * @param $period The date period
-	 */
-	public function findAllByDatePeriod($period) {
-		//Return sessions
-		return $this->getEntityManager()
-			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE s.date BETWEEN :begin AND :end')
-			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->getResult();
-	}
-
-	/**
-	 * Find sessions by location and date period
-	 *
-	 * @param $location The location
-	 * @param $period The date period
-	 */
-	public function findAllByLocationDatePeriod($location, $period) {
-		//Return sessions
-		return $this->getEntityManager()
-			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.date BETWEEN :begin AND :end)')
-			->setParameter('location', $location)
-			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->getResult();
-	}
-
-	/**
-	 * Find one session by location and user id within last month
-	 *
-	 * @param $location The location id
-	 * @param $user The user id
-	 */
-	public function findOneWithinLastMonthByLocationUser($location, $user) {
-		//Set the request
-		//XXX: give the gooddelay to guest just in case
-		$req =<<<SQL
-SELECT s.id
-FROM RapsysAirBundle:Session s
-JOIN RapsysAirBundle:Application a ON (a.id = s.application_id AND a.user_id = :uid AND (a.canceled IS NULL OR TIMESTAMPDIFF(DAY, a.canceled, ADDTIME(s.date, s.begin)) < 1))
-WHERE s.location_id = :lid AND s.date >= DATE_ADD(DATE_SUB(NOW(), INTERVAL 1 MONTH), INTERVAL :gooddelay DAY)
-SQL;
-
-		//Replace bundle entity name by table name
-		$req = str_replace($this->tableKeys, $this->tableValues, $req);
-
-		//Get result set mapping instance
-		$rsm = new ResultSetMapping();
-
-		//Declare all fields
-		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
-		$rsm->addScalarResult('id', 'id', 'integer')
-			->addIndexByScalar('id');
-
-		//Return result
-		return $this->_em
-			->createNativeQuery($req, $rsm)
-			->setParameter('lid', $location)
-			->setParameter('uid', $user)
-			->setParameter('gooddelay', self::SENIOR_DELAY)
-			->getOneOrNullResult();
-	}
-
-	/**
 	 * Fetch sessions by date period
 	 *
-	 * @param $period The date period
-	 * @param $locale The locale
+	 * @XXX: used in calendar command
+	 *
+	 * @param DatePeriod $period The date period
+	 * @return array The session array
 	 */
-	public function fetchAllByDatePeriod($period, $locale = null) {
+	public function fetchAllByDatePeriod(\DatePeriod $period): array {
 		//Set the request
 		//TODO: exclude opera and others ?
 		$req = <<<SQL
@@ -1132,487 +1053,20 @@ SQL;
 		$res = $this->_em
 			->createNativeQuery($req, $rsm)
 			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->setParameter('locale', $locale);
+			->setParameter('end', $period->getEndDate());
 
 		//Return result
 		return $res->getResult();
 	}
 
 	/**
-	 * Fetch session by id
-	 *
-	 * @todo drop fetchOneById when migration is complete
-	 * @todo FIX the updated computation, we can drop the group_concat for a MAX()
-	 * @XXX DO NOT ADD a.updated as we already compute that with applications !!!
-	 *
-	 * @param $id The session id
-	 * @param $locale The locale
-	 * @return array The session data
-	 */
-	public function fetchOneById($id, $locale = null) {
-		//Set the request
-		//TODO: compute scores ?
-		//TODO: compute delivery date ? (J-3/J-4 ?)
-		$req =<<<SQL
-SELECT
-	s.id,
-	s.date,
-	s.begin,
-	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
-	s.length,
-	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
-	s.rainfall,
-	s.rainrisk,
-	s.realfeel,
-	s.realfeelmin,
-	s.realfeelmax,
-	s.temperature,
-	s.temperaturemin,
-	s.temperaturemax,
-	s.locked,
-	s.created,
-	s.updated,
-	s.location_id AS l_id,
-	l.title AS l_title,
-	l.description AS l_description,
-	l.address AS l_address,
-	l.zipcode AS l_zipcode,
-	l.city AS l_city,
-	l.latitude AS l_latitude,
-	l.longitude AS l_longitude,
-	l.indoor AS l_indoor,
-	l.updated AS l_updated,
-	s.slot_id AS t_id,
-	t.title AS t_title,
-	t.updated AS t_updated,
-	s.application_id AS a_id,
-	a.canceled AS a_canceled,
-	a.dance_id AS ad_id,
-	ad.name AS ad_name,
-	ad.type AS ad_type,
-	ad.updated AS ad_updated,
-	a.user_id AS au_id,
-	au.pseudonym AS au_pseudonym,
-	p.id AS p_id,
-	p.description AS p_description,
-	p.class AS p_class,
-	p.contact AS p_contact,
-	p.donate AS p_donate,
-	p.link AS p_link,
-	p.profile AS p_profile,
-	p.rate AS p_rate,
-	p.hat AS p_hat,
-	p.updated AS p_updated,
-	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
-	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
-	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
-	GROUP_CONCAT(sa.updated ORDER BY sa.user_id SEPARATOR "\\n") AS sa_updated,
-	GROUP_CONCAT(IFNULL(sa.canceled, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_canceled,
-	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
-	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-LEFT JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-WHERE s.id = :id
-GROUP BY s.id
-ORDER BY NULL
-SQL;
-
-		//Replace bundle entity name by table name
-		$req = str_replace($this->tableKeys, $this->tableValues, $req);
-
-		//Get result set mapping instance
-		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
-		$rsm = new ResultSetMapping();
-
-		//Declare all fields
-		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
-		$rsm->addScalarResult('id', 'id', 'integer')
-			->addScalarResult('date', 'date', 'date')
-			->addScalarResult('begin', 'begin', 'time')
-			->addScalarResult('start', 'start', 'datetime')
-			->addScalarResult('length', 'length', 'time')
-			->addScalarResult('stop', 'stop', 'datetime')
-			->addScalarResult('rainfall', 'rainfall', 'float')
-			->addScalarResult('rainrisk', 'rainrisk', 'float')
-			->addScalarResult('realfeel', 'realfeel', 'float')
-			->addScalarResult('realfeelmin', 'realfeelmin', 'float')
-			->addScalarResult('realfeelmax', 'realfeelmax', 'float')
-			->addScalarResult('temperature', 'temperature', 'float')
-			->addScalarResult('temperaturemin', 'temperaturemin', 'float')
-			->addScalarResult('temperaturemax', 'temperaturemax', 'float')
-			->addScalarResult('locked', 'locked', 'datetime')
-			->addScalarResult('created', 'created', 'datetime')
-			->addScalarResult('updated', 'updated', 'datetime')
-			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_title', 'l_title', 'string')
-			->addScalarResult('l_description', 'l_description', 'string')
-			->addScalarResult('l_address', 'l_address', 'string')
-			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
-			->addScalarResult('l_city', 'l_city', 'string')
-			->addScalarResult('l_latitude', 'l_latitude', 'float')
-			->addScalarResult('l_longitude', 'l_longitude', 'float')
-			->addScalarResult('l_indoor', 'l_indoor', 'boolean')
-			->addScalarResult('l_updated', 'l_updated', 'datetime')
-			->addScalarResult('t_id', 't_id', 'integer')
-			->addScalarResult('t_title', 't_title', 'string')
-			->addScalarResult('t_updated', 't_updated', 'datetime')
-			->addScalarResult('a_id', 'a_id', 'integer')
-			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
-			->addScalarResult('ad_id', 'ad_id', 'integer')
-			->addScalarResult('ad_name', 'ad_name', 'string')
-			->addScalarResult('ad_type', 'ad_type', 'string')
-			->addScalarResult('ad_updated', 'ad_updated', 'datetime')
-			->addScalarResult('au_id', 'au_id', 'integer')
-			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('p_id', 'p_id', 'integer')
-			->addScalarResult('p_description', 'p_description', 'text')
-			->addScalarResult('p_class', 'p_class', 'text')
-			->addScalarResult('p_contact', 'p_contact', 'text')
-			->addScalarResult('p_donate', 'p_donate', 'text')
-			->addScalarResult('p_link', 'p_link', 'text')
-			->addScalarResult('p_profile', 'p_profile', 'text')
-			->addScalarResult('p_rate', 'p_rate', 'integer')
-			->addScalarResult('p_hat', 'p_hat', 'boolean')
-			->addScalarResult('p_updated', 'p_updated', 'datetime')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sa_id', 'sa_id', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sa_score', 'sa_score', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sa_created', 'sa_created', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sa_updated', 'sa_updated', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sa_canceled', 'sa_canceled', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_id', 'sau_id', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
-			->addIndexByScalar('id');
-
-		//Set result
-		return $this->_em
-			->createNativeQuery($req, $rsm)
-			->setParameter('id', $id)
-			->setParameter('locale', $locale)
-			->getOneOrNullResult();
-	}
-
-	/**
-	 * Fetch sessions calendar with translated location by date period
-	 *
-	 * @param $period The date period
-	 * @param $locationId The location id
-	 * @param $sessionId The session id
-	 * @param $granted The session is granted
-	 */
-	public function fetchCalendarByDatePeriod($period, $locationId = null, $sessionId = null, $granted = false, $locale = null) {
-		//Init granted sql
-		$grantSql = '';
-
-		//When granted is set
-		if (empty($granted)) {
-			//Set application and user as optional
-			$grantSql = 'LEFT ';
-		}
-
-		//Init location sql
-		$locationSql = '';
-
-		//When location id is set
-		if (!empty($locationId)) {
-			//Add location id clause
-			$locationSql = "\n\t".'AND s.location_id = :lid';
-		}
-
-		//Set the request
-		$req = <<<SQL
-
-SELECT
-	s.id,
-	s.date,
-	s.rainrisk,
-	s.rainfall,
-	s.realfeel,
-	s.temperature,
-	s.locked,
-	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
-	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
-	s.location_id AS l_id,
-	l.title AS l_title,
-	s.slot_id AS t_id,
-	t.title AS t_title,
-	s.application_id AS a_id,
-	a.canceled AS a_canceled,
-	ad.name AS ad_name,
-	ad.type AS ad_type,
-	a.user_id AS au_id,
-	au.pseudonym AS au_pseudonym,
-	p.rate AS p_rate,
-	p.hat AS p_hat,
-	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
-	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-${grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-${grantSql}JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-${grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-WHERE s.date BETWEEN :begin AND :end${locationSql}
-GROUP BY s.id
-ORDER BY NULL
-SQL;
-
-		//Replace bundle entity name by table name
-		$req = str_replace($this->tableKeys, $this->tableValues, $req);
-
-		//Get result set mapping instance
-		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
-		$rsm = new ResultSetMapping();
-
-		//Declare all fields
-		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
-		//addScalarResult($sqlColName, $resColName, $type = 'string');
-		$rsm->addScalarResult('id', 'id', 'integer')
-			->addScalarResult('date', 'date', 'date')
-			->addScalarResult('rainrisk', 'rainrisk', 'float')
-			->addScalarResult('rainfall', 'rainfall', 'float')
-			->addScalarResult('realfeel', 'realfeel', 'float')
-			->addScalarResult('temperature', 'temperature', 'float')
-			->addScalarResult('locked', 'locked', 'datetime')
-			->addScalarResult('start', 'start', 'datetime')
-			->addScalarResult('stop', 'stop', 'datetime')
-			->addScalarResult('t_id', 't_id', 'integer')
-			->addScalarResult('t_title', 't_title', 'string')
-			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_title', 'l_title', 'string')
-			->addScalarResult('a_id', 'a_id', 'integer')
-			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
-			->addScalarResult('ad_name', 'ad_name', 'string')
-			->addScalarResult('ad_type', 'ad_type', 'string')
-			->addScalarResult('au_id', 'au_id', 'integer')
-			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('p_rate', 'p_rate', 'integer')
-			->addScalarResult('p_hat', 'p_hat', 'boolean')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_id', 'sau_id', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
-			->addIndexByScalar('id');
-
-		//Fetch result
-		$res = $this->_em
-			->createNativeQuery($req, $rsm)
-			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->setParameter('locale', $locale);
-
-		//Add optional location id
-		if (!empty($locationId)) {
-			$res->setParameter('lid', $locationId);
-		}
-
-		//Get result
-		$res = $res->getResult();
-
-		//Init calendar
-		$calendar = [];
-
-		//Init month
-		$month = null;
-
-		//Iterate on each day
-		foreach($period as $date) {
-			//Init day in calendar
-			$calendar[$Ymd = $date->format('Ymd')] = [
-				'title' => $this->translator->trans($date->format('l')).' '.$date->format('d'),
-				'class' => [],
-				'sessions' => []
-			];
-
-			//Detect month change
-			if ($month != $date->format('m')) {
-				$month = $date->format('m');
-				//Append month for first day of month
-				//XXX: except if today to avoid double add
-				if ($date->format('U') != strtotime('today')) {
-					$calendar[$Ymd]['title'] .= '/'.$month;
-				}
-			}
-			//Deal with today
-			if ($date->format('U') == ($today = strtotime('today'))) {
-				$calendar[$Ymd]['title'] .= '/'.$month;
-				$calendar[$Ymd]['current'] = true;
-				$calendar[$Ymd]['class'][] = 'current';
-			}
-			//Disable passed days
-			if ($date->format('U') < $today) {
-				$calendar[$Ymd]['disabled'] = true;
-				$calendar[$Ymd]['class'][] = 'disabled';
-			}
-			//Set next month days
-			if ($date->format('m') > date('m')) {
-				$calendar[$Ymd]['next'] = true;
-				#$calendar[$Ymd]['class'][] = 'next';
-			}
-
-			//Detect sunday
-			if ($date->format('w') == 0) {
-				$calendar[$Ymd]['class'][] = 'sunday';
-			}
-
-			//Iterate on each session to find the one of the day
-			foreach($res as $session) {
-				if (($sessionYmd = $session['date']->format('Ymd')) == $Ymd) {
-					//Count number of application
-					$count = count(explode("\n", $session['sau_id']));
-
-					//Compute classes
-					$class = [];
-					if (!empty($session['a_id'])) {
-						$applications = [ $session['au_id'] => $session['au_pseudonym'] ];
-						if (!empty($session['a_canceled'])) {
-							$class[] = 'canceled';
-						} else {
-							$class[] = 'granted';
-						}
-					} elseif ($count > 1) {
-						$class[] = 'disputed';
-					} elseif (!empty($session['locked'])) {
-						$class[] = 'locked';
-					} else {
-						$class[] = 'pending';
-					}
-
-					if ($sessionId == $session['id']) {
-						$class[] = 'highlight';
-					}
-
-					//Set temperature
-					//XXX: realfeel may be null, temperature should not
-					$temperature = $session['realfeel'] !== null ? $session['realfeel'] : $session['temperature'];
-
-					//Compute weather
-					//XXX: rainfall may be null
-					if ($session['rainrisk'] > 0.50 || $session['rainfall'] > 2) {
-						$weather = self::GLYPHS['Stormy'];
-					} elseif ($session['rainrisk'] > 0.40 || $session['rainfall'] > 1) {
-						$weather = self::GLYPHS['Rainy'];
-					} elseif ($temperature > 24) {
-						$weather = self::GLYPHS['Cleary'];
-					} elseif ($temperature > 17) {
-						$weather = self::GLYPHS['Sunny'];
-					} elseif ($temperature > 10) {
-						$weather = self::GLYPHS['Cloudy'];
-					} elseif ($temperature !== null) {
-						$weather = self::GLYPHS['Winty'];
-					} else {
-						$weather = null;
-					}
-
-					//Init weathertitle
-					$weathertitle = [];
-
-					//Check if realfeel is available
-					if ($session['realfeel'] !== null) {
-						$weathertitle[] = $session['realfeel'].'°R';
-					}
-
-					//Check if temperature is available
-					if ($session['temperature'] !== null) {
-						$weathertitle[] = $session['temperature'].'°C';
-					}
-
-					//Check if rainrisk is available
-					if ($session['rainrisk'] !== null) {
-						$weathertitle[] = ($session['rainrisk']*100).'%';
-					}
-
-					//Check if rainfall is available
-					if ($session['rainfall'] !== null) {
-						$weathertitle[] = $session['rainfall'].'mm';
-					}
-
-					//Set applications
-					$applications = [
-						0 => $this->translator->trans($session['t_title']).' '.$this->translator->trans('at '.$session['l_title']).$this->translator->trans(':')
-					];
-
-					//Fetch pseudonyms from session applications
-					$applications += array_combine(explode("\n", $session['sau_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['sau_pseudonym'])));
-
-					//Set dance
-					$dance = null;
-
-					//Set pseudonym
-					$pseudonym = null;
-
-					//Check that session is not granted
-					if (empty($session['a_id'])) {
-						//With location id and unique application
-						if ($count == 1) {
-							//Set unique application pseudonym
-							$pseudonym = $session['sau_pseudonym'];
-						}
-					//Session is granted
-					} else {
-						//Replace granted application
-						$applications[$session['au_id']] = '* '.$session['au_pseudonym'];
-
-						//Set dance
-						$dance = $this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type']));
-
-						//Set pseudonym
-						$pseudonym = $session['au_pseudonym'].($count > 1 ? ' ['.$count.']':'');
-					}
-
-					//Add the session
-					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%05d', $session['id'])] = [
-						'id' => $session['id'],
-						'start' => $session['start'],
-						'stop' => $session['stop'],
-						'location' => $this->translator->trans($session['l_title']),
-						'dance' => $dance,
-						'pseudonym' => $pseudonym,
-						'class' => $class,
-						'slot' => self::GLYPHS[$session['t_title']],
-						'slottitle' => $this->translator->trans($session['t_title']),
-						'weather' => $weather,
-						'weathertitle' => implode(' ', $weathertitle),
-						'applications' => $applications,
-						'rate' => $session['p_rate'],
-						'hat' => $session['p_hat']
-					];
-				}
-			}
-
-			//Sort sessions
-			ksort($calendar[$Ymd]['sessions']);
-		}
-
-		//Send result
-		return $calendar;
-	}
-
-	/**
 	 * Fetch sessions calendar with translated location by date period and user
 	 *
-	 * @param $period The date period
-	 * @param $userId The user id
-	 * @param $sessionId The session id
+	 * @param DatePeriod $period The date period
+	 * @param ?int $userId The user id
+	 * @param ?int $sessionId The session id
 	 */
-	public function fetchUserCalendarByDatePeriod($period, $userId = null, $sessionId = null, $locale = null) {
+	public function fetchUserCalendarByDatePeriod(\DatePeriod $period, ?int $userId = null, ?int $sessionId = null): array {
 		//Init user sql
 		$userJoinSql = $userWhereSql = '';
 
@@ -1653,13 +1107,13 @@ SELECT
 FROM RapsysAirBundle:Session AS s
 JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
 JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-${userJoinSql}LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
+{$userJoinSql}LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
 LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 LEFT JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
 LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
 LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-WHERE s.date BETWEEN :begin AND :end${userWhereSql}
+WHERE s.date BETWEEN :begin AND :end{$userWhereSql}
 GROUP BY s.id
 ORDER BY NULL
 SQL;
@@ -1706,7 +1160,6 @@ SQL;
 			->setParameter('begin', $period->getStartDate())
 			->setParameter('end', $period->getEndDate())
 			->setParameter('uid', $userId)
-			->setParameter('locale', $locale)
 			->getResult();
 
 		//Init calendar
@@ -1894,9 +1347,9 @@ SQL;
 	/**
 	 * Find all session pending hourly weather
 	 *
-	 * @return array<Session> The sessions to update
+	 * @return array The sessions to update
 	 */
-	public function findAllPendingHourlyWeather() {
+	public function findAllPendingHourlyWeather(): array {
 		//Select all sessions starting and stopping in the next 3 days
 		//XXX: select session starting after now and stopping before date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
 		$req = <<<SQL
@@ -1943,9 +1396,9 @@ SQL;
 	/**
 	 * Find all session pending daily weather
 	 *
-	 * @return array<Session> The sessions to update
+	 * @return array The sessions to update
 	 */
-	public function findAllPendingDailyWeather() {
+	public function findAllPendingDailyWeather(): array {
 		//Select all sessions stopping after next 3 days
 		//XXX: select session stopping after or equal date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
 		$req = <<<SQL
@@ -1992,9 +1445,9 @@ SQL;
 	/**
 	 * Find every session pending application
 	 *
-	 * @return array<Session> The sessions to update
+	 * @return array The sessions to update
 	 */
-	public function findAllPendingApplication() {
+	public function findAllPendingApplication(): array {
 		//Select all sessions not locked without application or canceled application within attribution period
 		//XXX: DIFF(start, now) <= IF(DIFF(start, created) <= SENIOR_DELAY in DAY, DIFF(start, created) * 3 / 4, SENIOR_DELAY)
 		//TODO: remonter les données pour le mail ?
@@ -2003,10 +1456,10 @@ SELECT s.id
 FROM RapsysAirBundle:Session as s
 LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id AND a.canceled IS NULL)
 JOIN RapsysAirBundle:Application AS a2 ON (a2.session_id = s.id AND a2.canceled IS NULL)
-WHERE s.locked IS NULL AND a.id IS NULL AND
-TIME_TO_SEC(TIMEDIFF(@dt_start := ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), NOW())) <= IF(
-	TIME_TO_SEC(@td_sc := TIMEDIFF(@dt_start, s.created)) <= :seniordelay,
-	ROUND(TIME_TO_SEC(@td_sc) * :regulardelay / :seniordelay),
+WHERE s.locked IS NULL AND s.application_id IS NULL AND
+(UNIX_TIMESTAMP(@dt_start := ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY)) - UNIX_TIMESTAMP()) <= IF(
+	(@td_sc := UNIX_TIMESTAMP(@dt_start) - UNIX_TIMESTAMP(s.created)) <= :seniordelay,
+	ROUND(@td_sc * :regulardelay / :seniordelay),
 	:seniordelay
 )
 GROUP BY s.id
@@ -2035,9 +1488,9 @@ SQL;
 	 * Fetch session best application by session id
 	 *
 	 * @param int $id The session id
-	 * @return Application|null The application or null
+	 * @return ?Application The application or null
 	 */
-	public function findBestApplicationById($id) {
+	public function findBestApplicationById(int $id): ?Application {
 		/**
 		 * Query session applications ranked by location score, global score, created and user_id
 		 *
@@ -2120,7 +1573,7 @@ FROM (
 					AVG(IF(a2.id IS NOT NULL AND s2.temperature IS NOT NULL AND s2.rainfall IS NOT NULL, s2.temperature/(1+s2.rainfall), NULL)) AS l_tr_ratio,
 					(SUM(IF(a2.id IS NOT NULL AND s2.premium = 1, 1, 0))+1)/(SUM(IF(a2.id IS NOT NULL AND s2.premium = 0, 1, 0))+1) AS l_pn_ratio,
 					MIN(IF(a2.id IS NOT NULL, DATEDIFF(ADDDATE(s.date, INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), ADDDATE(s2.date, INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY)), NULL)) AS l_previous,
-					TIME_TO_SEC(TIMEDIFF(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY), NOW())) AS remaining,
+					UNIX_TIMESTAMP(ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY)) - UNIX_TIMESTAMP() AS remaining,
 					s.premium,
 					l.hotspot,
 					a.created
@@ -2204,7 +1657,6 @@ SQL;
 		//Return best ranked application
 		return $ret;
 	}
-
 
 	/**
 	 * Rekey sessions and applications by chronological session id
