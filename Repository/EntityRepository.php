@@ -68,6 +68,13 @@ class EntityRepository extends BaseEntityRepository {
 	protected array $languages = [];
 
 	/**
+	 * The current locale
+	 *
+	 * @var string
+	 */
+	protected string $locale;
+
+	/**
 	 * Initializes a new LocationRepository instance
 	 *
 	 * @param EntityManagerInterface $manager The EntityManagerInterface instance
@@ -76,13 +83,17 @@ class EntityRepository extends BaseEntityRepository {
 	 * @param SluggerUtil $slugger The SluggerUtil instance
 	 * @param TranslatorInterface $translator The TranslatorInterface instance
 	 * @param array $languages The languages list
+	 * @param string $locale The current locale
 	 */
-	public function __construct(EntityManagerInterface $manager, ClassMetadata $class, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, array $languages) {
+	public function __construct(EntityManagerInterface $manager, ClassMetadata $class, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, array $languages, string $locale) {
 		//Call parent constructor
 		parent::__construct($manager, $class);
 
 		//Set languages
 		$this->languages = $languages;
+
+		//Set locale
+		$this->locale = $locale;
 
 		//Set router
 		$this->router = $router;
@@ -144,6 +155,9 @@ class EntityRepository extends BaseEntityRepository {
 			':pnratio' => 1,
 			//XXX: tr_ratio diff over which considered at regular delay
 			':trdiff' => 5,
+			//Set locale
+			//XXX: or $manager->getConnection()->quote($this->locale) ???
+			':locale' => $dp->quoteStringLiteral($this->locale),
 			//XXX: Set limit used to workaround mariadb subselect optimization
 			':limit' => PHP_INT_MAX,
 			"\t" => '',
