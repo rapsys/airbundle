@@ -40,6 +40,7 @@ class WeatherCommand extends DoctrineCommand {
 			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/hourly-weather-forecast/179147_pc?day=',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/hourly-weather-forecast/179148_pc?day=',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/hourly-weather-forecast/179150_pc?day=',
+			75012 => 'https://www.accuweather.com/en/fr/paris-12-reuilly/75012/hourly-weather-forecast/179153_pc?day=',
 			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/hourly-weather-forecast/179154_pc?day=',
 			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/hourly-weather-forecast/179156_pc?day=',
 			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/hourly-weather-forecast/179160_pc?day=',
@@ -53,6 +54,7 @@ class WeatherCommand extends DoctrineCommand {
 			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/daily-weather-forecast/179147_pc',
 			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/daily-weather-forecast/179148_pc',
 			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/daily-weather-forecast/179150_pc',
+			75012 => 'https://www.accuweather.com/en/fr/paris-12-reuilly/75012/daily-weather-forecast/179153_pc',
 			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/daily-weather-forecast/179154_pc',
 			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/daily-weather-forecast/179156_pc',
 			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/daily-weather-forecast/179160_pc',
@@ -257,7 +259,8 @@ class WeatherCommand extends DoctrineCommand {
 						$temperature = str_replace('°', '', $node->div[0]->div[0]->span[0]);
 
 						//Get rainrisk
-						$rainrisk = str_replace('%', '', trim($node->div[2]))/100;
+						#$rainrisk = str_replace('%', '', trim($node->div[2]))/100;
+						$rainrisk = trim(str_replace('%', '', $node->div[1]))/100;
 
 						//Store data
 						$data[$zipcode][$dsm]['daily'] = [
@@ -272,28 +275,29 @@ class WeatherCommand extends DoctrineCommand {
 					#/html/body/div[1]/div[5]/div[1]/div[1]/div[1]/div[1]/div[1]/div/h2/span[1]
 					foreach($sx->xpath('//div[@data-shared="false"]') as $node) {
 						//Get hour
-						$hour = trim(str_replace(' h', '', $node->div[0]->div[0]->div[0]->h2[0]->span[0]));
+						$hour = trim(str_replace(' h', '', $node->div[0]->div[0]->div[0]->div[0]->div[0]->h2[0]));
 
 						//Compute dsm from day (1=d,2=d+1,3=d+2)
 						$dsm = (new \DateTime('+'.($day - 1).' day'))->format('d/m');
 
 						//Get temperature
-						$temperature = str_replace('°', '', $node->div[0]->div[0]->div[0]->div[0]);
+						$temperature = str_replace('°', '', $node->div[0]->div[0]->div[0]->div[0]->div[1]);
 
 						//Get realfeel
-						$realfeel = trim(str_replace(['RealFeel®', '°'], '', $node->div[0]->div[0]->div[1]->div[0]->div[0]->div[0]));
+						$realfeel = trim(str_replace(['RealFeel®', '°'], '', $node->div[0]->div[0]->div[0]->div[1]->div[0]->div[0]->div[0]));
 
 						//Get rainrisk
-						$rainrisk = floatval(str_replace('%', '', trim($node->div[0]->div[0]->div[2]->div[0]))/100);
+						$rainrisk = floatval(str_replace('%', '', trim($node->div[0]->div[0]->div[0]->div[2]->div[0]))/100);
 
 						//Set rainfall to 0 (mm)
 						$rainfall = 0;
 
 						//Iterate on each entry
 						//TODO: wind and other infos are present in $node->div[1]->div[0]->div[1]->div[0]->p
-						foreach($node->div[1]->div[0]->div[1]->div[1]->p as $p) {
+						#foreach($node->div[1]->div[0]->div[1]->div[1]->p as $p) {
+						foreach($node->div[1]->div[0]->div[1]->div[0]->p as $p) {
 							//Lookup for rain entry if present
-							if (trim($p) == 'Rain') {
+							if (in_array(trim($p), ['Rain', 'Pluie'])) {
 								//Get rainfall
 								$rainfall = floatval(str_replace(' mm', '', $p->span[0]));
 							}
