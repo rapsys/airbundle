@@ -55,7 +55,7 @@
 						{% endfor %}
 					</div>
 				{% else %}
-					<ul class="grid{% if locations|length > 2%} three{% elseif locations|length > 1%} two{% endif %}">
+					<ul class="grid{% if locations|length > 1%} two{% endif %}">
 						{% for id, location in locations %}
 							<li>{% if multimap is defined and multimap %}{{ id }} {% endif %}<a href="{{ location.link }}" title="{{ location.title }}">{{ location.title }}</a></li>
 						{% endfor %}
