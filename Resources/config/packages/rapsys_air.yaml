@@ -357,6 +357,10 @@ services:
         class: 'Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory'
         arguments: [ { 'Rapsys\AirBundle\Entity\User': { class: 'Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher', arguments: [ ~, ~, ~, '2y'] } } ]
         public: true
+    #Register facebook event subscriber
+    Rapsys\PackBundle\Subscriber\FacebookSubscriber:
+        arguments: [ '@router', '%rapsys_air.locales%' ]
+        tags: [ 'kernel.event_subscriber' ]
 
 #Twig Configuration
 twig:
