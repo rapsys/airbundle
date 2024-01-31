@@ -9,7 +9,9 @@
 				<div class="grid calendar seven">
 					{% for date, day in calendar %}
 						<section class="{{ day.class|join(' ') }}">
-							<h3>{{ day.title }}</h3>
+							<header>
+								<h3>{{ day.title }}</h3>
+							</header>
 							{% if day.sessions is not empty %}
 								<ul>
 									{% for session in day.sessions %}
