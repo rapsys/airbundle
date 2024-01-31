@@ -2,7 +2,7 @@
 {% if locations is defined and locations %}
 	<article class="location">
 		<header>
-			<h2><a href="{{ path('rapsys_air_location') }}">{% trans %}Locations{% endtrans %}</a></h2>
+			<h2><a href="{{ locations_link }}">{{ locations_title }}</a></h2>
 			{% if locations_description is defined %}
 				<p>{{ locations_description }}</p>
 			{% elseif forms.snippets is defined %}
@@ -28,7 +28,7 @@
 						<article class="cell{% if l.count is defined and l.count or location.id is defined and location.id == l.id or session.location.id is defined and session.location.id == l.id %} highlight{% endif %}">
 							<header>
 								{# TODO XXX virer le if l.link id defined when user view is fixed !!! #}
-								<h3>{% if multimap is defined and multimap %}{{ i }} {% endif %}<a href="{{ l.link }}">{{ l.title }}</a></h3>
+								<h3><a href="{{ l.link }}">{% if multimap is defined and multimap %}{{ i }} {% endif %}{{ l.title }}</a></h3>
 							</header>
 							{% if forms.snippets[i] is defined and forms.snippets[i] %}
 								{{ form_start(forms.snippets[i]) }}
@@ -111,7 +111,7 @@
 				<ul class="grid{% if locations|length > 1 %} two{% endif %}">
 					{% for i, l in locations %}
 						{# TODO XXX virer le if l.link id defined when user view is fixed !!! #}
-						<li>{% if multimap is defined and multimap %}{{ i }} {% endif %}<a href="{{ l.link }}">{{ l.title }}</a></li>
+						<li><a href="{{ l.link }}">{% if multimap is defined and multimap %}{{ i }} {% endif %}{{ l.title }}</a></li>
 					{% endfor %}
 				</ul>
 			{% endif %}
