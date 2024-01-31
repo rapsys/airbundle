@@ -259,7 +259,6 @@ class WeatherCommand extends DoctrineCommand {
 						$temperature = str_replace('°', '', $node->div[0]->div[0]->span[0]);
 
 						//Get rainrisk
-						#$rainrisk = str_replace('%', '', trim($node->div[2]))/100;
 						$rainrisk = trim(str_replace('%', '', $node->div[1]))/100;
 
 						//Store data
@@ -294,7 +293,6 @@ class WeatherCommand extends DoctrineCommand {
 
 						//Iterate on each entry
 						//TODO: wind and other infos are present in $node->div[1]->div[0]->div[1]->div[0]->p
-						#foreach($node->div[1]->div[0]->div[1]->div[1]->p as $p) {
 						foreach($node->div[1]->div[0]->div[1]->div[0]->p as $p) {
 							//Lookup for rain entry if present
 							if (in_array(trim($p), ['Rain', 'Pluie'])) {
@@ -443,7 +441,6 @@ class WeatherCommand extends DoctrineCommand {
 					//Check if realfeel differ
 					if ($session->getRealfeel() !== $realfeel) {
 						//Set average realfeel
-						#$meteo['realfeel'] = array_sum($meteo['realfeel'])/count($meteo['realfeel']);
 						$session->setRealfeel($realfeel);
 					}
 
@@ -468,7 +465,6 @@ class WeatherCommand extends DoctrineCommand {
 					//Check if temperature differ
 					if ($session->getTemperature() !== $temperature) {
 						//Set average temperature
-						#$meteo['temperature'] = array_sum($meteo['temperature'])/count($meteo['temperature']);
 						$session->setTemperature($temperature);
 					}
 
