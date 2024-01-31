@@ -17,7 +17,7 @@ class ContactType extends CaptchaType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		//Add fields
 		$builder
 			->add('name', TextType::class, ['attr' => ['placeholder' => 'Your name'], 'constraints' => [new NotBlank(['message' => 'Please provide your name'])]])
