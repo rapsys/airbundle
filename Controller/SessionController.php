@@ -23,447 +23,13 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RequestContext;
 
 use Rapsys\AirBundle\Entity\Application;
+use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Location;
 
 class SessionController extends AbstractController {
-	/**
-	 * Edit session
-	 *
-	 * @desc Persist session and all required dependencies in database
-	 *
-	 * @param Request $request The request instance
-	 *
-	 * @return Response The rendered view or redirection
-	 *
-	 * @throws \RuntimeException When user has not at least guest role
-	 */
-	public function edit(Request $request, $id): Response {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
-
-		//Reject non post requests
-		if (!$request->isMethod('POST')) {
-			throw new \RuntimeException('Request method MUST be POST');
-		}
-
-		//Get doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Set locale
-		$locale = $request->getLocale();
-
-		//Fetch session
-		$session = $doctrine->getRepository(Session::class)->fetchOneById($id, $locale);
-
-		//Check if
-		if (
-			//we are admin
-			!$this->isGranted('ROLE_ADMIN') &&
-			//or attributed user
-			$this->getUser()->getId() != $session['au_id'] &&
-			//or application without attributed user
-			$session['au_id'] !== null && !in_array($this->getUser()->getId(), explode("\n", $session['sau_id']))
-		) {
-			//Prevent non admin and non attributed user access
-			throw $this->createAccessDeniedException();
-		}
-
-		//Set now
-		$now = new \DateTime('now');
-
-		//Create SessionType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
-			//Set the action
-			'action' => $this->generateUrl('rapsys_air_session_edit', [ 'id' => $id ]),
-			//Set the form attribute
-			'attr' => [],
-			//Set admin
-			'admin' => $this->isGranted('ROLE_ADMIN'),
-			//Set default user to current
-			'user' => $this->getUser()->getId(),
-			//Set date
-			'date' => $session['date'],
-			//Set begin
-			'begin' => $session['begin'],
-			//Set length
-			'length' => $session['length'],
-			//Set raincancel
-			'raincancel' => ($this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id']) && $session['rainfall'] >= 2,
-			//Set cancel
-			'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $session['sau_id'])),
-			//Set modify
-			'modify' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
-			//Set move
-			'move' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
-			//Set attribute
-			'attribute' => $this->isGranted('ROLE_ADMIN') && $session['locked'] === null,
-			//Set session
-			'session' => $session['id']
-		]);
-
-		//Refill the fields in case of invalid form
-		$form->handleRequest($request);
-
-		//Handle invalid data
-		if (!$form->isSubmitted() || !$form->isValid()) {
-			//Set page
-			$this->context['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
-
-			//Set facebook title
-			$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->translator->trans('at '.$session['l_title']);
-
-			//Set section
-			$this->context['section'] = $this->translator->trans($session['l_title']);
-
-			//Set localization date formater
-			$intl = new \IntlDateFormatter($locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
-
-			//Set description
-			$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
-
-			//Set localization date formater
-			$intlDate = new \IntlDateFormatter($locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
-
-			//Set localization time formater
-			$intlTime = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
-
-			//Set facebook image
-			$this->context['facebook'] += [
-				'texts' => [
-					$session['au_pseudonym'] => [
-						'font' => 'irishgrover',
-						'size' => 110
-					],
-					ucfirst($intlDate->format($session['start']))."\n".$this->translator->trans('From %start% to %stop%', ['%start%' => $intlTime->format($session['start']), '%stop%' => $intlTime->format($session['stop'])]) => [
-						'align' => 'left'
-					],
-					$this->translator->trans('at '.$session['l_title']) => [
-						'align' => 'right',
-						'font' => 'labelleaurore',
-						'size' => 75
-					]
-				],
-				'updated' => $session['updated']->format('U')
-			];
-
-			//Add session in context
-			$this->context['session'] = [
-				'id' => $id,
-				'title' => $this->translator->trans('Session %id%', ['%id%' => $id]),
-				'location' => [
-					'id' => $session['l_id'],
-					'at' => $this->translator->trans('at '.$session['l_title'])
-				]
-			];
-
-			//Render the view
-			return $this->render('@RapsysAir/session/edit.html.twig', ['form' => $form->createView()]+$this->context);
-		}
-
-		//Get manager
-		$manager = $doctrine->getManager();
-
-		//Get data
-		$data = $form->getData();
-
-		//Fetch session
-		$session = $doctrine->getRepository(Session::class)->findOneById($id);
-
-		//Set user
-		$user = $this->getUser();
-
-		//Replace with requested user for admin
-		if ($this->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
-			$user = $doctrine->getRepository(User::class)->findOneById($data['user']);
-		}
-
-		//Set datetime
-		$datetime = new \DateTime('now');
-
-		//Set canceled time at start minus one day
-		$canceled = (clone $session->getStart())->sub(new \DateInterval('P1D'));
-
-		//Set action
-		$action = [
-			'raincancel' => $form->has('raincancel') && $form->get('raincancel')->isClicked(),
-			'modify' => $form->has('modify') && $form->get('modify')->isClicked(),
-			'move' => $form->has('move') && $form->get('move')->isClicked(),
-			'cancel' => $form->has('cancel') && $form->get('cancel')->isClicked(),
-			'forcecancel' => $form->has('forcecancel') && $form->get('forcecancel')->isClicked(),
-			'attribute' => $form->has('attribute') && $form->get('attribute')->isClicked(),
-			'autoattribute' => $form->has('autoattribute') && $form->get('autoattribute')->isClicked(),
-			'lock' => $form->has('lock') && $form->get('lock')->isClicked(),
-		];
-
-		//With raincancel and application and (rainfall or admin)
-		if ($action['raincancel'] && ($application = $session->getApplication()) && ($session->getRainfall() >= 2 || $this->isGranted('ROLE_ADMIN'))) {
-			//Cancel application at start minus one day
-			$application->setCanceled($canceled);
-
-			//Update time
-			$application->setUpdated($datetime);
-
-			//Insufficient rainfall
-			//XXX: is admin
-			if ($session->getRainfall() < 2) {
-				//Set score
-				//XXX: magic cheat score 42
-				$application->setScore(42);
-			}
-
-			//Queue application save
-			$manager->persist($application);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-
-			//Update time
-			$session->setUpdated($datetime);
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//With modify
-		} elseif ($action['modify']) {
-			//With admin
-			if ($this->isGranted('ROLE_ADMIN')) {
-				//Set date
-				$session->setDate($data['date']);
-			}
-
-			//Set begin
-			$session->setBegin($data['begin']);
-
-			//Set length
-			$session->setLength($data['length']);
-
-			//Update time
-			$session->setUpdated($datetime);
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//With move
-		} elseif ($action['move']) {
-			//Set location
-			$session->setLocation($doctrine->getRepository(Location::class)->findOneById($data['location']));
-
-			//Update time
-			$session->setUpdated($datetime);
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//With cancel or forcecancel
-		} elseif ($action['cancel'] || $action['forcecancel']) {
-			//Get application
-			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
-
-			//Not already canceled
-			if ($application->getCanceled() === null) {
-				//Cancel application
-				$application->setCanceled($datetime);
-
-				//Check if application is session application and (canceled 24h before start or forcecancel (as admin))
-				#if ($session->getApplication() == $application && ($datetime < $canceled || $action['forcecancel'])) {
-				if ($session->getApplication() == $application && $action['forcecancel']) {
-					//Set score
-					//XXX: magic cheat score 42
-					$application->setScore(42);
-
-					//Unattribute session
-					$session->setApplication(null);
-
-					//Update time
-					$session->setUpdated($datetime);
-
-					//Queue session save
-					$manager->persist($session);
-
-					//Add notice in flash message
-					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-				}
-			//Already canceled
-			} else {
-				//Uncancel application
-				$application->setCanceled(null);
-			}
-
-			//Update time
-			$application->setUpdated($datetime);
-
-			//Queue application save
-			$manager->persist($application);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-		//With attribute
-		} elseif ($action['attribute']) {
-			//Get application
-			$application = $doctrine->getRepository(Application::class)->findOneBySessionUser($session, $user);
-
-			//Already canceled
-			if ($application->getCanceled() !== null) {
-				//Uncancel application
-				$application->setCanceled(null);
-			}
-
-			//Set score
-			//XXX: magic cheat score 42
-			$application->setScore(42);
-
-			//Update time
-			$application->setUpdated($datetime);
-
-			//Queue application save
-			$manager->persist($application);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-
-			//Unattribute session
-			$session->setApplication($application);
-
-			//Update time
-			$session->setUpdated($datetime);
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//With autoattribute
-		} elseif ($action['autoattribute']) {
-			//Get best application
-			//XXX: best application may not issue result while grace time or bad behaviour
-			if (!empty($application = $doctrine->getRepository(Session::class)->findBestApplicationById($id))) {
-				//Attribute session
-				$session->setApplication($application);
-
-				//Update time
-				$session->setUpdated($datetime);
-
-				//Queue session save
-				$manager->persist($session);
-
-				//Add notice in flash message
-				$this->addFlash('notice', $this->translator->trans('Session %id% auto attributed', ['%id%' => $id]));
-			//No application
-			} else {
-				//Add warning in flash message
-				$this->addFlash('warning', $this->translator->trans('Session %id% not auto attributed', ['%id%' => $id]));
-			}
-		//With lock
-		} elseif ($action['lock']) {
-			//Already locked
-			if ($session->getLocked() !== null) {
-				//Set uncanceled
-				$canceled = null;
-
-				//Unlock session
-				$session->setLocked(null);
-			//Not locked
-			} else {
-				//Get application
-				if ($application = $session->getApplication()) {
-					//Set score
-					//XXX: magic cheat score 42
-					$application->setScore(42);
-
-					//Update time
-					$application->setUpdated($datetime);
-
-					//Queue application save
-					$manager->persist($application);
-
-					//Add notice in flash message
-					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
-				}
-
-				//Unattribute session
-				$session->setApplication(null);
-
-				//Lock session
-				$session->setLocked($datetime);
-			}
-
-			//Update time
-			$session->setUpdated($datetime);
-
-			//Queue session save
-			$manager->persist($session);
-
-			//Add notice in flash message
-			$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
-		//Unknown action
-		} else {
-			//Add warning in flash message
-			$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
-		}
-
-		//Flush to get the ids
-		$manager->flush();
-
-		//Extract and process referer
-		if ($referer = $request->headers->get('referer')) {
-			//Create referer request instance
-			$req = Request::create($referer);
-
-			//Get referer path
-			$path = $req->getPathInfo();
-
-			//Get referer query string
-			$query = $req->getQueryString();
-
-			//Remove script name
-			$path = str_replace($request->getScriptName(), '', $path);
-
-			//Try with referer path
-			try {
-				//Save old context
-				$oldContext = $this->router->getContext();
-
-				//Force clean context
-				//XXX: prevent MethodNotAllowedException because current context method is POST in onevendor/symfony/routing/Matcher/Dumper/CompiledUrlMatcherTrait.php+42
-				$this->router->setContext(new RequestContext());
-
-				//Retrieve route matching path
-				$route = $this->router->match($path);
-
-				//Reset context
-				$this->router->setContext($oldContext);
-
-				//Clear old context
-				unset($oldContext);
-
-				//Extract name
-				$name = $route['_route'];
-
-				//Remove route and controller from route defaults
-				unset($route['_route'], $route['_controller']);
-
-				//Generate url
-				return $this->redirectToRoute($name, $route);
-			//No route matched
-			} catch(MethodNotAllowedException|ResourceNotFoundException $e) {
-				//Unset referer to fallback to default route
-				unset($referer);
-			}
-		}
-
-		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air_session_view', ['id' => $id]);
-	}
-
 	/**
 	 * List all sessions
 	 *
@@ -474,48 +40,112 @@ class SessionController extends AbstractController {
 	 * @return Response The rendered view
 	 */
 	public function index(Request $request): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
+		//Get locations
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllAsArray($this->period);
 
-		//Set section
-		$section = $this->translator->trans('Sessions');
+		//Add cities
+		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period);
 
-		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air session list');
+		//Add calendar
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), null, null, 1);
+
+		//Add dances
+		$this->context['dances'] = $this->doctrine->getRepository(Dance::class)->findNamesAsArray();
+
+		//Set modified
+		$this->modified = max(array_map(function ($v) { return $v['modified']; }, array_merge($this->context['calendar'], $this->context['cities'], $this->context['dances'])));
+
+		//Create response
+		$response = new Response();
+
+		//With logged user
+		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+			//Set last modified
+			$response->setLastModified(new \DateTime('-1 year'));
+
+			//Set as private
+			$response->setPrivate();
+		//Without logged user
+		} else {
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize(array_merge($this->context['calendar'], $this->context['cities'], $this->context['dances']))));
+
+			//Set last modified
+			$response->setLastModified($this->modified);
+
+			//Set as public
+			$response->setPublic();
+
+			//Without role and modification
+			if ($response->isNotModified($request)) {
+				//Return 304 response
+				return $response;
+			}
+		}
+
+		//With cities
+		if (!empty($this->context['cities'])) {
+			//Set locations
+			$locations = [];
+
+			//Iterate on each cities
+			foreach($this->context['cities'] as $city) {
+				//Iterate on each locations
+				foreach($city['locations'] as $location) {
+					//Add location
+					$locations[$location['id']] = $location;
+				}
+			}
+
+			//Add multi
+			$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air cities sector map'), $this->modified->getTimestamp(), $locations);
+
+			//Set cities
+			$cities = array_map(function ($v) { return $v['in']; }, $this->context['cities']);
+
+			//Set dances
+			$dances = array_map(function ($v) { return $v['name']; }, $this->context['dances']);
+		} else {
+			//Set cities
+			$cities = [];
+
+			//Set dances
+			$dances = [];
+		}
 
 		//Set keywords
-		$this->context['keywords'] = [
-			$this->translator->trans('sessions'),
-			$this->translator->trans('session list'),
-			$this->translator->trans('listing'),
-			$this->translator->trans('Libre Air')
-		];
-
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
+		//TODO: use splice instead of that shit !!!
+		//TODO: handle smartly indoor and outdoor !!!
+		$this->context['keywords'] = array_values(
+			array_merge(
+				$dances,
+				$cities,
+				[
+					$this->translator->trans('indoor'),
+					$this->translator->trans('outdoor'),
+					$this->translator->trans('sessions'),
+					$this->translator->trans('session list'),
+					$this->translator->trans('listing'),
+					$this->translator->trans('Libre Air')
+				]
 			)
 		);
 
-		//Fetch calendar
-		//TODO: highlight with current session route parameter
-		$calendar = $doctrine->getRepository(Session::class)->fetchCalendarByDatePeriod($this->translator, $period, null, $request->get('session'), !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $request->getLocale());
+		//Get textual cities
+		$cities = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($cities, 0, -1))], array_slice($cities, -1)), 'strlen'));
 
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period);
+		//Get textual dances
+		$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
+
+		//Set title
+		$this->context['title'] = $this->translator->trans('%dances% %cities% sessions', ['%dances%' => $dances, '%cities%' => $cities]);
+
+		//Set description
+		$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor session calendar %cities%', ['%dances%' => $dances, '%cities%' => $cities]);
 
 		//Render the view
-		return $this->render('@RapsysAir/session/index.html.twig', ['title' => $title, 'section' => $section, 'calendar' => $calendar, 'locations' => $locations]+$this->context);
+		return $this->render('@RapsysAir/session/index.html.twig', $this->context);
 	}
 
 	/**
@@ -530,72 +160,40 @@ class SessionController extends AbstractController {
 	 * @return Response The rendered view or redirection
 	 */
 	public function tangoargentin(Request $request): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('today'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime('+2 week')
-		);
-
 		//Retrieve events to update
-		$sessions = $doctrine->getRepository(Session::class)->fetchAllByDatePeriod($period, $request->getLocale());
+		$sessions = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period);
 
 		//Init return array
 		$ret = [];
 
+		//Flatten sessions tree
+		$sessions = array_reduce($sessions, function ($c, $v) { return array_merge($c, $v['sessions']); }, []);
+
 		//Iterate on sessions
 		foreach($sessions as $sessionId => $session) {
-			//Set title
-			$title = $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']);
+			//Set route params
+			$routeParams = $this->router->match($session['link']);
 
-			//Use Transliterator if available
-			if (class_exists('Transliterator')) {
-				$trans = \Transliterator::create('Any-Latin; Latin-ASCII; Upper()');
-				$title = $trans->transliterate($title);
-			} else {
-				$title = strtoupper($title);
-			}
+			//Set route
+			$route = $routeParams['_route'];
 
-			//Set rate
-			$rate = 'Au chapeau';
+			//Drop _route from route params
+			unset($routeParams['_route']);
 
-			//Without hat
-			if ($session['p_hat'] === null) {
-				//Set rate
-				$rate = 'Gratuit';
-
-				//With rate
-				if ($session['p_rate'] !== null) {
-					//Set rate
-					$rate = $session['p_rate'].' €';
-				}
-			//With hat
-			} else {
-				//With rate
-				if ($session['p_rate'] !== null) {
-					//Set rate
-					$rate .= ', idéalement '.$session['p_rate'].' €';
-				}
-			}
-
-			//Store session data
-			$ret[$sessionId] = [
+			//Add session
+			$ret[$session['id']] = [
 				'start' => $session['start']->format(\DateTime::ISO8601),
 				'stop' => $session['start']->format(\DateTime::ISO8601),
-				'title' => $title,
-				'short' => $session['p_short'],
-				'rate' => $rate,
-				'location' => implode(' ', [$session['l_address'], $session['l_zipcode'], $session['l_city']]),
-				'status' => (empty($session['a_canceled']) && empty($session['locked']))?'confirmed':'cancelled',
-				'updated' => $session['updated']->format(\DateTime::ISO8601),
-				'organizer' => $session['au_forename'],
-				'source' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId], UrlGeneratorInterface::ABSOLUTE_URL)
+				'fromto' => $this->translator->trans('from %start% to %stop%', ['%start%' => $session['start']->format('H\hi'), '%stop%' => $session['stop']->format('H\hi')]),
+				'title' => $this->slugger->latin($session['application']['user']['title'])/*.' '.$this->translator->trans('at '.$session['location']['title'])*/,
+				'short' => $session['rate']['short'],
+				'rate' => $session['rate']['title'],
+				'location' => implode(' ', [$session['location']['address'], $session['location']['zipcode'], $session['location']['city']]),
+				'status' => in_array('canceled', $session['class'])?'annulé':'confirmé',
+				'modified' => $session['modified']->format(\DateTime::ISO8601),
+				#'organizer' => $session['application']['user']['title'],
+				#'source' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId, 'location' => $this->translator->trans($session['l_title'])], UrlGeneratorInterface::ABSOLUTE_URL)
+				'source' => $this->router->generate($route, $routeParams, UrlGeneratorInterface::ABSOLUTE_URL)
 			];
 		}
 
@@ -616,30 +214,36 @@ class SessionController extends AbstractController {
 	 * @todo XXX: TODO: like described in: https://www.alsacreations.com/article/lire/1400-attribut-rel-relations.html#xnf-rel-attribute
 	 * @todo XXX: TODO: or here: http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions
 	 *
-	 * @desc Display session by id with an application or login form
+	 * @todo: generate a background from @RapsysAir/Resources/public/location/<location>.png or @RapsysAir/Resources/public/location/<user>/<location>.png when available
+	 *
+	 * @todo: generate a share picture @RapsysAir/seance/363/place-saint-sulpice/bal-et-cours-de-tango-argentin/milonga-raphael/share.jpeg ?
+	 * (with date, organiser, type, location, times and logo ?)
+	 *
+	 * @todo: add picture stuff about location ???
 	 *
 	 * @param Request $request The request instance
 	 * @param int $id The session id
 	 *
 	 * @return Response The rendered view
+	 *
+	 * @throws NotFoundHttpException When session is not found
 	 */
-	public function view(Request $request, $id): Response {
-		//Fetch doctrine
-		$doctrine = $this->getDoctrine();
-
-		//Set locale
-		$locale = $request->getLocale();
-
+	public function view(Request $request, int $id): Response {
 		//Fetch session
-		if (empty($session = $doctrine->getRepository(Session::class)->fetchOneById($id, $locale))) {
+		if (empty($this->context['session'] = $this->doctrine->getRepository(Session::class)->findOneByIdAsArray($id))) {
+			//Session not found
 			throw $this->createNotFoundException($this->translator->trans('Unable to find session: %id%', ['%id%' => $id]));
 		}
 
+		//Get locations at less than 1 km
+		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByLatitudeLongitudeAsArray($this->context['session']['location']['latitude'], $this->context['session']['location']['longitude'], $this->period, 2);
+
+		//Set modified
+		//XXX: dance modified is already computed inside calendar modified
+		$this->modified = max(array_merge([$this->context['session']['modified']], array_map(function ($v) { return $v['modified']; }, $this->context['locations'])));
+
 		//Create response
 		$response = new Response();
-
-		//Set etag
-		$response->setEtag(md5(serialize($session)));
 
 		//With logged user
 		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -650,14 +254,12 @@ class SessionController extends AbstractController {
 			$response->setPrivate();
 		//Without logged user
 		} else {
-			//Extract applications updated
-			$session['sa_updated'] = array_map(function($v){return new \DateTime($v);}, explode("\n", $session['sa_updated']));
-
-			//Get last modified
-			$lastModified = max(array_merge([$session['updated'], $session['l_updated'], $session['t_updated'], $session['p_updated']], $session['sa_updated']));
+			//Set etag
+			//XXX: only for public to force revalidation by last modified
+			$response->setEtag(md5(serialize(array_merge($this->context['session'], $this->context['locations']))));
 
 			//Set last modified
-			$response->setLastModified($lastModified);
+			$response->setLastModified($this->modified);
 
 			//Set as public
 			$response->setPublic();
@@ -669,56 +271,151 @@ class SessionController extends AbstractController {
 			}
 		}
 
+		//Get route
+		$route = $request->attributes->get('_route');
+
+		//Get route params
+		$routeParams = $request->attributes->get('_route_params');
+
+		//Disable redirect
+		$redirect = false;
+
+		//Without location or invalid location
+		if (empty($routeParams['location']) || $this->context['session']['location']['slug'] !== $routeParams['location']) {
+			//Set location
+			$routeParams['location'] = $this->context['session']['location']['slug'];
+
+			//Enable redirect
+			$redirect = true;
+		}
+
+		//With dance slug without dance or invalid dance
+		if (!empty($this->context['session']['application']['dance']['slug']) && (empty($routeParams['dance']) || $this->context['session']['application']['dance']['slug'] !== $routeParams['dance'])) {
+			//Set dance
+			$routeParams['dance'] = $this->context['session']['application']['dance']['slug'];
+
+			//Enable redirect
+			$redirect = true;
+		//Without dance slug with dance
+		} elseif (empty($this->context['session']['application']['dance']['slug']) && !empty($routeParams['dance'])) {
+			//Set dance
+			unset($routeParams['dance']);
+
+			//Enable redirect
+			$redirect = true;
+		}
+
+		//With user slug without user or invalid user
+		if (!empty($this->context['session']['application']['user']['slug']) && (empty($routeParams['user']) || $this->context['session']['application']['user']['slug'] !== $routeParams['user'])) {
+			//Set user
+			$routeParams['user'] = $this->context['session']['application']['user']['slug'];
+
+			//Enable redirect
+			$redirect = true;
+		//Without user slug with user
+		} elseif (empty($this->context['session']['application']['user']['slug']) && !empty($routeParams['user'])) {
+			//Set user
+			unset($routeParams['user']);
+
+			//Enable redirect
+			$redirect = true;
+		}
+
+		//With redirect
+		if ($redirect) {
+			//Redirect to route
+			return $this->redirectToRoute($route, $routeParams, $this->context['session']['stop'] <= new \DateTime('now') ? Response::HTTP_MOVED_PERMANENTLY : Response::HTTP_FOUND);
+		}
+
+		//Add map
+		$this->context['map'] = $this->map->getMap($this->context['session']['location']['map'], $this->modified->getTimestamp(), $this->context['session']['location']['latitude'], $this->context['session']['location']['longitude']);
+
+		//Add multi map
+		$this->context['multimap'] = $this->map->getMultiMap($this->context['session']['location']['multimap'], $this->modified->getTimestamp(), $this->context['locations']);
+
+		//Set canonical
+		$this->context['canonical'] = $this->context['session']['canonical'];
+
+		//Set alternates
+		$this->context['alternates'] = $this->context['session']['alternates'];
+
 		//Set localization date formater
-		$intl = new \IntlDateFormatter($locale, \IntlDateFormatter::GREGORIAN, \IntlDateFormatter::SHORT);
-
-		//Set section
-		$this->context['section'] = $this->translator->trans($session['l_title']);
-
-		//Set description
-		$this->context['description'] = $this->translator->trans('Outdoor Argentine Tango session the %date%', [ '%date%' => $intl->format($session['start']) ]);
-
-		//Set keywords
-		$this->context['keywords'] = [
-			$this->translator->trans('outdoor'),
-			$this->translator->trans('Argentine Tango'),
-		];
-
-		//Set localization date formater
-		$intlDate = new \IntlDateFormatter($locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
+		$intlDate = new \IntlDateFormatter($this->locale, \IntlDateFormatter::TRADITIONAL, \IntlDateFormatter::NONE);
 
 		//Set localization time formater
-		$intlTime = new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
+		$intlTime = new \IntlDateFormatter($this->locale, \IntlDateFormatter::NONE, \IntlDateFormatter::SHORT);
+
+		//With application
+		if (!empty($this->context['session']['application'])) {
+			//Set title
+			$this->context['title'] = $this->translator->trans('%dance% %id% by %pseudonym%', ['%id%' => $id, '%dance%' => $this->context['session']['application']['dance']['title'], '%pseudonym%' => $this->context['session']['application']['user']['title']]);
+
+			//Set description
+			$this->context['description'] = ucfirst($this->translator->trans('%dance% %location% %city% %slot% on %date% at %time%', [
+				'%dance%' => $this->context['session']['application']['dance']['title'],
+				'%location%' => $this->context['session']['location']['at'],
+				'%city%' => $this->context['session']['location']['in'],
+				'%slot%' => $this->context['session']['slot']['the'],
+				'%date%' => $intlDate->format($this->context['session']['start']),
+				'%time%' => $intlTime->format($this->context['session']['start']),
+			]));
+
+			//Set keywords
+			//TODO: readd outdoor ???
+			$this->context['keywords'] = [
+				$this->context['session']['application']['dance']['type'],
+				$this->context['session']['application']['dance']['name'],
+				$this->context['session']['location']['title'],
+				$this->context['session']['application']['user']['title'],
+				$this->translator->trans($this->context['session']['location']['indoor']?'indoor':'outdoor')
+			];
+		//Without application
+		} else {
+			//Set title
+			$this->context['title'] = $this->translator->trans('Session %id%', ['%id%' => $id]);
+
+			//Set description
+			$this->context['description'] = ucfirst($this->translator->trans('%location% %city% %slot% on %date% at %time%', [
+				'%city%' => ucfirst($this->context['session']['location']['in']),
+				'%location%' => $this->context['session']['location']['at'],
+				'%slot%' => $this->context['session']['slot']['the'],
+				'%date%' => $intlDate->format($this->context['session']['start']),
+				'%time%' => $intlTime->format($this->context['session']['start'])
+			]));
+
+			//Add dance type
+			//TODO: readd outdoor ???
+			$this->context['keywords'] = [
+				$this->context['session']['location']['title'],
+				$this->translator->trans($this->context['session']['location']['indoor']?'indoor':'outdoor')
+			];
+		}
+
+		//Set section
+		$this->context['section'] = $this->context['session']['location']['title'];
+
+		//Set facebook title
+		$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->context['session']['location']['at'];
 
 		//Set facebook image
 		$this->context['facebook'] = [
 			'texts' => [
-				$session['au_pseudonym'] => [
+				$this->context['session']['application']['user']['title']??$this->context['title'] => [
 					'font' => 'irishgrover',
 					'size' => 110
 				],
-				ucfirst($intlDate->format($session['start']))."\n".$this->translator->trans('From %start% to %stop%', ['%start%' => $intlTime->format($session['start']), '%stop%' => $intlTime->format($session['stop'])]) => [
+				ucfirst($intlDate->format($this->context['session']['start']))."\n".$this->translator->trans('Around %start% until %stop%', ['%start%' => $intlTime->format($this->context['session']['start']), '%stop%' => $intlTime->format($this->context['session']['stop'])]) => [
+					'font' => 'irishgrover',
 					'align' => 'left'
 				],
-				$this->translator->trans('at '.$session['l_title']) => [
+				$this->context['session']['location']['at'] => [
 					'align' => 'right',
 					'font' => 'labelleaurore',
 					'size' => 75
 				]
 			],
-			'updated' => $session['updated']->format('U')
+			'updated' => $this->context['session']['updated']->format('U')
 		]+$this->context['facebook'];
-
-		//With granted session
-		if (!empty($session['au_id'])) {
-			array_unshift($this->context['keywords'], $session['au_pseudonym']);
-		}
-
-		//Set page
-		$this->context['title'] = $this->translator->trans(!empty($session['au_id'])?'Session %id% by %pseudonym%':'Session %id%', ['%id%' => $id, '%pseudonym%' => $session['au_pseudonym']]);
-
-		//Set facebook title
-		$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->translator->trans('at '.$session['l_title']);
 
 		//Create application form for role_guest
 		if ($this->isGranted('ROLE_GUEST')) {
@@ -726,9 +423,10 @@ class SessionController extends AbstractController {
 			$now = new \DateTime('now');
 
 			//Create SessionType form
+			//TODO: move to named form ???
 			$sessionForm = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
 				//Set the action
-				'action' => $this->generateUrl('rapsys_air_session_edit', [ 'id' => $id ]),
+				'action' => $this->generateUrl('rapsys_air_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]),
 				//Set the form attribute
 				'attr' => [ 'class' => 'col' ],
 				//Set admin
@@ -736,149 +434,286 @@ class SessionController extends AbstractController {
 				//Set default user to current
 				'user' => $this->getUser()->getId(),
 				//Set date
-				'date' => $session['date'],
+				'date' => $this->context['session']['date'],
 				//Set begin
-				'begin' => $session['begin'],
+				'begin' => $this->context['session']['begin'],
 				//Set length
-				'length' => $session['length'],
+				'length' => $this->context['session']['length'],
 				//Set raincancel
-				'raincancel' => ($this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id']) && $session['rainfall'] >= 2,
+				'raincancel' => ($this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id']) && $this->context['session']['rainfall'] >= 2,
 				//Set cancel
-				'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $session['sau_id'])),
+				'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $this->context['session']['sau_id'])),
 				//Set modify
-				'modify' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
+				'modify' => $this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
 				//Set move
-				'move' => $this->isGranted('ROLE_ADMIN') || $this->getUser()->getId() == $session['au_id'] && $session['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
+				'move' => $this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
 				//Set attribute
-				'attribute' => $this->isGranted('ROLE_ADMIN') && $session['locked'] === null,
+				'attribute' => $this->isGranted('ROLE_ADMIN') && $this->context['session']['locked'] === null,
 				//Set session
-				'session' => $session['id']
+				'session' => $this->context['session']['id']
 			]);
+
+			//Refill the fields in case of invalid form
+			$sessionForm->handleRequest($request);
+
+			//With submitted form
+			if ($sessionForm->isSubmitted() && $sessionForm->isValid()) {
+				//Get data
+				$data = $sessionForm->getData();
+
+				//Fetch session
+				$sessionObject = $this->doctrine->getRepository(Session::class)->findOneById($id);
+
+				//Set user
+				$userObject = $this->getUser();
+
+				//Replace with requested user for admin
+				if ($this->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
+					$userObject = $this->doctrine->getRepository(User::class)->findOneById($data['user']);
+				}
+
+				//Set datetime
+				$datetime = new \DateTime('now');
+
+				//Set canceled time at start minus one day
+				$canceled = (clone $sessionObject->getStart())->sub(new \DateInterval('P1D'));
+
+				//Set action
+				$action = [
+					'raincancel' => $sessionForm->has('raincancel') && $sessionForm->get('raincancel')->isClicked(),
+					'modify' => $sessionForm->has('modify') && $sessionForm->get('modify')->isClicked(),
+					'move' => $sessionForm->has('move') && $sessionForm->get('move')->isClicked(),
+					'cancel' => $sessionForm->has('cancel') && $sessionForm->get('cancel')->isClicked(),
+					'forcecancel' => $sessionForm->has('forcecancel') && $sessionForm->get('forcecancel')->isClicked(),
+					'attribute' => $sessionForm->has('attribute') && $sessionForm->get('attribute')->isClicked(),
+					'autoattribute' => $sessionForm->has('autoattribute') && $sessionForm->get('autoattribute')->isClicked(),
+					'lock' => $sessionForm->has('lock') && $sessionForm->get('lock')->isClicked(),
+				];
+
+				//With raincancel and application and (rainfall or admin)
+				if ($action['raincancel'] && ($application = $sessionObject->getApplication()) && ($sessionObject->getRainfall() >= 2 || $this->isGranted('ROLE_ADMIN'))) {
+					//Cancel application at start minus one day
+					$application->setCanceled($canceled);
+
+					//Update time
+					$application->setUpdated($datetime);
+
+					//Insufficient rainfall
+					//XXX: is admin
+					if ($sessionObject->getRainfall() < 2) {
+						//Set score
+						//XXX: magic cheat score 42
+						$application->setScore(42);
+					}
+
+					//Queue application save
+					$this->manager->persist($application);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+
+					//Update time
+					$sessionObject->setUpdated($datetime);
+
+					//Queue session save
+					$this->manager->persist($sessionObject);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				//With modify
+				} elseif ($action['modify']) {
+					//With admin
+					if ($this->isGranted('ROLE_ADMIN')) {
+						//Set date
+						$sessionObject->setDate($data['date']);
+					}
+
+					//Set begin
+					$sessionObject->setBegin($data['begin']);
+
+					//Set length
+					$sessionObject->setLength($data['length']);
+
+					//Update time
+					$sessionObject->setUpdated($datetime);
+
+					//Queue session save
+					$this->manager->persist($sessionObject);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				//With move
+				} elseif ($action['move']) {
+					//Set location
+					$sessionObject->setLocation($this->doctrine->getRepository(Location::class)->findOneById($data['location']));
+
+					//Update time
+					$sessionObject->setUpdated($datetime);
+
+					//Queue session save
+					$this->manager->persist($sessionObject);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				//With cancel or forcecancel
+				} elseif ($action['cancel'] || $action['forcecancel']) {
+					//Get application
+					$application = $this->doctrine->getRepository(Application::class)->findOneBySessionUser($sessionObject, $userObject);
+
+					//Not already canceled
+					if ($application->getCanceled() === null) {
+						//Cancel application
+						$application->setCanceled($datetime);
+
+						//Check if application is session application and (canceled 24h before start or forcecancel (as admin))
+						#if ($sessionObject->getApplication() == $application && ($datetime < $canceled || $action['forcecancel'])) {
+						if ($sessionObject->getApplication() == $application && $action['forcecancel']) {
+							//Set score
+							//XXX: magic cheat score 42
+							$application->setScore(42);
+
+							//Unattribute session
+							$sessionObject->setApplication(null);
+
+							//Update time
+							$sessionObject->setUpdated($datetime);
+
+							//Queue session save
+							$this->manager->persist($sessionObject);
+
+							//Add notice in flash message
+							$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+						}
+					//Already canceled
+					} else {
+						//Uncancel application
+						$application->setCanceled(null);
+					}
+
+					//Update time
+					$application->setUpdated($datetime);
+
+					//Queue application save
+					$this->manager->persist($application);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+				//With attribute
+				} elseif ($action['attribute']) {
+					//Get application
+					$application = $this->doctrine->getRepository(Application::class)->findOneBySessionUser($sessionObject, $userObject);
+
+					//Already canceled
+					if ($application->getCanceled() !== null) {
+						//Uncancel application
+						$application->setCanceled(null);
+					}
+
+					//Set score
+					//XXX: magic cheat score 42
+					$application->setScore(42);
+
+					//Update time
+					$application->setUpdated($datetime);
+
+					//Queue application save
+					$this->manager->persist($application);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+
+					//Unattribute session
+					$sessionObject->setApplication($application);
+
+					//Update time
+					$sessionObject->setUpdated($datetime);
+
+					//Queue session save
+					$this->manager->persist($sessionObject);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				//With autoattribute
+				} elseif ($action['autoattribute']) {
+					//Get best application
+					//XXX: best application may not issue result while grace time or bad behaviour
+					if (!empty($application = $this->doctrine->getRepository(Session::class)->findBestApplicationById($id))) {
+						//Attribute session
+						$sessionObject->setApplication($application);
+
+						//Update time
+						$sessionObject->setUpdated($datetime);
+
+						//Queue session save
+						$this->manager->persist($sessionObject);
+
+						//Add notice in flash message
+						$this->addFlash('notice', $this->translator->trans('Session %id% auto attributed', ['%id%' => $id]));
+					//No application
+					} else {
+						//Add warning in flash message
+						$this->addFlash('warning', $this->translator->trans('Session %id% not auto attributed', ['%id%' => $id]));
+					}
+				//With lock
+				} elseif ($action['lock']) {
+					//Already locked
+					if ($sessionObject->getLocked() !== null) {
+						//Set uncanceled
+						$canceled = null;
+
+						//Unlock session
+						$sessionObject->setLocked(null);
+					//Not locked
+					} else {
+						//Get application
+						if ($application = $sessionObject->getApplication()) {
+							//Set score
+							//XXX: magic cheat score 42
+							$application->setScore(42);
+
+							//Update time
+							$application->setUpdated($datetime);
+
+							//Queue application save
+							$this->manager->persist($application);
+
+							//Add notice in flash message
+							$this->addFlash('notice', $this->translator->trans('Application %id% updated', ['%id%' => $application->getId()]));
+						}
+
+						//Unattribute session
+						$sessionObject->setApplication(null);
+
+						//Lock session
+						$sessionObject->setLocked($datetime);
+					}
+
+					//Update time
+					$sessionObject->setUpdated($datetime);
+
+					//Queue session save
+					$this->manager->persist($sessionObject);
+
+					//Add notice in flash message
+					$this->addFlash('notice', $this->translator->trans('Session %id% updated', ['%id%' => $id]));
+				//Unknown action
+				} else {
+					//Add warning in flash message
+					$this->addFlash('warning', $this->translator->trans('Session %id% not updated', ['%id%' => $id]));
+				}
+
+				//Flush to get the ids
+				$this->manager->flush();
+
+				//Redirect to cleanup the form
+				return $this->redirectToRoute('rapsys_air_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]);
+			}
 
 			//Add form to context
 			$this->context['forms']['session'] = $sessionForm->createView();
 		}
 
-		//Add session in context
-		$this->context['session'] = [
-			'id' => $id,
-			'date' => $session['date'],
-			'begin' => $session['begin'],
-			'start' => $session['start'],
-			'length' => $session['length'],
-			'stop' => $session['stop'],
-			'rainfall' => $session['rainfall'] !== null ? $session['rainfall'].' mm' : $session['rainfall'],
-			'rainrisk' => $session['rainrisk'] !== null ? ($session['rainrisk']*100).' %' : $session['rainrisk'],
-			'realfeel' => $session['realfeel'] !== null ? $session['realfeel'].' °C' : $session['realfeel'],
-			'realfeelmin' => $session['realfeelmin'] !== null ? $session['realfeelmin'].' °C' : $session['realfeelmin'],
-			'realfeelmax' => $session['realfeelmax'] !== null ? $session['realfeelmax'].' °C' : $session['realfeelmax'],
-			'temperature' => $session['temperature'] !== null ? $session['temperature'].' °C' : $session['temperature'],
-			'temperaturemin' => $session['temperaturemin'] !== null ? $session['temperaturemin'].' °C' : $session['temperaturemin'],
-			'temperaturemax' => $session['temperaturemax'] !== null ? $session['temperaturemax'].' °C' : $session['temperaturemax'],
-			'locked' => $session['locked'],
-			'created' => $session['created'],
-			'updated' => $session['updated'],
-			'title' => $this->translator->trans('Session %id%', ['%id%' => $id]),
-			'application' => null,
-			'location' => [
-				'id' => $session['l_id'],
-				'at' => $this->translator->trans('at '.$session['l_title']),
-				'title' => $this->translator->trans($session['l_title']),
-				'address' => $session['l_address'],
-				'zipcode' => $session['l_zipcode'],
-				'city' => $session['l_city'],
-				'latitude' => $session['l_latitude'],
-				'longitude' => $session['l_longitude']
-			],
-			'slot' => [
-				'id' => $session['t_id'],
-				'title' => $this->translator->trans($session['t_title'])
-			],
-			'snippet' => [
-				'id' => $session['p_id'],
-				'description' => $session['p_description'],
-				'class' => $session['p_class'],
-				'contact' => $session['p_contact'],
-				'donate' => $session['p_donate'],
-				'link' => $session['p_link'],
-				'profile' => $session['p_profile'],
-				'rate' => $session['p_rate'],
-				'hat' => $session['p_hat']
-			],
-			'applications' => null
-		];
-
-		//With application
-		if (!empty($session['a_id'])) {
-			$this->context['session']['application'] = [
-				'user' => [
-					'id' => $session['au_id'],
-					'by' => $this->translator->trans('by %pseudonym%', [ '%pseudonym%' => $session['au_pseudonym'] ]),
-					'title' => $session['au_pseudonym']
-				],
-				'id' => $session['a_id'],
-				'canceled' => $session['a_canceled'],
-				'title' => $this->translator->trans('Application %id%', [ '%id%' => $session['a_id'] ]),
-			];
-		}
-
-		//With applications
-		if (!empty($session['sa_id'])) {
-			//Extract applications id
-			$session['sa_id'] = explode("\n", $session['sa_id']);
-			//Extract applications score
-			//XXX: score may be null before grant or for bad behaviour, replace NULL with 'NULL' to avoid silent drop in mysql
-			$session['sa_score'] = array_map(function($v){return $v==='NULL'?null:$v;}, explode("\n", $session['sa_score']));
-			//Extract applications created
-			$session['sa_created'] = array_map(function($v){return new \DateTime($v);}, explode("\n", $session['sa_created']));
-			//Extract applications updated
-			//XXX: done earlied when computing last modified
-			#$session['sa_updated'] = array_map(function($v){return new \DateTime($v);}, explode("\n", $session['sa_updated']));
-			//Extract applications canceled
-			//XXX: canceled is null before cancelation, replace NULL with 'NULL' to avoid silent drop in mysql
-			$session['sa_canceled'] = array_map(function($v){return $v==='NULL'?null:new \DateTime($v);}, explode("\n", $session['sa_canceled']));
-
-			//Extract applications user id
-			$session['sau_id'] = explode("\n", $session['sau_id']);
-			//Extract applications user pseudonym
-			$session['sau_pseudonym'] = explode("\n", $session['sau_pseudonym']);
-
-			//Init applications
-			$this->context['session']['applications'] = [];
-			foreach($session['sa_id'] as $i => $sa_id) {
-				$this->context['session']['applications'][$sa_id] = [
-					'user' => null,
-					'score' => $session['sa_score'][$i],
-					'created' => $session['sa_created'][$i],
-					'updated' => $session['sa_updated'][$i],
-					'canceled' => $session['sa_canceled'][$i]
-				];
-				if (!empty($session['sau_id'][$i])) {
-					$this->context['session']['applications'][$sa_id]['user'] = [
-						'id' => $session['sau_id'][$i],
-						'title' => $session['sau_pseudonym'][$i]
-					];
-				}
-			}
-		}
-
-		//Compute period
-		$period = new \DatePeriod(
-			//Start from first monday of week
-			new \DateTime('Monday this week'),
-			//Iterate on each day
-			new \DateInterval('P1D'),
-			//End with next sunday and 4 weeks
-			new \DateTime(
-				$this->isGranted('IS_AUTHENTICATED_REMEMBERED')?'Monday this week + 3 week':'Monday this week + 2 week'
-			)
-		);
-
-		//Fetch locations
-		//XXX: we want to display all active locations anyway
-		$locations = $doctrine->getRepository(Location::class)->findTranslatedSortedByPeriod($this->translator, $period, $session['au_id']);
-
 		//Render the view
-		return $this->render('@RapsysAir/session/view.html.twig', ['locations' => $locations]+$this->context, $response);
+		return $this->render('@RapsysAir/session/view.html.twig', $this->context, $response);
 	}
 }
