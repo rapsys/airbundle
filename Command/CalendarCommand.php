@@ -354,7 +354,7 @@ class CalendarCommand extends Command {
 								//TODO: replace 'airlibre' with $this->config['calendar']['prefix'] when possible with prefix validating [a-v0-9]{5,}
 								//XXX: see https://developers.google.com/calendar/api/v3/reference/events/insert#id
 								'id' => $token['prefix'].$sessionId,
-								'summary' => $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_short']),
+								'summary' => $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']),
 								#'description' => $markdown->convert(strip_tags($session['p_description'])),
 								'description' => $description,
 								'status' => empty($session['a_canceled'])?'confirmed':'cancelled',
@@ -395,7 +395,7 @@ class CalendarCommand extends Command {
 						//With updated event
 						if ($session['updated'] >= (new \DateTime($event->getUpdated()))) {
 							//Set summary
-							$event->setSummary($session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_short']));
+							$event->setSummary($session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']));
 
 							//Set description
 							$event->setDescription($description);
