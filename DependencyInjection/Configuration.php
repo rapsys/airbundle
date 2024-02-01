@@ -120,11 +120,6 @@ class Configuration implements ConfigurationInterface {
 					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
 					->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
 					->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
-					/*->arrayNode('languages')
-						->treatNullLike([])
-						->defaultValue($defaults['languages'])
-						->scalarPrototype()->end()
-					->end()*/
 				->end()
 			->end();
 
