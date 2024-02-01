@@ -10,10 +10,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extra\Markdown\DefaultMarkdown;
 
 use Rapsys\AirBundle\Entity\Session;
+
+use Rapsys\PackBundle\Util\SluggerUtil;
 
 class CalendarCommand extends Command {
 	//Set failure constant
@@ -21,9 +23,6 @@ class CalendarCommand extends Command {
 
 	///Set success constant
 	const SUCCESS = 0;
-
-	///Config array
-	protected $config;
 
 	/**
 	 * Doctrine instance
@@ -35,32 +34,54 @@ class CalendarCommand extends Command {
 	///Locale
 	protected $locale;
 
+	///Slugger
+	protected $slugger;
+
 	///Translator instance
 	protected $translator;
 
+	///Lifetime string
+	protected $lifetime;
+
+	///Namespace string
+	protected $namespace;
+
+	///Path string
+	protected $path;
+
 	/**
-	 * Inject doctrine, container and translator interface
+	 * Creates new calendar command
 	 *
-	 * @param ContainerInterface $container The container instance
 	 * @param ManagerRegistry $doctrine The doctrine instance
 	 * @param RouterInterface $router The router instance
+	 * @param SluggerUtil $slugger The slugger instance
 	 * @param TranslatorInterface $translator The translator instance
+	 * @param string $namespace The cache namespace
+	 * @param int $lifetime The cache lifetime
+	 * @param string $path The cache path
+	 * @param string $locale The default locale
 	 */
-    public function __construct(ContainerInterface $container, ManagerRegistry $doctrine, RouterInterface $router, TranslatorInterface $translator) {
+	public function __construct(ManagerRegistry $doctrine, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, string $namespace, int $lifetime, string $path, string $locale) {
 		//Call parent constructor
 		parent::__construct();
 
-		//Retrieve config
-		$this->config = $container->getParameter($this->getAlias());
-
-		//Retrieve locale
-		$this->locale = $container->getParameter('kernel.default_locale');
-
 		//Store doctrine
-        $this->doctrine = $doctrine;
+		$this->doctrine = $doctrine;
+
+		//Set lifetime
+		$this->lifetime = $lifetime;
+
+		//Set namespace
+		$this->namespace = $namespace;
+
+		//Set path
+		$this->path = $path;
 
 		//Store router
-        $this->router = $router;
+		$this->router = $router;
+
+		//Retrieve slugger
+		$this->slugger = $slugger;
 
 		//Get router context
 		$context = $this->router->getContext();
@@ -108,7 +129,7 @@ class CalendarCommand extends Command {
 		//Retrieve cache object
 		//XXX: by default stored in /tmp/symfony-cache/@/W/3/6SEhFfeIW4UMDlAII+Dg
 		//XXX: stored in %kernel.project_dir%/var/cache/airlibre/0/P/IA20X0K4dkMd9-+Ohp9Q
-		$cache = new FilesystemAdapter($this->config['cache']['namespace'], $this->config['cache']['lifetime'], $this->config['path']['cache']);
+		$cache = new FilesystemAdapter($this->namespace, $this->lifetime, $this->path);
 
 		//Retrieve calendars
 		$cacheCalendars = $cache->getItem('calendars');
@@ -290,12 +311,16 @@ class CalendarCommand extends Command {
 
 					//Init source
 					$source = [
-						'title' => $this->translator->trans('Session %id% by %pseudonym%', ['%id%' => $sessionId, '%pseudonym%' => $session['au_pseudonym']]).' '.$this->translator->trans('at '.$session['l_title']),
-						'url' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId], UrlGeneratorInterface::ABSOLUTE_URL)
+						'title' => $this->translator->trans('%dance% %id% by %pseudonym%', ['%id%' => $sessionId, '%dance%' => $this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type'])), '%pseudonym%' => $session['au_pseudonym']]).' '.$this->translator->trans('at '.$session['l_title']),
+						'url' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId, 'location' => $this->slugger->slug($this->translator->trans($session['l_title'])), 'dance' => $this->slugger->slug($this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type']))), 'user' => $this->slugger->slug($session['au_pseudonym'])], UrlGeneratorInterface::ABSOLUTE_URL)
 					];
 
-					//Init description
-					$description = 'Description :'."\n".strip_tags(preg_replace('!<a href="([^"]+)"(?: title="[^"]+")?'.'>([^<]+)</a>!', '\1', $markdown->convert(strip_tags($session['p_description']))));
+					//Init location
+					$description = 'Emplacement :'."\n".$this->translator->trans($session['l_description']);
+					$shared['location'] = $markdown->convert(strip_tags($session['l_description']));
+
+					//Add description
+					$description .= "\n\n".'Description :'."\n".strip_tags(preg_replace('!<a href="([^"]+)"(?: title="[^"]+")?'.'>([^<]+)</a>!', '\1', $markdown->convert(strip_tags($session['p_description']))));
 					$shared['description'] = $markdown->convert(strip_tags($session['p_description']));
 
 					//Add class when available
@@ -354,7 +379,8 @@ class CalendarCommand extends Command {
 								//TODO: replace 'airlibre' with $this->config['calendar']['prefix'] when possible with prefix validating [a-v0-9]{5,}
 								//XXX: see https://developers.google.com/calendar/api/v3/reference/events/insert#id
 								'id' => $token['prefix'].$sessionId,
-								'summary' => $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']),
+								#'summary' => $session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']),
+								'summary' => $source['title'],
 								#'description' => $markdown->convert(strip_tags($session['p_description'])),
 								'description' => $description,
 								'status' => empty($session['a_canceled'])?'confirmed':'cancelled',
@@ -395,7 +421,8 @@ class CalendarCommand extends Command {
 						//With updated event
 						if ($session['updated'] >= (new \DateTime($event->getUpdated()))) {
 							//Set summary
-							$event->setSummary($session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']));
+							#$event->setSummary($session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_title']));
+							$event->setSummary($source['title']);
 
 							//Set description
 							$event->setDescription($description);
