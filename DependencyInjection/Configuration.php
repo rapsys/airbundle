@@ -23,7 +23,44 @@ class Configuration implements ConfigurationInterface {
 		//Set defaults
 		$defaults = [
 			'site' => [
-				'logo' => '@RapsysAir/../public/png/logo.png',
+				'ico' => '@RapsysAir/ico/icon.ico',
+				'logo' => '@RapsysAir/png/logo.png',
+				//The png icon array
+				//XXX: see https://www.emergeinteractive.com/insights/detail/the-essentials-of-favicons/
+				//XXX: see https://caniuse.com/#feat=link-icon-svg
+				'png' => [
+					//Default
+					256 => '@RapsysAir/png/icon.256.png',
+
+					//For google
+					//Chrome for Android home screen icon
+					196 => '@RapsysAir/png/icon.196.png',
+					//Google Developer Web App Manifest Recommendation
+					192 => '@RapsysAir/png/icon.192.png',
+					//Chrome Web Store icon
+					128 => '@RapsysAir/png/icon.128.png',
+
+					//Fallback
+					32 => '@RapsysAir/png/icon.32.png',
+
+					//For apple
+					//XXX: old obsolete format: [57, 72, 76, 114, 120, 144]
+					//XXX: see https://webhint.io/docs/user-guide/hints/hint-apple-touch-icons/
+					//XXX: see https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html
+					//iPhone Retina
+					180 => '@RapsysAir/png/icon.180.png',
+					//iPad Retina touch icon
+					167 => '@RapsysAir/png/icon.167.png',
+					//iPad touch icon
+					152 => '@RapsysAir/png/icon.152.png',
+
+					//For windows
+					//XXX: see https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/dn255024(v=vs.85)
+					310 => '@RapsysAir/png/icon.310.png',
+					150 => '@RapsysAir/png/icon.150.png',
+					70 => '@RapsysAir/png/icon.70.png'
+				],
+				'svg' => '@RapsysAir/svg/icon.svg',
 				'title' => 'Air Libre'
 			],
 			'copy' => [
@@ -50,7 +87,14 @@ class Configuration implements ConfigurationInterface {
 					->arrayNode('site')
 						->addDefaultsIfNotSet()
 						->children()
+							->scalarNode('ico')->cannotBeEmpty()->defaultValue($defaults['site']['ico'])->end()
 							->scalarNode('logo')->cannotBeEmpty()->defaultValue($defaults['site']['logo'])->end()
+							->arrayNode('png')
+								->treatNullLike([])
+								->defaultValue($defaults['site']['png'])
+								->scalarPrototype()->end()
+							->end()
+							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()
 							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['site']['title'])->end()
 						->end()
 					->end()
