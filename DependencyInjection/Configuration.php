@@ -67,8 +67,11 @@ class Configuration implements ConfigurationInterface {
 				'url' => 'rapsys_air'
 			],
 			'copy' => [
+				'by' => 'Created by Raphaël',
+				'link' => 'https://rapsys.eu',
 				'long' => 'All rights reserved',
-				'short' => 'Copyright 2019'
+				'short' => 'Copyright 2019-2021',
+				'title' => 'Rapsys'
 			],
 			'contact' => [
 				'name' => 'John Doe',
@@ -108,8 +111,11 @@ class Configuration implements ConfigurationInterface {
 					->arrayNode('copy')
 						->addDefaultsIfNotSet()
 						->children()
+							->scalarNode('by')->defaultValue($defaults['copy']['by'])->end()
+							->scalarNode('link')->defaultValue($defaults['copy']['link'])->end()
 							->scalarNode('long')->defaultValue($defaults['copy']['long'])->end()
 							->scalarNode('short')->defaultValue($defaults['copy']['short'])->end()
+							->scalarNode('title')->defaultValue($defaults['copy']['title'])->end()
 						->end()
 					->end()
 					->arrayNode('contact')
