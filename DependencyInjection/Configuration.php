@@ -71,7 +71,8 @@ class Configuration implements ConfigurationInterface {
 			'contact' => [
 				'name' => 'John Doe',
 				'mail' => 'contact@example.com'
-			]
+			],
+			'locales' => '%kernel.translator.fallbacks%'
 		];
 
 		//Here we define the parameters that are allowed to configure the bundle.
@@ -114,6 +115,7 @@ class Configuration implements ConfigurationInterface {
 							->scalarNode('mail')->cannotBeEmpty()->defaultValue($defaults['contact']['mail'])->end()
 						->end()
 					->end()
+					->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
 				->end()
 			->end();
 
