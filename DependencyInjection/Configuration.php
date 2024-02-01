@@ -96,6 +96,9 @@ class Configuration implements ConfigurationInterface {
 			],
 			'locale' => '%kernel.default_locale%',
 			'locales' => '%kernel.translator.fallbacks%',
+			//XXX: revert to underscore because of that shit:
+			//XXX: see https://symfony.com/doc/current/components/config/definition.html#normalization
+			//XXX: see https://github.com/symfony/symfony/issues/7405
 			'languages' => '%rapsys_user.languages%',
 			'path' => [
 				'cache' => '%kernel.project_dir%/var/cache',
