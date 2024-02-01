@@ -289,38 +289,37 @@ class CalendarCommand extends Command {
 					];
 
 					//Init description
-					#$description = '<dl><dt>Description</dt><dd>'.$markdown->convert(strip_tags(str_replace(["\r", "\n\n"], ['', "\n"], $session['p_description']))).'</dd></dl>';
-					$description = '<dl><dt>Description</dt><dd>'.$markdown->convert(strip_tags($session['p_description'])).'</dd></dl>';
+					$description = 'Description :'."\n".strip_tags(preg_replace('!<a href="([^"]+)"(?: title="[^"]+")?'.'>([^<]+)</a>!', '\1', $markdown->convert(strip_tags($session['p_description']))));
+					$shared['description'] = $markdown->convert(strip_tags($session['p_description']));
 
 					//Add class when available
 					if (!empty($session['p_class'])) {
 						$shared['class'] = $session['p_class'];
-						#$description .= '<dl><dt>Classe</dt><dd>'.$markdown->convert(strip_tags(str_replace(["\r", "\n\n"], ['', "\n"], $session['p_class']))).'</dd></dl>';
-						$description .= '<dl><dt>Classe</dt><dd><p>'.$session['p_class'].'</p></dd></dl>';
+						$description .= "\n\n".'Classe :'."\n".$session['p_class'];
 					}
 
 					//Add contact when available
 					if (!empty($session['p_contact'])) {
 						$shared['contact'] = $session['p_contact'];
-						$description .= '<dl><dt>Contacter</dt><dd><p>'.$session['p_contact'].'</p></dd></dl>';
+						$description .= "\n\n".'Contact :'."\n".$session['p_contact'];
 					}
 
 					//Add donate when available
 					if (!empty($session['p_donate'])) {
 						$shared['donate'] = $session['p_donate'];
-						$description .= '<dl><dt>Contribuer</dt><dd><p>'.$session['p_donate'].'</p></dd></dl>';
+						$description .= "\n\n".'Contribuer :'."\n".$session['p_donate'];
 					}
 
 					//Add link when available
 					if (!empty($session['p_link'])) {
 						$shared['link'] = $session['p_link'];
-						$description .= '<dl><dt>Site</dt><dd><p>'.$session['p_link'].'</p></dd></dl>';
+						$description .= "\n\n".'Site :'."\n".$session['p_link'];
 					}
 
 					//Add profile when available
 					if (!empty($session['p_profile'])) {
 						$shared['profile'] = $session['p_profile'];
-						$description .= '<dl><dt>Réseau social</dt><dd><p>'.$session['p_profile'].'</p></dd></dl>';
+						$description .= "\n\n".'Réseau social :'."\n".$session['p_profile'];
 					}
 
 					//Locked session
@@ -388,8 +387,7 @@ class CalendarCommand extends Command {
 						$event = $events[$sessionId];
 
 						//With updated event
-						#if ($session['updated'] >= (new \DateTime($event->getUpdated()))) {
-						{
+						if ($session['updated'] >= (new \DateTime($event->getUpdated()))) {
 							//Set summary
 							$event->setSummary($session['au_pseudonym'].' '.$this->translator->trans('at '.$session['l_short']));
 
