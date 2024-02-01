@@ -5,6 +5,8 @@ namespace Rapsys\AirBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
+use Rapsys\AirBundle\RapsysAirBundle;
+
 /**
  * This is the class that validates and merges configuration from your app/config files.
  *
@@ -15,7 +17,7 @@ class Configuration implements ConfigurationInterface {
 	 * {@inheritdoc}
 	 */
 	public function getConfigTreeBuilder() {
-		$treeBuilder = new TreeBuilder('rapsys_air');
+		$treeBuilder = new TreeBuilder($alias = RapsysAirBundle::getAlias());
 
 		// Here you should define the parameters that are allowed to
 		// configure your bundle. See the documentation linked above for
@@ -24,8 +26,14 @@ class Configuration implements ConfigurationInterface {
 		$defaults = [
 			'site' => [
 				'donate' => 'https://paypal.me/milongaraphael',
-				'ico' => '@RapsysAir/ico/icon.ico',
-				'logo' => '@RapsysAir/png/logo.png',
+				'icon' => [
+					'ico' => '@RapsysAir/ico/icon.ico',
+					'svg' => '@RapsysAir/svg/icon.svg'
+				],
+				'logo' => [
+					'png' => '@RapsysAir/png/logo.png',
+					'svg' => '@RapsysAir/svg/logo.svg'
+				],
 				//The png icon array
 				//XXX: see https://www.emergeinteractive.com/insights/detail/the-essentials-of-favicons/
 				//XXX: see https://caniuse.com/#feat=link-icon-svg
@@ -63,13 +71,8 @@ class Configuration implements ConfigurationInterface {
 					150 => '@RapsysAir/png/icon.150.png',
 					70 => '@RapsysAir/png/icon.70.png'
 				],
-				'svg' => '@RapsysAir/svg/icon.svg',
 				'title' => 'Libre Air',
 				'url' => 'rapsys_air'
-			],
-			'cache' => [
-				'namespace' => 'airlibre',
-				'lifetime' => 0
 			],
 			'calendar' => [
 				'calendar' => '%env(string:RAPSYSAIR_CALENDAR)',
@@ -100,10 +103,13 @@ class Configuration implements ConfigurationInterface {
 			//XXX: see https://symfony.com/doc/current/components/config/definition.html#normalization
 			//XXX: see https://github.com/symfony/symfony/issues/7405
 			'languages' => '%rapsys_user.languages%',
-			'path' => [
-				'cache' => '%kernel.project_dir%/var/cache',
-				'public' => dirname(__DIR__).'/Resources/public'
-			]
+			'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public'
+			#'public' => [
+			#	//XXX: get path with bundles/<alias> or full path if not installed
+			#	//XXX: current working directory may be project dir or public subdir depending on context
+			#	'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public',
+			#	'url' => '/bundles/'.str_replace('_', '', $alias)
+			#]
 		];
 
 		//Here we define the parameters that are allowed to configure the bundle.
@@ -121,23 +127,26 @@ class Configuration implements ConfigurationInterface {
 						->addDefaultsIfNotSet()
 						->children()
 							->scalarNode('donate')->cannotBeEmpty()->defaultValue($defaults['site']['donate'])->end()
-							->scalarNode('ico')->cannotBeEmpty()->defaultValue($defaults['site']['ico'])->end()
-							->scalarNode('logo')->cannotBeEmpty()->defaultValue($defaults['site']['logo'])->end()
+							->arrayNode('icon')
+								->treatNullLike([])
+								->defaultValue($defaults['site']['icon'])
+								->scalarPrototype()->end()
+							->end()
+							->arrayNode('logo')
+								->treatNullLike([])
+								->defaultValue($defaults['site']['logo'])
+								->scalarPrototype()->end()
+							->end()
 							->arrayNode('png')
 								->treatNullLike([])
 								->defaultValue($defaults['site']['png'])
 								->scalarPrototype()->end()
 							->end()
-							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()
+							/*->scalarNode('ico')->cannotBeEmpty()->defaultValue($defaults['site']['ico'])->end()
+							->scalarNode('logo')->cannotBeEmpty()->defaultValue($defaults['site']['logo'])->end()
+							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()*/
 							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['site']['title'])->end()
 							->scalarNode('url')->cannotBeEmpty()->defaultValue($defaults['site']['url'])->end()
-						->end()
-					->end()
-					->arrayNode('cache')
-						->addDefaultsIfNotSet()
-						->children()
-							->scalarNode('namespace')->defaultValue($defaults['cache']['namespace'])->end()
-							->integerNode('lifetime')->min(0)->defaultValue($defaults['cache']['lifetime'])->end()
 						->end()
 					->end()
 					->arrayNode('calendar')
@@ -180,15 +189,28 @@ class Configuration implements ConfigurationInterface {
 						->end()
 					->end()
 					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
-					->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
-					->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
-					->arrayNode('path')
-						->addDefaultsIfNotSet()
-						->children()
-							->scalarNode('cache')->defaultValue($defaults['path']['cache'])->end()
-							->scalarNode('public')->defaultValue($defaults['path']['public'])->end()
-						->end()
+					#TODO: see if we can't prevent key normalisation with ->normalizeKeys(false)
+					#->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
+					->variableNode('locales')
+						->treatNullLike([])
+						->defaultValue($defaults['locales'])
+						#->scalarPrototype()->end()
 					->end()
+					#TODO: see if we can't prevent key normalisation with ->normalizeKeys(false)
+					#->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
+					->variableNode('languages')
+						->treatNullLike([])
+						->defaultValue($defaults['languages'])
+						#->scalarPrototype()->end()
+					->end()
+					->scalarNode('path')->defaultValue($defaults['path'])->end()
+					#->arrayNode('public')
+					#	->addDefaultsIfNotSet()
+					#	->children()
+					#		->scalarNode('path')->defaultValue($defaults['public']['path'])->end()
+					#		->scalarNode('url')->defaultValue($defaults['public']['url'])->end()
+					#	->end()
+					#->end()
 				->end()
 			->end();
 
