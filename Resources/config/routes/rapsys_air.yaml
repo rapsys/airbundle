@@ -93,13 +93,6 @@ rapsys_air_terms_of_service:
     controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
-rapsys_air_dispute:
-    path:
-        en_gb: '/en/dispute'
-        fr_fr: '/contestation'
-    controller: Rapsys\AirBundle\Controller\DefaultController::dispute
-    methods: GET|POST
-
 rapsys_air_location:
     path:
         en_gb: '/en/location'

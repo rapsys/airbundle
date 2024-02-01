@@ -28,7 +28,6 @@ use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Snippet;
 use Rapsys\AirBundle\Entity\User;
-use Rapsys\AirBundle\Pdf\DisputePdf;
 
 /**
  * {@inheritdoc}
@@ -161,127 +160,6 @@ class DefaultController extends AbstractController {
 
 		//Render template
 		return $this->render('@RapsysAir/form/contact.html.twig', ['form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
-	}
-
-	/**
-	 * The dispute page
-	 *
-	 * @desc Generate a dispute document
-	 *
-	 * @param Request $request The request instance
-	 *
-	 * @return Response The rendered view or redirection
-	 */
-	public function dispute(Request $request): Response {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_USER', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('User')]));
-
-		//Set page
-		$this->context['title'] = $this->translator->trans('Dispute');
-
-		//Set description
-		$this->context['description'] = $this->translator->trans('Libre Air dispute');
-
-		//Set keywords
-		$this->context['keywords'] = [
-			$this->translator->trans('dispute'),
-			$this->translator->trans('Libre Air'),
-			$this->translator->trans('outdoor'),
-			$this->translator->trans('Argentine Tango'),
-			$this->translator->trans('calendar')
-		];
-
-		//Create the form according to the FormType created previously.
-		//And give the proper parameters
-		$form = $this->createForm('Rapsys\AirBundle\Form\DisputeType', ['court' => 'Paris', 'abstract' => 'Pour constater cette prétendue infraction, les agents verbalisateurs ont pénétré dans un jardin privatif, sans visibilité depuis la voie publique, situé derrière un batiment privé, pour ce faire ils ont franchi au moins un grillage de chantier ou des potteaux métalliques séparant le terrain privé de la voie publique de l\'autre côté du batiment.'], [
-			'action' => $this->generateUrl('rapsys_air_dispute'),
-			'method' => 'POST'
-		]);
-
-		if ($request->isMethod('POST')) {
-			// Refill the fields in case the form is not valid.
-			$form->handleRequest($request);
-
-			if ($form->isValid()) {
-				//Get data
-				$data = $form->getData();
-
-				//Gathering offense
-				if (!empty($data['offense']) && $data['offense'] == 'gathering') {
-					//Add gathering
-					$output = DisputePdf::genGathering($data['court'], $data['notice'], $data['agent'], $data['service'], $data['abstract'], $this->translator->trans($this->getUser()->getCivility()->getTitle()), $this->getUser()->getForename(), $this->getUser()->getSurname());
-				//Traffic offense
-				} elseif (!empty($data['offense'] && $data['offense'] == 'traffic')) {
-					//Add traffic
-					$output = DisputePdf::genTraffic($data['court'], $data['notice'], $data['agent'], $data['service'], $data['abstract'], $this->translator->trans($this->getUser()->getCivility()->getTitle()), $this->getUser()->getForename(), $this->getUser()->getSurname());
-				//Unsupported offense
-				} else {
-					header('Content-Type: text/plain');
-					die('TODO');
-					exit;
-				}
-
-				//Send common headers
-				header('Content-Type: application/pdf');
-
-				//Send remaining headers
-				header('Cache-Control: private, max-age=0, must-revalidate');
-				header('Pragma: public');
-
-				//Send content-length
-				header('Content-Length: '.strlen($output));
-
-				//Display the pdf
-				echo $output;
-
-				//Die for now
-				exit;
-
-#				//Create message
-#				$message = (new TemplatedEmail())
-#					//Set sender
-#					->from(new Address($data['mail'], $data['name']))
-#					//Set recipient
-#					//XXX: remove the debug set in vendor/symfony/mime/Address.php +46
-#					->to(new Address($this->config['contact']['mail'], $this->config['contact']['title']))
-#					//Set subject
-#					->subject($data['subject'])
-#
-#					//Set path to twig templates
-#					->htmlTemplate('@RapsysAir/mail/contact.html.twig')
-#					->textTemplate('@RapsysAir/mail/contact.text.twig')
-#
-#					//Set context
-#					->context(
-#						[
-#							'subject' => $data['subject'],
-#							'message' => strip_tags($data['message']),
-#						]+$this->context
-#					);
-#
-#				//Try sending message
-#				//XXX: mail delivery may silently fail
-#				try {
-#					//Send message
-#					$this->mailer->send($message);
-#
-#					//Redirect on the same route with sent=1 to cleanup form
-#					return $this->redirectToRoute($request->get('_route'), ['sent' => 1]+$request->get('_route_params'));
-#				//Catch obvious transport exception
-#				} catch(TransportExceptionInterface $e) {
-#					if ($message = $e->getMessage()) {
-#						//Add error message mail unreachable
-#						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->config['contact']['mail'], '%message%' => $this->translator->trans($message)])));
-#					} else {
-#						//Add error message mail unreachable
-#						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->config['contact']['mail']])));
-#					}
-#				}
-			}
-		}
-
-		//Render template
-		return $this->render('@RapsysAir/default/dispute.html.twig', ['form' => $form->createView(), 'sent' => $request->query->get('sent', 0)]+$this->context);
 	}
 
 	/**
