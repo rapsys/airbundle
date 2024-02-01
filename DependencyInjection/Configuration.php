@@ -65,14 +65,16 @@ class Configuration implements ConfigurationInterface {
 				'url' => 'rapsys_air'
 			],
 			'copy' => [
-				'long' => 'John Doe all rights reserved',
+				'long' => 'All rights reserved',
 				'short' => 'Copyright 2019'
 			],
 			'contact' => [
 				'name' => 'John Doe',
 				'mail' => 'contact@example.com'
 			],
-			'locales' => '%kernel.translator.fallbacks%'
+			'locale' => '%kernel.default_locale%',
+			'locales' => '%kernel.translator.fallbacks%',
+			'languages' => '%rapsys_user.languages%',
 		];
 
 		//Here we define the parameters that are allowed to configure the bundle.
@@ -115,7 +117,14 @@ class Configuration implements ConfigurationInterface {
 							->scalarNode('mail')->cannotBeEmpty()->defaultValue($defaults['contact']['mail'])->end()
 						->end()
 					->end()
+					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
 					->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
+					->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
+					/*->arrayNode('languages')
+						->treatNullLike([])
+						->defaultValue($defaults['languages'])
+						->scalarPrototype()->end()
+					->end()*/
 				->end()
 			->end();
 
