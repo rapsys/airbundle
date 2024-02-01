@@ -61,7 +61,8 @@ class Configuration implements ConfigurationInterface {
 					70 => '@RapsysAir/png/icon.70.png'
 				],
 				'svg' => '@RapsysAir/svg/icon.svg',
-				'title' => 'Air Libre'
+				'title' => 'Open Air',
+				'url' => 'rapsys_air'
 			],
 			'copy' => [
 				'long' => 'John Doe all rights reserved',
@@ -96,6 +97,7 @@ class Configuration implements ConfigurationInterface {
 							->end()
 							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()
 							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['site']['title'])->end()
+							->scalarNode('url')->cannotBeEmpty()->defaultValue($defaults['site']['url'])->end()
 						->end()
 					->end()
 					->arrayNode('copy')
