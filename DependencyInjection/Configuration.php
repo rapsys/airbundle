@@ -53,6 +53,8 @@ class Configuration implements ConfigurationInterface {
 					167 => '@RapsysAir/png/icon.167.png',
 					//iPad touch icon
 					152 => '@RapsysAir/png/icon.152.png',
+					//iOS7
+					120 => '@RapsysAir/png/icon.120.png',
 
 					//For windows
 					//XXX: see https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/dn255024(v=vs.85)
