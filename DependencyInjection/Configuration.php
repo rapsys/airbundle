@@ -15,7 +15,7 @@ class Configuration implements ConfigurationInterface {
      * {@inheritdoc}
      */
     public function getConfigTreeBuilder() {
-        $treeBuilder = new TreeBuilder('parameters');
+        $treeBuilder = new TreeBuilder('rapsys_air');
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
@@ -39,15 +39,10 @@ class Configuration implements ConfigurationInterface {
 			->getRootNode()
 				->addDefaultsIfNotSet()
 				->children()
-					->arrayNode('rapsys_air')
-						->addDefaultsIfNotSet()
-						->children()
-							->scalarNode('logo')->defaultValue($defaults['logo'])->treatNullLike($defaults['logo'])->isRequired()->end()
-							->scalarNode('title')->defaultValue($defaults['title'])->treatNullLike($defaults['title'])->isRequired()->end()
-							->scalarNode('contact_name')->defaultValue($defaults['contact_name'])->treatNullLike($defaults['contact_name'])->isRequired()->end()
-							->scalarNode('contact_mail')->defaultValue($defaults['contact_mail'])->treatNullLike($defaults['contact_mail'])->isRequired()->end()
-						->end()
-					->end()
+					->scalarNode('logo')->defaultValue($defaults['logo'])->treatNullLike($defaults['logo'])->cannotBeEmpty()->end()
+					->scalarNode('title')->defaultValue($defaults['title'])->treatNullLike($defaults['title'])->cannotBeEmpty()->end()
+					->scalarNode('contact_name')->defaultValue($defaults['contact_name'])->treatNullLike($defaults['contact_name'])->cannotBeEmpty()->end()
+					->scalarNode('contact_mail')->defaultValue($defaults['contact_mail'])->treatNullLike($defaults['contact_mail'])->cannotBeEmpty()->end()
 				->end()
 			->end();
 
