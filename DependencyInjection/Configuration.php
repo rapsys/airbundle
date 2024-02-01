@@ -66,6 +66,18 @@ class Configuration implements ConfigurationInterface {
 				'title' => 'Libre Air',
 				'url' => 'rapsys_air'
 			],
+			'cache' => [
+				'namespace' => 'airlibre',
+				'lifetime' => 0,
+				'directory' => '%kernel.project_dir%/var/cache'
+			],
+			'calendar' => [
+				'calendar' => '%env(string:RAPSYSAIR_CALENDAR)',
+				'prefix' => '%env(string:RAPSYSAIR_PREFIX)',
+				'project' => '%env(string:RAPSYSAIR_PROJECT)',
+				'client' => '%env(string:GOOGLE_CLIENT_ID)',
+				'secret' => '%env(string:GOOGLE_CLIENT_SECRET)'
+			],
 			'copy' => [
 				'by' => 'Created by Raphaël',
 				'link' => 'https://rapsys.eu',
@@ -106,6 +118,24 @@ class Configuration implements ConfigurationInterface {
 							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()
 							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['site']['title'])->end()
 							->scalarNode('url')->cannotBeEmpty()->defaultValue($defaults['site']['url'])->end()
+						->end()
+					->end()
+					->arrayNode('cache')
+						->addDefaultsIfNotSet()
+						->children()
+							->scalarNode('namespace')->defaultValue($defaults['cache']['namespace'])->end()
+							->integerNode('lifetime')->min(0)->defaultValue($defaults['cache']['lifetime'])->end()
+							->scalarNode('directory')->defaultValue($defaults['cache']['directory'])->end()
+						->end()
+					->end()
+					->arrayNode('calendar')
+						->addDefaultsIfNotSet()
+						->children()
+							->scalarNode('calendar')->defaultValue($defaults['calendar']['calendar'])->end()
+							->scalarNode('prefix')->defaultValue($defaults['calendar']['prefix'])->end()
+							->scalarNode('project')->defaultValue($defaults['calendar']['project'])->end()
+							->scalarNode('client')->defaultValue($defaults['calendar']['client'])->end()
+							->scalarNode('secret')->defaultValue($defaults['calendar']['secret'])->end()
 						->end()
 					->end()
 					->arrayNode('copy')
