@@ -178,6 +178,8 @@ class CalendarCommand extends Command {
 						$cache->save($cacheCalendars);
 
 						//Drop token and report
+						//XXX: submit app to avoid expiration
+						//XXX: see https://console.cloud.google.com/apis/credentials/consent?project=calendar-317315
 						echo 'Token '.$tokenId.' for calendar '.$token['calendar'].' has expired and is not refreshable'."\n";
 
 						//Return failure
