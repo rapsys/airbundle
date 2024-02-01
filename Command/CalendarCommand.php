@@ -281,6 +281,7 @@ class CalendarCommand extends Command {
 				foreach($sessions as $sessionId => $session) {
 					//Init shared properties
 					//TODO: validate for constraints here ??? https://developers.google.com/calendar/api/guides/extended-properties
+					//TODO: drop shared as unused ???
 					$shared = [
 						'gps' => $session['l_latitude'].','.$session['l_longitude']
 					];
