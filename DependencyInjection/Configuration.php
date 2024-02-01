@@ -61,7 +61,7 @@ class Configuration implements ConfigurationInterface {
 					70 => '@RapsysAir/png/icon.70.png'
 				],
 				'svg' => '@RapsysAir/svg/icon.svg',
-				'title' => 'Open Air',
+				'title' => 'Libre Air',
 				'url' => 'rapsys_air'
 			],
 			'copy' => [
