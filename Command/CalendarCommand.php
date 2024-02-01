@@ -29,16 +29,19 @@ class CalendarCommand extends Command {
 	 *
 	 * @var ManagerRegistry
 	 */
-	protected $doctrine;
+	protected ManagerRegistry $doctrine;
+
+	///Router
+	protected RouterInterface $router;
+
+	///Slugger
+	protected SluggerUtil $slugger;
+
+	///Translator instance
+	protected TranslatorInterface $translator;
 
 	///Locale
 	protected $locale;
-
-	///Slugger
-	protected $slugger;
-
-	///Translator instance
-	protected $translator;
 
 	///Lifetime string
 	protected $lifetime;
