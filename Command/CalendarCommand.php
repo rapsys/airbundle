@@ -108,7 +108,7 @@ class CalendarCommand extends Command {
 		//Retrieve cache object
 		//XXX: by default stored in /tmp/symfony-cache/@/W/3/6SEhFfeIW4UMDlAII+Dg
 		//XXX: stored in %kernel.project_dir%/var/cache/airlibre/0/P/IA20X0K4dkMd9-+Ohp9Q
-		$cache = new FilesystemAdapter($this->config['cache']['namespace'], $this->config['cache']['lifetime'], $this->config['cache']['directory']);
+		$cache = new FilesystemAdapter($this->config['cache']['namespace'], $this->config['cache']['lifetime'], $this->config['path']['cache']);
 
 		//Retrieve calendars
 		$cacheCalendars = $cache->getItem('calendars');
@@ -147,10 +147,7 @@ class CalendarCommand extends Command {
 				//With expired token
 				if ($exp = $googleClient->isAccessTokenExpired()) {
 					//Refresh token
-					if ($googleClient->getRefreshToken()) {
-						//Retrieve refreshed token
-						$googleToken = $googleClient->fetchAccessTokenWithRefreshToken($googleClient->getRefreshToken());
-
+					if (($refreshToken = $googleClient->getRefreshToken()) && ($googleToken = $googleClient->fetchAccessTokenWithRefreshToken($refreshToken)) && empty($googleToken['error'])) {
 						//Add refreshed token
 						$calendars[$clientId]['tokens'][$googleToken['access_token']] = [
 							'calendar' => $token['calendar'],
@@ -173,6 +170,12 @@ class CalendarCommand extends Command {
 							//Drop client
 							unset($calendars[$clientId]);
 						}
+
+						//Save calendars
+						$cacheCalendars->set($calendars);
+
+						//Save calendar
+						$cache->save($cacheCalendars);
 
 						//Drop token and report
 						echo 'Token '.$tokenId.' for calendar '.$token['calendar'].' has expired and is not refreshable'."\n";
@@ -434,7 +437,7 @@ class CalendarCommand extends Command {
 							$end->setDateTime($session['stop']->format(\DateTime::ISO8601));
 
 							try {
-								//Insert the event
+								//Update the event
 								$updatedEvent = $googleCalendar->events->update($token['calendar'], $event->getId(), $event);
 							//Catch exception
 							} catch(\Google\Service\Exception $e) {
