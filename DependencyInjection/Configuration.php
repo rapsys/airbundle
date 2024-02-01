@@ -23,6 +23,7 @@ class Configuration implements ConfigurationInterface {
 		//Set defaults
 		$defaults = [
 			'site' => [
+				'donate' => 'https://paypal.me/milongaraphael',
 				'ico' => '@RapsysAir/ico/icon.ico',
 				'logo' => '@RapsysAir/png/logo.png',
 				//The png icon array
@@ -68,8 +69,7 @@ class Configuration implements ConfigurationInterface {
 			],
 			'cache' => [
 				'namespace' => 'airlibre',
-				'lifetime' => 0,
-				'directory' => '%kernel.project_dir%/var/cache'
+				'lifetime' => 0
 			],
 			'calendar' => [
 				'calendar' => '%env(string:RAPSYSAIR_CALENDAR)',
@@ -79,19 +79,28 @@ class Configuration implements ConfigurationInterface {
 				'secret' => '%env(string:GOOGLE_CLIENT_SECRET)'
 			],
 			'copy' => [
-				'by' => 'Created by Raphaël',
+				'by' => 'Rapsys',
 				'link' => 'https://rapsys.eu',
 				'long' => 'All rights reserved',
 				'short' => 'Copyright 2019-2021',
 				'title' => 'Rapsys'
 			],
 			'contact' => [
-				'name' => 'John Doe',
-				'mail' => 'contact@example.com'
+				'title' => 'Libre Air',
+				'mail' => 'contact@airlibre.eu'
+			],
+			'facebook' => [
+				'apps' => [3728770287223690],
+				'height' => 630,
+				'width' => 1200
 			],
 			'locale' => '%kernel.default_locale%',
 			'locales' => '%kernel.translator.fallbacks%',
 			'languages' => '%rapsys_user.languages%',
+			'path' => [
+				'cache' => '%kernel.project_dir%/var/cache',
+				'public' => dirname(__DIR__).'/Resources/public'
+			]
 		];
 
 		//Here we define the parameters that are allowed to configure the bundle.
@@ -108,6 +117,7 @@ class Configuration implements ConfigurationInterface {
 					->arrayNode('site')
 						->addDefaultsIfNotSet()
 						->children()
+							->scalarNode('donate')->cannotBeEmpty()->defaultValue($defaults['site']['donate'])->end()
 							->scalarNode('ico')->cannotBeEmpty()->defaultValue($defaults['site']['ico'])->end()
 							->scalarNode('logo')->cannotBeEmpty()->defaultValue($defaults['site']['logo'])->end()
 							->arrayNode('png')
@@ -125,7 +135,6 @@ class Configuration implements ConfigurationInterface {
 						->children()
 							->scalarNode('namespace')->defaultValue($defaults['cache']['namespace'])->end()
 							->integerNode('lifetime')->min(0)->defaultValue($defaults['cache']['lifetime'])->end()
-							->scalarNode('directory')->defaultValue($defaults['cache']['directory'])->end()
 						->end()
 					->end()
 					->arrayNode('calendar')
@@ -151,13 +160,32 @@ class Configuration implements ConfigurationInterface {
 					->arrayNode('contact')
 						->addDefaultsIfNotSet()
 						->children()
-							->scalarNode('name')->cannotBeEmpty()->defaultValue($defaults['contact']['name'])->end()
+							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['contact']['title'])->end()
 							->scalarNode('mail')->cannotBeEmpty()->defaultValue($defaults['contact']['mail'])->end()
+						->end()
+					->end()
+					->arrayNode('facebook')
+						->addDefaultsIfNotSet()
+						->children()
+							->arrayNode('apps')
+								->treatNullLike([])
+								->defaultValue($defaults['facebook']['apps'])
+								->scalarPrototype()->end()
+							->end()
+							->integerNode('height')->min(0)->defaultValue($defaults['facebook']['height'])->end()
+							->integerNode('width')->min(0)->defaultValue($defaults['facebook']['width'])->end()
 						->end()
 					->end()
 					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
 					->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
 					->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
+					->arrayNode('path')
+						->addDefaultsIfNotSet()
+						->children()
+							->scalarNode('cache')->defaultValue($defaults['path']['cache'])->end()
+							->scalarNode('public')->defaultValue($defaults['path']['public'])->end()
+						->end()
+					->end()
 				->end()
 			->end();
 
