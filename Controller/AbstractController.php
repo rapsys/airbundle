@@ -376,7 +376,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 					//With user
 					'user' => $this->checker->isGranted('ROLE_ADMIN'),
 					//Set user choices
-					'user_choices' => $this->doctrine->getRepository(User::class)->findIndexByGroupPseudonym(),
+					'user_choices' => $this->doctrine->getRepository(User::class)->findChoicesAsArray(),
 					//Set default user to current
 					'user_default' => $this->getUser()->getId(),
 					//Set to session slot or evening by default
