@@ -1,0 +1,43 @@
+Rapsys\AirBundle\Entity\GoogleToken:
+    type: entity
+    #repositoryClass: Rapsys\AirBundle\Repository\GoogleTokenRepository
+    table: google_tokens
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+            options:
+                unsigned: true
+    fields:
+        mail:
+            type: string
+            length: 254
+        access:
+            type: string
+            length: 2048
+        refresh:
+            type: string
+            length: 512
+            nullable: true
+        expired:
+            type: datetime
+        created:
+            type: datetime
+        updated:
+            type: datetime
+    manyToOne:
+        user:
+            targetEntity: Rapsys\AirBundle\Entity\User
+            inversedBy: googleTokens
+            joinColumn:
+                nullable: false
+    oneToMany:
+        googleCalendars:
+            targetEntity: Rapsys\AirBundle\Entity\GoogleCalendar
+            mappedBy: googleToken
+    uniqueConstraints:
+        user_mail:
+            columns: [ user_id, mail ]
+    lifecycleCallbacks:
+        preUpdate: ['preUpdate']
