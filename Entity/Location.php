@@ -444,6 +444,10 @@ class Location {
 	 * @return bool
 	 */
 	public function removeUser(User $user): bool {
+		if (!$this->users->contains($user)) {
+			return true;
+		}
+
 		//Remove from owning side
 		$user->removeSubscriber($this);
 
