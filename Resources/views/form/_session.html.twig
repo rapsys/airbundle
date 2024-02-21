@@ -6,6 +6,14 @@
 		{{ form_start(forms.session) }}
 			{% if forms.session.modify is defined %}
 				<div>
+					{% if forms.session.dance is defined %}
+						{{ form_row(forms.session.dance) }}
+					{% endif %}
+
+					{% if forms.session.slot is defined %}
+						{{ form_row(forms.session.slot) }}
+					{% endif %}
+
 					{% if forms.session.date is defined %}
 						{{ form_row(forms.session.date) }}
 					{% endif %}
