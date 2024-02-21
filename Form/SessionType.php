@@ -15,7 +15,9 @@ use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
+use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\Location;
+use Rapsys\AirBundle\Entity\Slot;
 use Rapsys\AirBundle\Entity\User;
 
 class SessionType extends AbstractType {
@@ -51,7 +53,14 @@ class SessionType extends AbstractType {
 		//Is admin or owner
 		if (!empty($options['modify'])) {
 			if (!empty($options['admin'])) {
-				$builder->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => $options['date'], 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
+				$builder
+					//Add dance field
+					->add('dance', EntityType::class, ['class' => 'RapsysAirBundle:Dance', 'choices' => $options['dance_choices'], 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your dance'])], 'data' => $options['dance_default']])
+
+					//Add slot field
+					->add('slot', EntityType::class, ['class' => 'RapsysAirBundle:Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot_default']])
+					//Add date field
+					->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => $options['date'], 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
 			}
 
 			$builder
@@ -104,18 +113,48 @@ class SessionType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function configureOptions(OptionsResolver $resolver) {
-		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'date' => null, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null]);
+		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'dance_choices' => [], 'dance_default' => null, 'dance_favorites' => [], 'date' => null, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null, 'slot_default' => null]);
+
+		//Add admin
 		$resolver->setAllowedTypes('admin', 'boolean');
-		#TODO: voir si c'est le bon type
+
+		//Add dance choices
+		$resolver->setAllowedTypes('dance_choices', 'array');
+
+		//Add dance default
+		$resolver->setAllowedTypes('dance_default', [Dance::class, 'null']);
+
+		//Add dance favorites
+		$resolver->setAllowedTypes('dance_favorites', 'array');
+
+		//Add date
 		$resolver->setAllowedTypes('date', 'datetime');
+
+		//Add begin
 		$resolver->setAllowedTypes('begin', 'datetime');
+
+		//Add length
 		$resolver->setAllowedTypes('length', 'datetime');
+
+		//Add cancel
 		$resolver->setAllowedTypes('cancel', 'boolean');
+
+		//Add raincancel
 		$resolver->setAllowedTypes('raincancel', 'boolean');
+
+		//Add modify
 		$resolver->setAllowedTypes('modify', 'boolean');
+
+		//Add move
 		$resolver->setAllowedTypes('move', 'boolean');
+
+		//Add attribute
 		$resolver->setAllowedTypes('attribute', 'boolean');
+
+		//Add user
 		$resolver->setAllowedTypes('user', 'integer');
+
+		//Add session
 		$resolver->setAllowedTypes('session', 'integer');
 	}
 
