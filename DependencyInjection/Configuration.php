@@ -74,12 +74,10 @@ class Configuration implements ConfigurationInterface {
 				'title' => 'Libre Air',
 				'url' => 'rapsys_air'
 			],
-			'calendar' => [
-				'calendar' => '%env(string:RAPSYSAIR_CALENDAR)',
-				'prefix' => '%env(string:RAPSYSAIR_PREFIX)',
-				'project' => '%env(string:RAPSYSAIR_PROJECT)',
-				'client' => '%env(string:GOOGLE_CLIENT_ID)',
-				'secret' => '%env(string:GOOGLE_CLIENT_SECRET)'
+			'google' => [
+				'client' => '%env(string:GOOGLE_CLIENT)',
+				'project' => '%env(string:GOOGLE_PROJECT)',
+				'secret' => '%env(string:GOOGLE_SECRET)'
 			],
 			'copy' => [
 				'by' => 'Rapsys',
@@ -149,14 +147,12 @@ class Configuration implements ConfigurationInterface {
 							->scalarNode('url')->cannotBeEmpty()->defaultValue($defaults['site']['url'])->end()
 						->end()
 					->end()
-					->arrayNode('calendar')
+					->arrayNode('google')
 						->addDefaultsIfNotSet()
 						->children()
-							->scalarNode('calendar')->defaultValue($defaults['calendar']['calendar'])->end()
-							->scalarNode('prefix')->defaultValue($defaults['calendar']['prefix'])->end()
-							->scalarNode('project')->defaultValue($defaults['calendar']['project'])->end()
-							->scalarNode('client')->defaultValue($defaults['calendar']['client'])->end()
-							->scalarNode('secret')->defaultValue($defaults['calendar']['secret'])->end()
+							->scalarNode('client')->defaultValue($defaults['google']['client'])->end()
+							->scalarNode('project')->defaultValue($defaults['google']['project'])->end()
+							->scalarNode('secret')->defaultValue($defaults['google']['secret'])->end()
 						->end()
 					->end()
 					->arrayNode('copy')
