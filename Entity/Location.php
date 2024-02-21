@@ -429,6 +429,9 @@ class Location {
 	 * @return Location
 	 */
 	public function addUser(User $user): Location {
+		//Add from owning side
+		$user->addSubscriber($this);
+
 		$this->users[] = $user;
 
 		return $this;
@@ -441,6 +444,9 @@ class Location {
 	 * @return bool
 	 */
 	public function removeUser(User $user): bool {
+		//Remove from owning side
+		$user->removeSubscriber($this);
+
 		return $this->users->removeElement($user);
 	}
 

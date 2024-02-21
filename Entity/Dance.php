@@ -209,6 +209,9 @@ class Dance {
 	 * @return Dance
 	 */
 	public function addUser(User $user): Dance {
+		//Add from owning side
+		$user->addSubscriber($this);
+
 		$this->users[] = $user;
 
 		return $this;
@@ -222,6 +225,9 @@ class Dance {
 	 * @return bool
 	 */
 	public function removeUser(User $user): bool {
+		//Remove from owning side
+		$user->removeSubscriber($this);
+
 		return $this->users->removeElement($user);
 	}
 
