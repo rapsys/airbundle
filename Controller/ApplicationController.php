@@ -104,7 +104,7 @@ class ApplicationController extends AbstractController {
 			//With user
 			'user' => $this->isGranted('ROLE_ADMIN'),
 			//Set user choices
-			'user_choices' => $this->doctrine->getRepository(User::class)->findIndexByGroupPseudonym(),
+			'user_choices' => $this->doctrine->getRepository(User::class)->findChoicesAsArray(),
 			//Set default user to current
 			'user_default' => $this->getUser()->getId(),
 			//Set default slot to evening
