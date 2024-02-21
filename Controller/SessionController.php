@@ -422,6 +422,23 @@ class SessionController extends AbstractController {
 			//Set now
 			$now = new \DateTime('now');
 
+			//Default favorites and dances
+			$danceFavorites = $dances = [];
+			//Default dance
+			$danceDefault = null;
+
+			//With admin
+			if ($this->isGranted('ROLE_ADMIN')) {
+				//Get favorites dances
+				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+
+				//Get dances
+				$dances = $this->doctrine->getRepository(Dance::class)->findAllIndexed();
+
+				//Set dance default
+				$danceDefault = !empty($this->context['session']['application'])?$dances[$this->context['session']['application']['dance']['id']]:null;
+			}
+
 			//Create SessionType form
 			//TODO: move to named form ???
 			$sessionForm = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
@@ -431,6 +448,15 @@ class SessionController extends AbstractController {
 				'attr' => [ 'class' => 'col' ],
 				//Set admin
 				'admin' => $this->isGranted('ROLE_ADMIN'),
+				//Set dance choices
+				'dance_choices' => $dances,
+				//Set dance default
+				'dance_default' => $danceDefault,
+				//Set dance favorites
+				'dance_favorites' => $danceFavorites,
+				//Set to session slot or evening by default
+				//XXX: default to Evening (3)
+				'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneById($this->context['session']['slot']['id']??3),
 				//Set default user to current
 				'user' => $this->getUser()->getId(),
 				//Set date
@@ -524,6 +550,18 @@ class SessionController extends AbstractController {
 				} elseif ($action['modify']) {
 					//With admin
 					if ($this->isGranted('ROLE_ADMIN')) {
+						//Get application
+						$application = $this->doctrine->getRepository(Application::class)->findOneBySessionUser($sessionObject, $userObject);
+
+						//Set dance
+						$application->setDance($data['dance']);
+
+						//Queue session save
+						$this->manager->persist($application);
+
+						//Set slot
+						$sessionObject->setSlot($data['slot']);
+
 						//Set date
 						$sessionObject->setDate($data['date']);
 					}
