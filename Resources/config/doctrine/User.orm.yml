@@ -26,6 +26,9 @@ Rapsys\AirBundle\Entity\User:
         snippets:
             targetEntity: Rapsys\AirBundle\Entity\Snippet
             mappedBy: user
+        googleTokens:
+            targetEntity: Rapsys\AirBundle\Entity\GoogleToken
+            mappedBy: user
     manyToMany:
         dances:
             targetEntity: Rapsys\AirBundle\Entity\Dance
