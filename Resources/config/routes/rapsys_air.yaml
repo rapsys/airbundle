@@ -18,6 +18,14 @@ rapsys_air_about:
     controller: Rapsys\AirBundle\Controller\DefaultController::about
     methods: GET
 
+#TODO: drop it or should we keep it to be able to add an application from multiple places ???
+rapsys_air_application_add:
+    path:
+        en_gb: '/en/application'
+        fr_fr: '/reservation'
+    controller: Rapsys\AirBundle\Controller\ApplicationController::add
+    methods: GET|POST
+
 rapsys_air_contact:
     path:
         en_gb: '/en/contact/{id<\d*>?}/{user<[\w-]*>?}'
@@ -25,17 +33,12 @@ rapsys_air_contact:
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
-rapsys_air_calendar:
-    path:
-        en_gb: '/en/calendar'
-        fr_fr: '/calendrier'
-    controller: Rapsys\AirBundle\Controller\CalendarController::index
-    methods: GET|POST
-
-rapsys_air_calendar_callback:
-    path: '/calendar/callback'
-    controller: Rapsys\AirBundle\Controller\CalendarController::callback
-    methods: GET
+#rapsys_air_calendar:
+#    path:
+#        en_gb: '/en/calendar'
+#        fr_fr: '/calendrier'
+#    controller: Rapsys\AirBundle\Controller\CalendarController::index
+#    methods: GET|POST
 
 rapsys_air_city:
     path:
@@ -79,18 +82,9 @@ rapsys_air_frequently_asked_questions:
     controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
     methods: GET
 
-rapsys_air_organizer_regulation:
-    path:
-        en_gb: '/en/organizer-regulation'
-        fr_fr: '/reglement-organisateur'
-    controller: Rapsys\AirBundle\Controller\DefaultController::organizerRegulation
-    methods: GET
-
-rapsys_air_terms_of_service:
-    path:
-        en_gb: '/en/terms-of-service'
-        fr_fr: '/conditions-generales-d-utilisation'
-    controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
+rapsys_air_google_callback:
+    path: '/google/callback'
+    controller: Rapsys\AirBundle\Controller\UserController::googleCallback
     methods: GET
 
 rapsys_air_location:
@@ -107,12 +101,12 @@ rapsys_air_location_view:
     controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
-rapsys_air_application_add:
+rapsys_air_organizer_regulation:
     path:
-        en_gb: '/en/application'
-        fr_fr: '/reservation'
-    controller: Rapsys\AirBundle\Controller\ApplicationController::add
-    methods: GET|POST
+        en_gb: '/en/organizer-regulation'
+        fr_fr: '/reglement-organisateur'
+    controller: Rapsys\AirBundle\Controller\DefaultController::organizerRegulation
+    methods: GET
 
 rapsys_air_session:
     path:
@@ -149,19 +143,19 @@ rapsys_air_snippet_edit:
     controller: Rapsys\AirBundle\Controller\SnippetController::edit
     methods: POST
 
+rapsys_air_terms_of_service:
+    path:
+        en_gb: '/en/terms-of-service'
+        fr_fr: '/conditions-generales-d-utilisation'
+    controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
+    methods: GET
+
 rapsys_air_user:
     path:
         en_gb: '/en/user'
         fr_fr: '/utilisateur'
     controller: Rapsys\AirBundle\Controller\DefaultController::userIndex
     methods: GET
-
-rapsys_air_user_view:
-    path:
-        en_gb: '/en/user/{id<\d+>}/{user<[\w-]+>?}'
-        fr_fr: '/utilisateur/{id<\d+>}/{user<[\w-]+>?}'
-    controller: Rapsys\AirBundle\Controller\DefaultController::userView
-    methods: GET|POST
 
 rapsys_air_user_milongaraphael:
     path:
@@ -172,6 +166,13 @@ rapsys_air_user_milongaraphael:
         # default parameters
         id: 1
         user: 'milonga-raphael'
+
+rapsys_air_user_view:
+    path:
+        en_gb: '/en/user/{id<\d+>}/{user<[\w-]+>?}'
+        fr_fr: '/utilisateur/{id<\d+>}/{user<[\w-]+>?}'
+    controller: Rapsys\AirBundle\Controller\DefaultController::userView
+    methods: GET|POST
 
 rapsys_user_confirm:
     path:
