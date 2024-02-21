@@ -20,7 +20,7 @@ use Symfony\Component\Routing\RouterInterface;
  *
  * @TODO: use new window function syntax https://mariadb.com/kb/en/window-functions-overview/ MAX(updated) OVER (PARTITION updated) AS modified ???
  */
-class LocationRepository extends EntityRepository {
+class LocationRepository extends Repository {
 	/**
 	 * Find locations
 	 *

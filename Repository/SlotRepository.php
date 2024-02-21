@@ -16,7 +16,7 @@ use Doctrine\ORM\Query\ResultSetMapping;
 /**
  * SlotRepository
  */
-class SlotRepository extends EntityRepository {
+class SlotRepository extends Repository {
 	/**
 	 * Find slots with translated title
 	 *

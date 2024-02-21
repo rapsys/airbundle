@@ -23,7 +23,7 @@ use Rapsys\AirBundle\Entity\Slot;
 /**
  * SessionRepository
  */
-class SessionRepository extends EntityRepository {
+class SessionRepository extends Repository {
 	///Set glyphs
 	//TODO: document utf-8 codes ?
 	//TODO: use unknown == ? symbol by default ???
