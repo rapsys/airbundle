@@ -43,6 +43,14 @@
 					{{ form_row(edit.phone) }}
 				{% endif %}
 
+				{% if edit.dances is defined %}
+					{{ form_row(edit.dances) }}
+				{% endif %}
+
+				{% if edit.subscriptions is defined %}
+					{{ form_row(edit.subscriptions) }}
+				{% endif %}
+
 				{{ form_row(edit.submit) }}
 			</div>
 
@@ -71,4 +79,64 @@
 			{{ form_end(reset) }}
 		</article>
 	{% endif %}
+	{% if calendar is defined %}
+		<article>
+			<header>
+				<h2><a href="{{ app.request.requesturi }}">{% trans %}Calendar{% endtrans %}</a></h2>
+			</header>
+			{% if calendar.link is defined %}
+				<section>
+					<header>
+						<h3>{% trans %}Add{% endtrans %}</h3>
+					</header>
+					<div>
+						<a class="center" href="{{ calendar.link }}"><img src="{{ asset(calendar.logo.svg) }}?20221024100144" srcset="{{ asset(calendar.logo.png) }}?20221024100144 200w, {{ asset(calendar.logo.svg) }}?20221024100144 400w" sizes="(min-width:400px) 400px, 200px" alt="{% trans %}Google Calendar logo{% endtrans %}" width="50" height="50" /><span>{% trans %}Link a Google Calendar account{% endtrans %}</span></a>
+					</div>
+				</section>
+			{% endif %}
+			{% if calendar.form is defined %}
+				{% for mail, form in calendar.form %}
+					<section>
+						<header>
+							<h3>{{ mail|ucfirst }}</h3>
+						</header>
+						{{ form_start(form) }}
+							<div>
+								{{ form_widget(form.calendar) }}
+
+								<div class="row">
+									{{ form_widget(form.submit) }}
+
+									{% if form.refresh is defined %}
+										{{ form_widget(form.refresh) }}
+									{% endif %}
+
+									{% if form.add is defined %}
+										{{ form_widget(form.add) }}
+									{% endif %}
+
+									{% if form.delete is defined %}
+										{{ form_widget(form.delete) }}
+									{% endif %}
+
+									{% if form.unlink is defined %}
+										{{ form_widget(form.unlink) }}
+									{% endif %}
+								</div>
+							</div>
+
+							{# Render CSRF token etc .#}
+							<footer style="display:none">{{ form_rest(form) }}</footer>
+						{{ form_end(form) }}
+					</section>
+				{% endfor %}
+			{% endif %}
+		</article>
+	{% endif %}
+	<article>
+		<header>
+			<h2><a href="{{ app.request.requesturi }}">{% trans %}Newsletter{% endtrans %}</a></h2>
+		</header>
+		<p class="center"><span>TODO: add newsletter stuff here ?</span></p>
+	</article>
 {% endblock %}
