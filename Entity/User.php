@@ -11,65 +11,71 @@
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Rapsys\UserBundle\Entity\User as BaseUser;
 
 class User extends BaseUser {
 	/**
-	 * @var string
+	 * @var ?string
 	 */
-	protected $city;
+	private ?string $city;
 
 	/**
-	 * @var string
+	 * @var ?string
 	 */
-	protected $phone;
+	private ?string $phone;
 
 	/**
 	 * @var Country
 	 */
-	protected $country;
+	private ?Country $country;
 
 	/**
-	 * @var string
+	 * @var ?string
 	 */
-	protected $pseudonym;
+	private ?string $pseudonym;
 
 	/**
-	 * @var string
+	 * @var ?string
 	 */
-	protected $zipcode;
+	private ?string $zipcode;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $applications;
+	private Collection $applications;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $dances;
+	private Collection $dances;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $locations;
+	private Collection $locations;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $snippets;
+	private Collection $snippets;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $subscribers;
+	private Collection $subscribers;
 
 	/**
-	 * @var ArrayCollection
+	 * @var \Doctrine\Common\Collections\Collection
 	 */
-	private $subscriptions;
+	private Collection $subscriptions;
+
+	/**
+	 * @var \Doctrine\Common\Collections\Collection
+	 */
+	private Collection $googleTokens;
 
 	/**
 	 * Constructor
@@ -94,28 +100,7 @@ class User extends BaseUser {
 		$this->snippets = new ArrayCollection();
 		$this->subscribers = new ArrayCollection();
 		$this->subscriptions = new ArrayCollection();
-	}
-
-	/**
-	 * Set country
-	 *
-	 * @param Country $country
-	 *
-	 * @return User
-	 */
-	public function setCountry(Country $country) {
-		$this->country = $country;
-
-		return $this;
-	}
-
-	/**
-	 * Get country
-	 *
-	 * @return Country
-	 */
-	public function getCountry() {
-		return $this->country;
+		$this->googleTokens = new ArrayCollection();
 	}
 
 	/**
@@ -138,6 +123,28 @@ class User extends BaseUser {
 	 */
 	public function getCity(): ?string {
 		return $this->city;
+	}
+
+	/**
+	 * Set country
+	 *
+	 * @param Country $country
+	 *
+	 * @return User
+	 */
+	public function setCountry(?Country $country): User {
+		$this->country = $country;
+
+		return $this;
+	}
+
+	/**
+	 * Get country
+	 *
+	 * @return Country
+	 */
+	public function getCountry(): ?Country {
+		return $this->country;
 	}
 
 	/**
@@ -231,9 +238,9 @@ class User extends BaseUser {
 	/**
 	 * Get applications
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getApplications(): ArrayCollection {
+	public function getApplications(): Collection {
 		return $this->applications;
 	}
 
@@ -264,9 +271,9 @@ class User extends BaseUser {
 	/**
 	 * Get dances
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getDances(): ArrayCollection {
+	public function getDances(): Collection {
 		return $this->dances;
 	}
 
@@ -295,9 +302,9 @@ class User extends BaseUser {
 	/**
 	 * Get locations
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getLocations(): ArrayCollection {
+	public function getLocations(): Collection {
 		return $this->locations;
 	}
 
@@ -326,9 +333,9 @@ class User extends BaseUser {
 	/**
 	 * Get snippets
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getSnippets(): ArrayCollection {
+	public function getSnippets(): Collection {
 		return $this->snippets;
 	}
 
@@ -357,9 +364,9 @@ class User extends BaseUser {
 	/**
 	 * Get subscribers
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getSubscribers(): ArrayCollection {
+	public function getSubscribers(): Collection {
 		return $this->subscribers;
 	}
 
@@ -371,6 +378,9 @@ class User extends BaseUser {
 	 * @return User
 	 */
 	public function addSubscription(User $subscription): User {
+		//Add from owning side
+		$subscription->addSubscriber($this);
+
 		$this->subscriptions[] = $subscription;
 
 		return $this;
@@ -382,15 +392,53 @@ class User extends BaseUser {
 	 * @param User $subscription
 	 */
 	public function removeSubscription(User $subscription): bool {
+		if (!$this->users->contains($user)) {
+			return true;
+		}
+
+		//Remove from owning side
+		$subscription->removeSubscriber($this);
+
 		return $this->subscriptions->removeElement($subscription);
 	}
 
 	/**
 	 * Get subscriptions
 	 *
-	 * @return ArrayCollection
+	 * @return \Doctrine\Common\Collections\Collection
 	 */
-	public function getSubscriptions(): ArrayCollection {
+	public function getSubscriptions(): Collection {
 		return $this->subscriptions;
+	}
+
+	/**
+	 * Add google token
+	 *
+	 * @param GoogleToken $googleToken
+	 *
+	 * @return User
+	 */
+	public function addGoogleToken(GoogleToken $googleToken): User {
+		$this->googleTokens[] = $googleToken;
+
+		return $this;
+	}
+
+	/**
+	 * Remove google token
+	 *
+	 * @param GoogleToken $googleToken
+	 */
+	public function removeGoogleToken(GoogleToken $googleToken): bool {
+		return $this->googleTokens->removeElement($googleToken);
+	}
+
+	/**
+	 * Get googleTokens
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getGoogleTokens(): Collection {
+		return $this->googleTokens;
 	}
 }
