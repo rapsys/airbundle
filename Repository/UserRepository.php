@@ -11,19 +11,20 @@
 
 namespace Rapsys\AirBundle\Repository;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * UserRepository
  */
-class UserRepository extends EntityRepository {
+class UserRepository extends Repository {
 	/**
 	 * Find users with translated highest group and civility
 	 *
 	 * @return array The user ids keyed by group and pseudonym
 	 */
-	public function findIndexByGroupPseudonym(): array {
+	public function findChoicesAsArray(): array {
 		//Set the request
 		$req =<<<SQL
 SELECT
@@ -38,9 +39,10 @@ FROM (
 		g.id AS g_id,
 		g.title AS g_title
 	FROM RapsysAirBundle:User AS u
-	LEFT JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
-	LEFT JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
-	ORDER BY g.id DESC
+	JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
+	JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
+	WHERE g.title <> 'User'
+	ORDER BY g.id DESC, u.pseudonym ASC
 	LIMIT 0, :limit
 ) AS a
 GROUP BY a.id
@@ -74,10 +76,11 @@ SQL;
 		//Process result
 		foreach($res as $data) {
 			//Without group or simple user
-			if (empty($data['g_title']) || $data['g_title'] == 'User') {
-				//Skip it
-				continue;
-			}
+			#XXX: moved in sql by removing LEFT JOIN and excluding user group
+			#if (empty($data['g_title']) || $data['g_title'] == 'User') {
+			#	//Skip it
+			#	continue;
+			#}
 
 			//Get translated group
 			$group = $this->translator->trans($data['g_title']);
@@ -89,11 +92,55 @@ SQL;
 
 			//Set data
 			//XXX: ChoiceType use display string as key
-			$ret[$group][$data['pseudonym']] = $data['id'];
+			$ret[$group][trim($data['pseudonym'].' ('.$data['id'].')')] = intval($data['id']);
 		}
 
 		//Send result
 		return $ret;
+	}
+
+	/**
+	 * Find user ids by pseudonym
+	 *
+	 * @param array $pseudonym The pseudonym filter
+	 * @return array The user ids
+	 */
+	public function findIdByPseudonymAsArray(array $pseudonym): array {
+		//Set the request
+		$req =<<<SQL
+SELECT
+	a.id
+FROM (
+	SELECT
+		u.id
+	FROM RapsysAirBundle:User AS u
+	LEFT JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
+	WHERE u.pseudonym IN (:pseudonym)
+	ORDER BY gu.group_id DESC, u.pseudonym ASC
+	LIMIT 0, :limit
+) AS a
+GROUP BY a.id
+ORDER BY NULL
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		//XXX: we don't use a result set as we want to translate group and civility
+		$rsm->addScalarResult('id', 'id', 'integer');
+
+		//Return result
+		return $this->_em
+			->createNativeQuery($req, $rsm)
+			->setParameter('pseudonym', $pseudonym)
+			//XXX: instead of array_column on the result
+			->getResult(AbstractQuery::HYDRATE_SCALAR_COLUMN);
 	}
 
 	/**
