@@ -12,7 +12,7 @@
 namespace Rapsys\AirBundle\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository as BaseEntityRepository;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -20,11 +20,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Rapsys\PackBundle\Util\SluggerUtil;
 
 /**
- * EntityRepository
+ * Repository
  *
  * {@inheritdoc}
  */
-class EntityRepository extends BaseEntityRepository {
+class Repository extends EntityRepository {
 	/**
 	 * The RouterInterface instance
 	 *
