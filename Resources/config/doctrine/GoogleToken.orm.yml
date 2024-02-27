@@ -1,6 +1,6 @@
 Rapsys\AirBundle\Entity\GoogleToken:
     type: entity
-    #repositoryClass: Rapsys\AirBundle\Repository\GoogleTokenRepository
+    repositoryClass: Rapsys\AirBundle\Repository\GoogleTokenRepository
     table: google_tokens
     id:
         id:
