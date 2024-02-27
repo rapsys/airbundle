@@ -4,7 +4,6 @@ namespace Rapsys\AirBundle\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -14,20 +13,11 @@ use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Slot;
 
-class AirFixtures extends Fixture implements ContainerAwareInterface {
+class AirFixtures extends Fixture {
 	/**
-	 * @var ContainerInterface
+	 * Air fixtures constructor
 	 */
-	private $container;
-
-	/**
-	 * @var UserPasswordHasherInterface
-	 */
-	private $hasher;
-
-	public function setContainer(ContainerInterface $container = null) {
-		$this->container = $container;
-		$this->hasher = $this->container->get('security.password_hasher_factory');
+	public function __construct(protected ContainerInterface $container, protected UserPasswordHasherInterface $hasher) {
 	}
 
 	/**
