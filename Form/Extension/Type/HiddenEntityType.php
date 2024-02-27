@@ -40,7 +40,7 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 	 *
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		//Call parent
 		parent::configureOptions($resolver);
 
@@ -102,24 +102,24 @@ class HiddenEntityType extends HiddenType implements DataTransformerInterface {
 	/**
 	 * Reverse transformation from string to data object
 	 *
-	 * @param string $data The object id
+	 * @param mixed $value The object id
 	 * @return mixed The data object
 	 */
-	public function reverseTransform($data) {
-		if (!$data) {
+	public function reverseTransform(mixed $value): mixed {
+		if (!$value) {
 			return null;
 		}
 
 		$res = null;
 		try {
 			$rep = $this->dm->getRepository($this->class);
-			$res = $rep->findOneById($data);
+			$res = $rep->findOneById($value);
 		} catch (\Exception $e) {
 			throw new TransformationFailedException($e->getMessage());
 		}
 
 		if ($res === null) {
-			throw new TransformationFailedException(sprintf('A %s with id %s does not exist!', $this->class, $data));
+			throw new TransformationFailedException(sprintf('A %s with id %s does not exist!', $this->class, $value));
 		}
 
 		return $res;
