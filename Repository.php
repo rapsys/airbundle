@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Rapsys\AirBundle\Repository;
+namespace Rapsys\AirBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -26,20 +26,6 @@ use Rapsys\PackBundle\Util\SluggerUtil;
  */
 class Repository extends EntityRepository {
 	/**
-	 * The RouterInterface instance
-	 *
-	 * @var RouterInterface
-	 */
-	protected RouterInterface $router;
-
-	/**
-	 * The SluggerUtil instance
-	 *
-	 * @var SluggerUtil
-	 */
-	protected SluggerUtil $slugger;
-
-	/**
 	 * The table keys array
 	 *
 	 * @var array
@@ -54,27 +40,6 @@ class Repository extends EntityRepository {
 	protected array $tableValues;
 
 	/**
-	 * The TranslatorInterface instance
-	 *
-	 * @var TranslatorInterface
-	 */
-	protected TranslatorInterface $translator;
-
-	/**
-	 * The list of languages
-	 *
-	 * @var string[]
-	 */
-	protected array $languages = [];
-
-	/**
-	 * The current locale
-	 *
-	 * @var string
-	 */
-	protected string $locale;
-
-	/**
 	 * Initializes a new LocationRepository instance
 	 *
 	 * @param EntityManagerInterface $manager The EntityManagerInterface instance
@@ -82,31 +47,16 @@ class Repository extends EntityRepository {
 	 * @param RouterInterface $router The router instance
 	 * @param SluggerUtil $slugger The SluggerUtil instance
 	 * @param TranslatorInterface $translator The TranslatorInterface instance
-	 * @param array $languages The languages list
 	 * @param string $locale The current locale
+	 * @param array $languages The languages list
 	 */
-	public function __construct(EntityManagerInterface $manager, ClassMetadata $class, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, array $languages, string $locale) {
+	public function __construct(protected EntityManagerInterface $manager, protected ClassMetadata $class, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected string $locale, protected array $languages) {
 		//Call parent constructor
 		parent::__construct($manager, $class);
 
-		//Set languages
-		$this->languages = $languages;
-
-		//Set locale
-		$this->locale = $locale;
-
-		//Set router
-		$this->router = $router;
-
-		//Set slugger
-		$this->slugger = $slugger;
-
-		//Set translator
-		$this->translator = $translator;
-
 		//Get quote strategy
-		$qs = $manager->getConfiguration()->getQuoteStrategy();
-		$dp = $manager->getConnection()->getDatabasePlatform();
+		$qs = $this->manager->getConfiguration()->getQuoteStrategy();
+		$dp = $this->manager->getConnection()->getDatabasePlatform();
 
 		//Set quoted table names
 		//XXX: this allow to make this code table name independent
@@ -115,10 +65,13 @@ class Repository extends EntityRepository {
 			'RapsysAirBundle:UserDance' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('dances'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:UserGroup' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('groups'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:UserLocation' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('locations'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
+			'RapsysAirBundle:UserSubscription' => $qs->getJoinTableName($manager->getClassMetadata('RapsysAirBundle:User')->getAssociationMapping('subscriptions'), $manager->getClassMetadata('RapsysAirBundle:User'), $dp),
 			'RapsysAirBundle:Application' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Application'), $dp),
 			'RapsysAirBundle:Civility' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Civility'), $dp),
 			'RapsysAirBundle:Country' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Country'), $dp),
 			'RapsysAirBundle:Dance' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Dance'), $dp),
+			'RapsysAirBundle:GoogleCalendar' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:GoogleCalendar'), $dp),
+			'RapsysAirBundle:GoogleToken' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:GoogleToken'), $dp),
 			'RapsysAirBundle:Group' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Group'), $dp),
 			'RapsysAirBundle:Location' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Location'), $dp),
 			'RapsysAirBundle:Session' => $qs->getTableName($manager->getClassMetadata('RapsysAirBundle:Session'), $dp),
