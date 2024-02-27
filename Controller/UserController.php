@@ -14,9 +14,9 @@ namespace Rapsys\AirBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use Rapsys\UserBundle\Controller\DefaultController;
+use Rapsys\UserBundle\Controller\UserController as BaseUserController;
 
-class UserController extends DefaultController {
+class UserController extends BaseUserController {
 	/**
 	 * {@inheritdoc}
 	 */
