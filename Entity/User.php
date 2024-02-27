@@ -347,6 +347,9 @@ class User extends BaseUser {
 	 * @return User
 	 */
 	public function addSubscriber(User $subscriber): User {
+		//Add from owning side
+		$subscriber->addSubscription($this);
+
 		$this->subscribers[] = $subscriber;
 
 		return $this;
@@ -358,6 +361,13 @@ class User extends BaseUser {
 	 * @param User $subscriber
 	 */
 	public function removeSubscriber(User $subscriber): bool {
+		if (!$this->subscriptions->contains($subscriber)) {
+			return true;
+		}
+
+		//Remove from owning side
+		$subscriber->removeSubscription($this);
+
 		return $this->subscribers->removeElement($subscriber);
 	}
 
@@ -378,9 +388,6 @@ class User extends BaseUser {
 	 * @return User
 	 */
 	public function addSubscription(User $subscription): User {
-		//Add from owning side
-		$subscription->addSubscriber($this);
-
 		$this->subscriptions[] = $subscription;
 
 		return $this;
@@ -392,13 +399,6 @@ class User extends BaseUser {
 	 * @param User $subscription
 	 */
 	public function removeSubscription(User $subscription): bool {
-		if (!$this->users->contains($user)) {
-			return true;
-		}
-
-		//Remove from owning side
-		$subscription->removeSubscriber($this);
-
 		return $this->subscriptions->removeElement($subscription);
 	}
 
