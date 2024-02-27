@@ -13,7 +13,10 @@ namespace Rapsys\AirBundle\Repository;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
+
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use Rapsys\AirBundle\Repository;
 
 /**
  * UserRepository

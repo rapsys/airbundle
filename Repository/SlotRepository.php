@@ -13,6 +13,8 @@ namespace Rapsys\AirBundle\Repository;
 
 use Doctrine\ORM\Query\ResultSetMapping;
 
+use Rapsys\AirBundle\Repository;
+
 /**
  * SlotRepository
  */
