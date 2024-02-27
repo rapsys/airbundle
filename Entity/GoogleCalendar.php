@@ -37,7 +37,7 @@ class GoogleCalendar {
 	/**
 	 * @var \DateTime
 	 */
-	private ?\DateTime $synchronized;
+	private \DateTime $synchronized;
 
 	/**
 	 * @var \DateTime
@@ -60,9 +60,9 @@ class GoogleCalendar {
 	 * @param \Rapsys\AirBundle\Entity\GoogleToken $googleToken The google token
 	 * @param string $mail The google calendar id
 	 * @param string $summary The google calendar summary
-	 * @param ?\DateTime $synchronized The google calendar last synchronization
+	 * @param \DateTime $synchronized The google calendar last synchronization
 	 */
-	public function __construct(GoogleToken $googleToken, string $mail, string $summary, ?\DateTime $synchronized = null) {
+	public function __construct(GoogleToken $googleToken, string $mail, string $summary, \DateTime $synchronized = new \DateTime('now')) {
 		//Set defaults
 		$this->googleToken = $googleToken;
 		$this->mail = $mail;
@@ -126,11 +126,11 @@ class GoogleCalendar {
 	/**
 	 * Set synchronized
 	 *
-	 * @param ?\DateTime $synchronized
+	 * @param \DateTime $synchronized
 	 *
 	 * @return GoogleCalendar
 	 */
-	public function setSynchronized(?\DateTime $synchronized = null): GoogleCalendar {
+	public function setSynchronized(\DateTime $synchronized): GoogleCalendar {
 		$this->synchronized = $synchronized;
 
 		return $this;
@@ -139,9 +139,9 @@ class GoogleCalendar {
 	/**
 	 * Get synchronized
 	 *
-	 * @return ?\DateTime
+	 * @return \DateTime
 	 */
-	public function getSynchronized(): ?\DateTime {
+	public function getSynchronized(): \DateTime {
 		return $this->synchronized;
 	}
 
