@@ -12,8 +12,11 @@
 namespace Rapsys\AirBundle\Repository;
 
 use Doctrine\ORM\Query\ResultSetMapping;
+
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+
+use Rapsys\AirBundle\Repository;
 
 /**
  * LocationRepository
