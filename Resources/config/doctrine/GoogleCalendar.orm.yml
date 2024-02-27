@@ -27,7 +27,6 @@ Rapsys\AirBundle\Entity\GoogleCalendar:
 #            length: 32
         synchronized:
             type: datetime
-            nullable: true
         created:
             type: datetime
         updated:
