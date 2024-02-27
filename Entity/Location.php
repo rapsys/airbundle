@@ -430,7 +430,7 @@ class Location {
 	 */
 	public function addUser(User $user): Location {
 		//Add from owning side
-		$user->addSubscriber($this);
+		$user->addLocation($this);
 
 		$this->users[] = $user;
 
@@ -444,12 +444,12 @@ class Location {
 	 * @return bool
 	 */
 	public function removeUser(User $user): bool {
-		if (!$this->users->contains($user)) {
+		if (!$this->locations->contains($user)) {
 			return true;
 		}
 
 		//Remove from owning side
-		$user->removeSubscriber($this);
+		$user->removeLocation($this);
 
 		return $this->users->removeElement($user);
 	}
