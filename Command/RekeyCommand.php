@@ -28,7 +28,7 @@ class RekeyCommand extends DoctrineCommand {
 	}
 
 	///Process the attribution
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
 

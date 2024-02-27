@@ -112,7 +112,7 @@ class CalendarCommand extends Command {
 	}
 
 	///Process the attribution
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Compute period
 		$period = new \DatePeriod(
 			//Start from last week

@@ -99,7 +99,7 @@ class WeatherCommand extends DoctrineCommand {
 	}
 
 	///Process the attribution
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Kernel object
 		$kernel = $this->getApplication()->getKernel();
 
