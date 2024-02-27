@@ -1,4 +1,13 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\DependencyInjection;
 
@@ -16,7 +25,7 @@ class Configuration implements ConfigurationInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getConfigTreeBuilder() {
+	public function getConfigTreeBuilder(): TreeBuilder {
 		$treeBuilder = new TreeBuilder($alias = RapsysAirBundle::getAlias());
 
 		// Here you should define the parameters that are allowed to
@@ -24,16 +33,25 @@ class Configuration implements ConfigurationInterface {
 		// more information on that topic.
 		//Set defaults
 		$defaults = [
-			'site' => [
-				'donate' => 'https://paypal.me/milongaraphael',
-				'icon' => [
-					'ico' => '@RapsysAir/ico/icon.ico',
-					'svg' => '@RapsysAir/svg/icon.svg'
-				],
-				'logo' => [
-					'png' => '@RapsysAir/png/logo.png',
-					'svg' => '@RapsysAir/svg/logo.svg'
-				],
+			'contact' => [
+				'address' => 'contact@airlibre.eu',
+				'name' => 'Libre Air'
+			],
+			'copy' => [
+				'by' => 'Rapsys',
+				'link' => 'https://rapsys.eu',
+				'long' => 'All rights reserved',
+				'short' => 'Copyright 2019-2021',
+				'title' => 'Rapsys'
+			],
+			'donate' => 'https://paypal.me/milongaraphael',
+			'facebook' => [
+				'apps' => [3728770287223690],
+				'height' => 630,
+				'width' => 1200
+			],
+			'icon' => [
+				'ico' => '@RapsysAir/ico/icon.ico',
 				//The png icon array
 				//XXX: see https://www.emergeinteractive.com/insights/detail/the-essentials-of-favicons/
 				//XXX: see https://caniuse.com/#feat=link-icon-svg
@@ -71,43 +89,27 @@ class Configuration implements ConfigurationInterface {
 					150 => '@RapsysAir/png/icon.150.png',
 					70 => '@RapsysAir/png/icon.70.png'
 				],
-				'title' => 'Libre Air',
-				'url' => 'rapsys_air'
+				'svg' => '@RapsysAir/svg/icon.svg'
 			],
-			'google' => [
-				'client' => '%env(string:GOOGLE_CLIENT)',
-				'project' => '%env(string:GOOGLE_PROJECT)',
-				'secret' => '%env(string:GOOGLE_SECRET)'
-			],
-			'copy' => [
-				'by' => 'Rapsys',
-				'link' => 'https://rapsys.eu',
-				'long' => 'All rights reserved',
-				'short' => 'Copyright 2019-2021',
-				'title' => 'Rapsys'
-			],
-			'contact' => [
-				'title' => 'Libre Air',
-				'mail' => 'contact@airlibre.eu'
-			],
-			'facebook' => [
-				'apps' => [3728770287223690],
-				'height' => 630,
-				'width' => 1200
-			],
-			'locale' => '%kernel.default_locale%',
-			'locales' => '%kernel.translator.fallbacks%',
 			//XXX: revert to underscore because of that shit:
 			//XXX: see https://symfony.com/doc/current/components/config/definition.html#normalization
 			//XXX: see https://github.com/symfony/symfony/issues/7405
-			'languages' => '%rapsys_user.languages%',
-			'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public'
-			#'public' => [
-			#	//XXX: get path with bundles/<alias> or full path if not installed
-			#	//XXX: current working directory may be project dir or public subdir depending on context
-			#	'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public',
-			#	'url' => '/bundles/'.str_replace('_', '', $alias)
-			#]
+			//TODO: copy to '%rapsys_user.languages%',
+			'languages' => [
+				'en_gb' => 'English'
+			],
+			//TODO: copy to '%kernel.default_locale%'
+			'locale' => 'en_gb',
+			//TODO: copy to '%kernel.translator.fallbacks%'
+			'locales' => [ 'en_gb' ],
+			'logo' => [
+				'alt' => 'Libre Air\'s booking system logo',
+				'png' => '@RapsysAir/png/logo.png',
+				'svg' => '@RapsysAir/svg/logo.svg'
+			],
+			'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public',
+			'root' => 'rapsys_air',
+            'title' => 'Libre Air\'s booking system'
 		];
 
 		//Here we define the parameters that are allowed to configure the bundle.
@@ -121,38 +123,11 @@ class Configuration implements ConfigurationInterface {
 			->getRootNode()
 				->addDefaultsIfNotSet()
 				->children()
-					->arrayNode('site')
+					->arrayNode('contact')
 						->addDefaultsIfNotSet()
 						->children()
-							->scalarNode('donate')->cannotBeEmpty()->defaultValue($defaults['site']['donate'])->end()
-							->arrayNode('icon')
-								->treatNullLike([])
-								->defaultValue($defaults['site']['icon'])
-								->scalarPrototype()->end()
-							->end()
-							->arrayNode('logo')
-								->treatNullLike([])
-								->defaultValue($defaults['site']['logo'])
-								->scalarPrototype()->end()
-							->end()
-							->arrayNode('png')
-								->treatNullLike([])
-								->defaultValue($defaults['site']['png'])
-								->scalarPrototype()->end()
-							->end()
-							/*->scalarNode('ico')->cannotBeEmpty()->defaultValue($defaults['site']['ico'])->end()
-							->scalarNode('logo')->cannotBeEmpty()->defaultValue($defaults['site']['logo'])->end()
-							->scalarNode('svg')->cannotBeEmpty()->defaultValue($defaults['site']['svg'])->end()*/
-							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['site']['title'])->end()
-							->scalarNode('url')->cannotBeEmpty()->defaultValue($defaults['site']['url'])->end()
-						->end()
-					->end()
-					->arrayNode('google')
-						->addDefaultsIfNotSet()
-						->children()
-							->scalarNode('client')->defaultValue($defaults['google']['client'])->end()
-							->scalarNode('project')->defaultValue($defaults['google']['project'])->end()
-							->scalarNode('secret')->defaultValue($defaults['google']['secret'])->end()
+							->scalarNode('address')->cannotBeEmpty()->defaultValue($defaults['contact']['address'])->end()
+							->scalarNode('name')->cannotBeEmpty()->defaultValue($defaults['contact']['name'])->end()
 						->end()
 					->end()
 					->arrayNode('copy')
@@ -165,13 +140,7 @@ class Configuration implements ConfigurationInterface {
 							->scalarNode('title')->defaultValue($defaults['copy']['title'])->end()
 						->end()
 					->end()
-					->arrayNode('contact')
-						->addDefaultsIfNotSet()
-						->children()
-							->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['contact']['title'])->end()
-							->scalarNode('mail')->cannotBeEmpty()->defaultValue($defaults['contact']['mail'])->end()
-						->end()
-					->end()
+					->scalarNode('donate')->cannotBeEmpty()->defaultValue($defaults['donate'])->end()
 					->arrayNode('facebook')
 						->addDefaultsIfNotSet()
 						->children()
@@ -184,13 +153,13 @@ class Configuration implements ConfigurationInterface {
 							->integerNode('width')->min(0)->defaultValue($defaults['facebook']['width'])->end()
 						->end()
 					->end()
-					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
-					#TODO: see if we can't prevent key normalisation with ->normalizeKeys(false)
-					#->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
-					->variableNode('locales')
-						->treatNullLike([])
-						->defaultValue($defaults['locales'])
-						#->scalarPrototype()->end()
+					->arrayNode('icon')
+						->addDefaultsIfNotSet()
+						->children()
+							->scalarNode('ico')->defaultValue($defaults['icon']['ico'])->end()
+							->scalarNode('png')->defaultValue($defaults['icon']['png'])->end()
+							->scalarNode('svg')->defaultValue($defaults['icon']['svg'])->end()
+						->end()
 					->end()
 					#TODO: see if we can't prevent key normalisation with ->normalizeKeys(false)
 					#->scalarNode('languages')->cannotBeEmpty()->defaultValue($defaults['languages'])->end()
@@ -199,14 +168,25 @@ class Configuration implements ConfigurationInterface {
 						->defaultValue($defaults['languages'])
 						#->scalarPrototype()->end()
 					->end()
+					->scalarNode('locale')->cannotBeEmpty()->defaultValue($defaults['locale'])->end()
+					#TODO: see if we can't prevent key normalisation with ->normalizeKeys(false)
+					#->scalarNode('locales')->cannotBeEmpty()->defaultValue($defaults['locales'])->end()
+					->variableNode('locales')
+						->treatNullLike([])
+						->defaultValue($defaults['locales'])
+						#->scalarPrototype()->end()
+					->end()
+					->arrayNode('logo')
+						->addDefaultsIfNotSet()
+						->children()
+							->scalarNode('alt')->defaultValue($defaults['logo']['alt'])->end()
+							->scalarNode('png')->defaultValue($defaults['logo']['png'])->end()
+							->scalarNode('svg')->defaultValue($defaults['logo']['svg'])->end()
+						->end()
+					->end()
 					->scalarNode('path')->defaultValue($defaults['path'])->end()
-					#->arrayNode('public')
-					#	->addDefaultsIfNotSet()
-					#	->children()
-					#		->scalarNode('path')->defaultValue($defaults['public']['path'])->end()
-					#		->scalarNode('url')->defaultValue($defaults['public']['url'])->end()
-					#	->end()
-					#->end()
+					->scalarNode('root')->cannotBeEmpty()->defaultValue($defaults['root'])->end()
+					->scalarNode('title')->cannotBeEmpty()->defaultValue($defaults['title'])->end()
 				->end()
 			->end();
 
