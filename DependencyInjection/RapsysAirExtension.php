@@ -31,6 +31,8 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 	 * {@inheritdoc}
 	 */
 	public function prepend(ContainerBuilder $container) {
+		/* XXX: All that shit is not used anymore in theory
+		 * TODO: drop it ???
 		//Load framework configurations
 		//XXX: required to extract default_locale and translation.fallbacks
 		$frameworks = $container->getExtensionConfig('framework');
@@ -64,7 +66,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		);
 
 		//Set rapsys_user.languages key
-		$container->setParameter('rapsys_user.languages', $rapsys_user['languages']);
+		$container->setParameter('rapsys_user.languages', $rapsys_user['languages']);*/
 
 		//Process the configuration
 		$configs = $container->getExtensionConfig($this->getAlias());
@@ -86,7 +88,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 
 		//Store flattened array in parameters
 		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
-		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.site.png', 'rapsys_air.site.icon', 'rapsys_air.site.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
+		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.copy', 'rapsys_air.icon', 'rapsys_air.icon.png', 'rapsys_air.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
 	}
