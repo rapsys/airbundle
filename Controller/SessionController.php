@@ -47,7 +47,7 @@ class SessionController extends AbstractController {
 		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period);
 
 		//Add calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), null, null, 1);
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'), null, null, 1);
 
 		//Add dances
 		$this->context['dances'] = $this->doctrine->getRepository(Dance::class)->findNamesAsArray();
@@ -59,7 +59,7 @@ class SessionController extends AbstractController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -246,7 +246,7 @@ class SessionController extends AbstractController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -418,7 +418,7 @@ class SessionController extends AbstractController {
 		]+$this->context['facebook'];
 
 		//Create application form for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
+		if ($this->checker->isGranted('ROLE_GUEST')) {
 			//Set now
 			$now = new \DateTime('now');
 
@@ -428,7 +428,7 @@ class SessionController extends AbstractController {
 			$danceDefault = null;
 
 			//With admin
-			if ($this->isGranted('ROLE_ADMIN')) {
+			if ($this->checker->isGranted('ROLE_ADMIN')) {
 				//Get favorites dances
 				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
 
@@ -447,7 +447,7 @@ class SessionController extends AbstractController {
 				//Set the form attribute
 				'attr' => [ 'class' => 'col' ],
 				//Set admin
-				'admin' => $this->isGranted('ROLE_ADMIN'),
+				'admin' => $this->checker->isGranted('ROLE_ADMIN'),
 				//Set dance choices
 				'dance_choices' => $dances,
 				//Set dance default
@@ -466,15 +466,15 @@ class SessionController extends AbstractController {
 				//Set length
 				'length' => $this->context['session']['length'],
 				//Set raincancel
-				'raincancel' => ($this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id']) && $this->context['session']['rainfall'] >= 2,
+				'raincancel' => ($this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id']) && $this->context['session']['rainfall'] >= 2,
 				//Set cancel
-				'cancel' => $this->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $this->context['session']['sau_id'])),
+				'cancel' => $this->checker->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $this->context['session']['sau_id'])),
 				//Set modify
-				'modify' => $this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->isGranted('ROLE_REGULAR'),
+				'modify' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_REGULAR'),
 				//Set move
-				'move' => $this->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->isGranted('ROLE_SENIOR'),
+				'move' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_SENIOR'),
 				//Set attribute
-				'attribute' => $this->isGranted('ROLE_ADMIN') && $this->context['session']['locked'] === null,
+				'attribute' => $this->checker->isGranted('ROLE_ADMIN') && $this->context['session']['locked'] === null,
 				//Set session
 				'session' => $this->context['session']['id']
 			]);
@@ -494,7 +494,7 @@ class SessionController extends AbstractController {
 				$userObject = $this->getUser();
 
 				//Replace with requested user for admin
-				if ($this->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
+				if ($this->checker->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
 					$userObject = $this->doctrine->getRepository(User::class)->findOneById($data['user']);
 				}
 
@@ -517,7 +517,7 @@ class SessionController extends AbstractController {
 				];
 
 				//With raincancel and application and (rainfall or admin)
-				if ($action['raincancel'] && ($application = $sessionObject->getApplication()) && ($sessionObject->getRainfall() >= 2 || $this->isGranted('ROLE_ADMIN'))) {
+				if ($action['raincancel'] && ($application = $sessionObject->getApplication()) && ($sessionObject->getRainfall() >= 2 || $this->checker->isGranted('ROLE_ADMIN'))) {
 					//Cancel application at start minus one day
 					$application->setCanceled($canceled);
 
@@ -549,7 +549,7 @@ class SessionController extends AbstractController {
 				//With modify
 				} elseif ($action['modify']) {
 					//With admin
-					if ($this->isGranted('ROLE_ADMIN')) {
+					if ($this->checker->isGranted('ROLE_ADMIN')) {
 						//Get application
 						$application = $this->doctrine->getRepository(Application::class)->findOneBySessionUser($sessionObject, $userObject);
 
