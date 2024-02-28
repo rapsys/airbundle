@@ -12,13 +12,16 @@
 namespace Rapsys\AirBundle\Repository;
 
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
+
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Rapsys\AirBundle\Entity\Application;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Slot;
+use Rapsys\AirBundle\Repository;
 
 /**
  * SessionRepository
@@ -932,6 +935,173 @@ SQL;
 		return $calendar;
 	}
 
+
+	/**
+	 * Find sessions by user id and synchronized date time
+	 *
+	 * @param int $userId The user id
+	 * @param DateTime $synchronized The synchronized datetime
+	 * @return array The session data
+	 */
+	public function findAllByUserIdSynchronized(int $userId, \DateTime $synchronized): array {
+		//Set the request
+		$req = <<<SQL
+SELECT ud.dance_id
+FROM RapsysAirBundle:UserDance AS ud
+WHERE ud.user_id = :uid
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare dance id field
+		$rsm->addScalarResult('dance_id', 'dance_id', 'integer');
+
+		//Set dance sql part
+		$danceSql = '';
+
+		//With user dance
+		if (
+			$userDances = $this->_em
+				->createNativeQuery($req, $rsm)
+				->setParameter('uid', $userId)
+				->getResult(AbstractQuery::HYDRATE_SCALAR_COLUMN)
+		) {
+			//Set dance sql part
+			$danceSql = ' AND a.dance_id IN (:dids)';
+		}
+
+		//Set the request
+		$req = <<<SQL
+SELECT us.user_id
+FROM RapsysAirBundle:UserSubscription AS us
+WHERE us.subscriber_id = :uid
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare user id field
+		$rsm->addScalarResult('user_id', 'user_id', 'integer');
+
+		//Set subscription sql part
+		$subscriptionSql = '';
+
+		//With user subscription
+		if (
+			$userSubscriptions = $this->_em
+				->createNativeQuery($req, $rsm)
+				->setParameter('uid', $userId)
+				->getResult(AbstractQuery::HYDRATE_SCALAR_COLUMN)
+		) {
+			//Set subscription sql part
+			$subscriptionSql = ' AND a.user_id IN (:uids)';
+		}
+
+		//Set the request
+		$req = <<<SQL
+SELECT
+	s.id,
+	s.date,
+	s.locked,
+	s.updated,
+	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
+	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
+	s.location_id AS l_id,
+	l.address AS l_address,
+	l.zipcode AS l_zipcode,
+	l.city AS l_city,
+	l.title AS l_title,
+	l.description AS l_description,
+	l.latitude AS l_latitude,
+	l.longitude AS l_longitude,
+	s.application_id AS a_id,
+	a.canceled AS a_canceled,
+	ad.name AS ad_name,
+	ad.type AS ad_type,
+	a.user_id AS au_id,
+	au.forename AS au_forename,
+	au.pseudonym AS au_pseudonym,
+	p.id AS p_id,
+	p.description AS p_description,
+	p.class AS p_class,
+	p.short AS p_short,
+	p.hat AS p_hat,
+	p.rate AS p_rate,
+	p.contact AS p_contact,
+	p.donate AS p_donate,
+	p.link AS p_link,
+	p.profile AS p_profile
+FROM RapsysAirBundle:Session AS s
+JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id${danceSql}${subscriptionSql})
+JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
+JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
+LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+WHERE GREATEST(s.created, s.updated, a.created, a.updated, ADDTIME(ADDTIME(s.date, s.begin), s.length)) >= :synchronized
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
+
+		//Get result set mapping instance
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		//addScalarResult($sqlColName, $resColName, $type = 'string');
+		$rsm
+			->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('date', 'date', 'date')
+			->addScalarResult('locked', 'locked', 'datetime')
+			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('start', 'start', 'datetime')
+			->addScalarResult('stop', 'stop', 'datetime')
+			->addScalarResult('l_id', 'l_id', 'integer')
+			->addScalarResult('l_address', 'l_address', 'string')
+			->addScalarResult('l_zipcode', 'l_zipcode', 'string')
+			->addScalarResult('l_city', 'l_city', 'string')
+			->addScalarResult('l_latitude', 'l_latitude', 'float')
+			->addScalarResult('l_longitude', 'l_longitude', 'float')
+			->addScalarResult('l_title', 'l_title', 'string')
+			->addScalarResult('l_description', 'l_description', 'string')
+			->addScalarResult('t_id', 't_id', 'integer')
+			->addScalarResult('t_title', 't_title', 'string')
+			->addScalarResult('a_id', 'a_id', 'integer')
+			->addScalarResult('a_canceled', 'a_canceled', 'datetime')
+			->addScalarResult('ad_name', 'ad_name', 'string')
+			->addScalarResult('ad_type', 'ad_type', 'string')
+			->addScalarResult('au_id', 'au_id', 'integer')
+			->addScalarResult('au_forename', 'au_forename', 'string')
+			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
+			->addScalarResult('p_id', 'p_id', 'integer')
+			->addScalarResult('p_description', 'p_description', 'string')
+			->addScalarResult('p_class', 'p_class', 'string')
+			->addScalarResult('p_short', 'p_short', 'string')
+			->addScalarResult('p_hat', 'p_hat', 'integer')
+			->addScalarResult('p_rate', 'p_rate', 'integer')
+			->addScalarResult('p_contact', 'p_contact', 'string')
+			->addScalarResult('p_donate', 'p_donate', 'string')
+			->addScalarResult('p_link', 'p_link', 'string')
+			->addScalarResult('p_profile', 'p_profile', 'string')
+			->addIndexByScalar('id');
+
+		//Return sessions
+		//TODO: XXX: finish here
+		return $this->_em
+			->createNativeQuery($req, $rsm)
+			->setParameter('dids', $userDances)
+			->setParameter('uids', $userSubscriptions)
+			->setParameter('synchronized', $synchronized)
+			->getArrayResult();
+	}
+
 	/**
 	 * Find session by location, slot and date
 	 *
@@ -1057,291 +1227,6 @@ SQL;
 
 		//Return result
 		return $res->getResult();
-	}
-
-	/**
-	 * Fetch sessions calendar with translated location by date period and user
-	 *
-	 * @param DatePeriod $period The date period
-	 * @param ?int $userId The user id
-	 * @param ?int $sessionId The session id
-	 */
-	public function fetchUserCalendarByDatePeriod(\DatePeriod $period, ?int $userId = null, ?int $sessionId = null): array {
-		//Init user sql
-		$userJoinSql = $userWhereSql = '';
-
-		//When user id is set
-		if (!empty($userId)) {
-			//Add user join
-			$userJoinSql = 'JOIN RapsysAirBundle:Application AS sua ON (sua.session_id = s.id)'."\n";
-			//Add user id clause
-			$userWhereSql = "\n\t".'AND sua.user_id = :uid';
-		}
-
-		//Set the request
-		//TODO: change as_u_* in sau_*, a_u_* in au_*, etc, see request up
-		$req = <<<SQL
-SELECT
-	s.id,
-	s.date,
-	s.rainrisk,
-	s.rainfall,
-	s.realfeel,
-	s.temperature,
-	s.locked,
-	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
-	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
-	s.location_id AS l_id,
-	l.title AS l_title,
-	s.slot_id AS t_id,
-	t.title AS t_title,
-	s.application_id AS a_id,
-	ad.name AS ad_name,
-	ad.type AS ad_type,
-	a.user_id AS au_id,
-	au.pseudonym AS au_pseudonym,
-	p.rate AS p_rate,
-	p.hat AS p_hat,
-	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
-	GROUP_CONCAT(CONCAT("- ", sau.pseudonym) ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-{$userJoinSql}LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-WHERE s.date BETWEEN :begin AND :end{$userWhereSql}
-GROUP BY s.id
-ORDER BY NULL
-SQL;
-
-		//Replace bundle entity name by table name
-		$req = str_replace($this->tableKeys, $this->tableValues, $req);
-
-		//Get result set mapping instance
-		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
-		$rsm = new ResultSetMapping();
-
-		//Declare all fields
-		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
-		//addScalarResult($sqlColName, $resColName, $type = 'string');
-		$rsm->addScalarResult('id', 'id', 'integer')
-			->addScalarResult('date', 'date', 'date')
-			->addScalarResult('rainrisk', 'rainrisk', 'float')
-			->addScalarResult('rainfall', 'rainfall', 'float')
-			->addScalarResult('realfeel', 'realfeel', 'float')
-			->addScalarResult('temperature', 'temperature', 'float')
-			->addScalarResult('locked', 'locked', 'datetime')
-			->addScalarResult('start', 'start', 'datetime')
-			->addScalarResult('stop', 'stop', 'datetime')
-			->addScalarResult('t_id', 't_id', 'integer')
-			->addScalarResult('t_title', 't_title', 'string')
-			->addScalarResult('l_id', 'l_id', 'integer')
-			->addScalarResult('l_title', 'l_title', 'string')
-			->addScalarResult('a_id', 'a_id', 'integer')
-			->addScalarResult('ad_name', 'ad_name', 'string')
-			->addScalarResult('ad_type', 'ad_type', 'string')
-			->addScalarResult('au_id', 'au_id', 'integer')
-			->addScalarResult('au_pseudonym', 'au_pseudonym', 'string')
-			->addScalarResult('p_rate', 'p_rate', 'integer')
-			->addScalarResult('p_hat', 'p_hat', 'boolean')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_id', 'sau_id', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
-			->addIndexByScalar('id');
-
-		//Fetch result
-		$res = $this->_em
-			->createNativeQuery($req, $rsm)
-			->setParameter('begin', $period->getStartDate())
-			->setParameter('end', $period->getEndDate())
-			->setParameter('uid', $userId)
-			->getResult();
-
-		//Init calendar
-		$calendar = [];
-
-		//Init month
-		$month = null;
-
-		//Iterate on each day
-		foreach($period as $date) {
-			//Init day in calendar
-			$calendar[$Ymd = $date->format('Ymd')] = [
-				'title' => $this->translator->trans($date->format('l')).' '.$date->format('d'),
-				'class' => [],
-				'sessions' => []
-			];
-
-			//Detect month change
-			if ($month != $date->format('m')) {
-				$month = $date->format('m');
-				//Append month for first day of month
-				//XXX: except if today to avoid double add
-				if ($date->format('U') != strtotime('today')) {
-					$calendar[$Ymd]['title'] .= '/'.$month;
-				}
-			}
-			//Deal with today
-			if ($date->format('U') == ($today = strtotime('today'))) {
-				$calendar[$Ymd]['title'] .= '/'.$month;
-				$calendar[$Ymd]['current'] = true;
-				$calendar[$Ymd]['class'][] = 'current';
-			}
-			//Disable passed days
-			if ($date->format('U') < $today) {
-				$calendar[$Ymd]['disabled'] = true;
-				$calendar[$Ymd]['class'][] = 'disabled';
-			}
-			//Set next month days
-			if ($date->format('m') > date('m')) {
-				$calendar[$Ymd]['next'] = true;
-				#$calendar[$Ymd]['class'][] = 'next';
-			}
-
-			//Detect sunday
-			if ($date->format('w') == 0) {
-				$calendar[$Ymd]['class'][] = 'sunday';
-			}
-
-			//Iterate on each session to find the one of the day
-			foreach($res as $session) {
-				if (($sessionYmd = $session['date']->format('Ymd')) == $Ymd) {
-					//Count number of application
-					$count = count(explode("\n", $session['sau_id']));
-
-					//Compute classes
-					$class = [];
-					if (!empty($session['a_id'])) {
-						$applications = [ $session['au_id'] => $session['au_pseudonym'] ];
-						if ($session['au_id'] == $userId) {
-							$class[] = 'granted';
-						} else {
-							$class[] = 'disputed';
-						}
-					} elseif ($count > 1) {
-						$class[] = 'disputed';
-					} elseif (!empty($session['locked'])) {
-						$class[] = 'locked';
-					} else {
-						$class[] = 'pending';
-					}
-
-					if ($sessionId == $session['id']) {
-						$class[] = 'highlight';
-					}
-
-					//Set temperature
-					//XXX: realfeel may be null, temperature should not
-					$temperature = $session['realfeel'] !== null ? $session['realfeel'] : $session['temperature'];
-
-					//Compute weather
-					//XXX: rainfall may be null
-					if ($session['rainrisk'] > 0.50 || $session['rainfall'] > 2) {
-						$weather = self::GLYPHS['Stormy'];
-					} elseif ($session['rainrisk'] > 0.40 || $session['rainfall'] > 1) {
-						$weather = self::GLYPHS['Rainy'];
-					} elseif ($temperature > 24) {
-						$weather = self::GLYPHS['Cleary'];
-					} elseif ($temperature > 17) {
-						$weather = self::GLYPHS['Sunny'];
-					} elseif ($temperature > 10) {
-						$weather = self::GLYPHS['Cloudy'];
-					} elseif ($temperature !== null) {
-						$weather = self::GLYPHS['Winty'];
-					} else {
-						$weather = null;
-					}
-
-					//Init weathertitle
-					$weathertitle = [];
-
-					//Check if realfeel is available
-					if ($session['realfeel'] !== null) {
-						$weathertitle[] = $session['realfeel'].'°R';
-					}
-
-					//Check if temperature is available
-					if ($session['temperature'] !== null) {
-						$weathertitle[] = $session['temperature'].'°C';
-					}
-
-					//Check if rainrisk is available
-					if ($session['rainrisk'] !== null) {
-						$weathertitle[] = ($session['rainrisk']*100).'%';
-					}
-
-					//Check if rainfall is available
-					if ($session['rainfall'] !== null) {
-						$weathertitle[] = $session['rainfall'].'mm';
-					}
-
-					//Set applications
-					$applications = [
-						0 => $this->translator->trans($session['t_title']).' '.$this->translator->trans('at '.$session['l_title']).$this->translator->trans(':')
-					];
-
-					//Fetch pseudonyms from session applications
-					$applications += array_combine(explode("\n", $session['sau_id']), array_map(function ($v) {return '- '.$v;}, explode("\n", $session['sau_pseudonym'])));
-
-					//Set dance
-					$dance = null;
-
-					//Set pseudonym
-					$pseudonym = null;
-
-					//Check that session is not granted
-					if (empty($session['a_id'])) {
-						//With location id and unique application
-						if ($count == 1) {
-							//Set unique application pseudonym
-							$pseudonym = $session['sau_pseudonym'];
-						}
-					//Session is granted
-					} else {
-						//Replace granted application
-						$applications[$session['au_id']] = '* '.$session['au_pseudonym'];
-
-						//Set dance
-						$dance = $this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type']));
-
-						//Set pseudonym
-						$pseudonym = $session['au_pseudonym'].($count > 1 ? ' ['.$count.']':'');
-					}
-
-					//Set title
-					$title = $this->translator->trans($session['l_title']).($count > 1 ? ' ['.$count.']':'');
-
-					//Add the session
-					$calendar[$Ymd]['sessions'][$session['t_id'].sprintf('%02d', $session['l_id'])] = [
-						'id' => $session['id'],
-						'start' => $session['start'],
-						'stop' => $session['stop'],
-						'location' => $this->translator->trans($session['l_title']),
-						'dance' => $dance,
-						'pseudonym' => $pseudonym,
-						'class' => $class,
-						'slot' => self::GLYPHS[$session['t_title']],
-						'slottitle' => $this->translator->trans($session['t_title']),
-						'weather' => $weather,
-						'weathertitle' => implode(' ', $weathertitle),
-						'applications' => $applications,
-						'rate' => $session['p_rate'],
-						'hat' => $session['p_hat']
-					];
-				}
-			}
-
-			//Sort sessions
-			ksort($calendar[$Ymd]['sessions']);
-		}
-
-		//Send result
-		return $calendar;
 	}
 
 	/**
