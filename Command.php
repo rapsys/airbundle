@@ -92,6 +92,17 @@ class Command extends BaseCommand {
 
 		//Set locale
 		$this->locale = $locale;
+
+		//With default name
+		//TODO: XXX: see how to make it works
+		/*if (isset(self::$defaultName)) {
+			$this->name = self::$defaultName;
+		}
+
+		//With default description
+		if (isset(self::$defaultDescription)) {
+			$this->name = self::$defaultDescription;
+		}*/
 	}
 
 	/**
