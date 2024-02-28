@@ -34,16 +34,6 @@ use Rapsys\PackBundle\Util\SluggerUtil;
 
 class Calendar2Command extends Command {
 	/**
-	 * Set default name
-	 */
-    protected static $defaultName = 'rapsysair:calendar2';
-
-	/**
-	 * Set default description
-	 */
-    protected static $defaultDescription = 'Synchronize sessions in users\' calendar';
-
-	/**
 	 * Set google client scopes
 	 */
 	private array $scopes = [
@@ -99,9 +89,23 @@ class Calendar2Command extends Command {
 	}
 
 	/**
+	 * Configure attribute command
+	 */
+	protected function configure() {
+		//Configure the class
+		$this
+			//Set name
+			->setName('rapsysair:calendar2')
+			//Set description shown with bin/console list
+			->setDescription('Synchronize sessions in users\' calendar')
+			//Set description shown with bin/console --help airlibre:attribute
+			->setHelp('This command synchronize sessions in users\' google calendar');
+	}
+
+	/**
 	 * Process the attribution
 	 */
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Iterate on google tokens
 		foreach($tokens = $this->doctrine->getRepository(GoogleToken::class)->findAllIndexed() as $tid => $token) {
 			//Iterate on google calendars
@@ -124,7 +128,7 @@ class Calendar2Command extends Command {
 				//TODO: load all calendar events here ?
 
 				//Iterate on sessions to update
-				foreach($sessions = $this->doctrine->getRepository(Session::class)->findAllByUserIdSynchronized($token['uid'], $calendar['synchronized'])) {
+				foreach($sessions = $this->doctrine->getRepository(Session::class)->findAllByUserIdSynchronized($token['uid'], $calendar['synchronized']) as $session) {
 					//TODO: insert/update/delete events here ?
 				}
 
