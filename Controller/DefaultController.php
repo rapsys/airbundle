@@ -175,7 +175,7 @@ class DefaultController extends AbstractController {
 		$this->context['cities'] = $this->doctrine->getRepository(Location::class)->findCitiesAsArray($this->period);
 
 		//Add calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'));
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'));
 
 		//Add dances
 		$this->context['dances'] = $this->doctrine->getRepository(Dance::class)->findNamesAsArray();
@@ -187,7 +187,7 @@ class DefaultController extends AbstractController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -390,7 +390,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function userIndex(Request $request): Response {
 		//With admin role
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Set section
 			$section = $this->translator->trans('Libre Air users');
 
@@ -420,7 +420,7 @@ class DefaultController extends AbstractController {
 		$users = $this->doctrine->getRepository(User::class)->findIndexByGroupId();
 
 		//With admin role
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Display all users
 			$this->context['groups'] = $users;
 		//Without admin role
@@ -454,7 +454,7 @@ class DefaultController extends AbstractController {
 		$token = new AnonymousToken('', $this->context['user']['mail'], $this->context['user']['roles']);
 
 		//Prevent access when not admin, user is not guest and not currently logged user
-		if (!($isAdmin = $this->isGranted('ROLE_ADMIN')) && !($isGuest = $this->decision->decide($token, ['ROLE_GUEST']))) {
+		if (!($isAdmin = $this->checker->isGranted('ROLE_ADMIN')) && !($isGuest = $this->decision->decide($token, ['ROLE_GUEST']))) {
 			//Throw access denied
 			throw new AccessDeniedException($this->translator->trans('Unable to access user: %id%', ['%id%' => $id]));
 		}
@@ -466,7 +466,7 @@ class DefaultController extends AbstractController {
 		}
 
 		//Fetch calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), null, null, $id);
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'), null, null, $id);
 
 		//Get locations at less than 2 km
 		$this->context['locations'] = $this->doctrine->getRepository(Location::class)->findAllByUserIdAsArray($id, $this->period, 2);
@@ -530,7 +530,7 @@ class DefaultController extends AbstractController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
