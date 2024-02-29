@@ -20,7 +20,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 use Rapsys\AirBundle\Entity\Dance;
@@ -28,6 +27,7 @@ use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Session;
 use Rapsys\AirBundle\Entity\Snippet;
 use Rapsys\AirBundle\Entity\User;
+use Rapsys\AirBundle\Token\AnonymousToken;
 
 /**
  * {@inheritdoc}
@@ -43,7 +43,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function about(Request $request): Response {
 		//Set page
-		$this->context['title'] = $this->translator->trans('About');
+		$this->context['title']['page'] = $this->translator->trans('About');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air about');
@@ -75,7 +75,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function contact(Request $request): Response {
 		//Set page
-		$this->context['title'] = $this->translator->trans('Contact');
+		$this->context['title']['page'] = $this->translator->trans('Contact');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Contact Libre Air');
@@ -93,7 +93,7 @@ class DefaultController extends AbstractController {
 		$data = [];
 
 		//With user
-		if ($user = $this->getUser()) {
+		if ($user = $this->security->getUser()) {
 			//Set data
 			$data = [
 				'name' => $user->getRecipientName(),
@@ -103,7 +103,7 @@ class DefaultController extends AbstractController {
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
-		$form = $this->createForm('Rapsys\AirBundle\Form\ContactType', $data, [
+		$form = $this->factory->create('Rapsys\AirBundle\Form\ContactType', $data, [
 			'action' => $this->generateUrl('rapsys_air_contact'),
 			'method' => 'POST'
 		]);
@@ -121,7 +121,7 @@ class DefaultController extends AbstractController {
 					//Set sender
 					->from(new Address($data['mail'], $data['name']))
 					//Set recipient
-					->to(new Address($this->context['contact']['mail'], $this->context['contact']['title']))
+					->to(new Address($this->context['contact']['address'], $this->context['contact']['name']))
 					//Set subject
 					->subject($data['subject'])
 
@@ -149,10 +149,10 @@ class DefaultController extends AbstractController {
 				} catch(TransportExceptionInterface $e) {
 					if ($message = $e->getMessage()) {
 						//Add error message mail unreachable
-						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->context['contact']['mail'], '%message%' => $this->translator->trans($message)])));
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%: %message%', ['%mail%' => $this->context['contact']['address'], '%message%' => $this->translator->trans($message)])));
 					} else {
 						//Add error message mail unreachable
-						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->context['contact']['mail']])));
+						$form->get('mail')->addError(new FormError($this->translator->trans('Unable to contact: %mail%', ['%mail%' => $this->context['contact']['address']])));
 					}
 				}
 			}
@@ -265,7 +265,7 @@ class DefaultController extends AbstractController {
 		$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
 
 		//Set title
-		$this->context['title'] = $this->translator->trans('%dances% %cities%', ['%dances%' => $dances, '%cities%' => $cities]);
+		$this->context['title']['page'] = $this->translator->trans('%dances% %cities%', ['%dances%' => $dances, '%cities%' => $cities]);
 
 		//Set description
 		//TODO: handle french translation when city start with a A, change à in en !
@@ -289,7 +289,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function organizerRegulation(Request $request): Response {
 		//Set page
-		$this->context['title'] = $this->translator->trans('Organizer regulation');
+		$this->context['title']['page'] = $this->translator->trans('Organizer regulation');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air organizer regulation');
@@ -322,7 +322,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function termsOfService(Request $request): Response {
 		//Set page
-		$this->context['title'] = $this->translator->trans('Terms of service');
+		$this->context['title']['page'] = $this->translator->trans('Terms of service');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air terms of service');
@@ -355,7 +355,7 @@ class DefaultController extends AbstractController {
 	 */
 	public function frequentlyAskedQuestions(Request $request): Response {
 		//Set page
-		$this->context['title'] = $this->translator->trans('Frequently asked questions');
+		$this->context['title']['page'] = $this->translator->trans('Frequently asked questions');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air frequently asked questions');
@@ -391,18 +391,24 @@ class DefaultController extends AbstractController {
 	public function userIndex(Request $request): Response {
 		//With admin role
 		if ($this->checker->isGranted('ROLE_ADMIN')) {
+			//Set title
+			$this->context['title']['page'] = $this->translator->trans('Libre Air user list');
+
 			//Set section
-			$section = $this->translator->trans('Libre Air users');
+			$this->context['title']['section'] = $this->translator->trans('Users');
 
 			//Set description
-			$this->context['description'] = $this->translator->trans('Libre Air user list');
+			$this->context['description'] = $this->translator->trans('Lists Libre air users');
 		//Without admin role
 		} else {
+			//Set title
+			$this->context['title']['page'] = $this->translator->trans('Libre Air organizer list');
+
 			//Set section
-			$section = $this->translator->trans('Libre Air organizers');
+			$this->context['title']['section'] = $this->translator->trans('Organizers');
 
 			//Set description
-			$this->context['description'] = $this->translator->trans('Libre Air organizers list');
+			$this->context['description'] = $this->translator->trans('Lists Libre air organizers');
 		}
 
 		//Set keywords
@@ -412,9 +418,6 @@ class DefaultController extends AbstractController {
 			$this->translator->trans('listing'),
 			$this->translator->trans('Libre Air')
 		];
-
-		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
 
 		//Fetch users
 		$users = $this->doctrine->getRepository(User::class)->findIndexByGroupId();
@@ -430,7 +433,7 @@ class DefaultController extends AbstractController {
 		}
 
 		//Render the view
-		return $this->render('@RapsysAir/user/index.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		return $this->render('@RapsysAir/user/index.html.twig', $this->context);
 	}
 
 	/**
@@ -451,7 +454,7 @@ class DefaultController extends AbstractController {
 		}
 
 		//Create token
-		$token = new AnonymousToken('', $this->context['user']['mail'], $this->context['user']['roles']);
+		$token = new AnonymousToken($this->context['user']['roles']);
 
 		//Prevent access when not admin, user is not guest and not currently logged user
 		if (!($isAdmin = $this->checker->isGranted('ROLE_ADMIN')) && !($isGuest = $this->decision->decide($token, ['ROLE_GUEST']))) {
@@ -593,7 +596,10 @@ class DefaultController extends AbstractController {
 		$ins = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($ins, 0, -1))], array_slice($ins, -1)), 'strlen'));
 
 		//Set title
-		$this->context['title'] = $this->translator->trans('%pseudonym% organizer', ['%pseudonym%' => $this->context['user']['pseudonym']]);
+		$this->context['title']['page'] = $this->translator->trans('%pseudonym% organizer', ['%pseudonym%' => $this->context['user']['pseudonym']]);
+
+		//Set section
+		$this->context['title']['section'] = $this->translator->trans('Users');
 
 		//With locations
 		if (!empty($locations)) {
@@ -613,7 +619,7 @@ class DefaultController extends AbstractController {
 
 		//Create snippet forms for role_guest
 		//TODO: optimize this call
-		if ($isAdmin || $isGuest && $this->getUser() && $this->context['user']['id'] == $this->getUser()->getId()) {
+		if ($isAdmin || $isGuest && $this->security->getUser() && $this->context['user']['id'] == $this->security->getUser()->getId()) {
 			//Fetch all user snippet
 			$snippets = $this->doctrine->getRepository(Snippet::class)->findByUserIdLocaleIndexByLocationId($id, $this->locale);
 
