@@ -120,6 +120,9 @@ class ApplicationController extends AbstractController {
 		//Set section
 		$this->context['title']['section'] = $this->translator->trans('Application');
 
+		//Set description
+		$this->context['description'] = $this->translator->trans('Add an application and session');
+
 		//Refill the fields in case of invalid form
 		$form->handleRequest($request);
 
