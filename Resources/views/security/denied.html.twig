@@ -1,7 +1,7 @@
-{% extends '@RapsysAir/body.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 <section id="content">
-	<h2><a href="{{ path('rapsys_air') }}">{{ title }}</a></h2>
+	<h2><a href="{{ path('rapsys_air') }}">{{ title.page }}</a></h2>
 	<p>{% if message is defined %}{{ message }}{% else %}{% trans %}Access denied{% endtrans %}{% endif %}</p>
 	{% if is_granted('ROLE_ADMIN') %}{% if trace is defined %}<pre>{{ trace }}</pre>{% endif %}{% endif %}
 </section>
