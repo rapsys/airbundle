@@ -25,20 +25,20 @@ class CalendarController extends DefaultController {
 	 * @return Response The rendered view
 	 */
 	public function index(Request $request): Response {
-		//Prevent non-admin to access here
-		$this->denyAccessUnlessGranted('ROLE_ADMIN', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
-
-		//Fetch doctrine
-		#$doctrine = $this->getDoctrine();
-
-		//Set section
-		$section = $this->translator->trans('Calendar oauth form');
+		//Without admin role
+		if (!$this->checker->isGranted('ROLE_ADMIN')) {
+			//Throw 403
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+		}
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Initiate calendar oauth process');
 
 		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+		$this->context['title']['page'] = $this->translator->trans('Oauth form');
+
+		//Set section
+		$this->context['title']['section'] = $this->translator->trans('Calendar');
 
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
@@ -129,7 +129,7 @@ class CalendarController extends DefaultController {
 		}
 
 		//Render template
-		return $this->render('@RapsysAir/calendar/index.html.twig', ['title' => $title, 'section' => $section, 'form' => $form->createView()]+$this->context);
+		return $this->render('@RapsysAir/calendar/index.html.twig', ['form' => $form->createView()]+$this->context);
 	}
 
 	/**
@@ -152,7 +152,10 @@ class CalendarController extends DefaultController {
 		$this->context['description'] = $this->translator->trans('Finish calendar oauth process');
 
 		//Set title
-		$title = $this->translator->trans($this->config['site']['title']).' - '.$section;
+		$this->context['title']['page'] = $this->translator->trans('Oauth callback');
+
+		//Set section
+		$this->context['title']['section'] = $this->translator->trans('Calendar');
 
 		//With code
 		if (!empty($code = $request->get('code'))) {
@@ -257,6 +260,6 @@ class CalendarController extends DefaultController {
 		}
 
 		//Render template
-		return $this->render('@RapsysAir/calendar/callback.html.twig', ['title' => $title, 'section' => $section]+$this->context);
+		return $this->render('@RapsysAir/calendar/callback.html.twig', $this->context);
 	}
 }
