@@ -1,77 +1,84 @@
 #RapsysAir configuration
 rapsys_air:
+    languages:
+        en_gb: 'English'
+        fr_fr: 'French'
+    locale: 'fr_fr'
+    locales: [ 'fr_fr', 'en_gb' ]
+    logo:
+        alt: 'Libre Air logo'
+    title: 'Libre Air'
 
 #RapsysUser configuration
 rapsys_user:
     #Class replacement
     class:
-        group: 'Rapsys\AirBundle\Entity\Group'
         civility: 'Rapsys\AirBundle\Entity\Civility'
-        user: 'Rapsys\AirBundle\Entity\User'
         country: 'Rapsys\AirBundle\Entity\Country'
+        dance: 'Rapsys\AirBundle\Entity\Dance'
+        group: 'Rapsys\AirBundle\Entity\Group'
+        user: 'Rapsys\AirBundle\Entity\User'
     #Default replacement
     default:
         group: [ 'User' ]
         civility: 'Mister'
+        languages: '%rapsys_air.languages%'
+        locales: '%rapsys_air.locales%'
         country: 'France'
         country_favorites: [ 'France', 'Belgium', 'Germany', 'Italy', 'Luxembourg', 'Portugal', 'Spain', 'Switzerland' ]
+        dance_favorites: [ 'Argentine Tango Ball', 'Argentine Tango Ball and class', 'Argentine Tango Ball and concert' ]
+        subscription_favorites: [ 'Milonga Raphaël' ]
     #Route replacement
     route:
         index:
             name: 'rapsys_air'
     #Translate replacement
-    translate: [ 'title', 'password', 'site.title', 'copy.by', 'copy.long', 'copy.short', 'copy.title' ]
-    #Languages replacement
-    languages:
-        en_gb: 'English'
-        fr_fr: 'French'
+    translate: [ 'title.page', 'title.section', 'title.site', 'password', 'copy.by', 'copy.long', 'copy.short', 'copy.title', 'logo.alt' ]
     #Contact replacement
     contact:
-        title: '%rapsys_air.contact.title%'
-        mail: '%rapsys_air.contact.mail%'
+        address: '%rapsys_air.contact.address%'
+        name: '%rapsys_air.contact.name%'
     #Context replacement
     context:
-        copy:
-            by: '%rapsys_air.copy.by%'
-            link: '%rapsys_air.copy.link%'
-            long: '%rapsys_air.copy.long%'
-            short: '%rapsys_air.copy.short%'
-            title: '%rapsys_air.copy.title%'
-        site:
-            icon: '%rapsys_air.site.icon%'
-            logo: '%rapsys_air.site.logo%'
-            png: '%rapsys_air.site.png%'
-            title: '%rapsys_air.site.title%'
-            url: '%rapsys_air.site.url%'
+        copy: '%rapsys_air.copy%'
+        icon: '%rapsys_air.icon%'
+        logo: '%rapsys_air.logo%'
+        root: '%rapsys_air.root%'
+        title:
+            section: 'User'
+            site: '%rapsys_air.title%'
     #Edit replacement
     edit:
         field:
             pseudonym: false
         route:
-            index: 'site.url'
+            index: 'root'
         view:
             edit: 'Rapsys\AirBundle\Form\RegisterType'
             name: '@RapsysAir/form/edit.html.twig'
             context:
-                title: 'Modify account'
+                title:
+                    page: 'Modify account'
                 password: 'Modify password'
     #Login replacement
     login:
         route:
-            index: 'site.url'
+            index: 'root'
         view:
             name: '@RapsysAir/form/login.html.twig'
             context:
-                title: 'Login'
+                title:
+                    page: 'Login'
     #Recover replacement
     recover:
         route:
-            index: 'site.url'
+            index: 'root'
             recover: 'recover_url'
         view:
             name: '@RapsysAir/form/recover.html.twig'
             context:
-                title: 'Recover'
+                title:
+                    page: 'Recover'
         mail:
             subject: 'Welcome back %%recipient_name%% to %%site.title%%'
             html: '@RapsysAir/mail/recover.html.twig'
@@ -86,13 +93,14 @@ rapsys_user:
             pseudonym: false
             zipcode: false
         route:
-            index: 'site.url'
+            index: 'root'
             confirm: 'confirm_url'
         view:
             form: 'Rapsys\AirBundle\Form\RegisterType'
             name: '@RapsysAir/form/register.html.twig'
             context:
-                title: 'Register'
+                title:
+                    page: 'Register'
         mail:
             subject: 'Welcome %%recipient_name%% to %%site.title%%'
             html: '@RapsysAir/mail/register.html.twig'
@@ -101,15 +109,17 @@ rapsys_user:
 
 #Doctrine configuration
 doctrine:
-    #Dbal configuration
+    # Dbal configuration
     dbal:
-        mapping_types:
-            enum: string
+        charset: 'utf8mb4'
+        default_table_options:
+            charset: 'utf8mb4'
+            collation: 'utf8mb4_unicode_ci'
 
     #Orm configuration
     orm:
         #Replace repository factory
-        repository_factory: 'Rapsys\AirBundle\Factory\RepositoryFactory'
+        repository_factory: 'Rapsys\AirBundle\Factory'
 
         #Force resolution of UserBundle entities to AirBundle one
         #XXX: without these lines, relations are lookup in parent namespace ignoring AirBundle extension
@@ -118,10 +128,21 @@ doctrine:
             Rapsys\UserBundle\Entity\Civility: 'Rapsys\AirBundle\Entity\Civility'
             Rapsys\UserBundle\Entity\User: 'Rapsys\AirBundle\Entity\User'
 
+        mappings:
+            #Entity short syntax was removed
+            #XXX: see https://github.com/doctrine/orm/issues/8818
+            RapsysAirBundle:
+                type: 'yml'
+                is_bundle: true
+                dir: 'Resources/config/doctrine'
+                prefix: 'Rapsys\AirBundle\Entity'
+                alias: 'RapsysAirBundle'
+
 #Security configuration
 security:
-    #Enable authenticator manager
-    enable_authenticator_manager: true
+#XXX: seems dropped in symfony 7
+#    #Enable authenticator manager
+#    enable_authenticator_manager: true
 
     #Set password hashers
     password_hashers:
@@ -196,10 +217,17 @@ security:
 
 #Framework configuration
 framework:
-    default_locale: 'fr_fr'
+    cache:
+        default_memcached_provider: 'memcached://localhost:11211'
+        pools:
+            air.cache:
+                adapter: 'cache.adapter.memcached'
+            user.cache:
+                adapter: 'cache.adapter.memcached'
+    default_locale: '%rapsys_air.locale%'
     #error_controller: 'Rapsys\AirBundle\Controller\ErrorController::show'
     translator:
-        fallbacks: [ 'fr_fr', 'en_gb' ]
+        fallbacks: '%rapsys_air.locales%'
     session:
         enabled: true
         handler_id: ~
@@ -209,8 +237,18 @@ framework:
     disallow_search_engine_index: false
     mailer:
         headers:
-            X-Originating-IP: '%env(REMOTE_ADDR)%'
-    secret: '%env(APP_SECRET)%'
+            X-Originating-IP: '%env(string:REMOTE_ADDR)%'
+    secret: '%env(string:APP_SECRET)%'
+    validation:
+        email_validation_mode: html5
+#    php_errors:
+#        log: true
+#    http_method_override: false
+#    session:
+#        handler_id: null
+#        cookie_secure: auto
+#        cookie_samesite: lax
+#        storage_factory_id: session.storage.factory.native
 #framework:
 #    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
 #
@@ -268,39 +306,39 @@ services:
     #    tags: [ 'twig.extension' ]
     #Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register calendar controller
     Rapsys\AirBundle\Controller\CalendarController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register default controller
     Rapsys\AirBundle\Controller\DefaultController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register dance controller
     Rapsys\AirBundle\Controller\DanceController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register location controller
     Rapsys\AirBundle\Controller\LocationController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register user controller
     Rapsys\AirBundle\Controller\UserController:
-        arguments: [ '@service_container', '@doctrine', '@security.user_password_hasher', '@logger', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@user.cache', '@security.authorization_checker', '@service_container', '@doctrine', '@form.factory', '@security.user_password_hasher', '@logger', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register session controller
     Rapsys\AirBundle\Controller\SessionController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register snippet controller
     Rapsys\AirBundle\Controller\SnippetController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         tags: [ 'controller.service_arguments' ]
     #Register error controller
     Rapsys\AirBundle\Controller\ErrorController:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         #arguments: [ '@service_container', '@router', '@translator' ]
         tags: [ 'controller.service_arguments' ]
     #Register locale event subscriber
@@ -310,9 +348,10 @@ services:
     #    tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Handler\AccessDeniedHandler:
-        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@rapsys_pack.slugger_util', '@request_stack', '@translator' ]
+        arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
     #Register air fixtures
     Rapsys\AirBundle\DataFixtures\AirFixtures:
+        arguments: [ '@service_container', '@security.user_password_hasher' ]
         tags: [ 'doctrine.fixture.orm' ]
 #   #Set version strategy
 #   assets.static_version_strategy:
@@ -332,11 +371,17 @@ services:
     Rapsys\AirBundle\Form\ContactType:
         arguments: [ '@rapsys_pack.image_util', '@rapsys_pack.slugger_util', '@translator' ]
         tags: [ 'form.type' ]
+    Rapsys\AirBundle\Form\RegisterType:
+        arguments: [ '@doctrine.orm.entity_manager' ]
+        tags: [ 'form.type' ]
     Rapsys\AirBundle\Command\AttributeCommand:
         arguments: [ '@doctrine' ]
         tags: [ 'console.command' ]
     Rapsys\AirBundle\Command\CalendarCommand:
         arguments: [ '@doctrine', '@router', '@rapsys_pack.slugger_util', '@translator', 'airlibre', 0, '%kernel.project_dir%/var/cache', '%kernel.default_locale%' ]
+        tags: [ 'console.command' ]
+    Rapsys\AirBundle\Command\Calendar2Command:
+        arguments: [ '@doctrine', '@router', '@rapsys_pack.slugger_util', '@translator', '%kernel.default_locale%', '%env(string:GOOGLE_PROJECT)', '%env(string:GOOGLE_CLIENT)', '%env(string:GOOGLE_SECRET)' ]
         tags: [ 'console.command' ]
     Rapsys\AirBundle\Command\RekeyCommand:
         arguments: [ '@doctrine' ]
@@ -344,8 +389,10 @@ services:
     Rapsys\AirBundle\Command\WeatherCommand:
         arguments: [ '@doctrine', '@filesystem' ]
         tags: [ 'console.command' ]
-    Rapsys\AirBundle\Factory\RepositoryFactory:
-        arguments: [ '@router', '@rapsys_pack.slugger_util', '@translator', '%rapsys_air.languages%', '%kernel.default_locale%' ]
+    Rapsys\AirBundle\Factory:
+        arguments: [ '@request_stack', '@router', '@rapsys_pack.slugger_util', '@translator', '%kernel.default_locale%', '%rapsys_air.languages%' ]
+    Rapsys\UserBundle\Factory:
+        arguments: [ '@request_stack', '@router', '@rapsys_pack.slugger_util', '@translator', '%kernel.default_locale%', '%rapsys_air.languages%' ]
     #Register facebook util service
     rapsys_air.facebook_util:
         class: 'Rapsys\PackBundle\Util\FacebookUtil'
@@ -365,14 +412,19 @@ services:
 #Twig Configuration
 twig:
     #Enforce debug
-    #debug: true
     #auto_reload: ~
+    debug: true
+    #debug: '%kernel.debug%'
+    #strict_variables: '%kernel.debug%'
+
     #Disable cache
     #XXX: enable forced regeneration of css and js at each page load
     cache: false
+
     #Fix form layout for css
     #XXX: @RapsysAir is a shortcut to vendor/rapsys/airbundle/Resources/views directory here
     form_theme: [ '@RapsysAir/form/form_div_layout.html.twig' ]
+
     #Set twig paths
     paths:
         #Required by email.image(site_logo) directive
