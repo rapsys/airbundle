@@ -13,7 +13,6 @@ namespace Rapsys\AirBundle\Command;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,40 +27,6 @@ use Rapsys\AirBundle\Entity\Session;
 use Rapsys\PackBundle\Util\SluggerUtil;
 
 class CalendarCommand extends Command {
-	//Set failure constant
-	const FAILURE = 1;
-
-	///Set success constant
-	const SUCCESS = 0;
-
-	/**
-	 * Doctrine instance
-	 *
-	 * @var ManagerRegistry
-	 */
-	protected ManagerRegistry $doctrine;
-
-	///Router
-	protected RouterInterface $router;
-
-	///Slugger
-	protected SluggerUtil $slugger;
-
-	///Translator instance
-	protected TranslatorInterface $translator;
-
-	///Locale
-	protected $locale;
-
-	///Lifetime string
-	protected $lifetime;
-
-	///Namespace string
-	protected $namespace;
-
-	///Path string
-	protected $path;
-
 	/**
 	 * Creates new calendar command
 	 *
@@ -74,39 +39,9 @@ class CalendarCommand extends Command {
 	 * @param string $path The cache path
 	 * @param string $locale The default locale
 	 */
-	public function __construct(ManagerRegistry $doctrine, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, string $namespace, int $lifetime, string $path, string $locale) {
+	public function __construct(protected ManagerRegistry $doctrine, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected string $namespace, protected int $lifetime, protected string $path, protected string $locale) {
 		//Call parent constructor
-		parent::__construct();
-
-		//Store doctrine
-		$this->doctrine = $doctrine;
-
-		//Set lifetime
-		$this->lifetime = $lifetime;
-
-		//Set namespace
-		$this->namespace = $namespace;
-
-		//Set path
-		$this->path = $path;
-
-		//Store router
-		$this->router = $router;
-
-		//Retrieve slugger
-		$this->slugger = $slugger;
-
-		//Get router context
-		$context = $this->router->getContext();
-
-		//Set host
-		$context->setHost('airlibre.eu');
-
-		//Set scheme
-		$context->setScheme('https');
-
-		//Set the translator
-		$this->translator = $translator;
+		parent::__construct($this->doctrine, $this->router, $this->slugger, $this->translator, $this->locale);
 	}
 
 	///Configure attribute command
