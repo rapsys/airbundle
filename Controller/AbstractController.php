@@ -13,22 +13,28 @@ namespace Rapsys\AirBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as BaseAbstractController;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Asset\PackageInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+use Twig\Environment;
 
 use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\Location;
@@ -47,74 +53,45 @@ use Rapsys\PackBundle\Util\SluggerUtil;
  * {@inheritdoc}
  */
 abstract class AbstractController extends BaseAbstractController implements ServiceSubscriberInterface {
-	///AuthorizationCheckerInterface instance
-	protected $checker;
+	/**
+	 * Config array
+	 */
+	protected array $config;
 
-	///Config array
-	protected $config;
+	/**
+	 * Context array
+	 */
+	protected array $context;
 
-	///ContainerInterface instance
-	protected $container;
+	/**
+	 * Locale string
+	 */
+	protected string $locale;
 
-	///Context array
-	protected $context;
+	/**
+	 * Modified DateTime
+	 */
+	protected \DateTime $modified;
 
-	///AccessDecisionManagerInterface instance
-	protected $decision;
+	/**
+	 * DatePeriod instance
+	 */
+	protected \DatePeriod $period;
 
-	///ManagerRegistry instance
-	protected $doctrine;
+	/**
+	 * Request instance
+	 */
+	protected Request $request;
 
-	///FacebookUtil instance
-	protected $facebook;
+	/**
+	 * Route string
+	 */
+	protected string $route;
 
-	///FormFactoryInterface instance
-	protected $factory;
-
-	///Image util instance
-	protected $image;
-
-	///Locale string
-	protected $locale;
-
-	///MailerInterface instance
-	protected $mailer;
-
-	///EntityManagerInterface instance
-	protected $manager;
-
-	///Map util instance
-	protected $map;
-
-	///Modified DateTime
-	protected $modified;
-
-	///PackageInterface instance
-	protected $package;
-
-	///DatePeriod instance
-	protected $period;
-
-	///Request instance
-	protected $request;
-
-	///Route string
-	protected $route;
-
-	///Route params array
-	protected $routeParams;
-
-	///Router instance
-	protected $router;
-
-	///Slugger util instance
-	protected $slugger;
-
-	///RequestStack instance
-	protected $stack;
-
-	///Translator instance
-	protected $translator;
+	/**
+	 * Route params array
+	 */
+	protected array $routeParams;
 
 	/**
 	 * Abstract constructor
@@ -131,49 +108,18 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 	 * @param MapUtil $map The map instance
 	 * @param PackageInterface $package The package instance
 	 * @param RouterInterface $router The router instance
+	 * @param Security $security The security instance
 	 * @param SluggerUtil $slugger The slugger instance
 	 * @param RequestStack $stack The stack instance
 	 * @param TranslatorInterface $translator The translator instance
+	 * @param Environment $twig The twig environment instance
 	 *
 	 * @TODO move all that stuff to setSlugger('@slugger') setters with a calls: [ setSlugger: [ '@slugger' ] ] to unbload classes ???
 	 * @TODO add a calls: [ ..., prepare: ['@???'] ] that do all the logic that can't be done in constructor because various things are not available
 	 */
-	public function __construct(AuthorizationCheckerInterface $checker, ContainerInterface $container, AccessDecisionManagerInterface $decision, ManagerRegistry $doctrine, FacebookUtil $facebook, FormFactoryInterface $factory, ImageUtil $image, MailerInterface $mailer, EntityManagerInterface $manager, MapUtil $map, PackageInterface $package, RouterInterface $router, SluggerUtil $slugger, RequestStack $stack, TranslatorInterface $translator) {
-		//Set checker
-		$this->checker = $checker;
-
+	public function __construct(protected AuthorizationCheckerInterface $checker, protected ContainerInterface $container, protected AccessDecisionManagerInterface $decision, protected ManagerRegistry $doctrine, protected FacebookUtil $facebook, protected FormFactoryInterface $factory, protected ImageUtil $image, protected MailerInterface $mailer, protected EntityManagerInterface $manager, protected MapUtil $map, protected PackageInterface $package, protected RouterInterface $router, protected Security $security, protected SluggerUtil $slugger, protected RequestStack $stack, protected TranslatorInterface $translator, protected Environment $twig, protected int $limit = 5) {
 		//Retrieve config
 		$this->config = $container->getParameter(RapsysAirBundle::getAlias());
-
-		//Set the container
-		$this->container = $container;
-
-		//Set decision
-		$this->decision = $decision;
-
-		//Set doctrine
-		$this->doctrine = $doctrine;
-
-		//Set facebook
-		$this->facebook = $facebook;
-
-		//Set factory
-		$this->factory = $factory;
-
-		//Set image
-		$this->image = $image;
-
-		//Set mailer
-		$this->mailer = $mailer;
-
-		//Set manager
-		$this->manager = $manager;
-
-		//Set map
-		$this->map = $map;
-
-		//Set package
-		$this->package = $package;
 
 		//Set period
 		$this->period = new \DatePeriod(
@@ -185,19 +131,6 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			//XXX: we can't use isGranted here as AuthenticatedVoter deny access because user is likely not authenticated yet :'(
 			new \DateTime('Monday this week + 2 week')
 		);
-
-
-		//Set router
-		$this->router = $router;
-
-		//Set slugger
-		$this->slugger = $slugger;
-
-		//Set stack
-		$this->stack = $stack;
-
-		//Set translator
-		$this->translator = $translator;
 
 		//Get main request
 		$this->request = $this->stack->getMainRequest();
@@ -235,13 +168,11 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 
 		//Set the context
 		$this->context = [
-			'description' => null,
-			'section' => null,
-			'title' => null,
-			'locale' => str_replace('_', '-', $this->locale),
+			'alternates' => $alternates,
+			'canonical' => $canonical,
 			'contact' => [
-				'title' => $this->translator->trans($this->config['contact']['title']),
-				'mail' => $this->config['contact']['mail']
+				'address' => $this->config['contact']['address'],
+				'name' => $this->translator->trans($this->config['contact']['name'])
 			],
 			'copy' => [
 				'by' => $this->translator->trans($this->config['copy']['by']),
@@ -250,32 +181,35 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				'short' => $this->translator->trans($this->config['copy']['short']),
 				'title' => $this->config['copy']['title']
 			],
-			'site' => [
-				'donate' => $this->config['site']['donate'],
-				'icon' => $this->config['site']['icon'],
-				'logo' => $this->config['site']['logo'],
-				'png' => $this->config['site']['png'],
-				'title' => $title = $this->translator->trans($this->config['site']['title']),
-				'url' => $this->router->generate($this->config['site']['url'])
-			],
-			'canonical' => $canonical,
-			'alternates' => $alternates,
+			'description' => null,
+			'donate' => $this->config['donate'],
 			'facebook' => [
-				'metas' => [
-					'og:type' => 'article',
-					'og:site_name' => $title,
-					'og:url' => $canonical,
-					#'fb:admins' => $this->config['facebook']['admins'],
-					'fb:app_id' => $this->config['facebook']['apps']
-				],
+				'og:type' => 'article',
+				'og:site_name' => $title = $this->translator->trans($this->config['title']),
+				'og:url' => $canonical,
+				#'fb:admins' => $this->config['facebook']['admins'],
+				'fb:app_id' => $this->config['facebook']['apps']
+			],
+			//XXX: TODO: only generate it when fb robot request the url ???
+			'fbimage' => [
 				'texts' => [
-					$this->translator->trans($this->config['site']['title']) => [
+					$title => [
 						'font' => 'irishgrover',
 						'size' => 110
 					]
 				]
 			],
-			'forms' => []
+			'icon' => $this->config['icon'],
+			'keywords' => null,
+			'locale' => str_replace('_', '-', $this->locale),
+			'logo' => $this->config['logo'],
+			'forms' => [],
+			'root' => $this->router->generate($this->config['root']),
+			'title' => [
+				'page' => null,
+				'section' => null,
+				'site' => $title
+			]
 		];
 	}
 
@@ -285,18 +219,21 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 	 * {@inheritdoc}
 	 */
 	protected function render(string $view, array $parameters = [], Response $response = null): Response {
+		//Create response when null
+		$response ??= new Response();
+
 		//Create application form for role_guest
-		if ($this->isGranted('ROLE_GUEST')) {
+		if ($this->checker->isGranted('ROLE_GUEST')) {
 			//Without application form
 			if (empty($parameters['forms']['application'])) {
 				//Get favorites dances
-				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->security->getUser()->getId());
 
 				//Set dance default
 				$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
 
 				//Get favorites locations
-				$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+				$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->security->getUser()->getId());
 
 				//Set location default
 				$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
@@ -356,7 +293,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				}
 
 				//Create ApplicationType form
-				$application = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+				$application = $this->factory->create('Rapsys\AirBundle\Form\ApplicationType', null, [
 					//Set the action
 					'action' => $this->generateUrl('rapsys_air_application_add'),
 					//Set the form attribute
@@ -378,7 +315,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 					//Set user choices
 					'user_choices' => $this->doctrine->getRepository(User::class)->findChoicesAsArray(),
 					//Set default user to current
-					'user_default' => $this->getUser()->getId(),
+					'user_default' => $this->security->getUser()->getId(),
 					//Set to session slot or evening by default
 					//XXX: default to Evening (3)
 					'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneById($parameters['session']['slot']['id']??3)
@@ -393,7 +330,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		//Create login form for anonymous
 		elseif (!$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Create LoginType form
-			$login = $this->createForm('Rapsys\UserBundle\Form\LoginType', null, [
+			$login = $this->factory->create('Rapsys\UserBundle\Form\LoginType', null, [
 				//Set the action
 				'action' => $this->generateUrl('rapsys_user_login'),
 				//Disable password repeated
@@ -426,7 +363,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			];
 
 			//Create RegisterType form
-			$register = $this->createForm('Rapsys\AirBundle\Form\RegisterType', null, $field+[
+			$register = $this->factory->create('Rapsys\AirBundle\Form\RegisterType', null, $field+[
 				//Set the action
 				'action' => $this->generateUrl(
 					'rapsys_user_register',
@@ -483,19 +420,21 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		}
 
 		//With page infos and without facebook texts
-		if (count($parameters['facebook']['texts']) <= 1 && isset($parameters['title']) && isset($this->route) && isset($this->routeParams)) {
+		if (count($parameters['fbimage']) <= 1 && isset($parameters['title']) && isset($this->route) && isset($this->routeParams)) {
 			//Append facebook image texts
-			$parameters['facebook']['texts'] += [
-				$parameters['title'] => [
-					'font' => 'irishgrover',
-					'align' => 'left'
-				]/*XXX: same problem as url, too long :'(,
-				$parameters['description'] => [
-					'align' => 'right',
-					'canonical' => true,
-					'font' => 'labelleaurore',
-					'size' => 50
-				]*/
+			$parameters['fbimage'] += [
+				'texts' => [
+					$parameters['title']['page'] => [
+						'font' => 'irishgrover',
+						'align' => 'left'
+					]/*XXX: same problem as url, too long :'(,
+					$parameters['description'] => [
+						'align' => 'right',
+						'canonical' => true,
+						'font' => 'labelleaurore',
+						'size' => 50
+					]*/
+				]
 			];
 
 			/*With short path info
@@ -525,25 +464,25 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		//With canonical
 		if (!empty($parameters['canonical'])) {
 			//Set facebook url
-			$parameters['facebook']['metas']['og:url'] = $parameters['canonical'];
+			$parameters['facebook']['og:url'] = $parameters['canonical'];
 		}
 
 		//With empty facebook title and title
-		if (empty($parameters['facebook']['metas']['og:title']) && !empty($parameters['title'])) {
+		if (empty($parameters['facebook']['og:title']) && !empty($parameters['title'])) {
 			//Set facebook title
-			$parameters['facebook']['metas']['og:title'] = $parameters['title'];
+			$parameters['facebook']['og:title'] = $parameters['title'];
 		}
 
 		//With empty facebook description and description
-		if (empty($parameters['facebook']['metas']['og:description']) && !empty($parameters['description'])) {
+		if (empty($parameters['facebook']['og:description']) && !empty($parameters['description'])) {
 			//Set facebook description
-			$parameters['facebook']['metas']['og:description'] = $parameters['description'];
+			$parameters['facebook']['og:description'] = $parameters['description'];
 		}
 
 		//With locale
 		if (!empty($this->locale)) {
 			//Set facebook locale
-			$parameters['facebook']['metas']['og:locale'] = $this->locale;
+			$parameters['facebook']['og:locale'] = $this->locale;
 
 			//With alternates
 			//XXX: locale change when fb_locale=xx_xx is provided is done in FacebookSubscriber
@@ -553,20 +492,36 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				foreach($parameters['alternates'] as $lang => $alternate) {
 					if (strlen($lang) == 5) {
 						//Set facebook locale alternate
-						$parameters['facebook']['metas']['og:locale:alternate'] = str_replace('-', '_', $lang);
+						$parameters['facebook']['og:locale:alternate'] = str_replace('-', '_', $lang);
 					}
 				}
 			}
 		}
 
 		//Without facebook image defined and texts
-		if (empty($parameters['facebook']['metas']['og:image']) && !empty($this->request) && !empty($parameters['facebook']['texts']) && !empty($this->modified)) {
+		if (empty($parameters['facebook']['og:image']) && !empty($this->request) && !empty($parameters['fbimage']['texts']) && !empty($this->modified)) {
 			//Get facebook image
-			$parameters['facebook']['metas'] += $this->facebook->getImage($this->request->getPathInfo(), $parameters['facebook']['texts'], $this->modified->getTimestamp());
+			$parameters['facebook'] += $this->facebook->getImage($this->request->getPathInfo(), $parameters['fbimage']['texts'], $this->modified->getTimestamp());
 		}
 
-		//Call parent method
-		return parent::render($view, $parameters, $response);
+		//Call twig render method
+		$content = $this->twig->render($view, $parameters);
+
+		//Invalidate OK response on invalid form
+		if (200 === $response->getStatusCode()) {
+			foreach ($parameters as $v) {
+				if ($v instanceof FormInterface && $v->isSubmitted() && !$v->isValid()) {
+					$response->setStatusCode(422);
+					break;
+				}
+			}
+		}
+
+		//Store content in response
+		$response->setContent($content);
+
+		//Return response
+		return $response;
 	}
 
 	/**
