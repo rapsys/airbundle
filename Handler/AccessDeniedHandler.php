@@ -35,7 +35,7 @@ class AccessDeniedHandler extends AbstractController implements AccessDeniedHand
 		$this->context['message'] = $exception->getMessage();
 
 		//With admin
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Add trace for admin
 			$this->context['trace'] = $exception->getTraceAsString();
 		}
