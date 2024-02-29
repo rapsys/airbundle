@@ -38,14 +38,14 @@ class UserController extends BaseUserController {
 		}
 
 		//Prevent access when not admin, user is not guest and not currently logged user
-		if (!$this->isGranted('ROLE_ADMIN') && $user != $this->getUser() || !$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+		if (!$this->checker->isGranted('ROLE_ADMIN') && $user != $this->security->getUser() || !$this->checker->isGranted('IS_AUTHENTICATED_FULLY')) {
 			//Throw access denied
 			//XXX: prevent slugger reverse engineering by not displaying decoded mail
 			throw $this->createAccessDeniedException($this->translator->trans('Unable to access user: %mail%', ['%mail%' => $smail]));
 		}
 
 		//Create the RegisterType form and give the proper parameters
-		$edit = $this->createForm($this->config['edit']['view']['edit'], $user, [
+		$edit = $this->factory->create($this->config['edit']['view']['edit'], $user, [
 			//Set action to register route name and context
 			'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']),
 			//Set civility class
@@ -59,9 +59,9 @@ class UserController extends BaseUserController {
 			//Set country favorites
 			'country_favorites' => $this->doctrine->getRepository($this->config['class']['country'])->findByTitle($this->config['default']['country_favorites']),
 			//Disable mail
-			'mail' => $this->isGranted('ROLE_ADMIN'),
+			'mail' => $this->checker->isGranted('ROLE_ADMIN'),
 			//Disable pseudonym
-			'pseudonym' => $this->isGranted('ROLE_GUEST'),
+			'pseudonym' => $this->checker->isGranted('ROLE_GUEST'),
 			//Disable password
 			'password' => false,
 			//Set method
@@ -69,9 +69,9 @@ class UserController extends BaseUserController {
 		]+$this->config['edit']['field']);
 
 		//With admin role
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Create the LoginType form and give the proper parameters
-			$reset = $this->createForm($this->config['edit']['view']['reset'], $user, [
+			$reset = $this->factory->create($this->config['edit']['view']['reset'], $user, [
 				//Set action to register route name and context
 				'action' => $this->generateUrl($this->config['route']['edit']['name'], ['mail' => $smail, 'hash' => $this->slugger->hash($smail)]+$this->config['route']['edit']['context']),
 				//Disable mail
@@ -142,7 +142,7 @@ class UserController extends BaseUserController {
 			}
 		//Without admin role
 		//XXX: prefer a reset on login to force user unspam action
-		} elseif (!$this->isGranted('ROLE_ADMIN')) {
+		} elseif (!$this->checker->isGranted('ROLE_ADMIN')) {
 			//Add notice
 			$this->addFlash('notice', $this->translator->trans('To change your password login with your mail and any password then follow the procedure'));
 		}
