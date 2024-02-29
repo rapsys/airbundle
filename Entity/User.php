@@ -14,6 +14,7 @@ namespace Rapsys\AirBundle\Entity;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
+use Rapsys\UserBundle\Entity\Civility;
 use Rapsys\UserBundle\Entity\User as BaseUser;
 
 class User extends BaseUser {
@@ -81,10 +82,16 @@ class User extends BaseUser {
 	 * Constructor
 	 *
 	 * @param string $mail The user mail
+	 * @param string $password The user password
+	 * @param ?Civility $civility The user civility
+	 * @param ?string $forename The user forename
+	 * @param ?string $surname The user surname
+	 * @param bool $active The user active
+	 * @param bool $enable The user enable
 	 */
-	public function __construct(string $mail) {
+	public function __construct(protected string $mail, protected string $password, protected ?Civility $civility = null, protected ?string $forename = null, protected ?string $surname = null, protected bool $active = false, protected bool $enable = true) {
 		//Call parent constructor
-		parent::__construct($mail);
+		parent::__construct($this->mail, $this->password, $this->civility, $this->forename, $this->surname, $this->active, $this->enable);
 
 		//Set defaults
 		$this->city = null;
