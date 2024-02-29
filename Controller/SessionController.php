@@ -139,7 +139,7 @@ class SessionController extends AbstractController {
 		$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
 
 		//Set title
-		$this->context['title'] = $this->translator->trans('%dances% %cities% sessions', ['%dances%' => $dances, '%cities%' => $cities]);
+		$this->context['title']['page'] = $this->translator->trans('%dances% %cities% sessions', ['%dances%' => $dances, '%cities%' => $cities]);
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor session calendar %cities%', ['%dances%' => $dances, '%cities%' => $cities]);
@@ -348,7 +348,7 @@ class SessionController extends AbstractController {
 		//With application
 		if (!empty($this->context['session']['application'])) {
 			//Set title
-			$this->context['title'] = $this->translator->trans('%dance% %id% by %pseudonym%', ['%id%' => $id, '%dance%' => $this->context['session']['application']['dance']['title'], '%pseudonym%' => $this->context['session']['application']['user']['title']]);
+			$this->context['title']['page'] = $this->translator->trans('%dance% %id% by %pseudonym%', ['%id%' => $id, '%dance%' => $this->context['session']['application']['dance']['title'], '%pseudonym%' => $this->context['session']['application']['user']['title']]);
 
 			//Set description
 			$this->context['description'] = ucfirst($this->translator->trans('%dance% %location% %city% %slot% on %date% at %time%', [
@@ -372,7 +372,7 @@ class SessionController extends AbstractController {
 		//Without application
 		} else {
 			//Set title
-			$this->context['title'] = $this->translator->trans('Session %id%', ['%id%' => $id]);
+			$this->context['title']['page'] = $this->translator->trans('Session %id%', ['%id%' => $id]);
 
 			//Set description
 			$this->context['description'] = ucfirst($this->translator->trans('%location% %city% %slot% on %date% at %time%', [
@@ -395,12 +395,12 @@ class SessionController extends AbstractController {
 		$this->context['section'] = $this->context['session']['location']['title'];
 
 		//Set facebook title
-		$this->context['facebook']['metas']['og:title'] = $this->context['title'].' '.$this->context['session']['location']['at'];
+		$this->context['facebook']['og:title'] = $this->context['title']['page'].' '.$this->context['session']['location']['at'];
 
 		//Set facebook image
-		$this->context['facebook'] = [
+		$this->context['fbimage'] = [
 			'texts' => [
-				$this->context['session']['application']['user']['title']??$this->context['title'] => [
+				$this->context['session']['application']['user']['title']??$this->context['title']['page'] => [
 					'font' => 'irishgrover',
 					'size' => 110
 				],
@@ -430,7 +430,7 @@ class SessionController extends AbstractController {
 			//With admin
 			if ($this->checker->isGranted('ROLE_ADMIN')) {
 				//Get favorites dances
-				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+				$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->security->getUser()->getId());
 
 				//Get dances
 				$dances = $this->doctrine->getRepository(Dance::class)->findAllIndexed();
@@ -441,7 +441,7 @@ class SessionController extends AbstractController {
 
 			//Create SessionType form
 			//TODO: move to named form ???
-			$sessionForm = $this->createForm('Rapsys\AirBundle\Form\SessionType', null, [
+			$sessionForm = $this->factory->create('Rapsys\AirBundle\Form\SessionType', null, [
 				//Set the action
 				'action' => $this->generateUrl('rapsys_air_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]),
 				//Set the form attribute
@@ -458,7 +458,7 @@ class SessionController extends AbstractController {
 				//XXX: default to Evening (3)
 				'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneById($this->context['session']['slot']['id']??3),
 				//Set default user to current
-				'user' => $this->getUser()->getId(),
+				'user' => $this->security->getUser()->getId(),
 				//Set date
 				'date' => $this->context['session']['date'],
 				//Set begin
@@ -466,13 +466,13 @@ class SessionController extends AbstractController {
 				//Set length
 				'length' => $this->context['session']['length'],
 				//Set raincancel
-				'raincancel' => ($this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id']) && $this->context['session']['rainfall'] >= 2,
+				'raincancel' => ($this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->security->getUser()->getId() == $this->context['session']['application']['user']['id']) && $this->context['session']['rainfall'] >= 2,
 				//Set cancel
-				'cancel' => $this->checker->isGranted('ROLE_ADMIN') || in_array($this->getUser()->getId(), explode("\n", $this->context['session']['sau_id'])),
+				'cancel' => $this->checker->isGranted('ROLE_ADMIN') || in_array($this->security->getUser()->getId(), explode("\n", $this->context['session']['sau_id'])),
 				//Set modify
-				'modify' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_REGULAR'),
+				'modify' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->security->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_REGULAR'),
 				//Set move
-				'move' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_SENIOR'),
+				'move' => $this->checker->isGranted('ROLE_ADMIN') || !empty($this->context['session']['application']['user']['id']) && $this->security->getUser()->getId() == $this->context['session']['application']['user']['id'] && $this->context['session']['stop'] >= $now && $this->checker->isGranted('ROLE_SENIOR'),
 				//Set attribute
 				'attribute' => $this->checker->isGranted('ROLE_ADMIN') && $this->context['session']['locked'] === null,
 				//Set session
@@ -491,7 +491,7 @@ class SessionController extends AbstractController {
 				$sessionObject = $this->doctrine->getRepository(Session::class)->findOneById($id);
 
 				//Set user
-				$userObject = $this->getUser();
+				$userObject = $this->security->getUser();
 
 				//Replace with requested user for admin
 				if ($this->checker->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
