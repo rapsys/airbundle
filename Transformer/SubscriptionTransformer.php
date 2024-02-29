@@ -35,10 +35,10 @@ class SubscriptionTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms a subscription object array or collection to an int array
 	 *
-	 * @param Subscription $subscriptions The subscription instances array
+	 * @param Collection|array $subscriptions The subscription instances array
 	 * @return array The subscription ids
 	 */
-	public function transform($subscriptions) {
+	public function transform(mixed $subscriptions): mixed {
 		//Without subscriptions
 		if (null === $subscriptions) {
 			return [];
@@ -58,9 +58,9 @@ class SubscriptionTransformer implements DataTransformerInterface {
 	 *
 	 * @param array $ids
 	 * @throws TransformationFailedException when object (subscription) is not found
-	 * @return array The subscription instances array
+	 * @return Collection The subscription instances array
 	 */
-	public function reverseTransform($ids) {
+	public function reverseTransform(mixed $ids): mixed {
 		//Without ids
 		if ('' === $ids || null === $ids) {
 			$ids = [];

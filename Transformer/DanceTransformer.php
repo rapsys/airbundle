@@ -35,10 +35,10 @@ class DanceTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms a dance object array or collection to an int array
 	 *
-	 * @param Dance $dances The dance instances array
+	 * @param Collection|array $dances The dance instances array
 	 * @return array The dance ids
 	 */
-	public function transform($dances) {
+	public function transform(mixed $dances): mixed {
 		//Without dances
 		if (null === $dances) {
 			return [];
@@ -60,7 +60,7 @@ class DanceTransformer implements DataTransformerInterface {
 	 * @throws TransformationFailedException when object (dance) is not found
 	 * @return array The dance instances array
 	 */
-	public function reverseTransform($ids) {
+	public function reverseTransform(mixed $ids): mixed {
 		//Without ids
 		if ('' === $ids || null === $ids) {
 			$ids = [];
