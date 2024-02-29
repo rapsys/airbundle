@@ -3,8 +3,6 @@
 	<head{% if facebook is defined and facebook %} prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#"{% endif %}>
 		{% block meta %}<meta charset="UTF-8">{% endblock %}
 		<title>{% block title %}{{ [title.page, title.section, title.site]|filter(v => v)|join(' - ') }}{% endblock %}</title>
-		{# block title %}{{ [site.title, section, title]|filter(v => v)|join(' - ') }}{% endblock #}
-		{#<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">#}
 		{% block stylesheet %}
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
 			{% if description is defined and description %}
@@ -72,22 +70,22 @@
 					{% block header_nav %}
 						<nav id="nav">
 							{#<h2>{% trans %}Navigation{% endtrans %}</h2>#}
-								<a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a>
-								<a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a>
-								<a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a>
-								{% if is_granted('ROLE_ADMIN') %}
-									<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
-								{% endif %}
-								{% if is_granted('ROLE_GUEST') %}
-									<a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a>
-								{% endif %}
-								{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-									<a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a>
-									<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
-								{% else %}
-									<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
-									<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
-								{% endif %}
+							<a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a>
+							<a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a>
+							<a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a>
+							{% if is_granted('ROLE_ADMIN') %}
+								<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
+							{% endif %}
+							{% if is_granted('ROLE_GUEST') %}
+								<a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a>
+							{% endif %}
+							{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+								<a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a>
+								<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
+							{% else %}
+								<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
+								<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
+							{% endif %}
 						</nav>
 					{% endblock %}
 			{#
