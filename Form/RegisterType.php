@@ -67,7 +67,7 @@ class RegisterType extends BaseRegisterType {
 		parent::configureOptions($resolver);
 
 		//Set defaults
-		$resolver->setDefaults(['city' => true, 'country' => true, 'country_class' => 'RapsysAirBundle:Country', 'country_default' => null, 'country_favorites' => [], 'phone' => true, 'pseudonym' => true, 'zipcode' => true]);
+		$resolver->setDefaults(['city' => true, 'country' => true, 'country_class' => 'Rapsys\AirBundle\Entity\Country', 'country_default' => null, 'country_favorites' => [], 'phone' => true, 'pseudonym' => true, 'zipcode' => true]);
 
 		//Add extra city option
 		$resolver->setAllowedTypes('city', 'boolean');

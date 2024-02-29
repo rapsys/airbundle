@@ -37,16 +37,16 @@ class ApplicationType extends AbstractType {
 		$form = $builder;
 
 		//Add dance field
-		$form->add('dance', EntityType::class, ['class' => 'RapsysAirBundle:Dance', 'choices' => $options['dance_choices'], 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your dance'])], 'data' => $options['dance_default']]);
+		$form->add('dance', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Dance', 'choices' => $options['dance_choices'], 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your dance'])], 'data' => $options['dance_default']]);
 
 		//Add date field
 		$form->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
 
 		//Add location field
-		$form->add('location', EntityType::class, ['class' => 'RapsysAirBundle:Location', 'choices' => $options['location_choices'], 'preferred_choices' => $options['location_favorites'], 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location_default']]);
+		$form->add('location', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Location', 'choices' => $options['location_choices'], 'preferred_choices' => $options['location_favorites'], 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location_default']]);
 
 		//Add slot field
-		$form->add('slot', EntityType::class, ['class' => 'RapsysAirBundle:Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot_default']]);
+		$form->add('slot', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot_default']]);
 
 		//Add extra user field
 		if (!empty($options['user'])) {
