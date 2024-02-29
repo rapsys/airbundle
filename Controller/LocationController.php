@@ -48,7 +48,7 @@ class LocationController extends DefaultController {
 		}
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -74,7 +74,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Set section
-		$this->context['title'] = $this->translator->trans('Libre Air cities');
+		$this->context['title']['page'] = $this->translator->trans('Libre Air cities');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air city list');
@@ -128,7 +128,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Add calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
 
 		//Set dances
 		$this->context['dances'] = [];
@@ -156,7 +156,7 @@ class LocationController extends DefaultController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -205,13 +205,13 @@ class LocationController extends DefaultController {
 			$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
 
 			//Set title
-			$this->context['title'] = $this->translator->trans('%dances% %city%', ['%dances%' => $dances, '%city%' => $this->context['city']['in']]);
+			$this->context['title']['page'] = $this->translator->trans('%dances% %city%', ['%dances%' => $dances, '%city%' => $this->context['city']['in']]);
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor calendar %city%', ['%dances%' => $dances, '%city%' => $this->context['city']['in']]);
 		} else {
 			//Set title
-			$this->context['title'] = $this->translator->trans('Dance %city%', ['%city%' => $this->context['city']['in']]);
+			$this->context['title']['page'] = $this->translator->trans('Dance %city%', ['%city%' => $this->context['city']['in']]);
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %city%', ['%city%' => $this->context['city']['in']]);
@@ -244,7 +244,7 @@ class LocationController extends DefaultController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -273,7 +273,7 @@ class LocationController extends DefaultController {
 		$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air locations sector map'), $this->modified->getTimestamp(), $this->context['locations']);
 
 		//Set title
-		$this->context['title'] = $this->translator->trans('Libre Air locations');
+		$this->context['title']['page'] = $this->translator->trans('Libre Air locations');
 
 		//Set description
 		$this->context['description'] = $this->translator->trans('Libre Air location list');
@@ -287,7 +287,7 @@ class LocationController extends DefaultController {
 		];
 
 		//Create location forms for role_admin
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Fetch all locations
 			$locations = $this->doctrine->getRepository(Location::class)->findAll();
 
@@ -404,7 +404,7 @@ class LocationController extends DefaultController {
 		}
 
 		//Fetch calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), $this->context['location']['latitude'], $this->context['location']['longitude']);
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'), $this->context['location']['latitude'], $this->context['location']['longitude']);
 
 		//Set dances
 		$this->context['dances'] = [];
@@ -432,7 +432,7 @@ class LocationController extends DefaultController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
@@ -481,14 +481,14 @@ class LocationController extends DefaultController {
 			$dances = implode($this->translator->trans(' and '), array_filter(array_merge([implode(', ', array_slice($dances, 0, -1))], array_slice($dances, -1)), 'strlen'));
 
 			//Set title
-			$this->context['title'] = $this->translator->trans('%dances% %location%', ['%dances%' => $dances, '%location%' => $this->context['location']['atin']]);
+			$this->context['title']['page'] = $this->translator->trans('%dances% %location%', ['%dances%' => $dances, '%location%' => $this->context['location']['atin']]);
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('%dances% indoor and outdoor calendar %location%', ['%dances%' => $dances, '%location%' => $this->context['location']['at']]);
 		//Without dances
 		} else {
 			//Set title
-			$this->context['title'] = $this->translator->trans('Dance %location%', ['%location%' => $this->context['location']['atin']]);
+			$this->context['title']['page'] = $this->translator->trans('Dance %location%', ['%location%' => $this->context['location']['atin']]);
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('Indoor and outdoor dance calendar %location%', ['%location%' => $this->context['location']['at']]);
