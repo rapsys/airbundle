@@ -28,8 +28,11 @@ class SnippetController extends DefaultController {
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
 	public function add(Request $request) {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		//Without guest role
+		if (!$this->checker->isGranted('ROLE_GUEST')) {
+			//Throw 403
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		}
 
 		//Create SnippetType form
 		$form = $this->container->get('form.factory')->createNamed(
@@ -53,8 +56,11 @@ class SnippetController extends DefaultController {
 
 		//Prevent creating snippet for other user unless admin
 		if ($form->get('user')->getData() !== $this->getUser()) {
-			//Prevent non-admin to access here
-			$this->denyAccessUnlessGranted('ROLE_ADMIN', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+			//Without admin role
+			if (!$this->checker->isGranted('ROLE_ADMIN')) {
+				//Throw 403
+				throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+			}
 		}
 
 		//Handle invalid form
@@ -166,8 +172,11 @@ class SnippetController extends DefaultController {
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
 	public function edit(Request $request, $id) {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		//Without guest role
+		if (!$this->checker->isGranted('ROLE_GUEST')) {
+			//Throw 403
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		}
 
 		//Get doctrine
 		$doctrine = $this->getDoctrine();
@@ -199,8 +208,11 @@ class SnippetController extends DefaultController {
 
 		//Prevent creating snippet for other user unless admin
 		if ($form->get('user')->getData() !== $this->getUser()) {
-			//Prevent non-admin to access here
-			$this->denyAccessUnlessGranted('ROLE_ADMIN', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+			//Without admin role
+			if (!$this->checker->isGranted('ROLE_ADMIN')) {
+				//Throw 403
+				throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Admin')]));
+			}
 		}
 
 		//Handle invalid form
