@@ -395,7 +395,7 @@ class DefaultController extends AbstractController {
 			$this->context['title']['page'] = $this->translator->trans('Libre Air user list');
 
 			//Set section
-			$this->context['title']['section'] = $this->translator->trans('Users');
+			$this->context['title']['section'] = $this->translator->trans('User');
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('Lists Libre air users');
@@ -405,7 +405,7 @@ class DefaultController extends AbstractController {
 			$this->context['title']['page'] = $this->translator->trans('Libre Air organizer list');
 
 			//Set section
-			$this->context['title']['section'] = $this->translator->trans('Organizers');
+			$this->context['title']['section'] = $this->translator->trans('Organizer');
 
 			//Set description
 			$this->context['description'] = $this->translator->trans('Lists Libre air organizers');
@@ -599,7 +599,7 @@ class DefaultController extends AbstractController {
 		$this->context['title']['page'] = $this->translator->trans('%pseudonym% organizer', ['%pseudonym%' => $this->context['user']['pseudonym']]);
 
 		//Set section
-		$this->context['title']['section'] = $this->translator->trans('Users');
+		$this->context['title']['section'] = $this->translator->trans('User');
 
 		//With locations
 		if (!empty($locations)) {
