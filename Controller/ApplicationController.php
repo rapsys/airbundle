@@ -57,7 +57,6 @@ class ApplicationController extends AbstractController {
 		//Set dance default
 		$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
 
-
 		//Get favorites locations
 		$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->security->getUser()->getId());
 
@@ -115,16 +114,19 @@ class ApplicationController extends AbstractController {
 			'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneByTitle('Evening')
 		]);
 
+		//Set title
+		$this->context['title']['page'] = $this->translator->trans('Application add');
+
+		//Set section
+		$this->context['title']['section'] = $this->translator->trans('Application');
+
 		//Refill the fields in case of invalid form
 		$form->handleRequest($request);
 
 		//Handle invalid form
 		if (!$form->isSubmitted() || !$form->isValid()) {
-			//Set title
-			$title = $this->translator->trans('Application add');
-
 			//Render the view
-			return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
+			return $this->render('@RapsysAir/application/add.html.twig', ['form' => $form->createView()]+$this->context);
 		}
 
 		//Get data
@@ -335,11 +337,8 @@ class ApplicationController extends AbstractController {
 				//Add error in flash message
 				$this->addFlash('error', $this->translator->trans('Session on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 
-				//Set title
-				$title = $this->translator->trans('Application add');
-
 				//Render the view
-				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
+				return $this->render('@RapsysAir/application/add.html.twig', ['form' => $form->createView()]+$this->context);
 			}
 
 			//Check if admin
@@ -347,11 +346,8 @@ class ApplicationController extends AbstractController {
 				//Add error in flash message
 				$this->addFlash('error', $this->translator->trans('Session in the past on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 
-				//Set title
-				$title = $this->translator->trans('Application add');
-
 				//Render the view
-				return $this->render('@RapsysAir/application/add.html.twig', ['title' => $title, 'form' => $form->createView()]+$this->context);
+				return $this->render('@RapsysAir/application/add.html.twig', ['form' => $form->createView()]+$this->context);
 			}
 
 			//Queue session save
