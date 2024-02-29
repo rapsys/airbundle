@@ -45,24 +45,27 @@ class ApplicationController extends AbstractController {
 	 * @throws \RuntimeException When user has not at least guest role
 	 */
 	public function add(Request $request) {
-		//Prevent non-guest to access here
-		$this->denyAccessUnlessGranted('ROLE_GUEST', null, $this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		//Without guest role
+		if (!$this->checker->isGranted('ROLE_GUEST')) {
+			//Throw 403
+			throw $this->createAccessDeniedException($this->translator->trans('Unable to access this page without role %role%!', ['%role%' => $this->translator->trans('Guest')]));
+		}
 
 		//Get favorites dances
-		$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->getUser()->getId());
+		$danceFavorites = $this->doctrine->getRepository(Dance::class)->findByUserId($this->security->getUser()->getId());
 
 		//Set dance default
 		$danceDefault = !empty($danceFavorites)?current($danceFavorites):null;
 
 
 		//Get favorites locations
-		$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->getUser()->getId());
+		$locationFavorites = $this->doctrine->getRepository(Location::class)->findByUserId($this->security->getUser()->getId());
 
 		//Set location default
 		$locationDefault = !empty($locationFavorites)?current($locationFavorites):null;
 
 		//With admin
-		if ($this->isGranted('ROLE_ADMIN')) {
+		if ($this->checker->isGranted('ROLE_ADMIN')) {
 			//Get dances
 			$dances = $this->doctrine->getRepository(Dance::class)->findAll();
 
@@ -84,7 +87,7 @@ class ApplicationController extends AbstractController {
 		}
 
 		//Create ApplicationType form
-		$form = $this->createForm('Rapsys\AirBundle\Form\ApplicationType', null, [
+		$form = $this->factory->create('Rapsys\AirBundle\Form\ApplicationType', null, [
 			//Set the action
 			'action' => $this->generateUrl('rapsys_air_application_add'),
 			//Set the form attribute
@@ -102,11 +105,11 @@ class ApplicationController extends AbstractController {
 			//Set location favorites
 			'location_favorites' => $locationFavorites,
 			//With user
-			'user' => $this->isGranted('ROLE_ADMIN'),
+			'user' => $this->checker->isGranted('ROLE_ADMIN'),
 			//Set user choices
 			'user_choices' => $this->doctrine->getRepository(User::class)->findChoicesAsArray(),
 			//Set default user to current
-			'user_default' => $this->getUser()->getId(),
+			'user_default' => $this->security->getUser()->getId(),
 			//Set default slot to evening
 			//XXX: default to Evening (3)
 			'slot_default' => $this->doctrine->getRepository(Slot::class)->findOneByTitle('Evening')
@@ -154,7 +157,7 @@ class ApplicationController extends AbstractController {
 			$session->setLength(new \DateTime('06:00:00'));
 
 			//Check if admin
-			if ($this->isGranted('ROLE_ADMIN')) {
+			if ($this->checker->isGranted('ROLE_ADMIN')) {
 				//Check if morning
 				if ($slot == 'Morning') {
 					//Set begin at 9h
@@ -340,7 +343,7 @@ class ApplicationController extends AbstractController {
 			}
 
 			//Check if admin
-			if (!$this->isGranted('ROLE_ADMIN') && $session->getStart() < new \DateTime('00:00:00')) {
+			if (!$this->checker->isGranted('ROLE_ADMIN') && $session->getStart() < new \DateTime('00:00:00')) {
 				//Add error in flash message
 				$this->addFlash('error', $this->translator->trans('Session in the past on %date% %location% %slot% not yet supported', ['%location%' => $this->translator->trans('at '.$data['location']), '%slot%' => $this->translator->trans('the '.strtolower(strval($data['slot']))), '%date%' => $data['date']->format('Y-m-d')]));
 
@@ -361,11 +364,11 @@ class ApplicationController extends AbstractController {
 		}
 
 		//Set user
-		$user = $this->getUser();
+		$user = $this->security->getUser();
 
 		//Replace with requested user for admin
-		if ($this->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
-			$user = $this->getDoctrine()->getRepository(User::class)->findOneById($data['user']);
+		if ($this->checker->isGranted('ROLE_ADMIN') && !empty($data['user'])) {
+			$user = $this->doctrine->getRepository(User::class)->findOneById($data['user']);
 		}
 
 		//Protect application fetching
