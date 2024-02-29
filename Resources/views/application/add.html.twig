@@ -1,7 +1,10 @@
-{% extends '@RapsysAir/body.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<section id="form">
-		<h2>{{ title }}</h2>
+		<header>
+			<h2>{{ title.page }}</h2>
+			<p>{{ description }}</p>
+		</header>
 		{{ form_start(form) }}
 			<div>
 				{% if form.user is defined %}
