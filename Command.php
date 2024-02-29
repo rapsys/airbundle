@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Rapsys\AirBundle\Command;
+namespace Rapsys\AirBundle;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Command\Command as BaseCommand;
@@ -22,41 +22,6 @@ use Rapsys\PackBundle\Util\SluggerUtil;
 
 class Command extends BaseCommand {
 	/**
-	 * Doctrine instance
-	 *
-	 * @var ManagerRegistry
-	 */
-	protected ManagerRegistry $doctrine;
-
-	/**
-	 * Router instance
-	 *
-	 * @var RouterInterface
-	 */
-	protected RouterInterface $router;
-
-	/**
-	 * Slugger instance
-	 *
-	 * @var SluggerUtil
-	 */
-	protected SluggerUtil $slugger;
-
-	/**
-	 * Translator instance
-	 *
-	 * @var TranslatorInterface
-	 */
-	protected TranslatorInterface $translator;
-
-	/**
-	 * Locale
-	 *
-	 * @var string
-	 */
-	protected string $locale;
-
-	/**
 	 * Creates new command
 	 *
 	 * @param ManagerRegistry $doctrine The doctrine instance
@@ -65,33 +30,20 @@ class Command extends BaseCommand {
 	 * @param TranslatorInterface $translator The translator instance
 	 * @param string $locale The default locale
 	 */
-	public function __construct(ManagerRegistry $doctrine, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, string $locale) {
+	public function __construct(protected ManagerRegistry $doctrine, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected string $locale) {
 		//Call parent constructor
 		parent::__construct();
-
-		//Set doctrine
-		$this->doctrine = $doctrine;
-
-		//Set router
-		$this->router = $router;
-
-		//Set slugger
-		$this->slugger = $slugger;
 
 		//Get router context
 		$context = $this->router->getContext();
 
 		//Set host
+		//TODO: set it in env RAPSYSAIR_HOST ?
 		$context->setHost('airlibre.eu');
 
 		//Set scheme
+		//TODO: set it in env RAPSYSAIR_SCHEME ?
 		$context->setScheme('https');
-
-		//Set the translator
-		$this->translator = $translator;
-
-		//Set locale
-		$this->locale = $locale;
 
 		//With default name
 		//TODO: XXX: see how to make it works
