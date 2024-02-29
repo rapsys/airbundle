@@ -1,8 +1,9 @@
-{% extends '@RapsysAir/body.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<article class="session{% if session.locked is defined and session.locked %} locked{% elseif session.application.canceled is defined and session.application.canceled %} canceled{% endif %}">
 		<header>
-			<h2>{{ description }}</h2>
+			<h2>{{ title.page }}</h2>
+			<p>{{ description }}</p>
 		</header>
 		<div class="panel">
 			<div class="grid three">
