@@ -1,4 +1,4 @@
-{% extends '@RapsysAir/body.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<article id="dashboard">
 		<header>
@@ -20,35 +20,35 @@
 			<header>
 				<h3 id="about">{% trans %}About Libre Air{% endtrans %}</h3>
 			</header>
-			<p>{{ '%title%, an information site for outdoor dancers and organizers.'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
+			<p>{{ '%title%, an information site for outdoor dancers and organizers.'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
 		</section>
 		<section>
 			<header>
 				<h3 id="mission">{% trans %}Our mission{% endtrans %}</h3>
 			</header>
-			<p>{{ '%title%\'s mission is simple: provide dancers with the information they need to easily find organizers dance sessions.'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
+			<p>{{ '%title%\'s mission is simple: provide dancers with the information they need to easily find organizers dance sessions.'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
 			<p>{% trans %}If it's an outdoor place we want to document it.{% endtrans %}</p>
-			{# <p><a href="{{ absolute_url(site.url) }}" title="{{ site.title }}">{{ site.title }}</a>{% trans %}, an information site for outdoor dancers and organizers.{% endtrans %}</p> #}
+			{# <p><a href="{{ absolute_url(root) }}" title="{{ title.site }}">{{ title.site }}</a>{% trans %}, an information site for outdoor dancers and organizers.{% endtrans %}</p> #}
 		</section>
 		<section>
 			<header>
 				<h3 id="howtohelp">{% trans %}How you can help{% endtrans %}</h3>
 			</header>
 			<p>{% trans %}Our community is composed of amazing dancers all around the world who participate, review dance session and help us promote them.{% endtrans %}</p>
-			<p>{{ 'However, you don\'t need to be a professional dancer or organizer to help %title%!'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
-			<p>{{ 'Donate on %title% to help us fund our mission.'|trans({'%title%': '<a href="' ~ site.donate ~ '" title="' ~ 'Fund our mission'|trans ~ '">' ~ 'our donation page'|trans ~ '</a>'})|raw }}</p>
+			<p>{{ 'However, you don\'t need to be a professional dancer or organizer to help %title%!'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
+			<p>{{ 'Donate on %title% to help us fund our mission.'|trans({'%title%': '<a href="' ~ donate ~ '" title="' ~ 'Fund our mission'|trans ~ '">' ~ 'our donation page'|trans ~ '</a>'})|raw }}</p>
 		</section>
 		<section>
 			<header>
 				<h3 id="history">{% trans %}History of Libre Air{% endtrans %}</h3>
 			</header>
 			{# <p>{% trans %}Our community is composed of amazing dancers all around the world who participate, review dance session and help us promote them.{% endtrans %}</p>
-			<p>{{ 'However, you don\'t need to be a professional dancer or organizer to help %title%!'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
-			<p>{{ 'Donate on %title% to help us fund our mission.'|trans({'%title%': '<a href="' ~ site.donate ~ '" title="' ~ 'Fund our mission'|trans ~ '">' ~ 'our donation page'|trans ~ '</a>'})|raw }}</p> #}
+			<p>{{ 'However, you don\'t need to be a professional dancer or organizer to help %title%!'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
+			<p>{{ 'Donate on %title% to help us fund our mission.'|trans({'%title%': '<a href="' ~ donate ~ '" title="' ~ 'Fund our mission'|trans ~ '">' ~ 'our donation page'|trans ~ '</a>'})|raw }}</p> #}
 
-			<p>{{ 'The %title% project started in 2019 when the need for a new dispatch platform for outdoor dance events arose.'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
+			<p>{{ 'The %title% project started in 2019 when the need for a new dispatch platform for outdoor dance events arose.'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
 			<p>{% trans %}Since then the project has grown and now forms a central point for broadcasting outdoor dance events from different organizers.{% endtrans %}</p>
-			<p>{{ 'In the future, %title% hopes to become a daily visited resource for participants and organizers of outdoor dance sessions.'|trans({'%title%': '<a href="' ~ absolute_url(site.url) ~ '" title="' ~ site.title ~ '">' ~ site.title ~ '</a>'})|raw }}</p>
+			<p>{{ 'In the future, %title% hopes to become a daily visited resource for participants and organizers of outdoor dance sessions.'|trans({'%title%': '<a href="' ~ absolute_url(root) ~ '" title="' ~ title.site ~ '">' ~ title.site ~ '</a>'})|raw }}</p>
 		</section>
 		<section>
 			<header>
