@@ -109,7 +109,7 @@ rapsys_user:
 
 #Doctrine configuration
 doctrine:
-    # Dbal configuration
+    #Dbal configuration
     dbal:
         charset: 'utf8mb4'
         default_table_options:
@@ -140,10 +140,6 @@ doctrine:
 
 #Security configuration
 security:
-#XXX: seems dropped in symfony 7
-#    #Enable authenticator manager
-#    enable_authenticator_manager: true
-
     #Set password hashers
     password_hashers:
         #Rapsys\AirBundle\Entity\User: plaintext
@@ -154,14 +150,14 @@ security:
     providers:
         database:
             entity:
-                class: Rapsys\AirBundle\Entity\User
-                property: mail
+                class: 'Rapsys\AirBundle\Entity\User'
+                property: 'mail'
 
     #Set firewall
     firewalls:
         #Disables authentication for assets and the profiler, adapt it according to your needs
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: '^/(_(profiler|wdt)|css|images|js)/'
             security: false
 
         main:
@@ -170,21 +166,21 @@ security:
             #lazy: true
 
             #Activate database provider
-            provider: database
+            provider: 'database'
 
             #XXX: https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
             #http_basic: ~
 
             #Set form login
-            #XXX: https://symfony.com/doc/current/security/form_login_setup.html
-            #TODO: https://symfony.com/doc/current/security/guard_authentication.html
+            #XXX: see https://symfony.com/doc/current/security/form_login_setup.html
+            #XXX: see https://symfony.com/doc/current/security/custom_authenticator.html
             form_login:
                 #Redirect to referer if different from login route
                 use_referer: true
                 #Login path
-                login_path: rapsys_user_login
+                login_path: 'rapsys_user_login'
                 #Check path
-                check_path: rapsys_user_login
+                check_path: 'rapsys_user_login'
                 #Username parameter
                 username_parameter: 'login[mail]'
                 #Password parameter
@@ -193,12 +189,12 @@ security:
             #Set logout route
             logout:
                 #Logout route
-                path: rapsys_user_logout
+                path: 'rapsys_user_logout'
                 #Logout default target
-                target: rapsys_air
+                target: 'rapsys_air'
 
             #Set custom access denied handler
-            access_denied_handler: Rapsys\AirBundle\Handler\AccessDeniedHandler
+            access_denied_handler: 'Rapsys\AirBundle\Handler\AccessDeniedHandler'
 
             #Remember me
             #XXX: see https://symfony.com/doc/current/security/remember_me.html
@@ -240,70 +236,10 @@ framework:
             X-Originating-IP: '%env(string:REMOTE_ADDR)%'
     secret: '%env(string:APP_SECRET)%'
     validation:
-        email_validation_mode: html5
-#    php_errors:
-#        log: true
-#    http_method_override: false
-#    session:
-#        handler_id: null
-#        cookie_secure: auto
-#        cookie_samesite: lax
-#        storage_factory_id: session.storage.factory.native
-#framework:
-#    error_controller: Rapsys\AirBundle\Controller\ErrorController::show
-#
-#    #Assets configuration
-#    XXX: don't use that shit, it breaks assets._default_package url generation
-#    assets:
-#        #Set default base path
-#        #base_path: '/bundles/%%s'
-#        #Set default version
-#        version: 'x'
-#        #Set default format
-#        version_format: '%%s?v=%%s'
-#
-#        packages:
-#            pack:
-#                base_path: '/bundles/%%s'
+        email_validation_mode: 'html5'
 
 #Service configuration
 services:
-    #Register twig file_get_contents extension
-    #XXX: obsolete by email.image twig filter in "twig/extensions" or "twig/html-extra"
-    #rapsys_air.twig.file_get_contents:
-    #    class: 'Rapsys\AirBundle\Twig\FileGetContentsExtension'
-    #    tags: [ 'twig.extension' ]
-    #Register twig base64 extension
-    #rapsys_air.twig.base64:
-    #    class: 'Rapsys\AirBundle\Twig\Base64Extension'
-    #    tags: [ 'twig.extension' ]
-    #Register twig bb2html extension
-    #rapsys_air.twig.bb2html:
-    #    class: 'Rapsys\AirBundle\Twig\Bb2htmlExtension'
-    #    tags: [ 'twig.extension' ]
-    #Register twig intl extension
-    #XXX: https://www.php.net/manual/en/class.intldateformatter.php
-    #XXX: https://stackoverflow.com/questions/25948853/how-to-install-the-intl-extension-for-twig
-    #rapsys_air.twig.intl:
-    #    class: 'Twig\Extensions\IntlExtension'
-    #    tags: [ 'twig.extension' ]
-    #new TwigFilter('markdown_to_html', ['Twig\\Extra\\Markdown\\MarkdownRuntime', 'convert'], ['is_safe' => ['all']]),
-    #new TwigFilter('html_to_markdown', 'Twig\\Extra\\Markdown\\twig_html_to_markdown', ['is_safe' => ['all']]),
-    #Register twig markdown_to_html extension
-    #    #class: 'Twig\Extra\Markdown\DefaultMarkdown'
-    #rapsys_air.twig.markdown_eruse:
-    #    class: 'Twig\Extra\Markdown\DefaultMarkdown'
-    #rapsys_air.twig.markdown_runtime:
-    #    class: 'Twig\Extra\Markdown\MarkdownRuntime'
-    #    arguments: [ '@rapsys_air.twig.markdown_eruse' ]
-    #rapsys_air.markdown:
-    #    class: 'Twig\Extra\Markdown\MarkdownExtension'
-    #    tags: [ 'twig.extension' ]
-    #Register twig pack extension
-    #rapsys_pack.pack_extension:
-    #    class: 'Rapsys\PackBundle\Twig\PackExtension'
-    #    arguments: [ '@file_locator', '@service_container', '@rapsys_pack.path_package' ]
-    #    tags: [ 'twig.extension' ]
     #Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
         arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
@@ -341,11 +277,6 @@ services:
         arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
         #arguments: [ '@service_container', '@router', '@translator' ]
         tags: [ 'controller.service_arguments' ]
-    #Register locale event subscriber
-    #TODO: remove that shit now ???
-    #Rapsys\AirBundle\EventSubscriber\LocaleSubscriber:
-    #    arguments: [ '@router', '%rapsys_air.locales%' ]
-    #    tags: [ 'kernel.event_subscriber' ]
     #Register access denied handler
     Rapsys\AirBundle\Handler\AccessDeniedHandler:
         arguments: [ '@security.authorization_checker', '@service_container', '@rapsys_user.access_decision_manager', '@doctrine', '@rapsys_air.facebook_util', '@form.factory', '@rapsys_pack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsys_pack.map_util', '@rapsys_pack.path_package', '@router', '@security.helper', '@rapsys_pack.slugger_util', '@request_stack', '@translator', '@twig' ]
@@ -353,10 +284,6 @@ services:
     Rapsys\AirBundle\DataFixtures\AirFixtures:
         arguments: [ '@service_container', '@security.user_password_hasher' ]
         tags: [ 'doctrine.fixture.orm' ]
-#   #Set version strategy
-#   assets.static_version_strategy:
-#       class: Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy
-#       arguments: [ 'x', '%%s?v=%%s' ]
     Rapsys\AirBundle\Form\ApplicationType:
         arguments: [ '@doctrine', '@translator' ]
         tags: [ 'form.type' ]
@@ -413,8 +340,7 @@ services:
 twig:
     #Enforce debug
     #auto_reload: ~
-    debug: true
-    #debug: '%kernel.debug%'
+    debug: '%kernel.debug%'
     #strict_variables: '%kernel.debug%'
 
     #Disable cache
