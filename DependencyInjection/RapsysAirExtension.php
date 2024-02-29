@@ -33,6 +33,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 	public function prepend(ContainerBuilder $container) {
 		/* XXX: All that shit is not used anymore in theory
 		 * TODO: drop it ???
+		 * XXX: problem was with ignoreExtraKeys($remove = true) missing false argument
 		//Load framework configurations
 		//XXX: required to extract default_locale and translation.fallbacks
 		$frameworks = $container->getExtensionConfig('framework');
@@ -53,7 +54,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		$container->setParameter('kernel.default_locale', $framework['default_locale']);
 
 		//Load rapsys_user configurations
-		//XXX: required to extract default_locale and translation.fallbacks
+		//XXX: required to extract class ?
 		$rapsys_users = $container->getExtensionConfig('rapsys_user');
 
 		//Recursively merge rapsys_user configurations
@@ -64,6 +65,9 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 			},
 			[]
 		);
+
+		//Set rapsys_user.languages key
+		$container->setParameter('rapsys_user', $rapsys_user);
 
 		//Set rapsys_user.languages key
 		$container->setParameter('rapsys_user.languages', $rapsys_user['languages']);*/
