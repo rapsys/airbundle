@@ -61,23 +61,24 @@ class Repository extends EntityRepository {
 		//Set quoted table names
 		//XXX: this allow to make this code table name independent
 		//XXX: remember to place longer prefix before shorter to avoid strange replacings
+		//XXX: entity short syntax removed in doctrine/persistence 3.x: https://github.com/doctrine/orm/issues/8818
 		$tables = [
-			'RapsysAirBundle:UserDance' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('dances'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
-			'RapsysAirBundle:UserGroup' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('groups'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
-			'RapsysAirBundle:UserLocation' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('locations'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
-			'RapsysAirBundle:UserSubscription' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('subscriptions'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
-			'RapsysAirBundle:Application' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Application'), $dp),
-			'RapsysAirBundle:Civility' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Civility'), $dp),
-			'RapsysAirBundle:Country' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Country'), $dp),
-			'RapsysAirBundle:Dance' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Dance'), $dp),
-			'RapsysAirBundle:GoogleCalendar' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\GoogleCalendar'), $dp),
-			'RapsysAirBundle:GoogleToken' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\GoogleToken'), $dp),
-			'RapsysAirBundle:Group' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Group'), $dp),
-			'RapsysAirBundle:Location' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Location'), $dp),
-			'RapsysAirBundle:Session' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Session'), $dp),
-			'RapsysAirBundle:Slot' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Slot'), $dp),
-			'RapsysAirBundle:Snippet' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Snippet'), $dp),
-			'RapsysAirBundle:User' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
+			'Rapsys\AirBundle\Entity\UserDance' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('dances'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
+			'Rapsys\AirBundle\Entity\UserGroup' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('groups'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
+			'Rapsys\AirBundle\Entity\UserLocation' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('locations'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
+			'Rapsys\AirBundle\Entity\UserSubscription' => $qs->getJoinTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User')->getAssociationMapping('subscriptions'), $manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
+			'Rapsys\AirBundle\Entity\Application' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Application'), $dp),
+			'Rapsys\AirBundle\Entity\Civility' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Civility'), $dp),
+			'Rapsys\AirBundle\Entity\Country' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Country'), $dp),
+			'Rapsys\AirBundle\Entity\Dance' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Dance'), $dp),
+			'Rapsys\AirBundle\Entity\GoogleCalendar' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\GoogleCalendar'), $dp),
+			'Rapsys\AirBundle\Entity\GoogleToken' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\GoogleToken'), $dp),
+			'Rapsys\AirBundle\Entity\Group' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Group'), $dp),
+			'Rapsys\AirBundle\Entity\Location' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Location'), $dp),
+			'Rapsys\AirBundle\Entity\Session' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Session'), $dp),
+			'Rapsys\AirBundle\Entity\Slot' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Slot'), $dp),
+			'Rapsys\AirBundle\Entity\Snippet' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\Snippet'), $dp),
+			'Rapsys\AirBundle\Entity\User' => $qs->getTableName($manager->getClassMetadata('Rapsys\AirBundle\Entity\User'), $dp),
 			//Set accuweather max number of daily pages
 			':accudaily' => 12,
 			//Set accuweather max number of hourly pages
