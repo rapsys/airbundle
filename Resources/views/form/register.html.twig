@@ -1,9 +1,8 @@
-{% extends '@RapsysAir/body.html.twig' %}
-{% block title %}{{ site.title }} - {{ title }}{% endblock %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<article>
 		<header>
-			<h2><a href="{{ path('rapsys_user_register') }}">{{ title }}</a></h2>
+			<h2><a href="{{ path('rapsys_user_register') }}">{{ title.page }}</a></h2>
 		</header>
 		{% if disabled is defined and disabled %}
 			<p class="message error">{% trans %}Your account has been disabled{% endtrans %}</p>
@@ -11,48 +10,44 @@
 			<p class="message notice">{% trans %}Your verification mail has been sent, to activate your account you must follow the confirmation link inside{% endtrans %}</p>
 			<p class="message warning">{% trans %}If you did not receive a verification mail, check your Spam or Junk mail folders{% endtrans %}</p>
 		{% else %}
-			{{ form_start(form) }}
-				<div>
-					{% if form.mail is defined %}
-						{{ form_row(form.mail) }}
-					{% endif %}
+			{{ form_start(register) }}
+				{% if register.mail is defined %}
+					{{ form_row(register.mail) }}
+				{% endif %}
 
-					{% if form.password is defined %}
-						{{ form_row(form.password.first) }}
+				{% if register.password is defined %}
+					{{ form_row(register.password) }}
+				{% endif %}
 
-						{{ form_row(form.password.second) }}
-					{% endif %}
+				{% if register.civility is defined %}
+					{{ form_row(register.civility) }}
+				{% endif %}
 
-					{% if form.civility is defined %}
-						{{ form_row(form.civility) }}
-					{% endif %}
+				{% if register.forename is defined %}
+					{{ form_row(register.forename) }}
+				{% endif %}
 
-					{% if form.forename is defined %}
-						{{ form_row(form.forename) }}
-					{% endif %}
+				{% if register.surname is defined %}
+					{{ form_row(register.surname) }}
+				{% endif %}
 
-					{% if form.surname is defined %}
-						{{ form_row(form.surname) }}
-					{% endif %}
+				{% if register.pseudonym is defined %}
+					{{ form_row(register.pseudonym) }}
+				{% endif %}
 
-					{% if form.pseudonym is defined %}
-						{{ form_row(form.pseudonym) }}
-					{% endif %}
+				{% if register.slug is defined %}
+					{{ form_row(register.slug) }}
+				{% endif %}
 
-					{% if form.slug is defined %}
-						{{ form_row(form.slug) }}
-					{% endif %}
+				{% if register.phone is defined %}
+					{{ form_row(register.phone) }}
+				{% endif %}
 
-					{% if form.phone is defined %}
-						{{ form_row(form.phone) }}
-					{% endif %}
-
-					{{ form_row(form.submit) }}
-				</div>
+				{{ form_row(register.submit) }}
 
 				{# Render CSRF token etc .#}
-				<footer style="display:none">{{ form_rest(form) }}</footer>
-			{{ form_end(form) }}
+				<footer style="display:none">{{ form_rest(register) }}</footer>
+			{{ form_end(register) }}
 		{% endif %}
 	</article>
 {% endblock %}

@@ -1,9 +1,8 @@
-{% extends '@RapsysAir/body.html.twig' %}
-{% block title %}{{ site.title }} - {{ title }}{% endblock %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<article>
 		<header>
-			<h2><a href="{{ app.request.requesturi }}">{{ title }}</a></h2>
+			<h2><a href="{{ app.request.requesturi }}">{{ title.page }}</a></h2>
 		</header>
 		{{ form_start(edit) }}
 			<div>
