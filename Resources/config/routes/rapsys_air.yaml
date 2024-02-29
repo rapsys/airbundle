@@ -178,7 +178,7 @@ rapsys_user_confirm:
     path:
         en_gb: '/en/confirm/{hash}/{mail}'
         fr_fr: '/confirmer/{hash}/{mail}'
-    controller: Rapsys\UserBundle\Controller\DefaultController::confirm
+    controller: Rapsys\UserBundle\Controller\UserController::confirm
     requirements:
         mail: '[a-zA-Z0-9=_-]+'
         hash: '[a-zA-Z0-9=_-]+'
@@ -198,7 +198,7 @@ rapsys_user_login:
     path:
         en_gb: '/en/login/{hash}/{mail}'
         fr_fr: '/connecter/{hash}/{mail}'
-    controller: Rapsys\UserBundle\Controller\DefaultController::login
+    controller: Rapsys\UserBundle\Controller\UserController::login
     defaults:
         mail: ~
         hash: ~
@@ -217,7 +217,7 @@ rapsys_user_recover:
     path:
         en_gb: '/en/recover/{hash}/{pass}/{mail}'
         fr_fr: '/recuperer/{hash}/{pass}/{mail}'
-    controller: Rapsys\UserBundle\Controller\DefaultController::recover
+    controller: Rapsys\UserBundle\Controller\UserController::recover
     defaults:
         mail: ~
         pass: ~
@@ -232,7 +232,7 @@ rapsys_user_register:
     path:
         en_gb: '/en/register/{hash}/{field}/{mail}'
         fr_fr: '/enregistrer/{hash}/{field}/{mail}'
-    controller: Rapsys\UserBundle\Controller\DefaultController::register
+    controller: Rapsys\UserBundle\Controller\UserController::register
     defaults:
         mail: ~
         field: ~
