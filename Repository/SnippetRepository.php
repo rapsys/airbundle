@@ -25,7 +25,7 @@ class SnippetRepository extends \Doctrine\ORM\EntityRepository {
 	public function findByUserIdLocaleIndexByLocationId(int $userId, string $locale): array {
 		//Fetch snippets
 		$ret = $this->_em
-			->createQuery('SELECT s FROM RapsysAirBundle:Snippet s INDEX BY s.location WHERE s.locale = :locale and s.user = :user')
+			->createQuery('SELECT s FROM Rapsys\AirBundle\Entity\Snippet s INDEX BY s.location WHERE s.locale = :locale and s.user = :user')
 			->setParameter('user', $userId)
 			->setParameter('locale', $locale)
 			->getResult();

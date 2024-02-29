@@ -32,7 +32,7 @@ SELECT
 	d.id,
 	d.name,
 	d.type
-FROM RapsysAirBundle:Dance AS d
+FROM Rapsys\AirBundle\Entity\Dance AS d
 SQL;
 
 		//Replace bundle entity name by table name
@@ -45,7 +45,7 @@ SQL;
 		//Declare all fields
 		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
 		//addScalarResult($sqlColName, $resColName, $type = 'string');
-		$rsm->addEntityResult('RapsysAirBundle:Dance', 'd')
+		$rsm->addEntityResult('Rapsys\AirBundle\Entity\Dance', 'd')
 			->addFieldResult('d', 'id', 'id')
 			->addFieldResult('d', 'name', 'name')
 			->addFieldResult('d', 'type', 'type')
@@ -69,7 +69,7 @@ SELECT
 	d.name,
 	GROUP_CONCAT(d.id ORDER BY d.id SEPARATOR "\\n") AS ids,
 	GROUP_CONCAT(d.type ORDER BY d.id SEPARATOR "\\n") AS types
-FROM RapsysAirBundle:Dance AS d
+FROM Rapsys\AirBundle\Entity\Dance AS d
 GROUP BY d.name
 ORDER BY d.name
 SQL;
@@ -133,7 +133,7 @@ SQL;
 		$req = <<<SQL
 SELECT
 	d.id
-FROM RapsysAirBundle:Dance AS d
+FROM Rapsys\AirBundle\Entity\Dance AS d
 WHERE CONCAT_WS(' ', d.name, d.type) IN (:nametype)
 ORDER BY d.name, d.type
 SQL;
@@ -171,7 +171,7 @@ SELECT
 	GROUP_CONCAT(d.id ORDER BY d.id SEPARATOR "\\n") AS ids,
 	GROUP_CONCAT(d.type ORDER BY d.id SEPARATOR "\\n") AS types,
 	MAX(d.updated) AS modified
-FROM RapsysAirBundle:Dance AS d
+FROM Rapsys\AirBundle\Entity\Dance AS d
 GROUP BY d.name
 ORDER BY d.name
 SQL;
@@ -248,8 +248,8 @@ SQL;
 	public function findByUserId($userId): array {
 		//Set the request
 		$req = 'SELECT d.id, d.name, d.type
-FROM RapsysAirBundle:UserDance AS ud
-JOIN RapsysAirBundle:Dance AS d ON (d.id = ud.dance_id)
+FROM Rapsys\AirBundle\Entity\UserDance AS ud
+JOIN Rapsys\AirBundle\Entity\Dance AS d ON (d.id = ud.dance_id)
 WHERE ud.user_id = :uid';
 
 		//Replace bundle entity name by table name
@@ -260,7 +260,7 @@ WHERE ud.user_id = :uid';
 		$rsm = new ResultSetMapping();
 
 		//Declare result set for our request
-		$rsm->addEntityResult('RapsysAirBundle:Dance', 'd');
+		$rsm->addEntityResult('Rapsys\AirBundle\Entity\Dance', 'd');
 		$rsm->addFieldResult('d', 'id', 'id');
 		$rsm->addFieldResult('d', 'name', 'name');
 		$rsm->addFieldResult('d', 'type', 'type');

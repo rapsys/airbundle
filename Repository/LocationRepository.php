@@ -51,8 +51,8 @@ SELECT
 	l.longitude,
 	l.indoor,
 	l.updated
-FROM RapsysAirBundle:Location AS l
-LEFT JOIN RapsysAirBundle:Session AS s ON (l.id = s.location_id)
+FROM Rapsys\AirBundle\Entity\Location AS l
+LEFT JOIN Rapsys\AirBundle\Entity\Session AS s ON (l.id = s.location_id)
 GROUP BY l.id
 ORDER BY COUNT(IF(s.date BETWEEN :begin AND :end, s.id, NULL)) DESC, COUNT(s.id) DESC, l.id
 SQL;
@@ -138,8 +138,8 @@ FROM (
 		l.zipcode,
 		COUNT(s.id) AS count,
 		COUNT(IF(s.date BETWEEN :begin AND :end, s.id, NULL)) AS pcount
-	FROM RapsysAirBundle:Location AS l
-	LEFT JOIN RapsysAirBundle:Session AS s ON (l.id = s.location_id)
+	FROM Rapsys\AirBundle\Entity\Location AS l
+	LEFT JOIN Rapsys\AirBundle\Entity\Session AS s ON (l.id = s.location_id)
 	GROUP BY l.id
 	ORDER BY NULL
 	LIMIT 0, :limit
@@ -271,7 +271,7 @@ SELECT
 	ROUND(AVG(l.latitude), 6) AS latitude,
 	ROUND(AVG(l.longitude), 6) AS longitude,
 	MAX(l.updated) AS updated
-FROM RapsysAirBundle:Location AS l
+FROM Rapsys\AirBundle\Entity\Location AS l
 GROUP BY city, SUBSTRING(l.zipcode, 1, 3)
 ORDER BY ACOS(SIN(RADIANS(:latitude))*SIN(RADIANS(l.latitude))+COS(RADIANS(:latitude))*COS(RADIANS(l.latitude))*COS(RADIANS(:longitude - l.longitude)))*40030.17/2/PI()
 LIMIT 0, 1
@@ -370,11 +370,11 @@ FROM (
 		l.latitude,
 		l.longitude,
 		l.updated
-	FROM RapsysAirBundle:Location AS l
+	FROM Rapsys\AirBundle\Entity\Location AS l
 	WHERE l.latitude BETWEEN :minlat AND :maxlat AND l.longitude BETWEEN :minlong AND :maxlong
 	LIMIT 0, :limit
 ) AS a
-LEFT JOIN RapsysAirBundle:Session s ON (s.location_id = a.id)
+LEFT JOIN Rapsys\AirBundle\Entity\Session s ON (s.location_id = a.id)
 GROUP BY a.id
 ORDER BY COUNT(IF(s.date BETWEEN :begin AND :end, s.id, NULL)) DESC, count DESC, a.id
 SQL;
@@ -589,8 +589,8 @@ SELECT
 	SUBSTRING(l.zipcode, 1, 2) AS city_id,
 	ROUND(AVG(l2.latitude), 6) AS city_latitude,
 	ROUND(AVG(l2.longitude), 6) AS city_longitude
-FROM RapsysAirBundle:Location AS l
-JOIN RapsysAirBundle:Location AS l2 ON (l2.city = l.city AND SUBSTRING(l.zipcode, 1, 3) = SUBSTRING(l.zipcode, 1, 3))
+FROM Rapsys\AirBundle\Entity\Location AS l
+JOIN Rapsys\AirBundle\Entity\Location AS l2 ON (l2.city = l.city AND SUBSTRING(l.zipcode, 1, 3) = SUBSTRING(l.zipcode, 1, 3))
 WHERE l.id = :id
 GROUP BY l.id
 LIMIT 0, 1
@@ -706,7 +706,7 @@ SQL;
 	public function findComplementBySessionId(int $id): array {
 		//Fetch complement locations
 		$ret = $this->getEntityManager()
-			  ->createQuery('SELECT l.id, l.title FROM RapsysAirBundle:Session s LEFT JOIN RapsysAirBundle:Session s2 WITH s2.id != s.id AND s2.slot = s.slot AND s2.date = s.date LEFT JOIN RapsysAirBundle:Location l WITH l.id != s.location AND (l.id != s2.location OR s2.location IS NULL) WHERE s.id = :sid GROUP BY l.id ORDER BY l.id')
+			  ->createQuery('SELECT l.id, l.title FROM Rapsys\AirBundle\Entity\Session s LEFT JOIN Rapsys\AirBundle\Entity\Session s2 WITH s2.id != s.id AND s2.slot = s.slot AND s2.date = s.date LEFT JOIN Rapsys\AirBundle\Entity\Location l WITH l.id != s.location AND (l.id != s2.location OR s2.location IS NULL) WHERE s.id = :sid GROUP BY l.id ORDER BY l.id')
 			->setParameter('sid', $id)
 			->getArrayResult();
 
@@ -728,8 +728,8 @@ SQL;
 	public function findByUserId(int $userId): array {
 		//Set the request
 		$req = 'SELECT l.id, l.title
-FROM RapsysAirBundle:UserLocation AS ul
-JOIN RapsysAirBundle:Location AS l ON (l.id = ul.location_id)
+FROM Rapsys\AirBundle\Entity\UserLocation AS ul
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = ul.location_id)
 WHERE ul.user_id = :id';
 
 		//Replace bundle entity name by table name
@@ -740,7 +740,7 @@ WHERE ul.user_id = :id';
 		$rsm = new ResultSetMapping();
 
 		//Declare result set for our request
-		$rsm->addEntityResult('RapsysAirBundle:Location', 'l')
+		$rsm->addEntityResult('Rapsys\AirBundle\Entity\Location', 'l')
 			->addFieldResult('l', 'id', 'id')
 			->addFieldResult('l', 'title', 'title');
 

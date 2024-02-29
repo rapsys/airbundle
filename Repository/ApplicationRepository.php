@@ -15,7 +15,7 @@ class ApplicationRepository extends \Doctrine\ORM\EntityRepository {
 	public function findOneBySessionUser($session, $user) {
 		//Fetch article
 		$ret = $this->getEntityManager()
-			->createQuery('SELECT a FROM RapsysAirBundle:Application a WHERE (a.session = :session AND a.user = :user)')
+			->createQuery('SELECT a FROM Rapsys\AirBundle\Entity\Application a WHERE (a.session = :session AND a.user = :user)')
 			->setParameter('session', $session)
 			->setParameter('user', $user)
 			->getSingleResult();

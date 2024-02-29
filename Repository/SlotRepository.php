@@ -27,7 +27,7 @@ class SlotRepository extends Repository {
 	public function findAllWithTranslatedTitle(): array {
 		//Set the request from quoted table name
 		//XXX: this allow to make this code table name independent
-		$req = 'SELECT s.id, s.title FROM RapsysAirBundle:Slot AS s';
+		$req = 'SELECT s.id, s.title FROM Rapsys\AirBundle\Entity\Slot AS s';
 
 		//Replace bundle entity name by table name
 		$req = str_replace($this->tableKeys, $this->tableValues, $req);

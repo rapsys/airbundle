@@ -41,9 +41,9 @@ FROM (
 		u.pseudonym,
 		g.id AS g_id,
 		g.title AS g_title
-	FROM RapsysAirBundle:User AS u
-	JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
-	JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
+	FROM Rapsys\AirBundle\Entity\User AS u
+	JOIN Rapsys\AirBundle\Entity\UserGroup AS gu ON (gu.user_id = u.id)
+	JOIN Rapsys\AirBundle\Entity\Group AS g ON (g.id = gu.group_id)
 	WHERE g.title <> 'User'
 	ORDER BY g.id DESC, u.pseudonym ASC
 	LIMIT 0, :limit
@@ -116,8 +116,8 @@ SELECT
 FROM (
 	SELECT
 		u.id
-	FROM RapsysAirBundle:User AS u
-	LEFT JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
+	FROM Rapsys\AirBundle\Entity\User AS u
+	LEFT JOIN Rapsys\AirBundle\Entity\UserGroup AS gu ON (gu.user_id = u.id)
 	WHERE u.pseudonym IN (:pseudonym)
 	ORDER BY gu.group_id DESC, u.pseudonym ASC
 	LIMIT 0, :limit
@@ -156,8 +156,8 @@ SQL;
 		//Set the request
 		$req =<<<SQL
 SELECT u.id, u.pseudonym
-FROM RapsysAirBundle:Application AS a
-JOIN RapsysAirBundle:User AS u ON (u.id = a.user_id)
+FROM Rapsys\AirBundle\Entity\Application AS a
+JOIN Rapsys\AirBundle\Entity\User AS u ON (u.id = a.user_id)
 WHERE a.session_id = :id
 SQL;
 
@@ -221,11 +221,11 @@ SELECT
 	GROUP_CONCAT(g.id ORDER BY g.id SEPARATOR "\\n") AS ids,
 	GROUP_CONCAT(g.title ORDER BY g.id SEPARATOR "\\n") AS titles,
 	GREATEST(COALESCE(u.updated, 0), COALESCE(c.updated, 0), COALESCE(o.updated, 0)) AS modified
-FROM RapsysAirBundle:User AS u
-LEFT JOIN RapsysAirBundle:Civility AS c ON (c.id = u.civility_id)
-LEFT JOIN RapsysAirBundle:Country AS o ON (o.id = u.country_id)
-LEFT JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
-LEFT JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
+FROM Rapsys\AirBundle\Entity\User AS u
+LEFT JOIN Rapsys\AirBundle\Entity\Civility AS c ON (c.id = u.civility_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Country AS o ON (o.id = u.country_id)
+LEFT JOIN Rapsys\AirBundle\Entity\UserGroup AS gu ON (gu.user_id = u.id)
+LEFT JOIN Rapsys\AirBundle\Entity\Group AS g ON (g.id = gu.group_id)
 WHERE u.id = :id
 SQL;
 
@@ -326,7 +326,8 @@ SQL;
 		//Iterate on each location
 		foreach(explode("\n", $result['ids']) as $k => $id) {
 			//Add role
-			$roles[$role = 'ROLE_'.strtoupper($titles[$k])] = $role;
+			//XXX: roles are keyes by id
+			$roles[$id] = 'ROLE_'.strtoupper($titles[$k]);
 
 			//Add group
 			$groups[$id] = $this->translator->trans($titles[$k]);
@@ -402,14 +403,14 @@ FROM (
 			u.pseudonym,
 			g.id AS g_id,
 			g.title AS g_title
-		FROM RapsysAirBundle:User AS u
-		JOIN RapsysAirBundle:UserGroup AS gu ON (gu.user_id = u.id)
-		JOIN RapsysAirBundle:Group AS g ON (g.id = gu.group_id)
+		FROM Rapsys\AirBundle\Entity\User AS u
+		JOIN Rapsys\AirBundle\Entity\UserGroup AS gu ON (gu.user_id = u.id)
+		JOIN Rapsys\AirBundle\Entity\Group AS g ON (g.id = gu.group_id)
 		ORDER BY NULL
 		LIMIT 0, :limit
 	) AS c
-	LEFT JOIN RapsysAirBundle:Application AS a ON (a.user_id = c.id)
-	LEFT JOIN RapsysAirBundle:Dance AS d ON (d.id = a.dance_id)
+	LEFT JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.user_id = c.id)
+	LEFT JOIN Rapsys\AirBundle\Entity\Dance AS d ON (d.id = a.dance_id)
 	GROUP BY d.id
 	ORDER BY NULL
 	LIMIT 0, :limit

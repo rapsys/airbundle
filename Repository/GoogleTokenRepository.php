@@ -39,8 +39,8 @@ SELECT
 	GROUP_CONCAT(c.mail ORDER BY c.id SEPARATOR "\\n") AS cmails,
 	GROUP_CONCAT(c.summary ORDER BY c.id SEPARATOR "\\n") AS csummaries,
 	GROUP_CONCAT(IFNULL(c.synchronized, 'NULL') ORDER BY c.id SEPARATOR "\\n") AS csynchronizeds
-FROM RapsysAirBundle:GoogleToken AS t
-JOIN RapsysAirBundle:GoogleCalendar AS c ON (c.google_token_id = t.id)
+FROM Rapsys\AirBundle\Entity\GoogleToken AS t
+JOIN Rapsys\AirBundle\Entity\GoogleCalendar AS c ON (c.google_token_id = t.id)
 GROUP BY t.id
 ORDER BY NULL
 SQL;

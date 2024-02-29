@@ -114,16 +114,16 @@ SELECT
 	GROUP_CONCAT(IFNULL(sa.canceled, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_canceled,
 	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
 	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-LEFT JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-LEFT JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
-LEFT JOIN RapsysAirBundle:Dance AS sad ON (sad.id = sa.dance_id)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
+JOIN Rapsys\AirBundle\Entity\Slot AS t ON (t.id = s.slot_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
+LEFT JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Dance AS sad ON (sad.id = sa.dance_id)
 WHERE s.id = :id
 GROUP BY s.id
 ORDER BY NULL
@@ -440,7 +440,7 @@ SQL;
 			//XXX: get every location between 0 and 15 km of latitude and longitude
 			$req = <<<SQL
 SELECT l.id
-FROM RapsysAirBundle:Location AS l
+FROM Rapsys\AirBundle\Entity\Location AS l
 WHERE ACOS(SIN(RADIANS(:latitude))*SIN(RADIANS(l.latitude))+COS(RADIANS(:latitude))*COS(RADIANS(l.latitude))*COS(RADIANS(:longitude - l.longitude)))*40030.17/2/PI() BETWEEN 0 AND 15
 SQL;
 
@@ -478,15 +478,15 @@ SQL;
 SELECT l2.id
 FROM (
 	SELECT l.id, l.latitude, l.longitude
-	FROM RapsysAirBundle:Application AS a
-	JOIN RapsysAirBundle:Session AS s ON (s.id = a.session_id)
-	JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+	FROM Rapsys\AirBundle\Entity\Application AS a
+	JOIN Rapsys\AirBundle\Entity\Session AS s ON (s.id = a.session_id)
+	JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 	WHERE a.user_id = :id
 	GROUP BY l.id
 	ORDER BY NULL
 	LIMIT 0, :limit
 ) AS a
-JOIN RapsysAirBundle:Location AS l2
+JOIN Rapsys\AirBundle\Entity\Location AS l2
 WHERE ACOS(SIN(RADIANS(a.latitude))*SIN(RADIANS(l2.latitude))+COS(RADIANS(a.latitude))*COS(RADIANS(l2.latitude))*COS(RADIANS(a.longitude - l2.longitude)))*40030.17/2/PI() BETWEEN 0 AND 15
 GROUP BY l2.id
 ORDER BY NULL
@@ -559,16 +559,16 @@ SELECT
 	GROUP_CONCAT(sad.name ORDER BY sa.user_id SEPARATOR "\\n") AS sad_name,
 	GROUP_CONCAT(sad.type ORDER BY sa.user_id SEPARATOR "\\n") AS sad_type,
 	GREATEST(COALESCE(s.updated, 0), COALESCE(l.updated, 0), COALESCE(p.updated, 0), COALESCE(MAX(sa.updated), 0), COALESCE(MAX(sau.updated), 0), COALESCE(MAX(sad.updated), 0)) AS modified
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Slot AS t ON (t.id = s.slot_id)
-{$grantSql}JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-{$grantSql}JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-{$grantSql}JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
-LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN RapsysAirBundle:Dance AS sad ON (sad.id = sa.dance_id)
-LEFT JOIN RapsysAirBundle:User AS sau ON (sau.id = sa.user_id)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
+JOIN Rapsys\AirBundle\Entity\Slot AS t ON (t.id = s.slot_id)
+{$grantSql}JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
+{$grantSql}JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
+{$grantSql}JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
+LEFT JOIN Rapsys\AirBundle\Entity\Dance AS sad ON (sad.id = sa.dance_id)
+LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
 WHERE s.date BETWEEN :begin AND :end{$locationSql}
 GROUP BY s.id
 ORDER BY NULL
@@ -947,7 +947,7 @@ SQL;
 		//Set the request
 		$req = <<<SQL
 SELECT ud.dance_id
-FROM RapsysAirBundle:UserDance AS ud
+FROM Rapsys\AirBundle\Entity\UserDance AS ud
 WHERE ud.user_id = :uid
 SQL;
 
@@ -977,7 +977,7 @@ SQL;
 		//Set the request
 		$req = <<<SQL
 SELECT us.user_id
-FROM RapsysAirBundle:UserSubscription AS us
+FROM Rapsys\AirBundle\Entity\UserSubscription AS us
 WHERE us.subscriber_id = :uid
 SQL;
 
@@ -1038,12 +1038,12 @@ SELECT
 	p.donate AS p_donate,
 	p.link AS p_link,
 	p.profile AS p_profile
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id${danceSql}${subscriptionSql})
-JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
+JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id{$danceSql}{$subscriptionSql})
+JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
+JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 WHERE GREATEST(s.created, s.updated, a.created, a.updated, ADDTIME(ADDTIME(s.date, s.begin), s.length)) >= :synchronized
 SQL;
 
@@ -1113,7 +1113,7 @@ SQL;
 	public function findOneByLocationSlotDate(Location $location, Slot $slot, \DateTime $date): ?Session {
 		//Return sessions
 		return $this->getEntityManager()
-			->createQuery('SELECT s FROM RapsysAirBundle:Session s WHERE (s.location = :location AND s.slot = :slot AND s.date = :date)')
+			->createQuery('SELECT s FROM Rapsys\AirBundle\Entity\Session s WHERE (s.location = :location AND s.slot = :slot AND s.date = :date)')
 			->setParameter('location', $location)
 			->setParameter('slot', $slot)
 			->setParameter('date', $date)
@@ -1164,12 +1164,12 @@ SELECT
 	p.donate AS p_donate,
 	p.link AS p_link,
 	p.profile AS p_profile
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id)
-JOIN RapsysAirBundle:Dance AS ad ON (ad.id = a.dance_id)
-JOIN RapsysAirBundle:User AS au ON (au.id = a.user_id)
-LEFT JOIN RapsysAirBundle:Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
+JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
+JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
+JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
 WHERE s.date BETWEEN :begin AND :end
 ORDER BY NULL
 SQL;
@@ -1239,8 +1239,8 @@ SQL;
 		//XXX: select session starting after now and stopping before date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
 		$req = <<<SQL
 SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 WHERE ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) >= NOW() AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY))
 SQL;
 
@@ -1252,7 +1252,7 @@ SQL;
 
 		//Declare all fields
 		$rsm
-			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addEntityResult('Rapsys\AirBundle\Entity\Session', 's')
 			->addFieldResult('s', 'id', 'id')
 			->addFieldResult('s', 'date', 'date')
 			->addFieldResult('s', 'begin', 'begin')
@@ -1265,9 +1265,9 @@ SQL;
 			->addFieldResult('s', 'temperature', 'temperature')
 			->addFieldResult('s', 'temperaturemin', 'temperaturemin')
 			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
-			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
+			->addJoinedEntityResult('Rapsys\AirBundle\Entity\Slot', 'o', 's', 'slot')
 			->addFieldResult('o', 'slot_id', 'id')
-			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
+			->addJoinedEntityResult('Rapsys\AirBundle\Entity\Location', 'l', 's', 'location')
 			->addFieldResult('l', 'location_id', 'id')
 			->addFieldResult('l', 'zipcode', 'zipcode')
 			->addIndexBy('s', 'id');
@@ -1288,8 +1288,8 @@ SQL;
 		//XXX: select session stopping after or equal date(now)+3d as accuweather only provide hourly data for the next 3 days (INTERVAL 3 DAY)
 		$req = <<<SQL
 SELECT s.id, s.slot_id, s.location_id, s.date, s.begin, s.length, s.rainfall, s.rainrisk, s.realfeel, s.realfeelmin, s.realfeelmax, s.temperature, s.temperaturemin, s.temperaturemax, l.zipcode
-FROM RapsysAirBundle:Session AS s
-JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
+FROM Rapsys\AirBundle\Entity\Session AS s
+JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 WHERE ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) >= DATE(ADDDATE(NOW(), INTERVAL :accuhourly DAY)) AND ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) < DATE(ADDDATE(NOW(), INTERVAL :accudaily DAY))
 SQL;
 
@@ -1301,7 +1301,7 @@ SQL;
 
 		//Declare all fields
 		$rsm
-			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addEntityResult('Rapsys\AirBundle\Entity\Session', 's')
 			->addFieldResult('s', 'id', 'id')
 			->addFieldResult('s', 'date', 'date')
 			->addFieldResult('s', 'begin', 'begin')
@@ -1314,9 +1314,9 @@ SQL;
 			->addFieldResult('s', 'temperature', 'temperature')
 			->addFieldResult('s', 'temperaturemin', 'temperaturemin')
 			->addFieldResult('s', 'temperaturemax', 'temperaturemax')
-			->addJoinedEntityResult('RapsysAirBundle:Slot', 'o', 's', 'slot')
+			->addJoinedEntityResult('Rapsys\AirBundle\Entity\Slot', 'o', 's', 'slot')
 			->addFieldResult('o', 'slot_id', 'id')
-			->addJoinedEntityResult('RapsysAirBundle:Location', 'l', 's', 'location')
+			->addJoinedEntityResult('Rapsys\AirBundle\Entity\Location', 'l', 's', 'location')
 			->addFieldResult('l', 'location_id', 'id')
 			->addFieldResult('l', 'zipcode', 'zipcode')
 			->addIndexBy('s', 'id');
@@ -1338,9 +1338,9 @@ SQL;
 		//TODO: remonter les données pour le mail ?
 		$req =<<<SQL
 SELECT s.id
-FROM RapsysAirBundle:Session as s
-LEFT JOIN RapsysAirBundle:Application AS a ON (a.id = s.application_id AND a.canceled IS NULL)
-JOIN RapsysAirBundle:Application AS a2 ON (a2.session_id = s.id AND a2.canceled IS NULL)
+FROM Rapsys\AirBundle\Entity\Session as s
+LEFT JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id AND a.canceled IS NULL)
+JOIN Rapsys\AirBundle\Entity\Application AS a2 ON (a2.session_id = s.id AND a2.canceled IS NULL)
 WHERE s.locked IS NULL AND s.application_id IS NULL AND
 (UNIX_TIMESTAMP(@dt_start := ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY)) - UNIX_TIMESTAMP()) <= IF(
 	(@td_sc := UNIX_TIMESTAMP(@dt_start) - UNIX_TIMESTAMP(s.created)) <= :seniordelay,
@@ -1359,7 +1359,7 @@ SQL;
 
 		//Declare all fields
 		$rsm
-			->addEntityResult('RapsysAirBundle:Session', 's')
+			->addEntityResult('Rapsys\AirBundle\Entity\Session', 's')
 			->addFieldResult('s', 'id', 'id')
 			->addIndexBy('s', 'id');
 
@@ -1462,29 +1462,29 @@ FROM (
 					s.premium,
 					l.hotspot,
 					a.created
-				FROM RapsysAirBundle:Session AS s
-				JOIN RapsysAirBundle:Location AS l ON (l.id = s.location_id)
-				JOIN RapsysAirBundle:Application AS a ON (a.session_id = s.id AND a.canceled IS NULL)
-				LEFT JOIN RapsysAirBundle:Session AS s2 ON (s2.id != s.id AND s2.location_id = s.location_id AND s2.slot_id IN (:afternoonid, :eveningid) AND s2.application_id IS NOT NULL AND s2.locked IS NULL AND s2.date > s.date - INTERVAL 1 YEAR)
-				LEFT JOIN RapsysAirBundle:Application AS a2 ON (a2.id = s2.application_id AND a2.user_id = a.user_id AND (a2.canceled IS NULL OR TIMESTAMPDIFF(DAY, a2.canceled, ADDDATE(ADDTIME(s2.date, s2.begin), INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY)) < 1))
+				FROM Rapsys\AirBundle\Entity\Session AS s
+				JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
+				JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.session_id = s.id AND a.canceled IS NULL)
+				LEFT JOIN Rapsys\AirBundle\Entity\Session AS s2 ON (s2.id != s.id AND s2.location_id = s.location_id AND s2.slot_id IN (:afternoonid, :eveningid) AND s2.application_id IS NOT NULL AND s2.locked IS NULL AND s2.date > s.date - INTERVAL 1 YEAR)
+				LEFT JOIN Rapsys\AirBundle\Entity\Application AS a2 ON (a2.id = s2.application_id AND a2.user_id = a.user_id AND (a2.canceled IS NULL OR TIMESTAMPDIFF(DAY, a2.canceled, ADDDATE(ADDTIME(s2.date, s2.begin), INTERVAL IF(s2.slot_id = :afterid, 1, 0) DAY)) < 1))
 				WHERE s.id = :sid
 				GROUP BY a.id
 				ORDER BY NULL
 				LIMIT 0, :limit
 			) AS b
-			LEFT JOIN RapsysAirBundle:Session AS s3 ON (s3.id != b.session_id AND s3.application_id IS NOT NULL AND s3.locked IS NULL AND s3.date > b.date - INTERVAL 1 YEAR)
-			LEFT JOIN RapsysAirBundle:Application AS a3 ON (a3.id = s3.application_id AND a3.user_id = b.user_id AND (a3.canceled IS NULL OR TIMESTAMPDIFF(DAY, a3.canceled, ADDDATE(ADDTIME(s3.date, s3.begin), INTERVAL IF(s3.slot_id = :afterid, 1, 0) DAY)) < 1))
+			LEFT JOIN Rapsys\AirBundle\Entity\Session AS s3 ON (s3.id != b.session_id AND s3.application_id IS NOT NULL AND s3.locked IS NULL AND s3.date > b.date - INTERVAL 1 YEAR)
+			LEFT JOIN Rapsys\AirBundle\Entity\Application AS a3 ON (a3.id = s3.application_id AND a3.user_id = b.user_id AND (a3.canceled IS NULL OR TIMESTAMPDIFF(DAY, a3.canceled, ADDDATE(ADDTIME(s3.date, s3.begin), INTERVAL IF(s3.slot_id = :afterid, 1, 0) DAY)) < 1))
 			GROUP BY b.id
 			ORDER BY NULL
 			LIMIT 0, :limit
 		) AS c
-		LEFT JOIN RapsysAirBundle:Session AS s4 ON (s4.id != c.session_id AND s4.location_id = c.location_id AND s4.application_id IS NOT NULL AND s4.locked IS NULL AND s4.date > c.date - INTERVAL 1 YEAR)
-		LEFT JOIN RapsysAirBundle:Application AS a4 ON (a4.id = s4.application_id AND a4.user_id != c.user_id AND (a4.canceled IS NULL OR TIMESTAMPDIFF(DAY, a4.canceled, ADDDATE(ADDTIME(s4.date, s4.begin), INTERVAL IF(s4.slot_id = :afterid, 1, 0) DAY)) < 1))
+		LEFT JOIN Rapsys\AirBundle\Entity\Session AS s4 ON (s4.id != c.session_id AND s4.location_id = c.location_id AND s4.application_id IS NOT NULL AND s4.locked IS NULL AND s4.date > c.date - INTERVAL 1 YEAR)
+		LEFT JOIN Rapsys\AirBundle\Entity\Application AS a4 ON (a4.id = s4.application_id AND a4.user_id != c.user_id AND (a4.canceled IS NULL OR TIMESTAMPDIFF(DAY, a4.canceled, ADDDATE(ADDTIME(s4.date, s4.begin), INTERVAL IF(s4.slot_id = :afterid, 1, 0) DAY)) < 1))
 		GROUP BY c.id
 		ORDER BY NULL
 		LIMIT 0, :limit
 	) AS d
-	LEFT JOIN RapsysAirBundle:UserGroup AS ug ON (ug.user_id = d.user_id)
+	LEFT JOIN Rapsys\AirBundle\Entity\UserGroup AS ug ON (ug.user_id = d.user_id)
 	GROUP BY d.id
 	LIMIT 0, :limit
 ) AS e
@@ -1501,7 +1501,7 @@ SQL;
 		$req = str_replace($this->tableKeys, $this->tableValues, $req);
 
 		//Set update request
-		$upreq = 'UPDATE RapsysAirBundle:Application SET score = :score, updated = NOW() WHERE id = :id';
+		$upreq = 'UPDATE Rapsys\AirBundle\Entity\Application SET score = :score, updated = NOW() WHERE id = :id';
 
 		//Replace bundle entity name by table name
 		$upreq = str_replace($this->tableKeys, $this->tableValues, $upreq);
@@ -1511,7 +1511,7 @@ SQL;
 
 		//Declare all fields
 		$rsm
-			->addEntityResult('RapsysAirBundle:Application', 'a')
+			->addEntityResult('Rapsys\AirBundle\Entity\Application', 'a')
 			->addFieldResult('a', 'id', 'id')
 			->addFieldResult('a', 'score', 'score')
 			->addIndexBy('a', 'id');
@@ -1564,8 +1564,8 @@ FROM (
 		s.begin,
 		s.slot_id,
 		GROUP_CONCAT(sa.id ORDER BY sa.id SEPARATOR "\\n") AS sa_id
-	FROM RapsysAirBundle:Session AS s
-	LEFT JOIN RapsysAirBundle:Application AS sa ON (sa.session_id = s.id)
+	FROM Rapsys\AirBundle\Entity\Session AS s
+	LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
 	GROUP BY s.id
 	ORDER BY NULL
 ) AS a
@@ -1597,7 +1597,7 @@ SQL;
 
 		//Set update session request
 		$sreq = <<<SQL
-UPDATE RapsysAirBundle:Session
+UPDATE Rapsys\AirBundle\Entity\Session
 SET id = :nid, updated = NOW()
 WHERE id = :id
 SQL;
@@ -1607,7 +1607,7 @@ SQL;
 
 		//Set update application request
 		$areq = <<<SQL
-UPDATE RapsysAirBundle:Application
+UPDATE Rapsys\AirBundle\Entity\Application
 SET session_id = :nid, updated = NOW()
 WHERE session_id = :id
 SQL;
@@ -1668,7 +1668,7 @@ SQL;
 
 				//Set update auto_increment request
 				$ireq = <<<SQL
-ALTER TABLE RapsysAirBundle:Session
+ALTER TABLE Rapsys\AirBundle\Entity\Session
 auto_increment = 1
 SQL;
 
