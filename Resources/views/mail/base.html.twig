@@ -1,5 +1,5 @@
 {% extends '@RapsysAir/base.html.twig' %}
-{% block stylesheets %}
+{% block stylesheet %}
 	<meta name="viewport" content="width=device-width" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	{% if locale is defined and locale %}<meta http-equiv="Content-Language" content="{{ locale }}" />{% endif %}
@@ -20,8 +20,8 @@
 {% block body %}
 	<table class="header">
 		<tr>
-			<td><a href="{{ site.url|escape('html_attr') }}"><img src="{{ email.image(site.logo.png) }}" alt="{{ site.title|escape('html_attr') }}" /></a></td>
-			<td><h1><a href="{{ site.url|escape('html_attr') }}">{{ site.title }}</a></h1></td>
+			<td><a href="{{ root|escape('html_attr') }}"><img src="{{ email.image(logo.png) }}" alt="{{ title.site|escape('html_attr') }}" /></a></td>
+			<td><h1><a href="{{ root|escape('html_attr') }}">{{ title.site }}</a></h1></td>
 		</tr>
 	</table>
         {% block content %}{% endblock %}
