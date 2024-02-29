@@ -67,7 +67,7 @@ class DanceController extends AbstractController {
 		}
 
 		//Add calendar
-		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
+		$this->context['calendar'] = $this->doctrine->getRepository(Session::class)->findAllByPeriodAsCalendarArray($this->period, !$this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED'), floatval($latitude), floatval($longitude));
 
 		//Set dances
 		$this->context['dances'] = [];
@@ -95,7 +95,7 @@ class DanceController extends AbstractController {
 		$response = new Response();
 
 		//With logged user
-		if ($this->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+		if ($this->checker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
 			//Set last modified
 			$response->setLastModified(new \DateTime('-1 year'));
 
