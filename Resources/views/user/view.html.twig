@@ -1,8 +1,9 @@
-{% extends '@RapsysAir/body.html.twig' %}
+{% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<article>
 		<header>
-			<h2>{{ description }}</h2>
+			<h2>{{ title.page }}</h2>
+			<p>{{ description }}</p>
 		</header>
 		<div class="panel">
 			{% if calendar is defined and calendar %}
