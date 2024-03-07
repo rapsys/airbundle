@@ -11,7 +11,7 @@
 
 namespace Rapsys\AirBundle;
 
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
