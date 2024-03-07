@@ -18,6 +18,8 @@ use Symfony\Component\Translation\Loader\ArrayLoader;
 
 use Rapsys\AirBundle\RapsysAirBundle;
 
+use Rapsys\UserBundle\RapsysUserBundle;
+
 /**
  * This is the class that loads and manages your bundle configuration.
  *
@@ -25,55 +27,30 @@ use Rapsys\AirBundle\RapsysAirBundle;
  */
 class RapsysAirExtension extends Extension implements PrependExtensionInterface {
 	/**
+	 * {@inheritdoc}
+	 *
 	 * Prepend the configuration
 	 *
-	 * @desc Preload the configuration to allow sourcing as parameters
-	 * {@inheritdoc}
+	 * Preload the configuration to allow sourcing as parameters
 	 */
-	public function prepend(ContainerBuilder $container) {
-		/* XXX: All that shit is not used anymore in theory
-		 * TODO: drop it ???
-		 * XXX: problem was with ignoreExtraKeys($remove = true) missing false argument
-		//Load framework configurations
-		//XXX: required to extract default_locale and translation.fallbacks
-		$frameworks = $container->getExtensionConfig('framework');
+	public function prepend(ContainerBuilder $container): void {
+		/*Load rapsysuser configurations
+		$rapsysusers = $container->getExtensionConfig($alias = RapsysUserBundle::getAlias());
 
-		//Recursively merge framework configurations
-		$framework = array_reduce(
-			$frameworks,
+		//Recursively merge rapsysuser configurations
+		$rapsysuser = array_reduce(
+			$rapsysusers,
 			function ($res, $i) {
 				return array_merge_recursive($res, $i);
 			},
 			[]
 		);
 
-		//Set translator fallbacks
-		$container->setParameter('kernel.translator.fallbacks', $framework['translator']['fallbacks']);
-
-		//Set default locale
-		$container->setParameter('kernel.default_locale', $framework['default_locale']);
-
-		//Load rapsys_user configurations
-		//XXX: required to extract class ?
-		$rapsys_users = $container->getExtensionConfig('rapsys_user');
-
-		//Recursively merge rapsys_user configurations
-		$rapsys_user = array_reduce(
-			$rapsys_users,
-			function ($res, $i) {
-				return array_merge_recursive($res, $i);
-			},
-			[]
-		);
-
-		//Set rapsys_user.languages key
-		$container->setParameter('rapsys_user', $rapsys_user);
-
-		//Set rapsys_user.languages key
-		$container->setParameter('rapsys_user.languages', $rapsys_user['languages']);*/
+		//Set rapsysuser.languages key
+		$container->setParameter($alias, $rapsysuser);*/
 
 		//Process the configuration
-		$configs = $container->getExtensionConfig($this->getAlias());
+		$configs = $container->getExtensionConfig($alias = RapsysAirBundle::getAlias());
 
 		//Load configuration
 		$configuration = $this->getConfiguration($configs, $container);
@@ -84,15 +61,15 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		//Detect when no user configuration is provided
 		if ($configs === [[]]) {
 			//Prepend default config
-			$container->prependExtensionConfig($this->getAlias(), $config);
+			$container->prependExtensionConfig($alias, $config);
 		}
 
 		//Save configuration in parameters
-		$container->setParameter($this->getAlias(), $config);
+		$container->setParameter($alias, $config);
 
 		//Store flattened array in parameters
 		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
-		foreach($this->flatten($config, $this->getAlias(), 10, '.', ['rapsys_air.copy', 'rapsys_air.icon', 'rapsys_air.icon.png', 'rapsys_air.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
+		foreach($this->flatten($config, $alias, 10, '.', ['rapsys_air.copy', 'rapsys_air.icon', 'rapsys_air.icon.png', 'rapsys_air.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
 	}
@@ -100,14 +77,7 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function load(array $configs, ContainerBuilder $container) {
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getAlias(): string {
-		return RapsysAirBundle::getAlias();
+	public function load(array $configs, ContainerBuilder $container): void {
 	}
 
 	/**
