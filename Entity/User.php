@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -19,62 +19,62 @@ use Rapsys\UserBundle\Entity\User as BaseUser;
 
 class User extends BaseUser {
 	/**
-	 * @var ?string
+	 * City
 	 */
 	private ?string $city;
 
 	/**
-	 * @var ?string
+	 * Phone
 	 */
 	private ?string $phone;
 
 	/**
-	 * @var Country
+	 * Country
 	 */
 	private ?Country $country;
 
 	/**
-	 * @var ?string
+	 * Pseudonym
 	 */
 	private ?string $pseudonym;
 
 	/**
-	 * @var ?string
+	 * Zipcode
 	 */
 	private ?string $zipcode;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Applications collection
 	 */
 	private Collection $applications;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Dances collection
 	 */
 	private Collection $dances;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Locations collection
 	 */
 	private Collection $locations;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Snippets collection
 	 */
 	private Collection $snippets;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Subscribers collection
 	 */
 	private Collection $subscribers;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Subscriptions collection
 	 */
 	private Collection $subscriptions;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Google tokens collection
 	 */
 	private Collection $googleTokens;
 
