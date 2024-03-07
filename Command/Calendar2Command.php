@@ -60,22 +60,18 @@ class Calendar2Command extends Command {
 
 	/**
 	 * {@inheritdoc}
-	 *
-	 * @param string $project The google project
-	 * @param string $client The google client
-	 * @param string $secret The google secret
 	 */
-	public function __construct(ManagerRegistry $doctrine, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator, string $locale, string $project, string $client, string $secret) {
+	public function __construct(ManagerRegistry $doctrine, string $locale, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator) {
 		//Call parent constructor
-		parent::__construct($doctrine, $router, $slugger, $translator, $locale);
+		parent::__construct($doctrine, $locale, $router, $slugger, $translator);
 
 		//Set google client
 		$this->client = new Client(
 			[
-				'application_name' => $project,
-				'client_id' => $client,
-				'client_secret' => $secret,
-				'redirect_uri' => $this->router->generate('rapsys_air_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
+				'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
+				'client_id' => $_ENV['RAPSYSAIR_GOOGLE_CLIENT'],
+				'client_secret' => $_ENV['RAPSYSAIR_GOOGLE_SECRET'],
+				'redirect_uri' => $this->router->generate('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 				'scopes' => $this->scopes,
 				'access_type' => 'offline',
 				#'login_hint' => $user->getMail(),
