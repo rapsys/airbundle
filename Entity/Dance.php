@@ -249,7 +249,7 @@ class Dance {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have a dance instance
-		if (($dance = $eventArgs->getEntity()) instanceof Dance) {
+		if (($dance = $eventArgs->getObject()) instanceof Dance) {
 			//Set updated value
 			$dance->setUpdated(new \DateTime('now'));
 		}

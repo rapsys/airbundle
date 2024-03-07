@@ -432,7 +432,7 @@ class Snippet {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have an snippet instance
-		if (($snippet = $eventArgs->getEntity()) instanceof Snippet) {
+		if (($snippet = $eventArgs->getObject()) instanceof Snippet) {
 			//Set updated value
 			$snippet->setUpdated(new \DateTime('now'));
 		}

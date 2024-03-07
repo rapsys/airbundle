@@ -238,7 +238,7 @@ class Application {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have an application instance
-		if (($application = $eventArgs->getEntity()) instanceof Application) {
+		if (($application = $eventArgs->getObject()) instanceof Application) {
 			//Set updated value
 			$application->setUpdated(new \DateTime('now'));
 		}

@@ -216,7 +216,7 @@ class GoogleCalendar {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs): ?GoogleCalendar {
 		//Check that we have an snippet instance
-		if (($entity = $eventArgs->getEntity()) instanceof GoogleCalendar) {
+		if (($entity = $eventArgs->getObject()) instanceof GoogleCalendar) {
 			//Set updated value
 			return $entity->setUpdated(new \DateTime('now'));
 		}

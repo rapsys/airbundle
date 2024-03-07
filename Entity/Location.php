@@ -468,7 +468,7 @@ class Location {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have a location instance
-		if (($location = $eventArgs->getEntity()) instanceof Location) {
+		if (($location = $eventArgs->getObject()) instanceof Location) {
 			//Set updated value
 			$location->setUpdated(new \DateTime('now'));
 		}

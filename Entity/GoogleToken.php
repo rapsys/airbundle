@@ -283,7 +283,7 @@ class GoogleToken {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs): ?GoogleToken {
 		//Check that we have an snippet instance
-		if (($entity = $eventArgs->getEntity()) instanceof GoogleToken) {
+		if (($entity = $eventArgs->getObject()) instanceof GoogleToken) {
 			//Set updated value
 			return $entity->setUpdated(new \DateTime('now'));
 		}

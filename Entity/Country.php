@@ -227,7 +227,7 @@ class Country {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have an country instance
-		if (($country = $eventArgs->getEntity()) instanceof Country) {
+		if (($country = $eventArgs->getObject()) instanceof Country) {
 			//Set updated value
 			$country->setUpdated(new \DateTime('now'));
 		}
