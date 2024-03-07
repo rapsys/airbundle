@@ -108,7 +108,7 @@ class Configuration implements ConfigurationInterface {
 				'svg' => '@RapsysAir/svg/logo.svg'
 			],
 			'path' => is_link(($prefix = is_dir('public') ? './public/' : './').($link = 'bundles/'.str_replace('_', '', $alias))) && is_dir(realpath($prefix.$link)) || is_dir($prefix.$link) ? $link : dirname(__DIR__).'/Resources/public',
-			'root' => 'rapsys_air',
+			'root' => 'rapsysair',
             'title' => 'Libre Air\'s booking system'
 		];
 
