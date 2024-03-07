@@ -32,39 +32,33 @@ class ApplicationType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options) {
-		//Create form
-		$form = $builder;
-
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		//Add dance field
-		$form->add('dance', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Dance', 'choices' => $options['dance_choices'], 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your dance'])], 'data' => $options['dance_default']]);
+		$builder->add('dance', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Dance', 'choices' => $options['dance_choices'], 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your dance'])], 'data' => $options['dance_default']]);
 
 		//Add date field
-		$form->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
+		$builder->add('date', DateType::class, ['attr' => ['placeholder' => 'Your date', 'class' => 'date'], 'html5' => true, 'input' => 'datetime', 'widget' => 'single_text', 'format' => 'yyyy-MM-dd', 'data' => new \DateTime('+7 day'), 'constraints' => [new NotBlank(['message' => 'Please provide your date']), new Type(['type' => \DateTime::class, 'message' => 'Your date doesn\'t seems to be valid'])]]);
 
 		//Add location field
-		$form->add('location', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Location', 'choices' => $options['location_choices'], 'preferred_choices' => $options['location_favorites'], 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location_default']]);
+		$builder->add('location', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Location', 'choices' => $options['location_choices'], 'preferred_choices' => $options['location_favorites'], 'attr' => ['placeholder' => 'Your location'], 'choice_translation_domain' => true, 'constraints' => [new NotBlank(['message' => 'Please provide your location'])], 'data' => $options['location_default']]);
 
 		//Add slot field
-		$form->add('slot', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot_default']]);
+		$builder->add('slot', EntityType::class, ['class' => 'Rapsys\AirBundle\Entity\Slot', 'attr' => ['placeholder' => 'Your slot'], 'constraints' => [new NotBlank(['message' => 'Please provide your slot'])], 'choice_translation_domain' => true, 'data' => $options['slot_default']]);
 
 		//Add extra user field
 		if (!empty($options['user'])) {
 			//XXX: choicetype used here to use our own custom translated string
-			$form->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'choice_translation_domain' => false, 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $options['user_choices'], 'data' => $options['user_default']]);
+			$builder->add('user', ChoiceType::class, ['attr' => ['placeholder' => 'Your user'], 'choice_translation_domain' => false, 'constraints' => [new NotBlank(['message' => 'Please provide your user'])], 'choices' => $options['user_choices'], 'data' => $options['user_default']]);
 		}
 
 		//Add submit
-		$form->add('submit', SubmitType::class, ['label' => 'Send', 'attr' => ['class' => 'submit']]);
-
-		//Return form
-		return $form;
+		$builder->add('submit', SubmitType::class, ['label' => 'Send', 'attr' => ['class' => 'submit']]);
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		//Set defaults
 		$resolver->setDefaults(['error_bubbling' => true, 'dance_choices' => [], 'dance_default' => null, 'dance_favorites' => [], 'location_choices' => [], 'location_default' => null, 'location_favorites' => [], 'slot_default' => null, 'user' => true, 'user_choices' => [], 'user_default' => 1]);
 
@@ -102,7 +96,7 @@ class ApplicationType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getName() {
-		return 'rapsys_air_application';
+	public function getName(): string {
+		return 'rapsysair_application';
 	}
 }

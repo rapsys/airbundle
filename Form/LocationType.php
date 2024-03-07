@@ -30,8 +30,9 @@ class LocationType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options) {
-		return $builder
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
+		//Build form
+		$builder
 			->add('title', TextType::class, ['attr' => ['placeholder' => 'Your title'], 'constraints' => [new NotBlank(['message' => 'Please provide your title'])]])
 			->add('description', TextareaType::class, ['attr' => ['placeholder' => 'Your description', 'cols' => 50, 'rows' => 15], 'required' => false])
 			->add('address', TextType::class, ['attr' => ['placeholder' => 'Your address'], 'constraints' => [new NotBlank(['message' => 'Please provide your address'])]])
@@ -47,7 +48,7 @@ class LocationType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(['data_class' => Location::class, 'error_bubbling' => true]);
 	}
 }

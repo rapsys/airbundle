@@ -33,7 +33,7 @@ class ContactType extends CaptchaType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		//Set defaults
 		$resolver->setDefaults(['error_bubbling' => true]);
 	}
@@ -41,7 +41,7 @@ class ContactType extends CaptchaType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getName() {
+	public function getName(): string {
 		return 'contact_form';
 	}
 }

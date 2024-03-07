@@ -187,6 +187,6 @@ class RegisterType extends BaseRegisterType {
 	 * {@inheritdoc}
 	 */
 	public function getName(): string {
-		return 'rapsys_air_register';
+		return 'rapsysair_register';
 	}
 }

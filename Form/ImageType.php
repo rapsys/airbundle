@@ -81,6 +81,6 @@ class ImageType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function getName(): string {
-		return 'rapsys_air_image';
+		return 'rapsysair_image';
 	}
 }

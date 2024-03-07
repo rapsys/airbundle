@@ -39,7 +39,7 @@ class SessionType extends AbstractType {
 	 *
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		//Is admin or user with rainfall >= 2
 		if (!empty($options['raincancel'])) {
 			//Add raincancel item
@@ -104,15 +104,12 @@ class SessionType extends AbstractType {
 					->add('autoattribute', SubmitType::class, ['label' => 'Auto attribute', 'attr' => ['class' => 'submit']]);
 			}
 		}
-
-		//Return form
-		return $builder;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(['error_bubbling' => true, 'admin' => false, 'dance_choices' => [], 'dance_default' => null, 'dance_favorites' => [], 'date' => null, 'begin' => null, 'length' => null, 'cancel' => false, 'raincancel' => false, 'modify' => false, 'move' => false, 'attribute' => false, 'user' => null, 'session' => null, 'slot_default' => null]);
 
 		//Add admin
@@ -161,7 +158,7 @@ class SessionType extends AbstractType {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getName() {
-		return 'rapsys_air_session_edit';
+	public function getName(): string {
+		return 'rapsysair_session_edit';
 	}
 }

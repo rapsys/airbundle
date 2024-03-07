@@ -120,6 +120,6 @@ class SnippetType extends AbstractType {
 	 * {@inheritdoc}
 	 */
 	public function getName(): string {
-		return 'rapsys_air_snippet';
+		return 'rapsysair_snippet';
 	}
 }
