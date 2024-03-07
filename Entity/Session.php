@@ -123,6 +123,8 @@ class Session {
 		//Set defaults
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+
+		//Set collections
 		$this->applications = new ArrayCollection();
 	}
 
