@@ -74,7 +74,7 @@ final class Factory implements RepositoryFactory {
 
 		//Set to current locale
 		//XXX: current request is not yet populated in constructor
-		$this->locale = $this->request->getCurrentRequest()->getLocale() ?? $this->locale;
+		$this->locale = $this->request->getCurrentRequest()?->getLocale() ?? $this->locale;
 
 		//Return repository class instance
 		//XXX: router, slugger, translator, languages and locale arguments will be ignored by default
