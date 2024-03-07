@@ -640,6 +640,6 @@ class UserController extends BaseUserController {
 		}
 
 		//Redirect to user
-		return $this->redirectToRoute('rapsys_user_edit', ['mail' => $short = $this->slugger->short($user->getMail()), 'hash' => $this->slugger->hash($short)]);
+		return $this->redirectToRoute('rapsysuser_edit', ['mail' => $short = $this->slugger->short($user->getMail()), 'hash' => $this->slugger->hash($short)]);
 	}
 }
