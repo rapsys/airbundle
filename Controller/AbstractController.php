@@ -332,7 +332,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			//Create LoginType form
 			$login = $this->factory->create('Rapsys\UserBundle\Form\LoginType', null, [
 				//Set the action
-				'action' => $this->generateUrl('rapsys_user_login'),
+				'action' => $this->generateUrl('rapsysuser_login'),
 				//Disable password repeated
 				'password_repeated' => false,
 				//Set the form attribute
@@ -366,7 +366,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			$register = $this->factory->create('Rapsys\AirBundle\Form\RegisterType', null, $field+[
 				//Set the action
 				'action' => $this->generateUrl(
-					'rapsys_user_register',
+					'rapsysuser_register',
 					[
 						'mail' => $smail = $this->slugger->short(''),
 						'field' => $sfield = $this->slugger->serialize($field),
@@ -536,12 +536,12 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 			'doctrine.orm.default_entity_manager' => EntityManagerInterface::class,
 			'form.factory' => FormFactoryInterface::class,
 			'mailer.mailer' => MailerInterface::class,
-			'rapsys_air.facebook_util' => FacebookUtil::class,
-			'rapsys_pack.image_util' => ImageUtil::class,
-			'rapsys_pack.map_util' => MapUtil::class,
-			'rapsys_pack.path_package' => PackageInterface::class,
-			'rapsys_pack.slugger_util' => SluggerUtil::class,
-			'rapsys_user.access_decision_manager' => AccessDecisionManagerInterface::class,
+			'rapsysair.facebook_util' => FacebookUtil::class,
+			'rapsyspack.image_util' => ImageUtil::class,
+			'rapsyspack.map_util' => MapUtil::class,
+			'rapsyspack.path_package' => PackageInterface::class,
+			'rapsyspack.slugger_util' => SluggerUtil::class,
+			'rapsysuser.access_decision_manager' => AccessDecisionManagerInterface::class,
 			'request_stack' => RequestStack::class,
 			'router' => RouterInterface::class,
 			'security.authorization_checker' => AuthorizationCheckerInterface::class,
