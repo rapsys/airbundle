@@ -258,7 +258,7 @@ class WeatherCommand extends DoctrineCommand {
 
 				//Load simplexml
 				//XXX: trash all xmlns= broken tags
-				$sx = new \SimpleXMLElement(str_replace(['xmlns=', 'xlink:href='], ['xns=', 'href='], $tidy));
+				$sx = new \SimpleXMLElement(str_replace(['xmlns=', 'xlink:href='], ['xns=', 'href='], (string)$tidy));
 
 				//Process daily
 				if ($day == 'daily') {
@@ -268,10 +268,10 @@ class WeatherCommand extends DoctrineCommand {
 						$dsm = trim($node->div[0]->h2[0]->span[1]);
 
 						//Get temperature
-						$temperature = str_replace('°', '', $node->div[0]->div[0]->span[0]);
+						$temperature = str_replace('°', '', (string)$node->div[0]->div[0]->span[0]);
 
 						//Get rainrisk
-						$rainrisk = trim(str_replace('%', '', $node->div[1]))/100;
+						$rainrisk = trim(str_replace('%', '', (string)$node->div[1]))/100;
 
 						//Store data
 						$data[$zipcode][$dsm]['daily'] = [
@@ -286,19 +286,19 @@ class WeatherCommand extends DoctrineCommand {
 					#/html/body/div[1]/div[5]/div[1]/div[1]/div[1]/div[1]/div[1]/div/h2/span[1]
 					foreach($sx->xpath('//div[@data-shared="false"]') as $node) {
 						//Get hour
-						$hour = trim(str_replace(' h', '', $node->div[0]->div[0]->div[0]->div[0]->div[0]->h2[0]));
+						$hour = trim(str_replace(' h', '', (string)$node->div[0]->div[0]->div[0]->div[0]->div[0]->h2[0]));
 
 						//Compute dsm from day (1=d,2=d+1,3=d+2)
 						$dsm = (new \DateTime('+'.($day - 1).' day'))->format('d/m');
 
 						//Get temperature
-						$temperature = str_replace('°', '', $node->div[0]->div[0]->div[0]->div[0]->div[1]);
+						$temperature = str_replace('°', '', (string)$node->div[0]->div[0]->div[0]->div[0]->div[1]);
 
 						//Get realfeel
-						$realfeel = trim(str_replace(['RealFeel®', '°'], '', $node->div[0]->div[0]->div[0]->div[1]->div[0]->div[0]->div[0]));
+						$realfeel = trim(str_replace(['RealFeel®', '°'], '', (string)$node->div[0]->div[0]->div[0]->div[1]->div[0]->div[0]->div[0]));
 
 						//Get rainrisk
-						$rainrisk = floatval(str_replace('%', '', trim($node->div[0]->div[0]->div[0]->div[2]->div[0]))/100);
+						$rainrisk = floatval(str_replace('%', '', trim((string)$node->div[0]->div[0]->div[0]->div[2]->div[0]))/100);
 
 						//Set rainfall to 0 (mm)
 						$rainfall = 0;
@@ -307,9 +307,9 @@ class WeatherCommand extends DoctrineCommand {
 						//TODO: wind and other infos are present in $node->div[1]->div[0]->div[1]->div[0]->p
 						foreach($node->div[1]->div[0]->div[1]->div[0]->p as $p) {
 							//Lookup for rain entry if present
-							if (in_array(trim($p), ['Rain', 'Pluie'])) {
+							if (in_array(trim((string)$p), ['Rain', 'Pluie'])) {
 								//Get rainfall
-								$rainfall = floatval(str_replace(' mm', '', $p->span[0]));
+								$rainfall = floatval(str_replace(' mm', '', (string)$p->span[0]));
 							}
 						}
 
