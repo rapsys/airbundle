@@ -4,14 +4,14 @@
 #SCRUD: index, add, edit, delete, view
 
 #TODO: rename view in show ???
-rapsys_air:
+rapsysair:
     path:
         en_gb: '/en'
         fr_fr: '/'
     controller: Rapsys\AirBundle\Controller\DefaultController::index
     methods: GET
 
-rapsys_air_about:
+rapsysair_about:
     path:
         en_gb: '/en/about'
         fr_fr: '/a-propos'
@@ -19,145 +19,145 @@ rapsys_air_about:
     methods: GET
 
 #TODO: drop it or should we keep it to be able to add an application from multiple places ???
-rapsys_air_application_add:
+rapsysair_application_add:
     path:
         en_gb: '/en/application'
         fr_fr: '/reservation'
     controller: Rapsys\AirBundle\Controller\ApplicationController::add
     methods: GET|POST
 
-rapsys_air_contact:
+rapsysair_contact:
     path:
         en_gb: '/en/contact/{id<\d*>?}/{user<[\w-]*>?}'
         fr_fr: '/contacter/{id<\d*>?}/{user<[\w-]*>?}'
     controller: Rapsys\AirBundle\Controller\DefaultController::contact
     methods: GET|POST
 
-#rapsys_air_calendar:
+#rapsysair_calendar:
 #    path:
 #        en_gb: '/en/calendar'
 #        fr_fr: '/calendrier'
 #    controller: Rapsys\AirBundle\Controller\CalendarController::index
 #    methods: GET|POST
 
-rapsys_air_city:
+rapsysair_city:
     path:
         'en_gb': '/en/city'
         'fr_fr': '/ville'
     controller: Rapsys\AirBundle\Controller\LocationController::cities
     methods: GET|POST
 
-rapsys_air_city_view:
+rapsysair_city_view:
     path:
         'en_gb': '/en/city/{latitude<-?(?:\d*\.)?\d+>}/{longitude<-?(?:\d*\.)?\d+>}/{city<[\w-]+>}'
         'fr_fr': '/ville/{latitude<-?(?:\d*\.)?\d+>}/{longitude<-?(?:\d*\.)?\d+>}/{city<[\w-]+>}'
     controller: Rapsys\AirBundle\Controller\LocationController::city
     methods: GET|POST
 
-rapsys_air_dance:
+rapsysair_dance:
     path:
         'en_gb': '/en/dance'
         'fr_fr': '/danse'
     controller: Rapsys\AirBundle\Controller\DanceController::index
     methods: GET|POST
 
-rapsys_air_dance_view:
+rapsysair_dance_view:
     path:
         'en_gb': '/en/dance/{id<[0-9]+>}/{name<[\w-]+>}/{type<[\w-]+>}'
         'fr_fr': '/danse/{id<[0-9]+>}/{name<[\w-]+>}/{type<[\w-]+>}'
     controller: Rapsys\AirBundle\Controller\DanceController::view
     methods: GET|POST
 
-rapsys_air_dance_name:
+rapsysair_dance_name:
     path:
         'en_gb': '/en/dance/{name<[a-zA-Z0-9=_-]+>}/{dance<[\w-]+>}'
         'fr_fr': '/danse/{name<[a-zA-Z0-9=_-]+>}/{dance<[\w-]+>}'
     controller: Rapsys\AirBundle\Controller\DanceController::name
     methods: GET|POST
 
-rapsys_air_frequently_asked_questions:
+rapsysair_frequently_asked_questions:
     path:
         en_gb: '/en/frequently-asked-questions'
         fr_fr: '/foire-aux-questions'
     controller: Rapsys\AirBundle\Controller\DefaultController::frequentlyAskedQuestions
     methods: GET
 
-rapsys_air_google_callback:
+rapsysair_google_callback:
     path: '/google/callback'
     controller: Rapsys\AirBundle\Controller\UserController::googleCallback
     methods: GET
 
-rapsys_air_location:
+rapsysair_location:
     path:
         en_gb: '/en/location'
         fr_fr: '/emplacement'
     controller: Rapsys\AirBundle\Controller\LocationController::index
     methods: GET|POST
 
-rapsys_air_location_view:
+rapsysair_location_view:
     path:
         en_gb: '/en/location/{id<\d+>}/{location<[\w-]+>?}'
         fr_fr: '/emplacement/{id<\d+>}/{location<[\w-]+>?}'
     controller: Rapsys\AirBundle\Controller\LocationController::view
     methods: GET
 
-rapsys_air_organizer_regulation:
+rapsysair_organizer_regulation:
     path:
         en_gb: '/en/organizer-regulation'
         fr_fr: '/reglement-organisateur'
     controller: Rapsys\AirBundle\Controller\DefaultController::organizerRegulation
     methods: GET
 
-rapsys_air_session:
+rapsysair_session:
     path:
         en_gb: '/en/session'
         fr_fr: '/seance'
     controller: Rapsys\AirBundle\Controller\SessionController::index
     methods: GET
 
-rapsys_air_session_tangoargentin:
+rapsysair_session_tangoargentin:
     path:
         en_gb: '/en/session/tangoargentin.{!_format?json}'
         fr_fr: '/seance/tangoargentin.{!_format?json}'
     controller: Rapsys\AirBundle\Controller\SessionController::tangoargentin
     methods: GET
 
-rapsys_air_session_view:
+rapsysair_session_view:
     path:
         en_gb: '/en/session/{id<\d+>}/{location<[\w-]+>?}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
         fr_fr: '/seance/{id<\d+>}/{location<[\w-]+>?}/{dance<[\w-]*>?}/{user<[\w-]*>?}'
     controller: Rapsys\AirBundle\Controller\SessionController::view
     methods: GET|POST
 
-rapsys_air_snippet_add:
+rapsysair_snippet_add:
     path:
         en_gb: '/en/snippet'
         fr_fr: '/extrait'
     controller: Rapsys\AirBundle\Controller\SnippetController::add
     methods: POST
 
-rapsys_air_snippet_edit:
+rapsysair_snippet_edit:
     path:
         en_gb: '/en/snippet/{id<\d+>}'
         fr_fr: '/extrait/{id<\d+>}'
     controller: Rapsys\AirBundle\Controller\SnippetController::edit
     methods: POST
 
-rapsys_air_terms_of_service:
+rapsysair_terms_of_service:
     path:
         en_gb: '/en/terms-of-service'
         fr_fr: '/conditions-generales-d-utilisation'
     controller: Rapsys\AirBundle\Controller\DefaultController::termsOfService
     methods: GET
 
-rapsys_air_user:
+rapsysair_user:
     path:
         en_gb: '/en/user'
         fr_fr: '/utilisateur'
     controller: Rapsys\AirBundle\Controller\DefaultController::userIndex
     methods: GET
 
-rapsys_air_user_milongaraphael:
+rapsysair_user_milongaraphael:
     path:
         en_gb: '/en/milonga-raphael'
         fr_fr: '/milonga-raphael'
@@ -167,7 +167,7 @@ rapsys_air_user_milongaraphael:
         id: 1
         user: 'milonga-raphael'
 
-rapsys_air_user_view:
+rapsysair_user_view:
     path:
         en_gb: '/en/user/{id<\d+>}/{user<[\w-]+>?}'
         fr_fr: '/utilisateur/{id<\d+>}/{user<[\w-]+>?}'
