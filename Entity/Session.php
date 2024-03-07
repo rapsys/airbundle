@@ -11,145 +11,118 @@
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+
+use Rapsys\PackBundle\Util\IntlUtil;
 
 /**
  * Session
  */
 class Session {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
-	 * @var \DateTime
+	 * Begin time
 	 */
-	private $date;
+	private ?\DateTime $begin = null;
 
 	/**
-	 * @var \DateTime
+	 * Computed start datetime
 	 */
-	private $begin;
+	private ?\DateTime $start = null;
 
 	/**
-	 * @var \DateTime
+	 * Length time
 	 */
-	private $start;
+	private ?\DateTime $length = null;
 
 	/**
-	 * @var \DateTime
+	 * Computed stop datetime
 	 */
-	private $length;
+	private ?\DateTime $stop = null;
 
 	/**
-	 * @var \DateTime
+	 * Premium
 	 */
-	private $stop;
+	private ?bool $premium = null;
 
 	/**
-	 * @var bool
+	 * Rain mm
 	 */
-	private $premium;
+	private ?float $rainfall = null;
 
 	/**
-	 * @var float
+	 * Rain chance
 	 */
-	private $rainfall;
+	private ?float $rainrisk = null;
 
 	/**
-	 * @var float
+	 * Real feel temperature
 	 */
-	private $rainrisk;
+	private ?float $realfeel = null;
 
 	/**
-	 * @var float
+	 * Real feel minimum temperature
 	 */
-	private $realfeel;
+	private ?float $realfeelmin = null;
 
 	/**
-	 * @var float
+	 * Real feel maximum temperature
 	 */
-	private $realfeelmin;
+	private ?float $realfeelmax = null;
 
 	/**
-	 * @var float
+	 * Temperature
 	 */
-	private $realfeelmax;
+	private ?float $temperature = null;
 
 	/**
-	 * @var float
+	 * Minimum temperature
 	 */
-	private $temperature;
+	private ?float $temperaturemin = null;
 
 	/**
-	 * @var float
+	 * Maximum temperature
 	 */
-	private $temperaturemin;
+	private ?float $temperaturemax = null;
 
 	/**
-	 * @var float
+	 * Lock datetime
 	 */
-	private $temperaturemax;
+	private ?\DateTime $locked = null;
 
 	/**
-	 * @var \DateTime
+	 * Creation datetime
 	 */
-	private $locked;
+	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
-	private $created;
+	private \DateTime $updated;
 
 	/**
-	 * @var \DateTime
+	 * Application instance
 	 */
-	private $updated;
+	private ?Application $application = null;
 
 	/**
-	 * @var Application
+	 * Applications collection
 	 */
-	private $application;
-
-	/**
-	 * @var Location
-	 */
-	private $location;
-
-	/**
-	 * @var Slot
-	 */
-	private $slot;
-
-	/**
-	 * @var ArrayCollection
-	 */
-	private $applications;
+	private Collection $applications;
 
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct(private \DateTime $date, private Location $location, private Slot $slot) {
 		//Set defaults
-		$this->begin = null;
-		$this->start = null;
-		$this->length = null;
-		$this->stop = null;
-		$this->premium = null;
-		$this->rainfall = null;
-		$this->rainrisk = null;
-		$this->realfeel = null;
-		$this->realfeelmin = null;
-		$this->realfeelmax = null;
-		$this->temperature = null;
-		$this->temperaturemin = null;
-		$this->temperaturemax = null;
-		$this->locked = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
-		$this->application = null;
 		$this->applications = new ArrayCollection();
 	}
 
@@ -158,7 +131,7 @@ class Session {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
@@ -290,7 +263,7 @@ class Session {
 	 *
 	 * @return Session
 	 */
-	public function setPremium(bool $premium): Session {
+	public function setPremium(?bool $premium): Session {
 		$this->premium = $premium;
 
 		return $this;
@@ -301,7 +274,7 @@ class Session {
 	 *
 	 * @return bool
 	 */
-	public function getPremium(): bool {
+	public function getPremium(): ?bool {
 		return $this->premium;
 	}
 
@@ -649,7 +622,7 @@ class Session {
 	 */
 	public function preUpdate(PreUpdateEventArgs $eventArgs) {
 		//Check that we have a session instance
-		if (($session = $eventArgs->getEntity()) instanceof Session) {
+		if (($session = $eventArgs->getObject()) instanceof Session) {
 			//Set updated value
 			$session->setUpdated(new \DateTime('now'));
 		}
@@ -660,6 +633,8 @@ class Session {
 	 *
 	 * Consider as premium a day off for afternoon, the eve for evening and after
 	 * Store computed result in premium member for afternoon and evening
+	 *
+	 * @TODO improve by moving day off computation in IntlUtil or HolidayUtil class ?
 	 *
 	 * @return bool Whether the date is day off or not
 	 */
@@ -731,7 +706,7 @@ class Session {
 		}
 
 		//Get eastern
-		$eastern = $this->getEastern($date->format('Y'));
+		$eastern = (new IntlUtil())->getEastern($date->format('Y'));
 
 		//Check dynamic holidays
 		if (
@@ -757,49 +732,5 @@ class Session {
 
 		//Date is not a holiday and week day
 		return false;
-	}
-
-	/**
-	 * Compute eastern for selected year
-	 *
-	 * @param string $year The eastern year
-	 *
-	 * @return DateTime The eastern date
-	 */
-	private function getEastern(string $year): \DateTime {
-		//Set static
-		static $data = null;
-
-		//Check if already computed
-		if (isset($data[$year])) {
-			//Return computed eastern
-			return $data[$year];
-		//Check if data is null
-		} elseif (is_null($data)) {
-			//Init data array
-			$data = [];
-		}
-
-		$d = (19 * ($year % 19) + 24) % 30;
-
-		$e = (2 * ($year % 4) + 4 * ($year % 7) + 6 * $d + 5) % 7;
-
-		$day = 22 + $d + $e;
-
-		$month = 3;
-
-		if ($day > 31) {
-			$day = $d + $e - 9;
-			$month = 4;
-		} elseif ($d == 29 && $e == 6) {
-			$day = 10;
-			$month = 4;
-		} elseif ($d == 28 && $e == 6) {
-			$day = 18;
-			$month = 4;
-		}
-
-		//Store eastern in data
-		return ($data[$year] = new \DateTime(sprintf('%04d-%02d-%02d', $year, $month, $day)));
 	}
 }
