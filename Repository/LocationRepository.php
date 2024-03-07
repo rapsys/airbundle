@@ -96,7 +96,7 @@ SQL;
 				'updated' => $data['updated'],
 				//XXX: Useless ???
 				'slug' => $location = $this->slugger->slug($title),
-				'link' => $this->router->generate('rapsys_air_location_view', ['id' => $data['id'], 'location' => $this->slugger->slug($location)])
+				'link' => $this->router->generate('rapsysair_location_view', ['id' => $data['id'], 'location' => $this->slugger->slug($location)])
 			];
 		}
 
@@ -125,7 +125,7 @@ SELECT
 	GROUP_CONCAT(a.longitude ORDER BY a.pcount DESC, a.count DESC, a.id SEPARATOR "\\n") AS longitudes,
 	GROUP_CONCAT(a.indoor ORDER BY a.pcount DESC, a.count DESC, a.id SEPARATOR "\\n") AS indoors,
 	GROUP_CONCAT(a.count ORDER BY a.pcount DESC, a.count DESC, a.id SEPARATOR "\\n") AS counts,
-	MAX(a.updated) AS modified
+	MAX(a.modified) AS modified
 FROM (
 	SELECT
 		l.id,
@@ -134,7 +134,7 @@ FROM (
 		l.latitude,
 		l.longitude,
 		l.indoor,
-		l.updated,
+		GREATEST(l.created, l.updated, COALESCE(s.created, 0), COALESCE(s.updated, 0)) AS modified,
 		l.zipcode,
 		COUNT(s.id) AS count,
 		COUNT(IF(s.date BETWEEN :begin AND :end, s.id, NULL)) AS pcount
@@ -144,8 +144,8 @@ FROM (
 	ORDER BY NULL
 	LIMIT 0, :limit
 ) AS a
-GROUP BY a.city, SUBSTRING(a.zipcode, 1, 3)
-ORDER BY a.city, SUBSTRING(a.zipcode, 1, 3)
+GROUP BY a.city, SUBSTRING(a.zipcode, 1, 2)
+ORDER BY a.city, a.zipcode
 SQL;
 
 		//Replace bundle entity name by table name
@@ -230,7 +230,7 @@ SQL;
 					'latitude' => floatval($latitudes[$k]),
 					'longitude' => floatval($longitudes[$k]),
 					'indoor' => $indoors[$k] == 0 ? $this->translator->trans('outdoor') : $this->translator->trans('indoor'),
-					'link' => $this->router->generate('rapsys_air_location_view', ['id' => $id, 'location' => $this->slugger->slug($location)])
+					'link' => $this->router->generate('rapsysair_location_view', ['id' => $id, 'location' => $this->slugger->slug($location)])
 				];
 			}
 
@@ -246,7 +246,7 @@ SQL;
 				'modified' => $data['modified'],
 				//XXX: Useless ???
 				'slug' => $city = $this->slugger->slug($data['city']),
-				'link' => $this->router->generate('rapsys_air_city_view', ['city' => $city, 'latitude' => $data['latitude'], 'longitude' => $data['longitude']]),
+				'link' => $this->router->generate('rapsysair_city_view', ['city' => $city, 'latitude' => $data['latitude'], 'longitude' => $data['longitude']]),
 				'locations' => $data['locations']
 			];
 		}
@@ -272,7 +272,7 @@ SELECT
 	ROUND(AVG(l.longitude), 6) AS longitude,
 	MAX(l.updated) AS updated
 FROM Rapsys\AirBundle\Entity\Location AS l
-GROUP BY city, SUBSTRING(l.zipcode, 1, 3)
+GROUP BY city, SUBSTRING(l.zipcode, 1, 2)
 ORDER BY ACOS(SIN(RADIANS(:latitude))*SIN(RADIANS(l.latitude))+COS(RADIANS(:latitude))*COS(RADIANS(l.latitude))*COS(RADIANS(:longitude - l.longitude)))*40030.17/2/PI()
 LIMIT 0, 1
 SQL;
@@ -318,7 +318,7 @@ SQL;
 			'multimap' => $this->translator->trans($result['city'].' sector map'),
 			//XXX: Useless ???
 			'slug' => $slug = $this->slugger->slug($result['city']),
-			'link' => $this->router->generate('rapsys_air_city_view', ['city' => $slug, 'latitude' => $result['latitude'], 'longitude' => $result['longitude']])
+			'link' => $this->router->generate('rapsysair_city_view', ['city' => $slug, 'latitude' => $result['latitude'], 'longitude' => $result['longitude']])
 		];
 	}
 
@@ -360,8 +360,9 @@ SELECT
 	a.title,
 	a.latitude,
 	a.longitude,
+	a.created,
 	a.updated,
-	MAX(a.updated) AS modified,
+	MAX(GREATEST(a.modified, COALESCE(s.created, 0), COALESCE(s.updated, 0))) AS modified,
 	COUNT(s.id) AS count
 FROM (
 	SELECT
@@ -369,7 +370,9 @@ FROM (
 		l.title,
 		l.latitude,
 		l.longitude,
-		l.updated
+		l.created,
+		l.updated,
+		GREATEST(l.created, l.updated) AS modified
 	FROM Rapsys\AirBundle\Entity\Location AS l
 	WHERE l.latitude BETWEEN :minlat AND :maxlat AND l.longitude BETWEEN :minlong AND :maxlong
 	LIMIT 0, :limit
@@ -393,6 +396,7 @@ SQL;
 			->addScalarResult('title', 'title', 'string')
 			->addScalarResult('latitude', 'latitude', 'float')
 			->addScalarResult('longitude', 'longitude', 'float')
+			->addScalarResult('created', 'created', 'datetime')
 			->addScalarResult('updated', 'updated', 'datetime')
 			->addScalarResult('modified', 'modified', 'datetime')
 			->addScalarResult('count', 'count', 'integer');
@@ -425,11 +429,12 @@ SQL;
 				'title' => $title = $this->translator->trans($data['title']),
 				'latitude' => $data['latitude'],
 				'longitude' => $data['longitude'],
+				'created' => $data['created'],
 				'updated' => $data['updated'],
 				'modified' => $data['modified'],
 				'count' => $data['count'],
 				'slug' => $slug = $this->slugger->slug($title),
-				'link' => $this->router->generate('rapsys_air_location_view', ['id' => $data['id'], 'location' => $slug])
+				'link' => $this->router->generate('rapsysair_location_view', ['id' => $data['id'], 'location' => $slug])
 			];
 		}
 
@@ -559,7 +564,7 @@ SQL;
 				'tcount' => $data['tcount'],
 				'modified' => $data['modified'],
 				'slug' => $slug = $this->slugger->slug($title),
-				'link' => $this->router->generate('rapsys_air_location_view', ['id' => $data['id'], 'location' => $slug])
+				'link' => $this->router->generate('rapsysair_location_view', ['id' => $data['id'], 'location' => $slug])
 			];
 		}
 
@@ -590,7 +595,7 @@ SELECT
 	ROUND(AVG(l2.latitude), 6) AS city_latitude,
 	ROUND(AVG(l2.longitude), 6) AS city_longitude
 FROM Rapsys\AirBundle\Entity\Location AS l
-JOIN Rapsys\AirBundle\Entity\Location AS l2 ON (l2.city = l.city AND SUBSTRING(l.zipcode, 1, 3) = SUBSTRING(l.zipcode, 1, 3))
+JOIN Rapsys\AirBundle\Entity\Location AS l2 ON (l2.city = l.city AND SUBSTRING(l2.zipcode, 1, 3) = SUBSTRING(l.zipcode, 1, 3))
 WHERE l.id = :id
 GROUP BY l.id
 LIMIT 0, 1
@@ -635,7 +640,7 @@ SQL;
 		$result['alternates'] = [];
 
 		//Set route
-		$route = 'rapsys_air_location_view';
+		$route = 'rapsysair_location_view';
 
 		//Set route params
 		$routeParams = ['id' => $id];
@@ -679,7 +684,7 @@ SQL;
 				'id' => $result['city_id'],
 				'title' => $result['city'],
 				'in' => $this->translator->trans('in '.$result['city']),
-				'link' => $this->router->generate('rapsys_air_city_view', ['city' => $result['city'], 'latitude' => $result['city_latitude'], 'longitude' => $result['city_longitude']])
+				'link' => $this->router->generate('rapsysair_city_view', ['city' => $result['city'], 'latitude' => $result['city_latitude'], 'longitude' => $result['city_longitude']])
 			],
 			'title' => $title = $this->translator->trans($result['title']),
 			'latitude' => $result['latitude'],
