@@ -68,10 +68,16 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 		$container->setParameter($alias, $config);
 
 		//Store flattened array in parameters
-		//XXX: don't flatten rapsys_air.site.png key which is required to be an array
-		foreach($this->flatten($config, $alias, 10, '.', ['rapsys_air.copy', 'rapsys_air.icon', 'rapsys_air.icon.png', 'rapsys_air.logo', 'rapsys_air.facebook.apps', 'rapsys_air.locales', 'rapsys_air.languages']) as $k => $v) {
+		//XXX: don't flatten rapsysair.site.png key which is required to be an array
+		foreach($this->flatten($config, $alias, 10, '.', ['rapsysair.copy', 'rapsysair.icon', 'rapsysair.icon.png', 'rapsysair.logo', 'rapsysair.facebook.apps', 'rapsysair.locales', 'rapsysair.languages']) as $k => $v) {
 			$container->setParameter($k, $v);
 		}
+
+		//Set rapsysair.alias key
+		$container->setParameter($alias.'.alias', $alias);
+
+		//Set rapsysair.version key
+		$container->setParameter($alias.'.version', RapsysAirBundle::getVersion());
 	}
 
 	/**
@@ -110,5 +116,14 @@ class RapsysAirExtension extends Extension implements PrependExtensionInterface 
 
 		//Return result
 		return $res;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 *
+	 * @xxx Required by kernel to load renamed alias configuration
+	 */
+	public function getAlias(): string {
+		return RapsysAirBundle::getAlias();
 	}
 }
