@@ -70,6 +70,9 @@ Rapsys\AirBundle\Entity\Session:
         date_location_slot:
             columns: [ date, location_id, slot_id ]
     indexes:
+        #XXX: used in SessionRepository::findAllByPeriodAsCalendarArray
+        date_location:
+            columns: [ date, location_id ]
         #XXX: used in SessionRepository::findAllPendingApplication
         locked_date_begin_created:
             columns: [ locked, date, begin, created ]
