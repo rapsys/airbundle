@@ -14,7 +14,7 @@
 									<ul>
 										{% for session in day.sessions %}
 											<li class="{{ ['session']|merge(session.class)|join(' ') }}">
-												<a href="{{ path('rapsys_air_session', {'id': session.id}) }}" title="{{ session.title }}">{{ session.title }}</a>
+												<a href="{{ path('rapsysair_session', {'id': session.id}) }}" title="{{ session.title }}">{{ session.title }}</a>
 											</li>
 										{% endfor %}
 									</ul>

@@ -2,7 +2,7 @@
 {% block content %}
 	<article id="form">
 		<header>
-			<h2><a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a></h2>
+			<h2><a href="{{ path('rapsysuser_login') }}">{% trans %}Login{% endtrans %}</a></h2>
 		</header>
 		{{ form_start(login) }}
 			<div>
@@ -20,7 +20,7 @@
 	{% if recover is defined %}
 		<article id="recover">
 			<header>
-				<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+				<h2><a href="{{ path('rapsysuser_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
 			</header>
 			{{ form_start(recover) }}
 

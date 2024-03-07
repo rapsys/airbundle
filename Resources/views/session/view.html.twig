@@ -213,9 +213,9 @@
 										<section class="cell">
 											<header>
 												{% if application.user.id == 1 and application.user.title|slug == 'milonga-raphael' %}
-													<h3><a href="{{ path('rapsys_air_user_milongaraphael') }}">{{ application.user.title }}</a></h3>
+													<h3><a href="{{ path('rapsysair_user_milongaraphael') }}">{{ application.user.title }}</a></h3>
 												{% else %}
-													<h3><a href="{{ path('rapsys_air_user_view', {'id': application.user.id, 'user': application.user.title|slug}) }}">{{ application.user.title }}</a></h3>
+													<h3><a href="{{ path('rapsysair_user_view', {'id': application.user.id, 'user': application.user.title|slug}) }}">{{ application.user.title }}</a></h3>
 												{% endif %}
 											</header>
 											<dl>

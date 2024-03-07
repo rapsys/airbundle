@@ -32,7 +32,7 @@
 			{% endif %}
 			{# stylesheet '//fonts.googleapis.com/css?family=Irish+Grover' '//fonts.googleapis.com/css?family=La+Belle+Aurore' '@RapsysAirBundle/Resources/public/css/{reset,screen}.css' #}
 			{% stopwatch 'stylesheet' %}
-				{% stylesheet '@rapsys_air_bundle/css/{reset,droidsans,lemon,notoemoji,screen}.css' %}
+				{% stylesheet '@RapsysAir/css/{reset,droidsans,lemon,notoemoji,screen}.css' %}
 					<link rel="stylesheet" type="text/css" href="{{ asset_url }}?20221024100144" />
 				{% endstylesheet %}
 			{% endstopwatch %}
@@ -70,21 +70,21 @@
 					{% block header_nav %}
 						<nav id="nav">
 							{#<h2>{% trans %}Navigation{% endtrans %}</h2>#}
-							<a href="{{ path('rapsys_air') }}" rel="home">{% trans %}Home{% endtrans %}</a>
-							<a href="{{ path('rapsys_air_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a>
-							<a href="{{ path('rapsys_air_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a>
+							<a href="{{ path('rapsysair') }}" rel="home">{% trans %}Home{% endtrans %}</a>
+							<a href="{{ path('rapsysair_contact') }}" rel="contact">{% trans %}Contact{% endtrans %}</a>
+							<a href="{{ path('rapsysair_frequently_asked_questions') }}">{% trans %}Frequently asked questions{% endtrans %}</a>
 							{% if is_granted('ROLE_ADMIN') %}
-								<a href="{{ path('rapsys_air_user') }}">{% trans %}Users{% endtrans %}</a>
+								<a href="{{ path('rapsysair_user') }}">{% trans %}Users{% endtrans %}</a>
 							{% endif %}
 							{% if is_granted('ROLE_GUEST') %}
-								<a href="{{ path('rapsys_air_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a>
+								<a href="{{ path('rapsysair_organizer_regulation') }}">{% trans %}Organizer regulation{% endtrans %}</a>
 							{% endif %}
 							{% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-								<a href="{{ path('rapsys_user_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a>
-								<a href="{{ path('rapsys_user_logout') }}">{% trans %}Logout{% endtrans %}</a>
+								<a href="{{ path('rapsysuser_edit', {mail: app.user.mail|short, hash: app.user.mail|short|hash}) }}">{% trans %}My account{% endtrans %}</a>
+								<a href="{{ path('rapsysuser_logout') }}">{% trans %}Logout{% endtrans %}</a>
 							{% else %}
-								<a href="{{ path('rapsys_user_login') }}">{% trans %}Login{% endtrans %}</a>
-								<a href="{{ path('rapsys_user_register') }}">{% trans %}Register{% endtrans %}</a>
+								<a href="{{ path('rapsysuser_login') }}">{% trans %}Login{% endtrans %}</a>
+								<a href="{{ path('rapsysuser_register') }}">{% trans %}Register{% endtrans %}</a>
 							{% endif %}
 						</nav>
 					{% endblock %}
@@ -128,11 +128,11 @@
 			{% endblock %}
 			{% block footer %}
 				<footer id="footer">
-					<a href="{{ path('rapsys_air_about') }}">{% trans %}About{% endtrans %}</a>
+					<a href="{{ path('rapsysair_about') }}">{% trans %}About{% endtrans %}</a>
 					{% if copy is defined and copy %}
 						<details><summary>{{ copy.long }}</summary><span>{{ copy.short }} <a href="{{ copy.link }}" title="{{ copy.title }}" rel="author">{{ copy.by }}</a></span></details>
 					{% endif %}
-					<a href="{{ path('rapsys_air_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a>
+					<a href="{{ path('rapsysair_terms_of_service') }}">{% trans %}Terms of service{% endtrans %}</a>
 					{% if alternates is defined and alternates %}
 						{% set langs = alternates|keys|filter(v => v|length == 5) %}
 						{% if langs|length > 1 %}

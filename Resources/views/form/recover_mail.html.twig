@@ -1,7 +1,7 @@
 {% extends '@RapsysAir/base.html.twig' %}
 {% block content %}
 	<section id="form">
-		<h2><a href="{{ path('rapsys_user_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
+		<h2><a href="{{ path('rapsysuser_recover') }}">{% trans %}Recover{% endtrans %}</a></h2>
 		{% if sent %}
 			<p class="message notice">{% trans %}Your password is updated and an account recover message has been sent{% endtrans %}</p>
 		{% elseif not found %}
