@@ -94,7 +94,7 @@ class Configuration implements ConfigurationInterface {
 			//XXX: revert to underscore because of that shit:
 			//XXX: see https://symfony.com/doc/current/components/config/definition.html#normalization
 			//XXX: see https://github.com/symfony/symfony/issues/7405
-			//TODO: copy to '%rapsys_user.languages%',
+			//TODO: copy to '%rapsysuser.languages%',
 			'languages' => [
 				'en_gb' => 'English'
 			],
