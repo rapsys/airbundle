@@ -1,3 +1,16 @@
+# Parameters configuration
+parameters:
+    # Google client
+    env(RAPSYSAIR_GOOGLE_CLIENT): "Ch4ng3m3!"
+    # Google project
+    env(RAPSYSAIR_GOOGLE_PROJECT): "Ch4ng3m3!"
+    # Google secret
+    env(RAPSYSAIR_GOOGLE_SECRET): "Ch4ng3m3!"
+    # Hostname
+    env(RAPSYSAIR_HOSTNAME): "Ch4ng3m3!"
+    # Scheme
+    env(RAPSYSAIR_SCHEME): "https"
+
 # RapsysAir configuration
 rapsysair:
     languages:
@@ -321,11 +334,11 @@ services:
         tags: [ 'console.command' ]
     # Register calendar command
     Rapsys\AirBundle\Command\CalendarCommand:
-        arguments: [ '@doctrine', '@router', '@rapsyspack.slugger_util', '@translator', 'airlibre', 0, '%kernel.project_dir%/var/cache', '%kernel.default_locale%' ]
+        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator', 'airlibre', 0, '%kernel.project_dir%/var/cache' ]
         tags: [ 'console.command' ]
     # Register calendar2 command
     Rapsys\AirBundle\Command\Calendar2Command:
-        arguments: [ '@doctrine', '@router', '@rapsyspack.slugger_util', '@translator', '%kernel.default_locale%', '%env(string:GOOGLE_PROJECT)', '%env(string:GOOGLE_CLIENT)', '%env(string:GOOGLE_SECRET)' ]
+        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator' ]
         tags: [ 'console.command' ]
     # Register rekey command
     Rapsys\AirBundle\Command\RekeyCommand:
