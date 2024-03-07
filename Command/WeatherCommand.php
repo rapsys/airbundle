@@ -265,7 +265,7 @@ class WeatherCommand extends DoctrineCommand {
 					//Iterate on each link containing data
 					foreach($sx->xpath('//a[contains(@class,"daily-forecast-card")]') as $node) {
 						//Get date
-						$dsm = trim($node->div[0]->h2[0]->span[1]);
+						$dsm = trim((string)$node->div[0]->h2[0]->span[1]);
 
 						//Get temperature
 						$temperature = str_replace('°', '', (string)$node->div[0]->div[0]->span[0]);
