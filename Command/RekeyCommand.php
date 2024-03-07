@@ -18,14 +18,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Rapsys\AirBundle\Command;
 use Rapsys\AirBundle\Entity\Session;
 
+/**
+ * {@inheritdoc}
+ */
 class RekeyCommand extends DoctrineCommand {
-	//Set failure constant
-	const FAILURE = 1;
-
-	///Set success constant
-	const SUCCESS = 0;
-
-	///Configure attribute command
+	/**
+	 * Configure attribute command
+	 */
 	protected function configure() {
 		//Configure the class
 		$this
@@ -37,7 +36,9 @@ class RekeyCommand extends DoctrineCommand {
 			->setHelp('This command rekey sessions in chronological order');
 	}
 
-	///Process the attribution
+	/**
+	 * Process the attribution
+	 */
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Fetch doctrine
 		$doctrine = $this->getDoctrine();
@@ -50,14 +51,5 @@ class RekeyCommand extends DoctrineCommand {
 
 		//Return success
 		return self::SUCCESS;
-	}
-
-	/**
-	 * Return the bundle alias
-	 *
-	 * {@inheritdoc}
-	 */
-	public function getAlias(): string {
-		return 'rapsys_air';
 	}
 }
