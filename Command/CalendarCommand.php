@@ -31,20 +31,22 @@ class CalendarCommand extends Command {
 	 * Creates new calendar command
 	 *
 	 * @param ManagerRegistry $doctrine The doctrine instance
+	 * @param string $locale The default locale
 	 * @param RouterInterface $router The router instance
 	 * @param SluggerUtil $slugger The slugger instance
 	 * @param TranslatorInterface $translator The translator instance
 	 * @param string $namespace The cache namespace
 	 * @param int $lifetime The cache lifetime
 	 * @param string $path The cache path
-	 * @param string $locale The default locale
 	 */
-	public function __construct(protected ManagerRegistry $doctrine, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected string $namespace, protected int $lifetime, protected string $path, protected string $locale) {
+	public function __construct(protected ManagerRegistry $doctrine, protected string $locale, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected string $namespace, protected int $lifetime, protected string $path) {
 		//Call parent constructor
-		parent::__construct($this->doctrine, $this->router, $this->slugger, $this->translator, $this->locale);
+		parent::__construct($this->doctrine, $this->locale, $this->router, $this->slugger, $this->translator);
 	}
 
-	///Configure attribute command
+	/**
+	 * Configure attribute command
+	 */
 	protected function configure() {
 		//Configure the class
 		$this
@@ -56,7 +58,9 @@ class CalendarCommand extends Command {
 			->setHelp('This command synchronize sessions in google calendar');
 	}
 
-	///Process the attribution
+	/**
+	 * Process the attribution
+	 */
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		//Compute period
 		$period = new \DatePeriod(
@@ -260,7 +264,7 @@ class CalendarCommand extends Command {
 					//Init source
 					$source = [
 						'title' => $this->translator->trans('%dance% %id% by %pseudonym%', ['%id%' => $sessionId, '%dance%' => $this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type'])), '%pseudonym%' => $session['au_pseudonym']]).' '.$this->translator->trans('at '.$session['l_title']),
-						'url' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId, 'location' => $this->slugger->slug($this->translator->trans($session['l_title'])), 'dance' => $this->slugger->slug($this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type']))), 'user' => $this->slugger->slug($session['au_pseudonym'])], UrlGeneratorInterface::ABSOLUTE_URL)
+						'url' => $this->router->generate('rapsysair_session_view', ['id' => $sessionId, 'location' => $this->slugger->slug($this->translator->trans($session['l_title'])), 'dance' => $this->slugger->slug($this->translator->trans($session['ad_name'].' '.lcfirst($session['ad_type']))), 'user' => $this->slugger->slug($session['au_pseudonym'])], UrlGeneratorInterface::ABSOLUTE_URL)
 					];
 
 					//Init location
@@ -458,14 +462,5 @@ class CalendarCommand extends Command {
 
 		//Return success
 		return self::SUCCESS;
-	}
-
-	/**
-	 * Return the bundle alias
-	 *
-	 * {@inheritdoc}
-	 */
-	public function getAlias(): string {
-		return 'rapsys_air';
 	}
 }
