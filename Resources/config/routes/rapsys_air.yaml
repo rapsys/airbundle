@@ -174,7 +174,7 @@ rapsys_air_user_view:
     controller: Rapsys\AirBundle\Controller\DefaultController::userView
     methods: GET|POST
 
-rapsys_user_confirm:
+rapsysuser_confirm:
     path:
         en_gb: '/en/confirm/{hash}/{mail}'
         fr_fr: '/confirmer/{hash}/{mail}'
@@ -184,7 +184,7 @@ rapsys_user_confirm:
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
-rapsys_user_edit:
+rapsysuser_edit:
     path:
         en_gb: '/en/user/{hash}/{mail}'
         fr_fr: '/utilisateur/{hash}/{mail}'
@@ -194,7 +194,7 @@ rapsys_user_edit:
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
-rapsys_user_login:
+rapsysuser_login:
     path:
         en_gb: '/en/login/{hash}/{mail}'
         fr_fr: '/connecter/{hash}/{mail}'
@@ -207,13 +207,13 @@ rapsys_user_login:
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
-rapsys_user_logout:
+rapsysuser_logout:
     path:
         en_gb: '/en/logout'
         fr_fr: '/deconnecter'
     methods: GET
 
-rapsys_user_recover:
+rapsysuser_recover:
     path:
         en_gb: '/en/recover/{hash}/{pass}/{mail}'
         fr_fr: '/recuperer/{hash}/{pass}/{mail}'
@@ -228,7 +228,7 @@ rapsys_user_recover:
         hash: '[a-zA-Z0-9=_-]+'
     methods: GET|POST
 
-rapsys_user_register:
+rapsysuser_register:
     path:
         en_gb: '/en/register/{hash}/{field}/{mail}'
         fr_fr: '/enregistrer/{hash}/{field}/{mail}'
