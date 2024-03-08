@@ -120,7 +120,7 @@ JOIN Rapsys\AirBundle\Entity\Slot AS t ON (t.id = s.slot_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 LEFT JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
-LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Dance AS sad ON (sad.id = sa.dance_id)
@@ -213,7 +213,7 @@ SQL;
 		}
 
 		//Set route
-		$route = 'rapsys_air_session_view';
+		$route = 'rapsysair_session_view';
 
 		//Set route params
 		$routeParams = ['id' => $id, 'location' => $this->slugger->slug($this->translator->trans($result['l_title']))];
@@ -255,7 +255,7 @@ SQL;
 				'longitude' => $result['l_longitude'],
 				'indoor' => $result['l_indoor'],
 				'slug' => $routeParams['location'],
-				'link' => $this->router->generate('rapsys_air_location_view', ['id' => $result['l_id'], 'location' => $routeParams['location']])
+				'link' => $this->router->generate('rapsysair_location_view', ['id' => $result['l_id'], 'location' => $routeParams['location']])
 			],
 			'slot' => [
 				'id' => $result['t_id'],
@@ -275,15 +275,15 @@ SQL;
 					'name' => $this->translator->trans($result['ad_name']),
 					'type' => $this->translator->trans($result['ad_type']),
 					'slug' => $routeParams['dance'] = $this->slugger->slug($this->translator->trans($result['ad_name'].' '.lcfirst($result['ad_type']))),
-					'link' => $this->router->generate('rapsys_air_dance_view', ['id' => $result['ad_id'], 'name' => $this->slugger->slug($this->translator->trans($result['ad_name'])), 'type' => $this->slugger->slug($this->translator->trans($result['ad_type']))])
+					'link' => $this->router->generate('rapsysair_dance_view', ['id' => $result['ad_id'], 'name' => $this->slugger->slug($this->translator->trans($result['ad_name'])), 'type' => $this->slugger->slug($this->translator->trans($result['ad_type']))])
 				],
 				'user' => [
 					'id' => $result['au_id'],
 					'by' => $this->translator->trans('by %pseudonym%', [ '%pseudonym%' => $result['au_pseudonym'] ]),
 					'title' => $result['au_pseudonym'],
 					'slug' => $routeParams['user'] =  $this->slugger->slug($result['au_pseudonym']),
-					'link' => $result['au_id'] == 1 && $routeParams['user'] == 'milonga-raphael' ? $this->router->generate('rapsys_air_user_milongaraphael') : $this->router->generate('rapsys_air_user_view', ['id' => $result['au_id'], 'user' => $routeParams['user']]),
-					'contact' => $this->router->generate('rapsys_air_contact', ['id' => $result['au_id'], 'user' => $routeParams['user']])
+					'link' => $result['au_id'] == 1 && $routeParams['user'] == 'milonga-raphael' ? $this->router->generate('rapsysair_user_milongaraphael') : $this->router->generate('rapsysair_user_view', ['id' => $result['au_id'], 'user' => $routeParams['user']]),
+					'contact' => $this->router->generate('rapsysair_contact', ['id' => $result['au_id'], 'user' => $routeParams['user']])
 				],
 				'id' => $result['a_id'],
 				'canceled' => $result['a_canceled']
@@ -565,7 +565,7 @@ JOIN Rapsys\AirBundle\Entity\Slot AS t ON (t.id = s.slot_id)
 {$grantSql}JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
 {$grantSql}JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 {$grantSql}JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
-LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
 LEFT JOIN Rapsys\AirBundle\Entity\Dance AS sad ON (sad.id = sa.dance_id)
 LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
@@ -647,7 +647,7 @@ SQL;
 		$month = null;
 
 		//Set route
-		$route = 'rapsys_air_session_view';
+		$route = 'rapsysair_session_view';
 
 		//Iterate on each day
 		foreach($period as $date) {
@@ -1043,7 +1043,7 @@ JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id{$danceSql}{$subscriptionSql})
 JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
-LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
 WHERE GREATEST(s.created, s.updated, a.created, a.updated, ADDTIME(ADDTIME(s.date, s.begin), s.length)) >= :synchronized
 SQL;
 
@@ -1169,7 +1169,7 @@ JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id)
 JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
-LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.location_id = s.location_id AND p.user_id = a.user_id AND p.locale = :locale)
+LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
 WHERE s.date BETWEEN :begin AND :end
 ORDER BY NULL
 SQL;
