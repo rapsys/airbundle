@@ -157,9 +157,9 @@ class UserController extends BaseUserController {
 			//Get google client
 			$googleClient = new \Google\Client(
 				[
-					'application_name' => $request->server->get('GOOGLE_PROJECT'),
-					'client_id' => $request->server->get('GOOGLE_CLIENT'),
-					'client_secret' => $request->server->get('GOOGLE_SECRET'),
+					'application_name' => $request->server->get('RAPSYSAIR_GOOGLE_PROJECT'),
+					'client_id' => $request->server->get('RAPSYSAIR_GOOGLE_CLIENT'),
+					'client_secret' => $request->server->get('RAPSYSAIR_GOOGLE_SECRET'),
 					'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 					'scopes' => self::googleScopes,
 					'access_type' => 'offline',
@@ -218,7 +218,13 @@ class UserController extends BaseUserController {
 								)
 							);
 
-							//Remove user token
+							//Iterate on each google token calendars
+							foreach($googleToken->getGoogleCalendars() as $googleCalendar) {
+								//Remove google token calendar
+								$this->manager->remove($googleCalendar);
+							}
+
+							//Remove google token
 							$this->manager->remove($googleToken);
 
 							//Flush to delete it
@@ -232,26 +238,26 @@ class UserController extends BaseUserController {
 					//XXX: TODO: remove DEBUG
 					#$this->cache->delete('user.edit.calendar.'.$this->slugger->short($googleToken->getMail()));
 
-					//Get calendars
-					$calendars = $this->cache->get(
-						//Set key to user.edit.$mail
-						($calendarKey = 'user.edit.calendar.'.($googleShortMail = $this->slugger->short($googleMail = $googleToken->getMail()))),
-						//Fetch mail calendar list
-						function (ItemInterface $item) use ($googleClient): array {
-							//Expire after 1h
-							$item->expiresAfter(3600);
+					//Retrieve calendar
+					try {
+						//Get calendars
+						$calendars = $this->cache->get(
+							//Set key to user.edit.$mail
+							($calendarKey = 'user.edit.calendar.'.($googleShortMail = $this->slugger->short($googleMail = $googleToken->getMail()))),
+							//Fetch mail calendar list
+							function (ItemInterface $item) use ($googleClient): array {
+								//Expire after 1h
+								$item->expiresAfter(3600);
 
-							//Get google calendar service
-							$service = new \Google\Service\Calendar($googleClient);
+								//Get google calendar service
+								$service = new \Google\Service\Calendar($googleClient);
 
-							//Init calendars
-							$calendars = [];
+								//Init calendars
+								$calendars = [];
 
-							//Init counter
-							$count = 0;
+								//Init counter
+								$count = 0;
 
-							//Retrieve calendar
-							try {
 								//Set page token
 								$pageToken = null;
 
@@ -276,16 +282,43 @@ class UserController extends BaseUserController {
 										}
 									}
 								} while ($pageToken = $calendarList->getNextPageToken());
-							//Catch exception
-							} catch(\Google\Service\Exception $e) {
-								//Throw error
-								throw new \LogicException('Calendar list failed', 0, $e);
+
+								//Cache calendars
+								return $calendars;
+							}
+						);
+					//Catch exception
+					} catch(\Google\Service\Exception $e) {
+						//With 401 code
+						if ($e->getCode() == 401) {
+							//Add error in flash message
+							$this->addFlash(
+								'error',
+								$this->translator->trans(
+									'Unable to list calendars: %error%',
+									['%error%' => $e->getMessage()]
+								)
+							);
+
+							//Iterate on each google token calendars
+							foreach($googleToken->getGoogleCalendars() as $googleCalendar) {
+								//Remove google token calendar
+								$this->manager->remove($googleCalendar);
 							}
 
-							//Cache calendars
-							return $calendars;
+							//Remove google token
+							$this->manager->remove($googleToken);
+
+							//Flush to delete it
+							$this->manager->flush();
+
+							//Skip to next token
+							continue;
 						}
-					);
+
+						//Throw error
+						throw new \LogicException('Calendar list failed', 0, $e);
+					}
 
 					//Set formData array
 					$formData = ['calendar' => []];
@@ -536,16 +569,16 @@ class UserController extends BaseUserController {
 		}
 
 		//Without user
-		if (empty($user = $this->getUser())) {
+		if (empty($user = $this->security->getUser())) {
 			throw new \LogicException('User is empty');
 		}
 
 		//Get google client
 		$googleClient = new \Google\Client(
 			[
-				'application_name' => $request->server->get('GOOGLE_PROJECT'),
-				'client_id' => $request->server->get('GOOGLE_CLIENT'),
-				'client_secret' => $request->server->get('GOOGLE_SECRET'),
+				'application_name' => $request->server->get('RAPSYSAIR_GOOGLE_PROJECT'),
+				'client_id' => $request->server->get('RAPSYSAIR_GOOGLE_CLIENT'),
+				'client_secret' => $request->server->get('RAPSYSAIR_GOOGLE_SECRET'),
 				'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 				'scopes' => self::googleScopes,
 				'access_type' => 'offline',
@@ -598,8 +631,7 @@ class UserController extends BaseUserController {
 							if ($i->getMail() == $userInfo['email']) {
 								return $i;
 							}
-						},
-						(object)[]
+						}
 					)
 				) {
 					//Set mail
