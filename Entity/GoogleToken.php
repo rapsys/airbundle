@@ -20,68 +20,40 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class GoogleToken {
 	/**
-	 * @var int
+	 * Primary key
 	 */
-	private ?int $id;
+	private ?int $id = null;
 
 	/**
-	 * @var string
-	 */
-	private string $mail;
-
-	/**
-	 * @var string
-	 */
-	private string $access;
-
-	/**
-	 * @var ?string
-	 */
-	private ?string $refresh;
-
-	/**
-	 * @var \DateTime
-	 */
-	private \DateTime $expired;
-
-	/**
-	 * @var \DateTime
+	 * Create datetime
 	 */
 	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
 	private \DateTime $updated;
 
 	/**
-	 * @var \Doctrine\Common\Collections\Collection
+	 * Google calendars collection
 	 */
 	private Collection $googleCalendars;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\User
-	 */
-	private User $user;
-
-	/**
 	 * Constructor
 	 *
-	 * @param \Rapsys\AirBundle\Entity\User $user The user
+	 * @param User $user The user instance
 	 * @param string The token user mail
 	 * @param string The access token identifier
 	 * @param \DateTime The access token expires
 	 * @param ?string The refresh token identifier
 	 */
-	public function __construct(User $user, string $mail, string $access, \DateTime $expired, ?string $refresh = null) {
+	public function __construct(private User $user, private string $mail, private string $access, private \DateTime $expired, private ?string $refresh = null) {
 		//Set defaults
-		$this->user = $user;
-		$this->mail = $mail;
-		$this->access = $access;
-		$this->refresh = $refresh;
-		$this->expired = $expired;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+
+		//Set collections
 		$this->googleCalendars = new ArrayCollection();
 	}
 
