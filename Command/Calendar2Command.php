@@ -33,38 +33,47 @@ use Rapsys\AirBundle\Entity\Session;
 
 use Rapsys\PackBundle\Util\SluggerUtil;
 
+/**
+ * {@inheritdoc}
+ *
+ * Synchronize sessions in users' calendar
+ */
 class Calendar2Command extends Command {
 	/**
-	 * Set google client scopes
+	 * Set description
+	 *
+	 * Shown with bin/console list
 	 */
-	private array $scopes = [
-		Calendar::CALENDAR_EVENTS,
-		Calendar::CALENDAR,
-		Oauth2::USERINFO_EMAIL
-	];
+	protected string $description = 'Synchronize sessions in users\' calendar';
 
 	/**
-	 * Set google client instance
+	 * Set help
+	 *
+	 * Shown with bin/console --help rapsysair:calendar2
 	 */
-	private Client $client;
+	protected string $help = 'This command synchronize sessions in users\' google calendar';
 
 	/**
 	 * Set markdown instance
 	 */
-	private DefaultMarkdown $markdown;
+	#private DefaultMarkdown $markdown;
 
 	/**
 	 * Set date period instance
 	 */
-	private \DatePeriod $period;
+	#private \DatePeriod $period;
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __construct(ManagerRegistry $doctrine, string $locale, RouterInterface $router, SluggerUtil $slugger, TranslatorInterface $translator) {
+	public function __construct(protected ManagerRegistry $doctrine, protected string $locale, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected Client $google, protected DefaultMarkdown $markdown) {
 		//Call parent constructor
-		parent::__construct($doctrine, $locale, $router, $slugger, $translator);
+		parent::__construct($this->doctrine, $this->locale, $this->router, $this->slugger, $this->translator);
 
+		//Replace google client redirect uri
+		$this->google->setRedirectUri($this->router->generate($this->google->getRedirectUri(), [], UrlGeneratorInterface::ABSOLUTE_URL));
+
+		/*
 		//Set google client
 		$this->client = new Client(
 			[
@@ -82,13 +91,13 @@ class Calendar2Command extends Command {
 		);
 
 		//Set Markdown instance
-		$this->markdown = new DefaultMarkdown;
+		$this->markdown = new DefaultMarkdown;*/
 	}
 
 	/**
 	 * Configure attribute command
 	 */
-	protected function configure() {
+	/*protected function configure() {
 		//Configure the class
 		$this
 			//Set name
@@ -97,26 +106,26 @@ class Calendar2Command extends Command {
 			->setDescription('Synchronize sessions in users\' calendar')
 			//Set description shown with bin/console --help airlibre:attribute
 			->setHelp('This command synchronize sessions in users\' google calendar');
-	}
+	}*/
 
 	/**
 	 * Process the attribution
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output): int {
+		//Set period
+		$period = new \DatePeriod(
+			//Start from last week
+			new \DateTime('-1 week'),
+			//Iterate on each day
+			new \DateInterval('P1D'),
+			//End with next 2 week
+			new \DateTime('+2 week')
+		);
+
 		//Iterate on google tokens
 		foreach($tokens = $this->doctrine->getRepository(GoogleToken::class)->findAllIndexed() as $tid => $token) {
 			//Iterate on google calendars
 			foreach($calendars = $token['calendars'] as $cid => $calendar) {
-				//Set period
-				$this->period = new \DatePeriod(
-					//Start from last week
-					new \DateTime('-1 week'),
-					//Iterate on each day
-					new \DateInterval('P1D'),
-					//End with next 2 week
-					new \DateTime('+2 week')
-				);
-
 				#$calendar['synchronized']
 				var_dump($token);
 
