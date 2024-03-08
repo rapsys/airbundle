@@ -17,31 +17,34 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Rapsys\UserBundle\Entity\Civility;
 use Rapsys\UserBundle\Entity\User as BaseUser;
 
+/**
+ * {@inheritdoc}
+ */
 class User extends BaseUser {
 	/**
 	 * City
 	 */
-	private ?string $city;
-
-	/**
-	 * Phone
-	 */
-	private ?string $phone;
+	private ?string $city = null;
 
 	/**
 	 * Country
 	 */
-	private ?Country $country;
+	private ?Country $country = null;
+
+	/**
+	 * Phone
+	 */
+	private ?string $phone = null;
 
 	/**
 	 * Pseudonym
 	 */
-	private ?string $pseudonym;
+	private ?string $pseudonym = null;
 
 	/**
 	 * Zipcode
 	 */
-	private ?string $zipcode;
+	private ?string $zipcode = null;
 
 	/**
 	 * Applications collection
@@ -92,13 +95,6 @@ class User extends BaseUser {
 	public function __construct(protected string $mail, protected string $password, protected ?Civility $civility = null, protected ?string $forename = null, protected ?string $surname = null, protected bool $active = false, protected bool $enable = true) {
 		//Call parent constructor
 		parent::__construct($this->mail, $this->password, $this->civility, $this->forename, $this->surname, $this->active, $this->enable);
-
-		//Set defaults
-		$this->city = null;
-		$this->country = null;
-		$this->phone = null;
-		$this->pseudonym = null;
-		$this->zipcode = null;
 
 		//Set collections
 		$this->applications = new ArrayCollection();
