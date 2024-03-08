@@ -11,6 +11,7 @@
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
@@ -19,39 +20,24 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Country {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
-	 * @var string
+	 * Create datetime
 	 */
-	protected $code;
+	private \DateTime $created;
 
 	/**
-	 * @var string
+	 * Update datetime
 	 */
-	protected $alpha;
+	private \DateTime $updated;
 
 	/**
-	 * @var string
+	 * Users collection
 	 */
-	protected $title;
-
-	/**
-	 * @var \DateTime
-	 */
-	protected $created;
-
-	/**
-	 * @var \DateTime
-	 */
-	protected $updated;
-
-	/**
-	 * @var ArrayCollection
-	 */
-	protected $users;
+	private Collection $users;
 
 	/**
 	 * Constructor
@@ -60,11 +46,8 @@ class Country {
 	 * @param string $alpha The country alpha
 	 * @param string $title The country title
 	 */
-	public function __construct(string $code, string $alpha, string $title) {
+	public function __construct(private string $code, private string $alpha, private string $title) {
 		//Set defaults
-		$this->code = $code;
-		$this->alpha = $alpha;
-		$this->title = $title;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 
@@ -77,7 +60,7 @@ class Country {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
