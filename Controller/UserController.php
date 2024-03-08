@@ -218,17 +218,38 @@ class UserController extends BaseUserController {
 								)
 							);
 
+							//Set calendar mails
+							$cmails = [];
+
 							//Iterate on each google token calendars
 							foreach($googleToken->getGoogleCalendars() as $googleCalendar) {
+								//Add calendar mail
+								$cmails[] = $googleCalendar->getMail();
+
 								//Remove google token calendar
 								$this->manager->remove($googleCalendar);
 							}
+
+							//Log unlinked google token infos
+							$this->logger->emergency(
+								$this->translator->trans(
+									'expired: mail=%mail% gmail=%gmail% cmails=%cmails% locale=%locale%',
+									[
+										'%mail%' => $googleToken->getUser()->getMail(),
+										'%gmail%' => $googleToken->getMail(),
+										'%cmails' => implode(',', $cmails),
+										'%locale%' => $request->getLocale()
+									]
+								)
+							);
 
 							//Remove google token
 							$this->manager->remove($googleToken);
 
 							//Flush to delete it
 							$this->manager->flush();
+
+							//TODO: warn user by mail ?
 
 							//Skip to next token
 							continue;
@@ -289,8 +310,9 @@ class UserController extends BaseUserController {
 						);
 					//Catch exception
 					} catch(\Google\Service\Exception $e) {
-						//With 401 code
-						if ($e->getCode() == 401) {
+						//With 401 or code
+						//XXX: see https://cloud.google.com/apis/design/errors
+						if ($e->getCode() == 401 || $e->getCode() == 403) {
 							//Add error in flash message
 							$this->addFlash(
 								'error',
@@ -300,17 +322,38 @@ class UserController extends BaseUserController {
 								)
 							);
 
+							//Set calendar mails
+							$cmails = [];
+
 							//Iterate on each google token calendars
 							foreach($googleToken->getGoogleCalendars() as $googleCalendar) {
+								//Add calendar mail
+								$cmails[] = $googleCalendar->getMail();
+
 								//Remove google token calendar
 								$this->manager->remove($googleCalendar);
 							}
+
+							//Log unlinked google token infos
+							$this->logger->emergency(
+								$this->translator->trans(
+									'denied: mail=%mail% gmail=%gmail% cmails=%cmails% locale=%locale%',
+									[
+										'%mail%' => $googleToken->getUser()->getMail(),
+										'%gmail%' => $googleToken->getMail(),
+										'%cmails' => implode(',', $cmails),
+										'%locale%' => $request->getLocale()
+									]
+								)
+							);
 
 							//Remove google token
 							$this->manager->remove($googleToken);
 
 							//Flush to delete it
 							$this->manager->flush();
+
+							//TODO: warn user by mail ?
 
 							//Skip to next token
 							continue;
@@ -341,12 +384,8 @@ class UserController extends BaseUserController {
 						}
 					}
 
-					//XXX: TODO: remove DEBUG
-					#header('Content-Type: text/plain');
-
-					//TODO: add feature to filter synchronized data (OrganizerId/DanceId)
 					//TODO: add feature for alerts (-30min/-1h) ?
-					//[Direct link to calendar ?][Direct link to calendar settings ?][Alerts][Remove]
+					//TODO: [Direct link to calendar ?][Direct link to calendar settings ?][Alerts][Remove]
 
 					//Create the CalendarType form and give the proper parameters
 					$form = $this->factory->createNamed('calendar_'.$googleShortMail, 'Rapsys\AirBundle\Form\CalendarType', $formData, [
