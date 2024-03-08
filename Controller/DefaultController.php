@@ -104,7 +104,7 @@ class DefaultController extends AbstractController {
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
 		$form = $this->factory->create('Rapsys\AirBundle\Form\ContactType', $data, [
-			'action' => $this->generateUrl('rapsys_air_contact'),
+			'action' => $this->generateUrl('rapsysair_contact'),
 			'method' => 'POST'
 		]);
 
@@ -465,7 +465,7 @@ class DefaultController extends AbstractController {
 		//With invalid user slug
 		if ($this->context['user']['slug'] !== $user) {
 			//Redirect to cleaned url
-			return $this->redirectToRoute('rapsys_air_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
+			return $this->redirectToRoute('rapsysair_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
 		}
 
 		//Fetch calendar
@@ -635,16 +635,7 @@ class DefaultController extends AbstractController {
 				//Without existing snippet
 				} else {
 					//Init snippet
-					$current = new Snippet();
-
-					//Set default locale
-					$current->setLocale($this->locale);
-
-					//Set default user
-					$current->setUser($user);
-
-					//Set default location
-					$current->setLocation($this->doctrine->getRepository(Location::class)->findOneById($location['id']));
+					$current = new Snippet($this->locale, $this->doctrine->getRepository(Location::class)->findOneById($location['id']), $user);
 				}
 
 				//Create SnippetType form
@@ -676,7 +667,7 @@ class DefaultController extends AbstractController {
 					$this->addFlash('notice', $this->translator->trans('Snippet for %user% %location% updated', ['%location%' => $location['at'], '%user%' => $this->context['user']['pseudonym']]));
 
 					//Redirect to cleaned url
-					return $this->redirectToRoute('rapsys_air_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
+					return $this->redirectToRoute('rapsysair_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
 				}
 
 				//Add form to context
@@ -727,7 +718,7 @@ class DefaultController extends AbstractController {
 							$this->addFlash('notice', $this->translator->trans('Image for %user% %location% deleted', ['%location%' => $location['at'], '%user%' => $this->context['user']['pseudonym']]));
 
 							//Redirect to cleaned url
-							return $this->redirectToRoute('rapsys_air_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
+							return $this->redirectToRoute('rapsysair_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
 						}
 					}
 
@@ -767,7 +758,7 @@ class DefaultController extends AbstractController {
 						$this->addFlash('notice', $this->translator->trans('Image for %user% %location% updated', ['%location%' => $location['at'], '%user%' => $this->context['user']['pseudonym']]));
 
 						//Redirect to cleaned url
-						return $this->redirectToRoute('rapsys_air_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
+						return $this->redirectToRoute('rapsysair_user_view', ['id' => $id, 'user' => $this->context['user']['slug']]);
 					}
 				}
 

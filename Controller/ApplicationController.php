@@ -88,7 +88,7 @@ class ApplicationController extends AbstractController {
 		//Create ApplicationType form
 		$form = $this->factory->create('Rapsys\AirBundle\Form\ApplicationType', null, [
 			//Set the action
-			'action' => $this->generateUrl('rapsys_air_application_add'),
+			'action' => $this->generateUrl('rapsysair_application_add'),
 			//Set the form attribute
 			#'attr' => [ 'class' => 'col' ],
 			//Set dance choices
@@ -142,10 +142,7 @@ class ApplicationController extends AbstractController {
 		//Catch no session case
 		} catch (NoResultException $e) {
 			//Create the session
-			$session = new Session();
-			$session->setLocation($data['location']);
-			$session->setDate($data['date']);
-			$session->setSlot($data['slot']);
+			$session = new Session($data['date'], $data['location'], $data['slot']);
 
 			//Get location
 			$location = $data['location']->getTitle();
@@ -440,7 +437,7 @@ class ApplicationController extends AbstractController {
 				unset($route['_route'], $route['_controller']);
 
 				//Check if session view route
-				if ($name == 'rapsys_air_session_view' && !empty($route['id'])) {
+				if ($name == 'rapsysair_session_view' && !empty($route['id'])) {
 					//Replace id
 					$route['id'] = $session->getId();
 				//Other routes
@@ -459,6 +456,6 @@ class ApplicationController extends AbstractController {
 		}
 
 		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air', ['session' => $session->getId()]);
+		return $this->redirectToRoute('rapsysair', ['session' => $session->getId()]);
 	}
 }
