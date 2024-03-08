@@ -275,7 +275,7 @@ SQL;
 		$result['alternates'] = [];
 
 		//Set route
-		$route = 'rapsys_air_user_view';
+		$route = 'rapsysair_user_view';
 
 		//Set route params
 		$routeParams = ['id' => $id, 'user' => $this->slugger->slug($result['pseudonym'])];
@@ -283,7 +283,7 @@ SQL;
 		//Milonga Raphaël exception
 		if ($routeParams['id'] == 1 && $routeParams['user'] == 'milonga-raphael') {
 			//Set route
-			$route = 'rapsys_air_user_milongaraphael';
+			$route = 'rapsysair_user_milongaraphael';
 			//Set route params
 			$routeParams = [];
 		}
@@ -473,8 +473,8 @@ SQL;
 				'dances' => [],
 				'slug' => $slug = $this->slugger->slug($data['pseudonym']),
 				//Milonga Raphaël exception
-				'link' => $data['id'] == 1 && $slug == 'milonga-raphael' ? $this->router->generate('rapsys_air_user_milongaraphael', []) : $this->router->generate('rapsys_air_user_view', ['id' => $data['id'], 'user' => $slug]),
-				'edit' => $this->router->generate('rapsys_user_edit', ['mail' => $short = $this->slugger->short($data['mail']), 'hash' => $this->slugger->hash($short)])
+				'link' => $data['id'] == 1 && $slug == 'milonga-raphael' ? $this->router->generate('rapsysair_user_milongaraphael', []) : $this->router->generate('rapsysair_user_view', ['id' => $data['id'], 'user' => $slug]),
+				'edit' => $this->router->generate('rapsysuser_edit', ['mail' => $short = $this->slugger->short($data['mail']), 'hash' => $this->slugger->hash($short)])
 			];
 
 			//With dances
@@ -490,13 +490,13 @@ SQL;
 					//Init dance when missing
 					if (!isset($ret[$group][$data['id']]['dances'][$name = $this->translator->trans($names[$k])])) {
 						$ret[$group][$data['id']]['dances'][$name] = [
-							'link' => $this->router->generate('rapsys_air_dance_name', ['name' => $this->slugger->short($names[$k]), 'dance' => $this->slugger->slug($name)]),
+							'link' => $this->router->generate('rapsysair_dance_name', ['name' => $this->slugger->short($names[$k]), 'dance' => $this->slugger->slug($name)]),
 							'types' => []
 						];
 					}
 
 					//Set type
-					$ret[$group][$data['id']]['dances'][$name]['types'][$type = $this->translator->trans($types[$k])] = $this->router->generate('rapsys_air_dance_view', ['id' => $id, 'name' => $this->slugger->slug($name), 'type' => $this->slugger->slug($type)]);
+					$ret[$group][$data['id']]['dances'][$name]['types'][$type = $this->translator->trans($types[$k])] = $this->router->generate('rapsysair_dance_view', ['id' => $id, 'name' => $this->slugger->slug($name), 'type' => $this->slugger->slug($type)]);
 				}
 			}
 		}

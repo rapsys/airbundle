@@ -221,7 +221,7 @@ SQL;
 					'id' => $id,
 					'type' => $type = $this->translator->trans($name['types'][$k]),
 					'slug' => $stype = $this->slugger->slug($type),
-					'link' => $this->router->generate('rapsys_air_dance_view', ['id' => $id, 'name' => $slug, 'type' => $stype])
+					'link' => $this->router->generate('rapsysair_dance_view', ['id' => $id, 'name' => $slug, 'type' => $stype])
 				];
 			}
 
@@ -229,7 +229,7 @@ SQL;
 			$return[$sname = $this->slugger->short($name['name'])] = [
 				'name' => $tname,
 				'slug' => $slug,
-				'link' => $this->router->generate('rapsys_air_dance_name', ['name' => $sname, 'dance' => $slug]),
+				'link' => $this->router->generate('rapsysair_dance_name', ['name' => $sname, 'dance' => $slug]),
 				'types' => $types,
 				'modified' => $name['modified']
 			];
