@@ -227,7 +227,7 @@ class LocationController extends DefaultController {
 	/**
 	 * List all locations
 	 *
-	 * @desc Display all locations
+	 * Display all locations
 	 *
 	 * @param Request $request The request instance
 	 *

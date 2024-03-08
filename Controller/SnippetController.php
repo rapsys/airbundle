@@ -19,7 +19,7 @@ class SnippetController extends DefaultController {
 	/**
 	 * Add snippet
 	 *
-	 * @desc Persist snippet in database
+	 * Persist snippet in database
 	 *
 	 * @param Request $request The request instance
 	 *
@@ -163,7 +163,7 @@ class SnippetController extends DefaultController {
 	/**
 	 * Edit snippet
 	 *
-	 * @desc Persist snippet in database
+	 * Persist snippet in database
 	 *
 	 * @param Request $request The request instance
 	 *

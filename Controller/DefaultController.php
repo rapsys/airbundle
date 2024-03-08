@@ -36,7 +36,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The about page
 	 *
-	 * @desc Display the about informations
+	 * Display the about informations
 	 *
 	 * @param Request $request The request instance
 	 * @return Response The rendered view
@@ -67,7 +67,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The contact page
 	 *
-	 * @desc Send a contact mail to configured contact
+	 * Send a contact mail to configured contact
 	 *
 	 * @param Request $request The request instance
 	 *
@@ -282,7 +282,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The organizer regulation page
 	 *
-	 * @desc Display the organizer regulation policy
+	 * Display the organizer regulation policy
 	 *
 	 * @param Request $request The request instance
 	 * @return Response The rendered view
@@ -315,7 +315,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The terms of service page
 	 *
-	 * @desc Display the terms of service policy
+	 * Display the terms of service policy
 	 *
 	 * @param Request $request The request instance
 	 * @return Response The rendered view
@@ -348,7 +348,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * The frequently asked questions page
 	 *
-	 * @desc Display the frequently asked questions
+	 * Display the frequently asked questions
 	 *
 	 * @param Request $request The request instance
 	 * @return Response The rendered view
@@ -382,7 +382,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * List all users
 	 *
-	 * @desc Display all user with a group listed as users
+	 * Display all user with a group listed as users
 	 *
 	 * @param Request $request The request instance
 	 *
@@ -439,7 +439,7 @@ class DefaultController extends AbstractController {
 	/**
 	 * List all sessions for the user
 	 *
-	 * @desc Display all sessions for the user with an application or login form
+	 * Display all sessions for the user with an application or login form
 	 *
 	 * @param Request $request The request instance
 	 * @param int $id The user id

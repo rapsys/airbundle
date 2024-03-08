@@ -18,7 +18,7 @@ class CalendarController extends DefaultController {
 	/**
 	 * Calendar authorization
 	 *
-	 * @desc Initiate calendar oauth process
+	 * Initiate calendar oauth process
 	 *
 	 * @param Request $request The request instance
 	 *

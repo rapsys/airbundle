@@ -33,7 +33,7 @@ class SessionController extends AbstractController {
 	/**
 	 * List all sessions
 	 *
-	 * @desc Display all sessions with an application or login form
+	 * Display all sessions with an application or login form
 	 *
 	 * @param Request $request The request instance
 	 *
@@ -151,7 +151,7 @@ class SessionController extends AbstractController {
 	/**
 	 * List all sessions for tango argentin
 	 *
-	 * @desc Display all sessions in tango argentin json format
+	 * Display all sessions in tango argentin json format
 	 *
 	 * @todo Drop it if unused by tangoargentin ???
 	 *

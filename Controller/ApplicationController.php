@@ -34,7 +34,7 @@ class ApplicationController extends AbstractController {
 	/**
 	 * Add application
 	 *
-	 * @desc Persist application and all required dependencies in database
+	 * Persist application and all required dependencies in database
 	 *
 	 * @param Request $request The request instance
 	 * @param Registry $manager The doctrine registry
