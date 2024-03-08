@@ -69,8 +69,8 @@ class Calendar2Command extends Command {
 		$this->client = new Client(
 			[
 				'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
-				'client_id' => $_ENV['RAPSYSAIR_GOOGLE_CLIENT'],
-				'client_secret' => $_ENV['RAPSYSAIR_GOOGLE_SECRET'],
+				'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
+				'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
 				'redirect_uri' => $this->router->generate('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 				'scopes' => $this->scopes,
 				'access_type' => 'offline',

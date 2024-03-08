@@ -1,11 +1,7 @@
 # Parameters configuration
 parameters:
-    # Google client
-    env(RAPSYSAIR_GOOGLE_CLIENT): "Ch4ng3m3!"
     # Google project
     env(RAPSYSAIR_GOOGLE_PROJECT): "Ch4ng3m3!"
-    # Google secret
-    env(RAPSYSAIR_GOOGLE_SECRET): "Ch4ng3m3!"
     # Hostname
     env(RAPSYSAIR_HOSTNAME): "Ch4ng3m3!"
     # Scheme

@@ -157,9 +157,9 @@ class UserController extends BaseUserController {
 			//Get google client
 			$googleClient = new \Google\Client(
 				[
-					'application_name' => $request->server->get('RAPSYSAIR_GOOGLE_PROJECT'),
-					'client_id' => $request->server->get('RAPSYSAIR_GOOGLE_CLIENT'),
-					'client_secret' => $request->server->get('RAPSYSAIR_GOOGLE_SECRET'),
+					'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
+					'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
+					'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
 					'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 					'scopes' => self::googleScopes,
 					'access_type' => 'offline',
@@ -615,9 +615,9 @@ class UserController extends BaseUserController {
 		//Get google client
 		$googleClient = new \Google\Client(
 			[
-				'application_name' => $request->server->get('RAPSYSAIR_GOOGLE_PROJECT'),
-				'client_id' => $request->server->get('RAPSYSAIR_GOOGLE_CLIENT'),
-				'client_secret' => $request->server->get('RAPSYSAIR_GOOGLE_SECRET'),
+				'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
+				'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
+				'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
 				'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 				'scopes' => self::googleScopes,
 				'access_type' => 'offline',
