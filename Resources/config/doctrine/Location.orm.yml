@@ -60,6 +60,6 @@ Rapsys\AirBundle\Entity\Location:
             columns: [ city, zipcode ]
             #XXX: see https://github.com/doctrine/dbal/pull/2412 and https://stackoverflow.com/questions/32539973/configuring-index-text-length-mysql-in-doctrine
             options:
-                lengths: [ ~, 3 ]
+                lengths: [ ~, 2 ]
     lifecycleCallbacks:
         preUpdate: ['preUpdate']
