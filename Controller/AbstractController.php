@@ -295,7 +295,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 				//Create ApplicationType form
 				$application = $this->factory->create('Rapsys\AirBundle\Form\ApplicationType', null, [
 					//Set the action
-					'action' => $this->generateUrl('rapsys_air_application_add'),
+					'action' => $this->generateUrl('rapsysair_application_add'),
 					//Set the form attribute
 					'attr' => [ 'class' => 'col' ],
 					//Set dance choices
@@ -452,7 +452,7 @@ abstract class AbstractController extends BaseAbstractController implements Serv
 		//With empty locations link
 		if (empty($parameters['locations_link'])) {
 			//Set locations link
-			$parameters['locations_link'] = $this->router->generate('rapsys_air_location');
+			$parameters['locations_link'] = $this->router->generate('rapsysair_location');
 		}
 
 		//With empty locations title

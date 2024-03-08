@@ -192,7 +192,7 @@ class SessionController extends AbstractController {
 				'status' => in_array('canceled', $session['class'])?'annulé':'confirmé',
 				'modified' => $session['modified']->format(\DateTime::ISO8601),
 				#'organizer' => $session['application']['user']['title'],
-				#'source' => $this->router->generate('rapsys_air_session_view', ['id' => $sessionId, 'location' => $this->translator->trans($session['l_title'])], UrlGeneratorInterface::ABSOLUTE_URL)
+				#'source' => $this->router->generate('rapsysair_session_view', ['id' => $sessionId, 'location' => $this->translator->trans($session['l_title'])], UrlGeneratorInterface::ABSOLUTE_URL)
 				'source' => $this->router->generate($route, $routeParams, UrlGeneratorInterface::ABSOLUTE_URL)
 			];
 		}
@@ -443,7 +443,7 @@ class SessionController extends AbstractController {
 			//TODO: move to named form ???
 			$sessionForm = $this->factory->create('Rapsys\AirBundle\Form\SessionType', null, [
 				//Set the action
-				'action' => $this->generateUrl('rapsys_air_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]),
+				'action' => $this->generateUrl('rapsysair_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]),
 				//Set the form attribute
 				'attr' => [ 'class' => 'col' ],
 				//Set admin
@@ -744,7 +744,7 @@ class SessionController extends AbstractController {
 				$this->manager->flush();
 
 				//Redirect to cleanup the form
-				return $this->redirectToRoute('rapsys_air_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]);
+				return $this->redirectToRoute('rapsysair_session_view', ['id' => $id, 'location' => $this->context['session']['location']['slug'], 'dance' => $this->context['session']['application']['dance']['slug']??null, 'user' => $this->context['session']['application']['user']['slug']??null]);
 			}
 
 			//Add form to context

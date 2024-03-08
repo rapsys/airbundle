@@ -43,7 +43,7 @@ class CalendarController extends DefaultController {
 		//Create the form according to the FormType created previously.
 		//And give the proper parameters
 		$form = $this->createForm('Rapsys\AirBundle\Form\CalendarType', ['calendar' => $this->config['calendar']['calendar'], 'prefix' => $this->config['calendar']['prefix']], [
-			'action' => $this->generateUrl('rapsys_air_calendar'),
+			'action' => $this->generateUrl('rapsysair_calendar'),
 			'method' => 'POST'
 		]);
 
@@ -70,7 +70,7 @@ class CalendarController extends DefaultController {
 						'application_name' => $data['project'],
 						'client_id' => $data['client'],
 						'client_secret' => $data['secret'],
-						'redirect_uri' => $redirect = $this->generateUrl('rapsys_air_calendar_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
+						'redirect_uri' => $redirect = $this->generateUrl('rapsysair_calendar_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
 						'scopes' => [Calendar::CALENDAR, Calendar::CALENDAR_EVENTS],
 						'access_type' => 'offline',
 						'approval_prompt' => 'force'
@@ -93,7 +93,7 @@ class CalendarController extends DefaultController {
 #				$googleClient->addScope(Calendar::CALENDAR_EVENTS);
 #
 #				//Set redirect uri
-#				$googleClient->setRedirectUri($redirect = $this->generateUrl('rapsys_air_calendar_callback', [], UrlGeneratorInterface::ABSOLUTE_URL));
+#				$googleClient->setRedirectUri($redirect = $this->generateUrl('rapsysair_calendar_callback', [], UrlGeneratorInterface::ABSOLUTE_URL));
 #
 #				//Set offline access
 #				$googleClient->setAccessType('offline');

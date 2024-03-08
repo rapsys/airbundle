@@ -329,7 +329,7 @@ class LocationController extends DefaultController {
 					$this->addFlash('notice', $this->translator->trans('Location %id% updated', ['%id%' => $location['id']]));
 
 					//Redirect to cleanup the form
-					return $this->redirectToRoute('rapsys_air_location', ['location' => $location['id']]);
+					return $this->redirectToRoute('rapsysair_location', ['location' => $location['id']]);
 				}
 
 				//Add form to context
@@ -366,7 +366,7 @@ class LocationController extends DefaultController {
 				$this->addFlash('notice', $this->translator->trans('Location created'));
 
 				//Redirect to cleanup the form
-				return $this->redirectToRoute('rapsys_air_location', ['location' => $data->getId()]);
+				return $this->redirectToRoute('rapsysair_location', ['location' => $data->getId()]);
 			}
 
 			//Add form to context
@@ -400,7 +400,7 @@ class LocationController extends DefaultController {
 		//With invalid slug
 		if ($location !== $this->context['location']['slug']) {
 			//Redirect on correctly spelled location
-			return $this->redirectToRoute('rapsys_air_location_view', ['id' => $this->context['location']['id'], 'location' => $this->context['location']['slug']], Response::HTTP_MOVED_PERMANENTLY);
+			return $this->redirectToRoute('rapsysair_location_view', ['id' => $this->context['location']['id'], 'location' => $this->context['location']['slug']], Response::HTTP_MOVED_PERMANENTLY);
 		}
 
 		//Fetch calendar
@@ -426,7 +426,7 @@ class LocationController extends DefaultController {
 
 		//Set modified
 		//XXX: dance modified is already computed inside calendar modified
-		$this->modified = max(array_merge([$this->context['location']['updated']], array_map(function ($v) { return $v['modified']; }, array_merge($this->context['calendar'], $this->context['locations']))));
+		$this->modified = max(array_merge([$this->context['location']['modified']], array_map(function ($v) { return $v['modified']; }, array_merge($this->context['calendar'], $this->context['locations']))));
 
 		//Create response
 		$response = new Response();
