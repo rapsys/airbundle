@@ -1,4 +1,13 @@
-<?php
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the Rapsys AirBundle package.
+ *
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Rapsys\AirBundle\DataFixtures;
 
@@ -13,6 +22,9 @@ use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Entity\Location;
 use Rapsys\AirBundle\Entity\Slot;
 
+/**
+ * {@inheritdoc}
+ */
 class AirFixtures extends Fixture {
 	/**
 	 * Air fixtures constructor
@@ -25,19 +37,16 @@ class AirFixtures extends Fixture {
 	 */
 	public function load(ObjectManager $manager) {
 		//Civility tree
-		$civilityTree = array(
+		$civilityTree = [
 			'Mister',
 			'Madam',
 			'Miss'
-		);
+		];
 
 		//Create titles
-		$civilitys = array();
+		$civilitys = [];
 		foreach($civilityTree as $civilityData) {
-			$civility = new Civility();
-			$civility->setTitle($civilityData);
-			$civility->setCreated(new \DateTime('now'));
-			$civility->setUpdated(new \DateTime('now'));
+			$civility = new Civility($civilityData);
 			$manager->persist($civility);
 			$civilitys[$civilityData] = $civility;
 			unset($civility);
@@ -48,19 +57,17 @@ class AirFixtures extends Fixture {
 		#insert into countries (code, alpha, title, created, updated) select countryCode, isoAlpha3, countryName, NOW(), NOW() FROM apps_countries_detailed ORDER BY countryCode ASC, isoAlpha3 ASC;
 
 		//Dance tree
-		$danceTree = array(
+		$danceTree = [
 			'Argentine Tango' => [
 			   'Milonga', 'Class and milonga', 'Public class', 'Private class'
 			]
-		);
+		];
 
 		//Create titles
-		$dances = array();
+		$dances = [];
 		foreach($danceTree as $danceTitle => $danceData) {
 			foreach($danceData as $danceType) {
 				$dance = new Dance($danceTitle, $danceType);
-				$dance->setCreated(new \DateTime('now'));
-				$dance->setUpdated(new \DateTime('now'));
 				$manager->persist($dance);
 				unset($dance);
 			}
@@ -68,20 +75,18 @@ class AirFixtures extends Fixture {
 
 		//Group tree
 		//XXX: ROLE_XXX is required by
-		$groupTree = array(
+		$groupTree = [
 			'User',
 			'Guest',
 			'Regular',
 			'Senior',
 			'Admin'
-		);
+		];
 
 		//Create groups
-		$groups = array();
+		$groups = [];
 		foreach($groupTree as $groupData) {
 			$group = new Group($groupData);
-			$group->setCreated(new \DateTime('now'));
-			$group->setUpdated(new \DateTime('now'));
 			$manager->persist($group);
 			$groups[$groupData] = $group;
 			unset($group);
@@ -91,8 +96,8 @@ class AirFixtures extends Fixture {
 		$manager->flush();
 
 		//User tree
-		$userTree = array(
-			array(
+		$userTree = [
+			[
 				'short' => 'Mr.',
 				'group' => 'Admin',
 				'mail' => 'tango@rapsys.eu',
@@ -101,8 +106,8 @@ class AirFixtures extends Fixture {
 				'surname' => 'Gertz',
 				'phone' => '+33677952829',
 				'password' => 'test'
-			),
-			/*array(
+			],
+			/*[
 				'short' => 'Mr.',
 				'group' => 'Senior',
 				'mail' => 'denis.courvoisier@wanadoo.fr',
@@ -111,8 +116,8 @@ class AirFixtures extends Fixture {
 				'surname' => 'Courvoisier',
 				'phone' => '+33600000000',
 				'password' => 'test'
-			),*/
-			array(
+			],*/
+			[
 				'short' => 'Mr.',
 				'group' => 'Senior',
 				'mail' => 'rannou402@orange.fr',
@@ -121,8 +126,8 @@ class AirFixtures extends Fixture {
 				'surname' => 'Rannou',
 				'phone' => '+33600000000',
 				'password' => 'test'
-			),
-			/*array(
+			],
+			/*[
 				'short' => 'Ms.',
 				'group' => 'Regular',
 				'mail' => 'roxmaps@gmail.com',
@@ -131,22 +136,18 @@ class AirFixtures extends Fixture {
 				'surname' => 'Prado',
 				'phone' => '+33600000000',
 				'password' => 'test'
-			),*/
-		);
+			],*/
+		];
 
 		//Create users
-		$users = array();
+		$users = [];
 		foreach($userTree as $userData) {
-			$user = new User($userData['mail']);
+			$user = new User($userData['mail'], $userData['password'], $civilitys[$userData['short']], $userData['forename'], $userData['surname']);
+			#TODO: check that password is hashed correctly !!!
+			#$user->setPassword($this->hasher->hashPassword($user, $userData['password']));
 			$user->setPseudonym($userData['pseudonym']);
-			$user->setForename($userData['forename']);
-			$user->setSurname($userData['surname']);
 			$user->setPhone($userData['phone']);
-			$user->setPassword($this->hasher->hashPassword($user, $userData['password']));
-			$user->setCivility($civilitys[$userData['short']]);
 			$user->addGroup($groups[$userData['group']]);
-			$user->setCreated(new \DateTime('now'));
-			$user->setUpdated(new \DateTime('now'));
 			$manager->persist($user);
 			$users[] = $user;
 			unset($user);
@@ -157,6 +158,7 @@ class AirFixtures extends Fixture {
 
 		//Location tree
 		//XXX: adding a new zipcode here requires matching accuweather uris in Command/WeatherCommand.php
+		//TODO: add descriptions as well
 		$locationTree = [
 			[
 				'title' => 'Garnier opera',
@@ -302,7 +304,7 @@ class AirFixtures extends Fixture {
 		];
 
 		//Create locations
-		$locations = array();
+		$locations = [];
 		foreach($locationTree as $locationData) {
 			$location = new Location();
 			$location->setTitle($locationData['title']);
@@ -313,8 +315,6 @@ class AirFixtures extends Fixture {
 			$location->setLatitude($locationData['latitude']);
 			$location->setLongitude($locationData['longitude']);
 			$location->setHotspot($locationData['hotspot']);
-			$location->setCreated(new \DateTime('now'));
-			$location->setUpdated(new \DateTime('now'));
 			$manager->persist($location);
 			$locations[$locationData['title']] = $location;
 			unset($location);
@@ -332,12 +332,9 @@ class AirFixtures extends Fixture {
 		];
 
 		//Create slots
-		$slots = array();
+		$slots = [];
 		foreach($slotTree as $slotData) {
-			$slot = new Slot();
-			$slot->setTitle($slotData);
-			$slot->setCreated(new \DateTime('now'));
-			$slot->setUpdated(new \DateTime('now'));
+			$slot = new Slot($slotData);
 			$manager->persist($slot);
 			$slots[$slot->getId()] = $slot;
 			unset($slot);
