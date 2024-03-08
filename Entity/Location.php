@@ -1,16 +1,17 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
@@ -19,9 +20,9 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Location {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
 	 * @var string
@@ -31,7 +32,7 @@ class Location {
 	/**
 	 * @var string
 	 */
-	protected $description;
+	private ?string $description = null;
 
 	/**
 	 * @var string
@@ -69,38 +70,39 @@ class Location {
 	private $hotspot;
 
 	/**
-	 * @var \DateTime
+	 * Create datetime
 	 */
-	private $created;
+	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
-	private $updated;
+	private \DateTime $updated;
 
 	/**
-	 * @var ArrayCollection
+	 * Sessions collection
 	 */
-	private $sessions;
+	private Collection $sessions;
 
 	/**
-	 * @var ArrayCollection
+	 * Snippets collection
 	 */
-	private $snippets;
+	private Collection $snippets;
 
 	/**
-	 * @var ArrayCollection
+	 * Users collection
 	 */
-	private $users;
+	private Collection $users;
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		//Set defaults
-		$this->description = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+
+		//Set collections
 		$this->sessions = new ArrayCollection();
 		$this->snippets = new ArrayCollection();
 		$this->users = new ArrayCollection();
@@ -111,7 +113,7 @@ class Location {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
