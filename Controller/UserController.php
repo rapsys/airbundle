@@ -11,10 +11,27 @@
 
 namespace Rapsys\AirBundle\Controller;
 
-use Symfony\Contracts\Cache\ItemInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+
+use Google\Client;
+
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
+
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Rapsys\UserBundle\Controller\UserController as BaseUserController;
 
@@ -23,14 +40,42 @@ use Rapsys\AirBundle\Entity\GoogleCalendar;
 use Rapsys\AirBundle\Entity\GoogleToken;
 use Rapsys\AirBundle\Entity\User;
 
+use Rapsys\PackBundle\Util\SluggerUtil;
+
+use Twig\Environment;
+
 /**
  * {@inheritdoc}
  */
 class UserController extends BaseUserController {
 	/**
-	 * Set google client scopes
+	 * {@inheritdoc}
+	 *
+	 * @param CacheInterface $cache The cache instance
+	 * @param AuthorizationCheckerInterface $checker The checker instance
+	 * @param ContainerInterface $container The container instance
+	 * @param ManagerRegistry $doctrine The doctrine instance
+	 * @param FormFactoryInterface $factory The factory instance
+	 * @param UserPasswordHasherInterface $hasher The password hasher instance
+	 * @param LoggerInterface $logger The logger instance
+	 * @param MailerInterface $mailer The mailer instance
+	 * @param EntityManagerInterface $manager The manager instance
+	 * @param RouterInterface $router The router instance
+	 * @param Security $security The security instance
+	 * @param SluggerUtil $slugger The slugger instance
+	 * @param RequestStack $stack The stack instance
+	 * @param TranslatorInterface $translator The translator instance
+	 * @param Environment $twig The twig environment instance
+	 * @param Client $google The google client instance
+	 * @param integer $limit The page limit
 	 */
-	const googleScopes = [\Google\Service\Calendar::CALENDAR_EVENTS, \Google\Service\Calendar::CALENDAR, \Google\Service\Oauth2::USERINFO_EMAIL];
+	public function __construct(protected CacheInterface $cache, protected AuthorizationCheckerInterface $checker, protected ContainerInterface $container, protected ManagerRegistry $doctrine, protected FormFactoryInterface $factory, protected UserPasswordHasherInterface $hasher, protected LoggerInterface $logger, protected MailerInterface $mailer, protected EntityManagerInterface $manager, protected RouterInterface $router, protected Security $security, protected SluggerUtil $slugger, protected RequestStack $stack, protected TranslatorInterface $translator, protected Environment $twig, protected Client $google, protected int $limit = 5) {
+		//Call parent constructor
+		parent::__construct($this->cache, $this->checker, $this->container, $this->doctrine, $this->factory, $this->hasher, $this->logger, $this->mailer, $this->manager, $this->router, $this->security, $this->slugger, $this->stack, $this->translator, $this->twig, $this->limit);
+
+		//Replace google client redirect uri
+		$this->google->setRedirectUri($this->router->generate($this->google->getRedirectUri(), [], UrlGeneratorInterface::ABSOLUTE_URL));
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -154,21 +199,8 @@ class UserController extends BaseUserController {
 				]
 			];
 
-			//Get google client
-			$googleClient = new \Google\Client(
-				[
-					'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
-					'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
-					'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
-					'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
-					'scopes' => self::googleScopes,
-					'access_type' => 'offline',
-					'login_hint' => $user->getMail(),
-					//XXX: see https://stackoverflow.com/questions/10827920/not-receiving-google-oauth-refresh-token
-					#'approval_prompt' => 'force'
-					'prompt' => 'consent'
-				]
-			);
+			//Set login hint
+			$this->google->setLoginHint($user->getMail());
 
 			//With user tokens
 			if (!($googleTokens = $user->getGoogleTokens())->isEmpty()) {
@@ -177,10 +209,10 @@ class UserController extends BaseUserController {
 				foreach($googleTokens as $googleToken) {
 					//Clear client cache before changing access token
 					//TODO: set a per token cache ?
-					$googleClient->getCache()->clear();
+					$this->google->getCache()->clear();
 
 					//Set access token
-					$googleClient->setAccessToken(
+					$this->google->setAccessToken(
 						[
 							'access_token' => $googleToken->getAccess(),
 							'refresh_token' => $googleToken->getRefresh(),
@@ -190,9 +222,9 @@ class UserController extends BaseUserController {
 					);
 
 					//With expired token
-					if ($googleClient->isAccessTokenExpired()) {
+					if ($this->google->isAccessTokenExpired()) {
 						//Refresh token
-						if (($refresh = $googleClient->getRefreshToken()) && ($token = $googleClient->fetchAccessTokenWithRefreshToken($refresh)) && empty($token['error'])) {
+						if (($refresh = $this->google->getRefreshToken()) && ($token = $this->google->fetchAccessTokenWithRefreshToken($refresh)) && empty($token['error'])) {
 							//Set access token
 							$googleToken->setAccess($token['access_token']);
 
@@ -266,12 +298,12 @@ class UserController extends BaseUserController {
 							//Set key to user.edit.$mail
 							($calendarKey = 'user.edit.calendar.'.($googleShortMail = $this->slugger->short($googleMail = $googleToken->getMail()))),
 							//Fetch mail calendar list
-							function (ItemInterface $item) use ($googleClient): array {
+							function (ItemInterface $item): array {
 								//Expire after 1h
 								$item->expiresAfter(3600);
 
 								//Get google calendar service
-								$service = new \Google\Service\Calendar($googleClient);
+								$service = new \Google\Service\Calendar($this->google);
 
 								//Init calendars
 								$calendars = [];
@@ -418,7 +450,7 @@ class UserController extends BaseUserController {
 							//Add button
 							} elseif ($clicked == 'add') {
 								//Get google calendar service
-								$service = new \Google\Service\Calendar($googleClient);
+								$service = new \Google\Service\Calendar($this->google);
 
 								//Add calendar
 								try {
@@ -446,7 +478,7 @@ class UserController extends BaseUserController {
 							//Delete button
 							} elseif ($clicked == 'delete') {
 								//Get google calendar service
-								$service = new \Google\Service\Calendar($googleClient);
+								$service = new \Google\Service\Calendar($this->google);
 
 								//Remove calendar
 								try {
@@ -487,12 +519,12 @@ class UserController extends BaseUserController {
 								$this->manager->flush();
 
 								//Revoke access token
-								$googleClient->revokeToken($googleToken->getAccess());
+								$this->google->revokeToken($googleToken->getAccess());
 
 								//With refresh token
 								if ($refresh = $googleToken->getRefresh()) {
 									//Revoke refresh token
-									$googleClient->revokeToken($googleToken->getRefresh());
+									$this->google->revokeToken($googleToken->getRefresh());
 								}
 
 								//Remove calendar key
@@ -546,7 +578,7 @@ class UserController extends BaseUserController {
 			}
 
 			//Add google calendar auth url
-			$this->config['edit']['view']['context']['calendar']['link'] = $googleClient->createAuthUrl();
+			$this->config['edit']['view']['context']['calendar']['link'] = $this->google->createAuthUrl();
 		}
 
 		//With post method
@@ -612,25 +644,16 @@ class UserController extends BaseUserController {
 			throw new \LogicException('User is empty');
 		}
 
-		//Get google client
-		$googleClient = new \Google\Client(
-			[
-				'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
-				'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
-				'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
-				'redirect_uri' => $this->generateUrl('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
-				'scopes' => self::googleScopes,
-				'access_type' => 'offline',
-				'login_hint' => $user->getMail(),
-				#'approval_prompt' => 'force'
-				'prompt' => 'consent'
-			]
-		);
+		//Set google client login hint
+		$this->google->setLoginHint($user->getMail());
+
+		//Set google client scopes
+		$googleScopes = [\Google\Service\Calendar::CALENDAR_EVENTS, \Google\Service\Calendar::CALENDAR, \Google\Service\Oauth2::USERINFO_EMAIL];
 
 		//Protect to extract failure
 		try {
 			//Authenticate with code
-			if (!empty($token = $googleClient->authenticate($code))) {
+			if (!empty($token = $this->google->authenticate($code))) {
 				//With error
 				if (!empty($token['error'])) {
 					throw new \LogicException('Client authenticate failed: '.str_replace('_', ' ', $token['error']));
@@ -644,12 +667,12 @@ class UserController extends BaseUserController {
 				} elseif (empty($token['scope'])) {
 					throw new \LogicException('Scope in is empty');
 				//Without valid scope
-				} elseif (array_intersect(self::googleScopes, explode(' ', $token['scope'])) != self::googleScopes) {
+				} elseif (array_intersect($googleScopes, explode(' ', $token['scope'])) != $googleScopes) {
 					throw new \LogicException('Scope in is not valid');
 				}
 
 				//Get Oauth2 object
-				$oauth2 = new \Google\Service\Oauth2($googleClient);
+				$oauth2 = new \Google\Service\Oauth2($this->google);
 
 				//Protect user info get call
 				try {
