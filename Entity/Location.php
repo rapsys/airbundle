@@ -27,47 +27,7 @@ class Location {
 	/**
 	 * @var string
 	 */
-	private $title;
-
-	/**
-	 * @var string
-	 */
 	private ?string $description = null;
-
-	/**
-	 * @var string
-	 */
-	private $address;
-
-	/**
-	 * @var string
-	 */
-	private $zipcode;
-
-	/**
-	 * @var string
-	 */
-	private $city;
-
-	/**
-	 * @var string
-	 */
-	private $latitude;
-
-	/**
-	 * @var string
-	 */
-	private $longitude;
-
-	/**
-	 * @var bool
-	 */
-	private $indoor;
-
-	/**
-	 * @var bool
-	 */
-	private $hotspot;
 
 	/**
 	 * Create datetime
@@ -97,7 +57,7 @@ class Location {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct(private string $title = '', private string $address = '', private string $zipcode = '', private string $city = '', private float $latitude = 0, private float $longitude = 0, private bool $hotspot = false, private bool $indoor = false) {
 		//Set defaults
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
