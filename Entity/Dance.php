@@ -1,16 +1,17 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
@@ -19,39 +20,29 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Dance {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
-	 * @var string
+	 * Create datetime
 	 */
-	protected $name;
+	private \DateTime $created;
 
 	/**
-	 * @var string
+	 * Update datetime
 	 */
-	protected $type;
+	private \DateTime $updated;
 
 	/**
-	 * @var \DateTime
+	 * Applications collection
 	 */
-	private $created;
+	private Collection $applications;
 
 	/**
-	 * @var \DateTime
+	 * Users collection
 	 */
-	private $updated;
-
-	/**
-	 * @var ArrayCollection
-	 */
-	private $applications;
-
-	/**
-	 * @var ArrayCollection
-	 */
-	private $users;
+	private Collection $users;
 
 	/**
 	 * Constructor
@@ -59,10 +50,8 @@ class Dance {
 	 * @param string $name The dance name
 	 * @param string $type The dance type
 	 */
-	public function __construct(string $name, string $type) {
+	public function __construct(private string $name, private string $type) {
 		//Set defaults
-		$this->name = $name;
-		$this->type = $type;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 
@@ -76,7 +65,7 @@ class Dance {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
