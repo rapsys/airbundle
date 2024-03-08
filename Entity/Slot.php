@@ -1,16 +1,17 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace Rapsys\AirBundle\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
@@ -19,37 +20,34 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Slot {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
-	 * @var string
+	 * Create datetime
 	 */
-	protected $title;
+	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
-	private $created;
+	private \DateTime $updated;
 
 	/**
-	 * @var \DateTime
+	 * Sessions collection
 	 */
-	private $updated;
-
-	/**
-	 * @var ArrayCollection
-	 */
-	private $sessions;
+	private Collection $sessions;
 
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function __construct(private string $title) {
 		//Set defaults
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
+
+		//Set collections
 		$this->sessions = new ArrayCollection();
 	}
 
@@ -58,7 +56,7 @@ class Slot {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
