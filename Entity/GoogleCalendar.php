@@ -11,8 +11,6 @@
 
 namespace Rapsys\AirBundle\Entity;
 
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 /**
@@ -20,54 +18,30 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class GoogleCalendar {
 	/**
-	 * @var int
+	 * Primary key
 	 */
-	private ?int $id;
+	private ?int $id = null;
 
 	/**
-	 * @var string
-	 */
-	private $mail;
-
-	/**
-	 * @var string
-	 */
-	private $summary;
-
-	/**
-	 * @var \DateTime
-	 */
-	private \DateTime $synchronized;
-
-	/**
-	 * @var \DateTime
+	 * Create datetime
 	 */
 	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
 	private \DateTime $updated;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\GoogleToken
-	 */
-	private GoogleToken $googleToken;
-
-	/**
 	 * Constructor
 	 *
-	 * @param \Rapsys\AirBundle\Entity\GoogleToken $googleToken The google token
+	 * @param GoogleToken $googleToken The google token
 	 * @param string $mail The google calendar id
 	 * @param string $summary The google calendar summary
 	 * @param \DateTime $synchronized The google calendar last synchronization
 	 */
-	public function __construct(GoogleToken $googleToken, string $mail, string $summary, \DateTime $synchronized = new \DateTime('now')) {
+	public function __construct(private GoogleToken $googleToken, private string $mail, private string $summary, private \DateTime $synchronized = new \DateTime('now')) {
 		//Set defaults
-		$this->googleToken = $googleToken;
-		$this->mail = $mail;
-		$this->summary = $summary;
-		$this->synchronized = $synchronized;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 	}
