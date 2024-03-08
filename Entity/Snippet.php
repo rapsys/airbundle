@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -18,95 +18,74 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Snippet {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
 	 * @var string
 	 */
-	protected $locale;
+	private ?string $description = null;
 
 	/**
 	 * @var string
 	 */
-	protected $description;
+	private ?string $class = null;
 
 	/**
 	 * @var string
 	 */
-	protected $class;
-
-	/**
-	 * @var string
-	 */
-	protected $short;
+	private ?string $short = null;
 
 	/**
 	 * @var integer
 	 */
-	protected $rate;
+	private ?int $rate = null;
 
 	/**
 	 * @var bool
 	 */
-	protected $hat;
+	private ?bool $hat = null;
 
 	/**
 	 * @var string
 	 */
-	protected $contact;
+	private ?string $contact = null;
 
 	/**
 	 * @var string
 	 */
-	protected $donate;
+	private ?string $donate = null;
 
 	/**
 	 * @var string
 	 */
-	protected $link;
+	private ?string $link = null;
 
 	/**
 	 * @var string
 	 */
-	protected $profile;
+	private ?string $profile = null;
 
 	/**
-	 * @var \DateTime
+	 * Create datetime
 	 */
-	protected $created;
+	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
-	protected $updated;
-
-	/**
-	 * @var Location
-	 */
-	protected $location;
-
-	/**
-	 * @var User
-	 */
-	protected $user;
+	private \DateTime $updated;
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $locale The locale
+	 * @param Location $location The location instance
+	 * @param User $user The user instance
 	 */
-	public function __construct() {
+	public function __construct(private string $locale, private Location $location, private User $user) {
 		//Set defaults
-		$this->description = null;
-		$this->class = null;
-		$this->short = null;
-		$this->rate = null;
-		$this->hat = null;
-		$this->contact = null;
-		$this->donate = null;
-		$this->link = null;
-		$this->profile = null;
-		$this->location = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
 	}
@@ -116,7 +95,7 @@ class Snippet {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
@@ -390,7 +369,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setLocation(Location $location) {
+	public function setLocation(Location $location): Snippet {
 		$this->location = $location;
 
 		return $this;
@@ -401,7 +380,7 @@ class Snippet {
 	 *
 	 * @return Location
 	 */
-	public function getLocation() {
+	public function getLocation(): Location {
 		return $this->location;
 	}
 
@@ -412,7 +391,7 @@ class Snippet {
 	 *
 	 * @return Snippet
 	 */
-	public function setUser(User $user) {
+	public function setUser(User $user): Snippet {
 		$this->user = $user;
 
 		return $this;
@@ -423,7 +402,7 @@ class Snippet {
 	 *
 	 * @return User
 	 */
-	public function getUser() {
+	public function getUser(): User {
 		return $this->user;
 	}
 
