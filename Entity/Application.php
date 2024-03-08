@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
 /*
- * this file is part of the rapsys packbundle package.
+ * This file is part of the Rapsys AirBundle package.
  *
- * (c) raphaël gertz <symfony@rapsys.eu>
+ * (c) Raphaël Gertz <symfony@rapsys.eu>
  *
- * for the full copyright and license information, please view the license
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -18,56 +18,52 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
  */
 class Application {
 	/**
-	 * @var integer
+	 * Primary key
 	 */
-	private $id;
+	private ?int $id = null;
 
 	/**
-	 * @var Dance
+	 * Dance instance
 	 */
-	private $dance;
+	private Dance $dance;
 
 	/**
-	 * @var float
+	 * Score
 	 */
-	private $score;
+	private ?float $score = null;
 
 	/**
-	 * @var \DateTime
+	 * Cancel datetime
 	 */
-	private $canceled;
+	private ?\DateTime $canceled = null;
 
 	/**
-	 * @var \DateTime
+	 * Create datetime
 	 */
-	private $created;
+	private \DateTime $created;
 
 	/**
-	 * @var \DateTime
+	 * Update datetime
 	 */
-	private $updated;
+	private \DateTime $updated;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\Session
+	 * Session instance
 	 */
-	private $session;
+	private $session = null;
 
 	/**
-	 * @var \Rapsys\AirBundle\Entity\User
+	 * User instance
 	 */
-	private $user;
+	private $user = null;
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		//Set defaults
-		$this->score = null;
-		$this->canceled = null;
 		$this->created = new \DateTime('now');
 		$this->updated = new \DateTime('now');
-		$this->session = null;
-		$this->user = null;
 	}
 
 	/**
@@ -75,7 +71,7 @@ class Application {
 	 *
 	 * @return integer
 	 */
-	public function getId(): int {
+	public function getId(): ?int {
 		return $this->id;
 	}
 
