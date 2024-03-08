@@ -459,8 +459,9 @@ SELECT
 	a.city,
 	a.latitude,
 	a.longitude,
+	a.created,
 	a.updated,
-	a.modified,
+	MAX(GREATEST(a.modified, COALESCE(s3.created, 0), COALESCE(s3.updated, 0))) AS modified,
 	a.pcount,
 	COUNT(s3.id) AS tcount
 FROM (
@@ -470,9 +471,10 @@ FROM (
 		b.city,
 		b.latitude,
 		b.longitude,
+		b.created,
 		b.updated,
-		COUNT(s2.id) AS pcount,
-		MAX(b.updated) AS modified
+		MAX(GREATEST(b.modified, COALESCE(s2.created, 0), COALESCE(s2.updated, 0))) AS modified,
+		COUNT(s2.id) AS pcount
 	FROM (
 		SELECT
 			l2.id,
@@ -480,7 +482,9 @@ FROM (
 			l2.title,
 			l2.latitude,
 			l2.longitude,
-			l2.updated
+			l2.created,
+			l2.updated,
+			GREATEST(l2.created, l2.updated) AS modified
 		FROM (
 			SELECT
 				l.id,
@@ -525,10 +529,11 @@ SQL;
 			->addScalarResult('city', 'city', 'string')
 			->addScalarResult('latitude', 'latitude', 'float')
 			->addScalarResult('longitude', 'longitude', 'float')
+			->addScalarResult('created', 'created', 'datetime')
 			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('modified', 'modified', 'datetime')
 			->addScalarResult('pcount', 'pcount', 'integer')
-			->addScalarResult('tcount', 'tcount', 'integer')
-			->addScalarResult('modified', 'modified', 'datetime');
+			->addScalarResult('tcount', 'tcount', 'integer');
 
 		//Get result
 		$result = $this->_em
@@ -559,10 +564,11 @@ SQL;
 				'miniature' => $this->translator->trans($data['title'].' miniature'),
 				'latitude' => $data['latitude'],
 				'longitude' => $data['longitude'],
+				'created' => $data['created'],
 				'updated' => $data['updated'],
+				'modified' => $data['modified'],
 				'pcount' => $data['pcount'],
 				'tcount' => $data['tcount'],
-				'modified' => $data['modified'],
 				'slug' => $slug = $this->slugger->slug($title),
 				'link' => $this->router->generate('rapsysair_location_view', ['id' => $data['id'], 'location' => $slug])
 			];
@@ -590,12 +596,12 @@ SELECT
 	l.longitude,
 	l.indoor,
 	l.zipcode,
-	MAX(l2.updated) AS updated,
+	MAX(GREATEST(l.created, l.updated, l2.created, l2.updated)) AS modified,
 	SUBSTRING(l.zipcode, 1, 2) AS city_id,
 	ROUND(AVG(l2.latitude), 6) AS city_latitude,
 	ROUND(AVG(l2.longitude), 6) AS city_longitude
 FROM Rapsys\AirBundle\Entity\Location AS l
-JOIN Rapsys\AirBundle\Entity\Location AS l2 ON (l2.city = l.city AND SUBSTRING(l2.zipcode, 1, 3) = SUBSTRING(l.zipcode, 1, 3))
+JOIN Rapsys\AirBundle\Entity\Location AS l2 ON (l2.city = l.city AND SUBSTRING(l2.zipcode, 1, 2) = SUBSTRING(l.zipcode, 1, 2))
 WHERE l.id = :id
 GROUP BY l.id
 LIMIT 0, 1
@@ -618,7 +624,7 @@ SQL;
 			->addScalarResult('longitude', 'longitude', 'float')
 			->addScalarResult('indoor', 'indoor', 'boolean')
 			->addScalarResult('zipcode', 'zipcode', 'string')
-			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('modified', 'modified', 'datetime')
 			->addScalarResult('city_id', 'city_id', 'integer')
 			->addScalarResult('city_latitude', 'city_latitude', 'float')
 			->addScalarResult('city_longitude', 'city_longitude', 'float')
@@ -690,7 +696,7 @@ SQL;
 			'latitude' => $result['latitude'],
 			'longitude' => $result['longitude'],
 			'indoor' => $result['indoor'],
-			'updated' => $result['updated'],
+			'modified' => $result['modified'],
 			'around' => $this->translator->trans('around '.$result['title']),
 			'at' => $this->translator->trans('at '.$result['title']),
 			'atin' => $this->translator->trans('at '.$result['title']).' '.$this->translator->trans('in '.$result['city']),
