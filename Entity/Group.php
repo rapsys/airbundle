@@ -13,5 +13,8 @@ namespace Rapsys\AirBundle\Entity;
 
 use Rapsys\UserBundle\Entity\Group as BaseGroup;
 
+/**
+ * {@inheritdoc}
+ */
 class Group extends BaseGroup {
 }

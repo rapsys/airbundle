@@ -13,5 +13,8 @@ namespace Rapsys\AirBundle\Entity;
 
 use Rapsys\UserBundle\Entity\Civility as BaseCivility;
 
+/**
+ * {@inheritdoc}
+ */
 class Civility extends BaseCivility {
 }
