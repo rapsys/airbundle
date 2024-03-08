@@ -45,7 +45,7 @@ class SnippetController extends DefaultController {
 			//Set options
 			[
 				//Set the action
-				'action' => $this->generateUrl('rapsys_air_snippet_add', ['location' => $request->get('location')]),
+				'action' => $this->generateUrl('rapsysair_snippet_add', ['location' => $request->get('location')]),
 				//Set the form attribute
 				'attr' => []
 			]
@@ -138,7 +138,7 @@ class SnippetController extends DefaultController {
 				unset($route['_route'], $route['_controller']);
 
 				//Check if snippet view route
-				if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
+				if ($name == 'rapsysair_user_view' && !empty($route['id'])) {
 					//Replace id
 					$route['id'] = $snippet->getUser()->getId();
 				//Other routes
@@ -157,7 +157,7 @@ class SnippetController extends DefaultController {
 		}
 
 		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air', ['snippet' => $snippet->getId()]);
+		return $this->redirectToRoute('rapsysair', ['snippet' => $snippet->getId()]);
 	}
 
 	/**
@@ -197,7 +197,7 @@ class SnippetController extends DefaultController {
 			//Set options
 			[
 				//Set the action
-				'action' => $this->generateUrl('rapsys_air_snippet_edit', ['id' => $id]),
+				'action' => $this->generateUrl('rapsysair_snippet_edit', ['id' => $id]),
 				//Set the form attribute
 				'attr' => []
 			]
@@ -322,7 +322,7 @@ class SnippetController extends DefaultController {
 				unset($route['_route'], $route['_controller']);
 
 				//Check if snippet view route
-				if ($name == 'rapsys_air_user_view' && !empty($route['id'])) {
+				if ($name == 'rapsysair_user_view' && !empty($route['id'])) {
 					//Replace id
 					$route['id'] = $snippet->getUser()->getId();
 				//Other routes
@@ -341,6 +341,6 @@ class SnippetController extends DefaultController {
 		}
 
 		//Redirect to cleanup the form
-		return $this->redirectToRoute('rapsys_air', ['snippet' => $snippet->getId()]);
+		return $this->redirectToRoute('rapsysair', ['snippet' => $snippet->getId()]);
 	}
 }
