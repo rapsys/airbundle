@@ -257,6 +257,27 @@ framework:
 
 # Service configuration
 services:
+    # Register google client service
+    Google\Client:
+        alias: 'google.client'
+    # Register google client service alias
+    google.client:
+        arguments: [
+            {
+                application_name: '%env(string:RAPSYSAIR_GOOGLE_PROJECT)%',
+                client_id: '%env(string:GOOGLE_CLIENT_ID)%',
+                client_secret: '%env(string:GOOGLE_CLIENT_SECRET)%',
+                #redirect_uri: '%env(string:RAPSYSAIR_SCHEME)%://%env(string:RAPSYSAIR_HOSTNAME)%/google/callback',
+                redirect_uri: 'rapsysair_google_callback',
+                scopes: [ !php/const '\Google\Service\Calendar::CALENDAR_EVENTS', !php/const '\Google\Service\Calendar::CALENDAR', !php/const '\Google\Service\Oauth2::USERINFO_EMAIL' ],
+                access_type: 'offline',
+                #//XXX: see https://stackoverflow.com/questions/10827920/not-receiving-google-oauth-refresh-token
+                #'approval_prompt' => 'force',
+                prompt: 'consent'
+            }
+        ]
+        class: 'Google\Client'
+        public: true
     # Register application controller
     Rapsys\AirBundle\Controller\ApplicationController:
         arguments: [ '@security.authorization_checker', '@service_container', '@rapsysuser.access_decision_manager', '@doctrine', '@rapsysair.facebook_util', '@form.factory', '@rapsyspack.image_util', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@rapsyspack.map_util', '@rapsyspack.path_package', '@router', '@security.helper', '@rapsyspack.slugger_util', '@request_stack', '@translator', '@twig' ]
@@ -279,7 +300,7 @@ services:
         tags: [ 'controller.service_arguments' ]
     # Register user controller
     Rapsys\AirBundle\Controller\UserController:
-        arguments: [ '@user.cache', '@security.authorization_checker', '@service_container', '@doctrine', '@form.factory', '@security.user_password_hasher', '@logger', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@router', '@security.helper', '@rapsyspack.slugger_util', '@request_stack', '@translator', '@twig' ]
+        arguments: [ '@user.cache', '@security.authorization_checker', '@service_container', '@doctrine', '@form.factory', '@security.user_password_hasher', '@logger', '@mailer.mailer', '@doctrine.orm.default_entity_manager', '@router', '@security.helper', '@rapsyspack.slugger_util', '@request_stack', '@translator', '@twig', '@google.client' ]
         tags: [ 'controller.service_arguments' ]
     # Register session controller
     Rapsys\AirBundle\Controller\SessionController:
@@ -334,7 +355,7 @@ services:
         tags: [ 'console.command' ]
     # Register calendar2 command
     Rapsys\AirBundle\Command\Calendar2Command:
-        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator' ]
+        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator', '@google.client', '@twig.markdown.default' ]
         tags: [ 'console.command' ]
     # Register rekey command
     Rapsys\AirBundle\Command\RekeyCommand:
@@ -347,6 +368,12 @@ services:
     # Register repository factory
     Rapsys\AirBundle\Factory:
         arguments: [ '@request_stack', '@router', '@rapsyspack.slugger_util', '@translator', '%kernel.default_locale%', '%rapsysair.languages%' ]
+    # Register facebook event subscriber
+    Rapsys\PackBundle\Subscriber\FacebookSubscriber:
+        arguments: [ '@router', '%rapsysair.locales%' ]
+        tags: [ 'kernel.event_subscriber' ]
+    # Register dotenv:dump command
+    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
     # Register facebook util service
     rapsysair.facebook_util:
         class: 'Rapsys\PackBundle\Util\FacebookUtil'
@@ -358,12 +385,6 @@ services:
         class: 'Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory'
         arguments: [ { 'Rapsys\AirBundle\Entity\User': { class: 'Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher', arguments: [ ~, ~, ~, '2y'] } } ]
         public: true
-    # Register facebook event subscriber
-    Rapsys\PackBundle\Subscriber\FacebookSubscriber:
-        arguments: [ '@router', '%rapsysair.locales%' ]
-        tags: [ 'kernel.event_subscriber' ]
-    # Register dotenv:dump command
-    Symfony\Component\Dotenv\Command\DotenvDumpCommand: ~
 
 # Twig Configuration
 twig:
