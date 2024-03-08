@@ -168,7 +168,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.871268,
 				'longitude' => 2.331832,
-				'hotspot' => true
+				'hotspot' => true,
+				'indoor' => false
 			],
 			[
 				'title' => 'Tino-Rossi garden',
@@ -178,7 +179,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.847736,
 				'longitude' => 2.360953,
-				'hotspot' => true
+				'hotspot' => true,
+				'indoor' => false
 			],
 			[
 				'title' => 'Trocadero esplanade',
@@ -189,7 +191,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.861888,
 				'longitude' => 2.288853,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Colette place',
@@ -199,7 +202,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.863219,
 				'longitude' => 2.335847,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Swan island',
@@ -209,7 +213,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.849976, #48.849976
 				'longitude' => 2.279603, #2.2796029,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Jussieu esplanade',
@@ -219,7 +224,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.847955, #48.8479548
 				'longitude' => 2.353291, #2.3532907,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Orleans gallery',
@@ -229,7 +235,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.863885,
 				'longitude' => 2.337387,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Orsay museum',
@@ -239,7 +246,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.860418,
 				'longitude' => 2.325815,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Saint-Honore market',
@@ -249,7 +257,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.866992,
 				'longitude' => 2.331752,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Igor Stravinsky place',
@@ -259,7 +268,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.859244,
 				'longitude' => 2.351289,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Tokyo palace',
@@ -269,7 +279,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.863827,
 				'longitude' => 2.297339,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Drawings\' garden',
@@ -279,7 +290,8 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.892503,
 				'longitude' => 2.389300,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Louvre palace',
@@ -289,32 +301,25 @@ class AirFixtures extends Fixture {
 				'city' => 'Paris',
 				'latitude' => 48.860386,
 				'longitude' => 2.332611,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			],
 			[
 				'title' => 'Monde garden',
-				'short' => 'Monde',
 				'address' => '63 avenue Pierre Mendès-France',
 				'zipcode' => '75013',
 				'city' => 'Paris',
 				'latitude' => 48.840451,
 				'longitude' => 2.367638,
-				'hotspot' => false
+				'hotspot' => false,
+				'indoor' => false
 			]
 		];
 
 		//Create locations
 		$locations = [];
 		foreach($locationTree as $locationData) {
-			$location = new Location();
-			$location->setTitle($locationData['title']);
-			$location->setShort($locationData['short']);
-			$location->setAddress($locationData['address']);
-			$location->setZipcode($locationData['zipcode']);
-			$location->setCity($locationData['city']);
-			$location->setLatitude($locationData['latitude']);
-			$location->setLongitude($locationData['longitude']);
-			$location->setHotspot($locationData['hotspot']);
+			$location = new Location($locationData['title'], $locationData['address'], $locationData['zipcode'], $locationData['city'], $locationData['latitude'], $locationData['longitude'], $locationData['hotspot'], $locationData['indoor']);
 			$manager->persist($location);
 			$locations[$locationData['title']] = $location;
 			unset($location);
