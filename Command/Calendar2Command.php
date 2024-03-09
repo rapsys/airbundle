@@ -54,16 +54,6 @@ class Calendar2Command extends Command {
 	protected string $help = 'This command synchronize sessions in users\' google calendar';
 
 	/**
-	 * Set markdown instance
-	 */
-	#private DefaultMarkdown $markdown;
-
-	/**
-	 * Set date period instance
-	 */
-	#private \DatePeriod $period;
-
-	/**
 	 * {@inheritdoc}
 	 */
 	public function __construct(protected ManagerRegistry $doctrine, protected string $locale, protected RouterInterface $router, protected SluggerUtil $slugger, protected TranslatorInterface $translator, protected Client $google, protected DefaultMarkdown $markdown) {
@@ -72,41 +62,7 @@ class Calendar2Command extends Command {
 
 		//Replace google client redirect uri
 		$this->google->setRedirectUri($this->router->generate($this->google->getRedirectUri(), [], UrlGeneratorInterface::ABSOLUTE_URL));
-
-		/*
-		//Set google client
-		$this->client = new Client(
-			[
-				'application_name' => $_ENV['RAPSYSAIR_GOOGLE_PROJECT'],
-				'client_id' => $_ENV['GOOGLE_CLIENT_ID'],
-				'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'],
-				'redirect_uri' => $this->router->generate('rapsysair_google_callback', [], UrlGeneratorInterface::ABSOLUTE_URL),
-				'scopes' => $this->scopes,
-				'access_type' => 'offline',
-				#'login_hint' => $user->getMail(),
-				//XXX: see https://stackoverflow.com/questions/10827920/not-receiving-google-oauth-refresh-token
-				#'approval_prompt' => 'force'
-				'prompt' => 'consent'
-			]
-		);
-
-		//Set Markdown instance
-		$this->markdown = new DefaultMarkdown;*/
 	}
-
-	/**
-	 * Configure attribute command
-	 */
-	/*protected function configure() {
-		//Configure the class
-		$this
-			//Set name
-			->setName('rapsysair:calendar2')
-			//Set description shown with bin/console list
-			->setDescription('Synchronize sessions in users\' calendar')
-			//Set description shown with bin/console --help airlibre:attribute
-			->setHelp('This command synchronize sessions in users\' google calendar');
-	}*/
 
 	/**
 	 * Process the attribution
@@ -146,56 +102,7 @@ class Calendar2Command extends Command {
 
 		//TODO: XXX: or fetch directly the events updated since synchronized + matching rubscriptions and/or dances
 
-		#var_dump($tokens);
 		exit;
-		
-		//Set sql request
-		$sql =<<<SQL
-SELECT
-	b.*,
-	GROUP_CONCAT(us.user_id) AS users
-FROM (
-	SELECT
-		a.*,
-		GROUP_CONCAT(ud.dance_id) AS dances
-	FROM (
-		SELECT
-			t.id AS tid,
-			t.mail AS gmail,
-			t.user_id,
-			t.access,
-			t.refresh,
-			t.expired,
-			GROUP_CONCAT(c.id) AS cids,
-			GROUP_CONCAT(c.mail) AS cmails,
-			GROUP_CONCAT(c.summary) AS csummaries,
-			GROUP_CONCAT(c.synchronized) AS csynchronizeds
-		FROM google_tokens AS t
-		JOIN google_calendars AS c ON (c.google_token_id = t.id)
-		GROUP BY t.id
-		ORDER BY NULL
-		LIMIT 100000
-	) AS a
-	LEFT JOIN users_dances AS ud ON (ud.user_id = a.user_id)
-	GROUP BY a.tid
-	ORDER BY NULL
-	LIMIT 100000
-) AS b
-LEFT JOIN users_subscriptions AS us ON (us.subscriber_id = b.user_id)
-GROUP BY b.tid
-ORDER BY NULL
-SQL;
-		#$sessions = $this->doctrine->getRepository(Session::class)->findAllByDanceUserModified($filter['dance'], $filter['user'], $calendar['synchronized']);
-		//Iterate on google tokens
-		foreach($tokens as $token) {
-			//TODO: clear google client cache
-			//TODO: set google token
-			//Iterate on google calendars
-			foreach($calendars as $calendar) {
-				//Fetch sessions to sync
-				$sessions = $this->doctrine->getRepository(Session::class)->findAllByDanceUserModified($filter['dance'], $filter['user'], $calendar['synchronized']);
-			}
-		}
 
 		//Return success
 		return self::SUCCESS;
