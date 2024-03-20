@@ -5,8 +5,8 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome back to %site.title%'|trans({'%site.title%': site.title})|raw}) }}</h2>
-				<p>{{ 'Thanks so much for rejoining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}</p>
+				<h2>{{ 'Subject: %subject%'|trans({'%subject%': 'welcome back to %title.site%'|trans({'%title.site%': title.site})|raw}) }}</h2>
+				<p>{{ 'Thanks so much for rejoining %title.site%, the space reservation program.'|trans({'%title.site%': title.site}) }}</p>
 				<p>{{ 'Your account password has been changed, to recover your account you can follow this link: '|trans }}</p>
 				<p><a href="{{ recover_url|escape('html_attr') }}">{{ recover_url }}</a></p>
 			</td>

@@ -2,7 +2,7 @@
 {% for i in range(1, subject|length) %}={% endfor %}
 
 
-*{{ 'Thanks so much for rejoining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}*
+*{{ 'Thanks so much for rejoining %title.site%, the space reservation program.'|trans({'%title.site%': title.site}) }}*
 
 {{ 'Your account password has been changed, to recover your account you can follow this link: %recover_url%'|trans({'%recover_url%': recover_url}) }}
 

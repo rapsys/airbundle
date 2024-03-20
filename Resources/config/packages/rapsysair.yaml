@@ -89,7 +89,7 @@ rapsysuser:
                 title:
                     page: 'Recover'
         mail:
-            subject: 'Welcome back %%recipient_name%% to %%site.title%%'
+            subject: 'Welcome back %%recipient_name%% to %%title.site%%'
             html: '@RapsysAir/mail/recover.html.twig'
             text: '@RapsysAir/mail/recover.text.twig'
             context:
@@ -111,7 +111,7 @@ rapsysuser:
                 title:
                     page: 'Register'
         mail:
-            subject: 'Welcome %%recipient_name%% to %%site.title%%'
+            subject: 'Welcome %%recipient_name%% to %%title.site%%'
             html: '@RapsysAir/mail/register.html.twig'
             text: '@RapsysAir/mail/register.text.twig'
             context:

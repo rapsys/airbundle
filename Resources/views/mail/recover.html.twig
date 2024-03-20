@@ -6,7 +6,7 @@
 			<td>&nbsp;</td>
 			<td>
 				<h2>{{ 'Subject: %subject%'|trans({'%subject%': subject})|raw }}</h2>
-				<p>{{ 'Thanks so much for rejoining %site.title%, the space reservation program.'|trans({'%site.title%': site.title}) }}</p>
+				<p>{{ 'Thanks so much for rejoining %title.site%, the space reservation program.'|trans({'%title.site%': title.site}) }}</p>
 				<p>{% trans %}To recover your account follow this link:{% endtrans %}</p>
 				<p><a href="{{ recover_url|escape('html_attr') }}" class="link">{{ recover_url }}</a></p>
 			</td>
