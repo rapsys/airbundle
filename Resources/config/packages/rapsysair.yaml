@@ -127,6 +127,11 @@ doctrine:
 
     # Orm configuration
     orm:
+        # Controller resolver
+        controller_resolver:
+            # Disable auto mapping
+            auto_mapping: false
+
         # Replace repository factory
         repository_factory: 'Rapsys\AirBundle\Factory'
 
@@ -137,6 +142,7 @@ doctrine:
             Rapsys\UserBundle\Entity\Civility: 'Rapsys\AirBundle\Entity\Civility'
             Rapsys\UserBundle\Entity\User: 'Rapsys\AirBundle\Entity\User'
 
+        # Force mappings
         mappings:
             # Map entities
             # XXX: Entity short syntax was removed
