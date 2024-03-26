@@ -43,6 +43,10 @@
 					{{ form_row(register.phone) }}
 				{% endif %}
 
+				{% if register.captcha is defined %}
+					{{ form_row(register.captcha) }}
+				{% endif %}
+
 				{{ form_row(register.submit) }}
 
 				{# Render CSRF token etc .#}
