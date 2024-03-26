@@ -13,57 +13,63 @@ namespace Rapsys\AirBundle\Form;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TelType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use Rapsys\AirBundle\Entity\Country;
 use Rapsys\AirBundle\Entity\Dance;
 use Rapsys\AirBundle\Entity\User;
 use Rapsys\AirBundle\Transformer\DanceTransformer;
 use Rapsys\AirBundle\Transformer\SubscriptionTransformer;
 
+use Rapsys\PackBundle\Util\ImageUtil;
+use Rapsys\PackBundle\Util\SluggerUtil;
+
 use Rapsys\UserBundle\Form\RegisterType as BaseRegisterType;
+
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * {@inheritdoc}
  */
 class RegisterType extends BaseRegisterType {
 	/**
-	 * Public constructor
+	 * Constructor
 	 *
 	 * @param EntityManagerInterface $manager The entity manager
+	 * @param ?ImageUtil $image The image instance
+	 * @param ?SluggerUtil $slugger The slugger instance
+	 * @param ?TranslatorInterface $translator The translator instance
 	 */
-	public function __construct(private EntityManagerInterface $manager) {
+	public function __construct(protected EntityManagerInterface $manager, protected ?ImageUtil $image = null, protected ?SluggerUtil $slugger = null, protected ?TranslatorInterface $translator = null) {
+		//Call parent constructor
+		parent::__construct($this->image, $this->slugger, $this->translator);
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options): FormBuilderInterface {
-		//Call parent build form
-		$form = parent::buildForm($builder, $options);
-
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		//Add extra city field
 		if (!empty($options['city'])) {
-			$form->add('city', TextType::class, ['attr' => ['placeholder' => 'Your city'], 'required' => false]);
+			$builder->add('city', TextType::class, ['attr' => ['placeholder' => 'Your city'], 'required' => false]);
 		}
 
 		//Add extra country field
 		if (!empty($options['country'])) {
 			//Add country field
-			$form->add('country', EntityType::class, ['class' => $options['country_class'], 'choice_label' => 'title'/*, 'choices' => $options['location_choices']*/, 'preferred_choices' => $options['country_favorites'], 'attr' => ['placeholder' => 'Your country'], 'choice_translation_domain' => false, 'required' => true, 'data' => $options['country_default']]);
+			$builder->add('country', EntityType::class, ['class' => $options['country_class'], 'choice_label' => 'title'/*, 'choices' => $options['location_choices']*/, 'preferred_choices' => $options['country_favorites'], 'attr' => ['placeholder' => 'Your country'], 'choice_translation_domain' => false, 'required' => true, 'data' => $options['country_default']]);
 		}
 
 		//Add extra dance field
 		if (!empty($options['dance'])) {
 			//Add dance field
-			#$form->add('dances', EntityType::class, ['class' => $options['dance_class'], 'choice_label' => null, 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => false, 'required' => false, 'data' => $options['dance_default']]);
-			$form->add(
-				$form
+			#$builder->add('dances', EntityType::class, ['class' => $options['dance_class'], 'choice_label' => null, 'preferred_choices' => $options['dance_favorites'], 'attr' => ['placeholder' => 'Your dance'], 'choice_translation_domain' => false, 'required' => false, 'data' => $options['dance_default']]);
+			$builder->add(
+				$builder
 					->create('dances', ChoiceType::class, ['attr' => ['placeholder' => 'Your dance']/*, 'by_reference' => false*/, 'choice_attr' => ['class' => 'row'], 'choice_translation_domain' => false, 'choices' => $options['dance_choices'], 'multiple' => true, 'preferred_choices' => $options['dance_favorites'], 'required' => false])
 					->addModelTransformer(new DanceTransformer($this->manager))
 					#->addModelTransformer(new CollectionToArrayTransformer)
@@ -73,21 +79,21 @@ class RegisterType extends BaseRegisterType {
 
 		//Add extra phone field
 		if (!empty($options['phone'])) {
-			$form->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'required' => false]);
+			$builder->add('phone', TelType::class, ['attr' => ['placeholder' => 'Your phone'], 'required' => false]);
 		}
 
 		//Add extra pseudonym field
 		if (!empty($options['pseudonym'])) {
-			$form->add('pseudonym', TextType::class, ['attr' => ['placeholder' => 'Your pseudonym'], 'required' => false]);
+			$builder->add('pseudonym', TextType::class, ['attr' => ['placeholder' => 'Your pseudonym'], 'required' => false]);
 		}
 
 		//Add extra subscription field
 		if (!empty($options['subscription'])) {
 			//Add subscription field
-			#$form->add('subscriptions', EntityType::class, ['class' => $options['subscription_class'], 'choice_label' => 'pseudonym', 'preferred_choices' => $options['subscription_favorites'], 'attr' => ['placeholder' => 'Your subscription'], 'choice_translation_domain' => false, 'required' => false, 'data' => $options['subscription_default']]);
-			#$form->add('subscriptions', ChoiceType::class, ['attr' => ['placeholder' => 'Your subscription'], 'choice_attr' => ['class' => 'row'], 'choice_translation_domain' => false, 'choices' => $options['subscription_choices'], 'multiple' => true, 'preferred_choices' => $options['subscription_favorites'], 'required' => false]);
-			$form->add(
-				$form
+			#$builder->add('subscriptions', EntityType::class, ['class' => $options['subscription_class'], 'choice_label' => 'pseudonym', 'preferred_choices' => $options['subscription_favorites'], 'attr' => ['placeholder' => 'Your subscription'], 'choice_translation_domain' => false, 'required' => false, 'data' => $options['subscription_default']]);
+			#$builder->add('subscriptions', ChoiceType::class, ['attr' => ['placeholder' => 'Your subscription'], 'choice_attr' => ['class' => 'row'], 'choice_translation_domain' => false, 'choices' => $options['subscription_choices'], 'multiple' => true, 'preferred_choices' => $options['subscription_favorites'], 'required' => false]);
+			$builder->add(
+				$builder
 					//XXX: by_reference need to be false to allow persisting of data from the read only inverse side
 					->create('subscriptions', ChoiceType::class, ['attr' => ['placeholder' => 'Your subscription']/*, 'by_reference' => false*/, 'choice_attr' => ['class' => 'row'], 'choice_translation_domain' => false, 'choices' => $options['subscription_choices'], 'multiple' => true, 'preferred_choices' => $options['subscription_favorites'], 'required' => false])
 					->addModelTransformer(new SubscriptionTransformer($this->manager))
@@ -98,11 +104,11 @@ class RegisterType extends BaseRegisterType {
 
 		//Add extra zipcode field
 		if (!empty($options['zipcode'])) {
-			$form->add('zipcode', TextType::class, ['attr' => ['placeholder' => 'Your zipcode'], 'required' => false]);
+			$builder->add('zipcode', TextType::class, ['attr' => ['placeholder' => 'Your zipcode'], 'required' => false]);
 		}
 
-		//Return form
-		return $form;
+		//Call parent
+		parent::buildForm($builder, $options);
 	}
 
 	/**
