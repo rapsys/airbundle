@@ -349,7 +349,7 @@ services:
         tags: [ 'form.type' ]
     # Register register form
     Rapsys\AirBundle\Form\RegisterType:
-        arguments: [ '@doctrine.orm.entity_manager' ]
+        arguments: [ '@doctrine.orm.entity_manager', '@rapsyspack.image_util', '@rapsyspack.slugger_util', '@translator' ]
         tags: [ 'form.type' ]
     # Register attribute command
     Rapsys\AirBundle\Command\AttributeCommand:
