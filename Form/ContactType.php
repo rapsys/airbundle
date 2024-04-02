@@ -46,6 +46,9 @@ class ContactType extends CaptchaType {
 	 * {@inheritdoc}
 	 */
 	public function configureOptions(OptionsResolver $resolver): void {
+		//Call parent configure options
+		parent::configureOptions($resolver);
+
 		//Set defaults
 		$resolver->setDefaults(['error_bubbling' => true]);
 	}

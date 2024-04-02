@@ -105,6 +105,7 @@ class DefaultController extends AbstractController {
 		//And give the proper parameters
 		$form = $this->factory->create('Rapsys\AirBundle\Form\ContactType', $data, [
 			'action' => $this->generateUrl('rapsysair_contact'),
+			'captcha' => true,
 			'method' => 'POST'
 		]);
 
