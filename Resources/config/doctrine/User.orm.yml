@@ -54,7 +54,7 @@ Rapsys\AirBundle\Entity\User:
                         name: user_id
                 inverseJoinColumns:
                     id:
-                        name: subscriber_id
+                        name: subscribed_id
         locations:
             targetEntity: Rapsys\AirBundle\Entity\Location
             inversedBy: users
