@@ -976,9 +976,9 @@ SQL;
 
 		//Set the request
 		$req = <<<SQL
-SELECT us.user_id
+SELECT us.subscribed_id
 FROM Rapsys\AirBundle\Entity\UserSubscription AS us
-WHERE us.subscriber_id = :uid
+WHERE us.user_id = :uid
 SQL;
 
 		//Replace bundle entity name by table name
@@ -988,7 +988,7 @@ SQL;
 		$rsm = new ResultSetMapping();
 
 		//Declare user id field
-		$rsm->addScalarResult('user_id', 'user_id', 'integer');
+		$rsm->addScalarResult('subscribed_id', 'subscribed_id', 'integer');
 
 		//Set subscription sql part
 		$subscriptionSql = '';
