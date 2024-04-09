@@ -361,7 +361,7 @@ services:
         tags: [ 'console.command' ]
     # Register calendar2 command
     Rapsys\AirBundle\Command\Calendar2Command:
-        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator', '@google.client', '@twig.markdown.default' ]
+        arguments: [ '@doctrine', '%kernel.default_locale%', '@router', '@rapsyspack.slugger_util', '@translator', '@user.cache', '@google.client', '@twig.markdown.default' ]
         tags: [ 'console.command' ]
     # Register rekey command
     Rapsys\AirBundle\Command\RekeyCommand:
