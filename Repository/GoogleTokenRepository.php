@@ -34,6 +34,7 @@ SELECT
 	b.uid,
 	b.access,
 	b.refresh,
+	b.created,
 	b.expired,
 	b.cids,
 	b.cmails,
@@ -48,6 +49,7 @@ FROM (
 		a.uid,
 		a.access,
 		a.refresh,
+		a.created,
 		a.expired,
 		a.cids,
 		a.cmails,
@@ -61,6 +63,7 @@ FROM (
 			t.user_id AS uid,
 			t.access,
 			t.refresh,
+			t.created,
 			t.expired,
 			GROUP_CONCAT(c.id ORDER BY c.id SEPARATOR "\\n") AS cids,
 			GROUP_CONCAT(c.mail ORDER BY c.id SEPARATOR "\\n") AS cmails,
@@ -92,6 +95,7 @@ SQL;
 			->addScalarResult('uid', 'uid', 'integer')
 			->addScalarResult('access', 'access', 'string')
 			->addScalarResult('refresh', 'refresh', 'string')
+			->addScalarResult('created', 'created', 'datetime')
 			->addScalarResult('expired', 'expired', 'datetime')
 			->addScalarResult('cids', 'cids', 'string')
 			->addScalarResult('cmails', 'cmails', 'string')
@@ -130,6 +134,7 @@ SQL;
 				'uid' => $token['uid'],
 				'access' => $token['access'],
 				'refresh' => $token['refresh'],
+				'created' => $token['created'],
 				'expired' => $token['expired'],
 				'calendars' => [],
 				'dances' => [],
