@@ -106,7 +106,7 @@ SELECT
 	p.profile AS p_profile,
 	p.rate AS p_rate,
 	p.hat AS p_hat,
-	GREATEST(COALESCE(s.updated, 0), COALESCE(l.updated, 0), COALESCE(t.updated, 0), COALESCE(p.updated, 0), COALESCE(MAX(sa.updated), 0), COALESCE(MAX(sau.updated), 0), COALESCE(MAX(sad.updated), 0)) AS modified,
+	GREATEST(s.created, s.updated, l.created, l.updated, t.created, t.updated, COALESCE(a.created, '1970-01-01'), COALESCE(a.updated, '1970-01-01'), COALESCE(ad.created, '1970-01-01'), COALESCE(ad.updated, '1970-01-01'), COALESCE(au.created, '1970-01-01'), COALESCE(au.updated, '1970-01-01'), COALESCE(p.created, '1970-01-01'), COALESCE(p.updated, '1970-01-01'), MAX(GREATEST(COALESCE(sa.created, '1970-01-01'), COALESCE(sa.updated, '1970-01-01'), COALESCE(sad.created, '1970-01-01'), COALESCE(sad.updated, '1970-01-01'), COALESCE(sau.created, '1970-01-01'), COALESCE(sau.updated, '1970-01-01')))) AS modified,
 	GROUP_CONCAT(sa.id ORDER BY sa.user_id SEPARATOR "\\n") AS sa_id,
 	GROUP_CONCAT(IFNULL(sa.score, 'NULL') ORDER BY sa.user_id SEPARATOR "\\n") AS sa_score,
 	GROUP_CONCAT(sa.created ORDER BY sa.user_id SEPARATOR "\\n") AS sa_created,
@@ -122,8 +122,8 @@ LEFT JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 LEFT JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Application AS sa ON (sa.session_id = s.id)
-LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Dance AS sad ON (sad.id = sa.dance_id)
+LEFT JOIN Rapsys\AirBundle\Entity\User AS sau ON (sau.id = sa.user_id)
 WHERE s.id = :id
 GROUP BY s.id
 ORDER BY NULL
@@ -553,12 +553,12 @@ SELECT
 	p.hat AS p_hat,
 	p.rate AS p_rate,
 	p.short AS p_short,
-	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
-	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym,
+	GREATEST(s.created, s.updated, l.created, l.updated, t.created, t.updated, COALESCE(a.created, '1970-01-01'), COALESCE(a.updated, '1970-01-01'), COALESCE(ad.created, '1970-01-01'), COALESCE(ad.updated, '1970-01-01'), COALESCE(au.created, '1970-01-01'), COALESCE(au.updated, '1970-01-01'), COALESCE(p.created, '1970-01-01'), COALESCE(p.updated, '1970-01-01'), MAX(GREATEST(COALESCE(sa.created, '1970-01-01'), COALESCE(sa.updated, '1970-01-01'), COALESCE(sad.created, '1970-01-01'), COALESCE(sad.updated, '1970-01-01'), COALESCE(sau.created, '1970-01-01'), COALESCE(sau.updated, '1970-01-01')))) AS modified,
 	GROUP_CONCAT(sa.dance_id ORDER BY sa.user_id SEPARATOR "\\n") AS sad_id,
 	GROUP_CONCAT(sad.name ORDER BY sa.user_id SEPARATOR "\\n") AS sad_name,
 	GROUP_CONCAT(sad.type ORDER BY sa.user_id SEPARATOR "\\n") AS sad_type,
-	GREATEST(COALESCE(s.updated, 0), COALESCE(l.updated, 0), COALESCE(p.updated, 0), COALESCE(MAX(sa.updated), 0), COALESCE(MAX(sau.updated), 0), COALESCE(MAX(sad.updated), 0)) AS modified
+	GROUP_CONCAT(sa.user_id ORDER BY sa.user_id SEPARATOR "\\n") AS sau_id,
+	GROUP_CONCAT(sau.pseudonym ORDER BY sa.user_id SEPARATOR "\\n") AS sau_pseudonym
 FROM Rapsys\AirBundle\Entity\Session AS s
 JOIN Rapsys\AirBundle\Entity\Location AS l ON (l.id = s.location_id)
 JOIN Rapsys\AirBundle\Entity\Slot AS t ON (t.id = s.slot_id)
@@ -615,15 +615,15 @@ SQL;
 			->addScalarResult('p_rate', 'p_rate', 'integer')
 			->addScalarResult('p_short', 'p_short', 'string')
 			//XXX: is a string because of \n separator
-			->addScalarResult('sau_id', 'sau_id', 'string')
-			//XXX: is a string because of \n separator
-			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
-			//XXX: is a string because of \n separator
 			->addScalarResult('sad_id', 'sad_id', 'string')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sad_name', 'sad_name', 'string')
 			//XXX: is a string because of \n separator
 			->addScalarResult('sad_type', 'sad_type', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sau_id', 'sau_id', 'string')
+			//XXX: is a string because of \n separator
+			->addScalarResult('sau_pseudonym', 'sau_pseudonym', 'string')
 			->addIndexByScalar('id');
 
 		//Fetch result
@@ -943,7 +943,7 @@ SQL;
 	 * @param DateTime $synchronized The synchronized datetime
 	 * @return array The session data
 	 */
-	public function findAllByUserIdSynchronized(int $userId, \DateTime $synchronized): array {
+	public function findAllByUserIdSynchronized(int $userId, \DateTime $synchronized = new \DateTime('1970-01-01')): array {
 		//Set the request
 		$req = <<<SQL
 SELECT ud.dance_id
@@ -1010,7 +1010,7 @@ SELECT
 	s.id,
 	s.date,
 	s.locked,
-	s.updated,
+	GREATEST(s.created, s.updated, l.created, l.updated, a.created, a.updated, ad.created, ad.updated, au.created, au.updated, COALESCE(p.created, '1970-01-01'), COALESCE(p.updated, '1970-01-01')) AS modified,
 	ADDDATE(ADDTIME(s.date, s.begin), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS start,
 	ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY) AS stop,
 	s.location_id AS l_id,
@@ -1044,7 +1044,7 @@ JOIN Rapsys\AirBundle\Entity\Application AS a ON (a.id = s.application_id{$dance
 JOIN Rapsys\AirBundle\Entity\Dance AS ad ON (ad.id = a.dance_id)
 JOIN Rapsys\AirBundle\Entity\User AS au ON (au.id = a.user_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Snippet AS p ON (p.locale = :locale AND p.location_id = s.location_id AND p.user_id = a.user_id)
-WHERE GREATEST(s.created, s.updated, a.created, a.updated, ADDTIME(ADDTIME(s.date, s.begin), s.length)) >= :synchronized
+WHERE GREATEST(GREATEST(s.created, s.updated, l.created, l.updated, a.created, a.updated, ad.created, ad.updated, au.created, au.updated, COALESCE(p.created, '1970-01-01'), COALESCE(p.updated, '1970-01-01')), ADDDATE(ADDTIME(ADDTIME(s.date, s.begin), s.length), INTERVAL IF(s.slot_id = :afterid, 1, 0) DAY)) >= :synchronized
 SQL;
 
 		//Replace bundle entity name by table name
@@ -1060,7 +1060,7 @@ SQL;
 			->addScalarResult('id', 'id', 'integer')
 			->addScalarResult('date', 'date', 'date')
 			->addScalarResult('locked', 'locked', 'datetime')
-			->addScalarResult('updated', 'updated', 'datetime')
+			->addScalarResult('modified', 'modified', 'datetime')
 			->addScalarResult('start', 'start', 'datetime')
 			->addScalarResult('stop', 'stop', 'datetime')
 			->addScalarResult('l_id', 'l_id', 'integer')
@@ -1099,7 +1099,7 @@ SQL;
 			->setParameter('dids', $userDances)
 			->setParameter('uids', $userSubscriptions)
 			->setParameter('synchronized', $synchronized)
-			->getArrayResult();
+			->getResult(AbstractQuery::HYDRATE_ARRAY);
 	}
 
 	/**
