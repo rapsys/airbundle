@@ -134,7 +134,7 @@ FROM (
 		l.latitude,
 		l.longitude,
 		l.indoor,
-		GREATEST(l.created, l.updated, COALESCE(s.created, 0), COALESCE(s.updated, 0)) AS modified,
+		GREATEST(l.created, l.updated, COALESCE(s.created, '1970-01-01'), COALESCE(s.updated, '1970-01-01')) AS modified,
 		l.zipcode,
 		COUNT(s.id) AS count,
 		COUNT(IF(s.date BETWEEN :begin AND :end, s.id, NULL)) AS pcount
@@ -362,7 +362,7 @@ SELECT
 	a.longitude,
 	a.created,
 	a.updated,
-	MAX(GREATEST(a.modified, COALESCE(s.created, 0), COALESCE(s.updated, 0))) AS modified,
+	MAX(GREATEST(a.modified, COALESCE(s.created, '1970-01-01'), COALESCE(s.updated, '1970-01-01'))) AS modified,
 	COUNT(s.id) AS count
 FROM (
 	SELECT
@@ -461,7 +461,7 @@ SELECT
 	a.longitude,
 	a.created,
 	a.updated,
-	MAX(GREATEST(a.modified, COALESCE(s3.created, 0), COALESCE(s3.updated, 0))) AS modified,
+	MAX(GREATEST(a.modified, COALESCE(s3.created, '1970-01-01'), COALESCE(s3.updated, '1970-01-01'))) AS modified,
 	a.pcount,
 	COUNT(s3.id) AS tcount
 FROM (
@@ -473,7 +473,7 @@ FROM (
 		b.longitude,
 		b.created,
 		b.updated,
-		MAX(GREATEST(b.modified, COALESCE(s2.created, 0), COALESCE(s2.updated, 0))) AS modified,
+		MAX(GREATEST(b.modified, COALESCE(s2.created, '1970-01-01'), COALESCE(s2.updated, '1970-01-01'))) AS modified,
 		COUNT(s2.id) AS pcount
 	FROM (
 		SELECT
@@ -716,18 +716,15 @@ SQL;
 	 */
 	public function findComplementBySessionId(int $id): array {
 		//Fetch complement locations
-		$ret = $this->getEntityManager()
-			  ->createQuery('SELECT l.id, l.title FROM Rapsys\AirBundle\Entity\Session s LEFT JOIN Rapsys\AirBundle\Entity\Session s2 WITH s2.id != s.id AND s2.slot = s.slot AND s2.date = s.date LEFT JOIN Rapsys\AirBundle\Entity\Location l WITH l.id != s.location AND (l.id != s2.location OR s2.location IS NULL) WHERE s.id = :sid GROUP BY l.id ORDER BY l.id')
-			->setParameter('sid', $id)
-			->getArrayResult();
-
-		//TODO: try to improve with:
-		#->addIndexByScalar('city');
-
-		//Rekey array
-		$ret = array_column($ret, 'id', 'title');
-
-		return $ret;
+		return array_column(
+			$this->getEntityManager()
+				#->createQuery('SELECT l.id, l.title FROM Rapsys\AirBundle\Entity\Location l JOIN Rapsys\AirBundle\Entity\Session s WITH s.id = :sid LEFT JOIN Rapsys\AirBundle\Entity\Session s2 WITH s2.id != s.id AND s2.slot = s.slot AND s2.date = s.date WHERE l.id != s.location AND s2.location IS NULL GROUP BY l.id ORDER BY l.id')
+				->createQuery('SELECT l.id, l.title FROM Rapsys\AirBundle\Entity\Session s LEFT JOIN Rapsys\AirBundle\Entity\Session s2 WITH s2.id != s.id AND s2.slot = s.slot AND s2.date = s.date LEFT JOIN Rapsys\AirBundle\Entity\Location l WITH l.id != s.location AND (l.id != s2.location OR s2.location IS NULL) WHERE s.id = :sid GROUP BY l.id ORDER BY l.id')
+				->setParameter('sid', $id)
+				->getArrayResult(),
+			'id',
+			'title'
+		);
 	}
 
 	/**
