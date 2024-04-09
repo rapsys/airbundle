@@ -218,9 +218,9 @@ SELECT
 	c.title AS c_title,
 	u.country_id AS o_id,
 	o.title AS o_title,
+	GREATEST(u.created, u.updated, COALESCE(c.created, '1970-01-01'), COALESCE(c.updated, '1970-01-01'), COALESCE(o.created, '1970-01-01'), COALESCE(o.updated, '1970-01-01'), COALESCE(g.created, '1970-01-01'), COALESCE(g.updated, '1970-01-01')) AS modified,
 	GROUP_CONCAT(g.id ORDER BY g.id SEPARATOR "\\n") AS ids,
-	GROUP_CONCAT(g.title ORDER BY g.id SEPARATOR "\\n") AS titles,
-	GREATEST(COALESCE(u.updated, 0), COALESCE(c.updated, 0), COALESCE(o.updated, 0)) AS modified
+	GROUP_CONCAT(g.title ORDER BY g.id SEPARATOR "\\n") AS titles
 FROM Rapsys\AirBundle\Entity\User AS u
 LEFT JOIN Rapsys\AirBundle\Entity\Civility AS c ON (c.id = u.civility_id)
 LEFT JOIN Rapsys\AirBundle\Entity\Country AS o ON (o.id = u.country_id)
@@ -252,11 +252,11 @@ SQL;
 			->addScalarResult('c_title', 'c_title', 'string')
 			->addScalarResult('o_id', 'o_id', 'integer')
 			->addScalarResult('o_title', 'o_title', 'string')
+			->addScalarResult('modified', 'modified', 'datetime')
 			//XXX: is a string because of \n separator
 			->addScalarResult('ids', 'ids', 'string')
 			//XXX: is a string because of \n separator
 			->addScalarResult('titles', 'titles', 'string')
-			->addScalarResult('modified', 'modified', 'datetime')
 			->addIndexByScalar('id');
 
 		//Get result
