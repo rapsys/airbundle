@@ -136,6 +136,7 @@ class CalendarCommand extends Command {
 			//With expired token
 			if ($this->google->isAccessTokenExpired()) {
 				//Refresh token
+				//TODO: better handle internal_failure
 				if (($gRefresh = $this->google->getRefreshToken()) && ($gToken = $this->google->fetchAccessTokenWithRefreshToken($gRefresh)) && empty($gToken['error'])) {
 					//Get google token
 					$googleToken = $this->doctrine->getRepository(GoogleToken::class)->findOneById($token['id']);
@@ -157,6 +158,7 @@ class CalendarCommand extends Command {
 				//Refresh failed
 				} else {
 					//Show error
+					//TODO: remove that and simply log internal failure ?
 					fprintf(STDERR, 'Unable to refresh token %d: %s', $token['id'], $gToken['error']?:'');
 
 					//TODO: warn user by mail ?
@@ -309,6 +311,9 @@ class CalendarCommand extends Command {
 							throw new \LogicException(sprintf('Calendar %s event %s operation failed', $calendar, $this->prefix.$session['id']), 0, $e);
 						}
 					}
+
+					//Sleep
+					usleep(300000);
 				}
 
 				//Get all sessions
