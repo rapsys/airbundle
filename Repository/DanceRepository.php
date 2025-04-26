@@ -14,6 +14,8 @@ namespace Rapsys\AirBundle\Repository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query\ResultSetMapping;
 
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 use Rapsys\AirBundle\Repository;
 
 /**
@@ -156,6 +158,112 @@ SQL;
 			->setParameter('nametype', $nametype)
 			//XXX: instead of array_column on the result
 			->getResult(AbstractQuery::HYDRATE_SCALAR_COLUMN);
+	}
+
+	/**
+	 * Find dance as array by id
+	 *
+	 * @param int $id The dance id
+	 * @return array The dance data
+	 */
+	public function findOneByIdAsArray(int $id): ?array {
+		//Set the request
+		$req = <<<SQL
+SELECT
+	d.id,
+	d.name,
+	d.type,
+	GREATEST(d.created, d.updated) AS modified
+FROM Rapsys\AirBundle\Entity\Dance AS d
+WHERE d.id = :id
+SQL;
+
+		//Replace bundle entity name by table name
+		$req = str_replace($this->tableKeys, $this->tableValues, $req);
+
+		//Get result set mapping instance
+		//XXX: DEBUG: see ../blog.orig/src/Rapsys/BlogBundle/Repository/ArticleRepository.php
+		$rsm = new ResultSetMapping();
+
+		//Declare all fields
+		//XXX: see vendor/doctrine/dbal/lib/Doctrine/DBAL/Types/Types.php
+		//addScalarResult($sqlColName, $resColName, $type = 'string');
+		$rsm->addScalarResult('id', 'id', 'integer')
+			->addScalarResult('name', 'name', 'string')
+			->addScalarResult('type', 'type', 'string')
+			->addScalarResult('modified', 'modified', 'datetime')
+			->addIndexByScalar('id');
+
+		//Get result
+		$result = $this->_em
+			->createNativeQuery($req, $rsm)
+			->setParameter('id', $id)
+			->getOneOrNullResult();
+
+		//Without result
+		if ($result === null) {
+			//Return result
+			return $result;
+		}
+
+		//Set alternates
+		$result['alternates'] = [];
+
+		//Set route
+		$route = 'rapsysair_dance_view';
+
+		//Set route params
+		$routeParams = ['id' => $id];
+
+		//Iterate on each languages
+		foreach($this->languages as $languageId => $language) {
+			//Without current locale
+			if ($languageId !== $this->locale) {
+				//Set titles
+				$titles = [];
+
+				//Set route params locale
+				$routeParams['_locale'] = $languageId;
+
+				//Set route params name
+				$routeParams['name'] = $this->slugger->slug($this->translator->trans($result['name'], [], null, $languageId));
+
+				//Set route params type
+				$routeParams['type'] = $this->slugger->slug($this->translator->trans($result['type'], [], null, $languageId));
+
+				//Iterate on each locales
+				foreach(array_keys($this->languages) as $other) {
+					//Without other locale
+					if ($other !== $languageId) {
+						//Set other locale title
+						$titles[$other] = $this->translator->trans($language, [], null, $other);
+					}
+				}
+
+				//Add alternates locale
+				$result['alternates'][substr($languageId, 0, 2)] = $result['alternates'][str_replace('_', '-', $languageId)] = [
+					'absolute' => $this->router->generate($route, $routeParams, UrlGeneratorInterface::ABSOLUTE_URL),
+					'relative' => $this->router->generate($route, $routeParams),
+					'title' => implode('/', $titles),
+					'translated' => $this->translator->trans($language, [], null, $languageId)
+				];
+			}
+		}
+
+		//Return result
+		return [
+			'id' => $result['id'],
+			'name' => $name = $this->translator->trans($result['name']),
+			'type' => $type = $this->translator->trans($result['type']),
+			'slug' => [
+				'name' => $sname = $this->slugger->slug($name),
+				'type' => $stype = $this->slugger->slug($type)
+			],
+			'modified' => $result['modified'],
+			//XXX: Useless ???
+			'link' => $this->router->generate($route, ['_locale' => $this->locale, 'name' => $sname, 'type' => $stype]+$routeParams),
+			'alternates' => $result['alternates']
+		];
 	}
 
 	/**
