@@ -177,6 +177,12 @@ class WeatherCommand extends DoctrineCommand {
 				//Set stop day
 				$day = $stop->diff((new \DateTime('now'))->setTime(0, 0, 0))->d + 1;
 
+				//Skip 4th day
+				//XXX: accuweather only allow until 3rd day
+				if ($day >= 4) {
+					continue;
+				}
+
 				//Check if zipcode date is set
 				if (!isset($zipcodes[$zipcode][$day])) {
 					$zipcodes[$zipcode][$day] = [ $sessionId => $sessionId ];
