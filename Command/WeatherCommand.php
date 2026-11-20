@@ -59,18 +59,18 @@ class WeatherCommand extends DoctrineCommand {
 		],
 		//Daily uri
 		'daily' => [
-			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/daily-weather-forecast/179142_pc',
-			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/daily-weather-forecast/179145_pc',
-			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/daily-weather-forecast/179146_pc',
-			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/daily-weather-forecast/179147_pc',
-			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/daily-weather-forecast/179148_pc',
-			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/daily-weather-forecast/179150_pc',
-			75010 => 'https://www.accuweather.com/en/fr/paris-10-entrepot/75010/daily-weather-forecast/179151_pc',
-			75012 => 'https://www.accuweather.com/en/fr/paris-12-reuilly/75012/daily-weather-forecast/179153_pc',
-			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/daily-weather-forecast/179154_pc',
-			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/daily-weather-forecast/179156_pc',
-			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/daily-weather-forecast/179160_pc',
-			75116 => 'https://www.accuweather.com/en/fr/paris-16-passy/75116/daily-weather-forecast/179246_pc'
+			75001 => 'https://www.accuweather.com/en/fr/paris-01-louvre/75001/10-day-weather-forecast/179142_pc?page=%7Bpage%7D',
+			75004 => 'https://www.accuweather.com/en/fr/paris-04-hotel-de-ville/75004/10-day-weather-forecast/179145_pc?page=%7Bpage%7D',
+			75005 => 'https://www.accuweather.com/en/fr/paris-05-pantheon/75005/10-day-weather-forecast/179146_pc?page=%7Bpage%7D',
+			75006 => 'https://www.accuweather.com/fr/fr/paris-06-luxembourg/75006/10-day-weather-forecast/179147_pc?page=%7Bpage%7D',
+			75007 => 'https://www.accuweather.com/en/fr/paris-07-palais-bourbon/75007/10-day-weather-forecast/179148_pc?page=%7Bpage%7D',
+			75009 => 'https://www.accuweather.com/en/fr/paris-09-opera/75009/10-day-weather-forecast/179150_pc?page=%7Bpage%7D',
+			75010 => 'https://www.accuweather.com/en/fr/paris-10-entrepot/75010/10-day-weather-forecast/179151_pc?page=%7Bpage%7D',
+			75012 => 'https://www.accuweather.com/en/fr/paris-12-reuilly/75012/10-day-weather-forecast/179153_pc?page=%7Bpage%7D',
+			75013 => 'https://www.accuweather.com/en/fr/paris-13-gobelins/75013/10-day-weather-forecast/179154_pc?page=%7Bpage%7D',
+			75015 => 'https://www.accuweather.com/en/fr/paris-15-vaugirard/75015/10-day-weather-forecast/179156_pc?page=%7Bpage%7D',
+			75019 => 'https://www.accuweather.com/en/fr/paris-19-buttes-chaumont/75019/10-day-weather-forecast/179160_pc?page=%7Bpage%7D',
+			75116 => 'https://www.accuweather.com/en/fr/paris-16-passy/75116/10-day-weather-forecast/179246_pc?page=%7Bpage%7D'
 		]
 	];
 
@@ -223,7 +223,7 @@ class WeatherCommand extends DoctrineCommand {
 		}
 
 		//Init curl
-		$this->curl_init();
+		$this->curl_init($tmpdir);
 
 		//Init data array
 		$data = [];
@@ -516,7 +516,7 @@ class WeatherCommand extends DoctrineCommand {
 	 *
 	 * @return bool|void Return success or exit
 	 */
-	function curl_init() {
+	function curl_init(string $tmpdir) {
 		//Init curl
 		if (($this->ch = curl_init()) === false) {
 			//Display error
@@ -532,6 +532,8 @@ class WeatherCommand extends DoctrineCommand {
 				[
 					//Force http2
 					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
+					//Accept encoding
+					CURLOPT_ACCEPT_ENCODING => '',
 					//Set http headers
 					CURLOPT_HTTPHEADER => [
 						//XXX: it seems that you can disable akamai fucking protection with Pragma: akamai-x-cache-off
@@ -540,25 +542,82 @@ class WeatherCommand extends DoctrineCommand {
 						//XXX: working curl command
 						#curl --http2 --cookie file.jar --cookie-jar file.jar -v -i -k -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' -H 'Accept-Language: en-GB,en;q=0.9' -H 'Cache-Control: no-cache' -H 'Connection: keep-alive' -H 'Host: www.accuweather.com' -H 'Pragma: no-cache' -H 'Upgrade-Insecure-Requests: 1' -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36' 'https://www.accuweather.com/'
 						//Set accept
-						'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+						'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+						//Set encoding
+						'Accept-Encoding: gzip, deflate, br, zstd',
 						//Set accept language
 						'Accept-Language: en-GB,en;q=0.9',
 						//Disable cache
 						'Cache-Control: no-cache',
 						//Keep connection alive
-						'Connection: keep-alive',
+						#XXX: to drop? 'Connection: keep-alive',
+						//Do not track
+						'Dnt: 1',
 						//Disable cache
 						'Pragma: no-cache',
+						//Priority
+						'Priority: u=0, i',
+						//Sec ch ua
+						'Sec-CH-UA: "Chromium";v="148", "Google Chrome";v="148", "Not/A)Brand";v="99"',
+						//Sec ch ua mobile
+						'Sec-CH-Mobile: ?0',
+						//Sec ch ua platform
+						'Sec-CH-UA-Platform: "Windows"',
+						//Sec fetch dest
+						'Sec-Fetch-Dest: document',
+						//Sec fetch mode
+						'Sec-Fetch-Mode: navigate',
+						//Sec fetch site
+						'Sec-Fetch-Site: none',
+						//Sec fetch user
+						'Sec-Fetch-User: ?1',
 						//Force secure requests
 						'Upgrade-Insecure-Requests: 1',
 						//Set user agent
-						'User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+						'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36',
 						//Force akamai cookie
 						//XXX: seems to come from http request
-						'Cookie: AKA_A2=A',
+						#'Cookie: AKA_A2=A',
+						//TODO: add akamai cookie ?
+						//XXX: see https://www.ford.eu/cookie-guide
+						#ak_bmsc: ajouter ? valable un jour ?
+#request-context: appId=cid-v1:69db91ae-4014-4da6-962b-6e1205fccce5
+#< permissions-policy: browsing-topics=()
+#permissions-policy: browsing-topics=()
+#< vary: Accept-Encoding
+#vary: Accept-Encoding
+#< content-encoding: gzip
+#content-encoding: gzip
+#< date: Mon, 23 Mar 2026 22:36:43 GMT
+#date: Mon, 23 Mar 2026 22:36:43 GMT
+#< content-length: 39349
+#content-length: 39349
+#* Added cookie awx_id="1062821a-a1f2-42be-82ec-859a2aac16ef" for domain www.accuweather.com, path /, expire 1805841403
+#< set-cookie: awx_id=1062821a-a1f2-42be-82ec-859a2aac16ef; expires=Tue, 23 Mar 2027 22:36:43 GMT; path=/; secure; httponly
+#set-cookie: awx_id=1062821a-a1f2-42be-82ec-859a2aac16ef; expires=Tue, 23 Mar 2027 22:36:43 GMT; path=/; secure; httponly
+#* Added cookie awx_session_essential="id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A1" for domain www.accuweather.com, path /, expire 1774306003
+#< set-cookie: awx_session_essential=id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A1; expires=Mon, 23 Mar 2026 22:46:43 GMT; path=/; secure; samesite=lax; httponly
+#set-cookie: awx_session_essential=id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A1; expires=Mon, 23 Mar 2026 22:46:43 GMT; path=/; secure; samesite=lax; httponly
+
+#* Replaced cookie awx_id="1062821a-a1f2-42be-82ec-859a2aac16ef" for domain www.accuweather.com, path /, expire 1805841454
+#< set-cookie: awx_id=1062821a-a1f2-42be-82ec-859a2aac16ef; expires=Tue, 23 Mar 2027 22:37:34 GMT; path=/; secure; httponly
+#set-cookie: awx_id=1062821a-a1f2-42be-82ec-859a2aac16ef; expires=Tue, 23 Mar 2027 22:37:34 GMT; path=/; secure; httponly
+#* Replaced cookie awx_session_essential="id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A2" for domain www.accuweather.com, path /, expire 1774306054
+#< set-cookie: awx_session_essential=id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A2; expires=Mon, 23 Mar 2026 22:47:34 GMT; path=/; secure; samesite=lax; httponly
+#set-cookie: awx_session_essential=id%3A614c5979-6977-444e-a900-c0834e6602fb%7CpageView%3A2; expires=Mon, 23 Mar 2026 22:47:34 GMT; path=/; secure; samesite=lax; httponly
+#< strict-transport-security: max-age=15768000 ; includeSubDomains ; preload
+#strict-transport-security: max-age=15768000 ; includeSubDomains ; preload
+#* Added cookie ak_bmsc="010A87851EDC882D1FE84B535E75D0C6~000000000000000000000000000000~YAAQfOIlF3lI//WcAQAAZqrYHB/DJCb/+t9xHWxhT1EDW/Qe8778baYOLuqlhfzRUU1m6YXWfZjRJlfkpMYg5WdzrV2Y0WtHuiTknE9/AMA9MTh82uI4z4xr3Rv3TeZjG+ggc05Sp2rKiyYjHxgq7ZN9fHAFS0Mqab+DTtTtAZaSCeBc96tb+hg0c3TEXZSDRStGppvA1ejPTO1Q3jZ+PIXZ0NzR3LN4DcpmvgtcB1A4vIsIuXhqbsvz6ns2XdKIYgvrdY6v0mJA6+EbAv+O/u0WRlcM1akq5+Cahmm8lgpy52DRuq82lwLR0JwtUHc+JjukuY9bWSi595VZvehTyhnjXHqSY7M1qhpJ9IVR9wFRWWFo5SSOZpEW5xsl+n2Aph4XHkuEKxc2TnqXHA4fdgM=" for domain accuweather.com, path /, expire 1774312654
+#< set-cookie: ak_bmsc=010A87851EDC882D1FE84B535E75D0C6~000000000000000000000000000000~YAAQfOIlF3lI//WcAQAAZqrYHB/DJCb/+t9xHWxhT1EDW/Qe8778baYOLuqlhfzRUU1m6YXWfZjRJlfkpMYg5WdzrV2Y0WtHuiTknE9/AMA9MTh82uI4z4xr3Rv3TeZjG+ggc05Sp2rKiyYjHxgq7ZN9fHAFS0Mqab+DTtTtAZaSCeBc96tb+hg0c3TEXZSDRStGppvA1ejPTO1Q3jZ+PIXZ0NzR3LN4DcpmvgtcB1A4vIsIuXhqbsvz6ns2XdKIYgvrdY6v0mJA6+EbAv+O/u0WRlcM1akq5+Cahmm8lgpy52DRuq82lwLR0JwtUHc+JjukuY9bWSi595VZvehTyhnjXHqSY7M1qhpJ9IVR9wFRWWFo5SSOZpEW5xsl+n2Aph4XHkuEKxc2TnqXHA4fdgM=; Domain=.accuweather.com; Path=/; Expires=Tue, 24 Mar 2026 00:37:34 GMT; Max-Age=7200; HttpOnly
+#set-cookie: ak_bmsc=010A87851EDC882D1FE84B535E75D0C6~000000000000000000000000000000~YAAQfOIlF3lI//WcAQAAZqrYHB/DJCb/+t9xHWxhT1EDW/Qe8778baYOLuqlhfzRUU1m6YXWfZjRJlfkpMYg5WdzrV2Y0WtHuiTknE9/AMA9MTh82uI4z4xr3Rv3TeZjG+ggc05Sp2rKiyYjHxgq7ZN9fHAFS0Mqab+DTtTtAZaSCeBc96tb+hg0c3TEXZSDRStGppvA1ejPTO1Q3jZ+PIXZ0NzR3LN4DcpmvgtcB1A4vIsIuXhqbsvz6ns2XdKIYgvrdY6v0mJA6+EbAv+O/u0WRlcM1akq5+Cahmm8lgpy52DRuq82lwLR0JwtUHc+JjukuY9bWSi595VZvehTyhnjXHqSY7M1qhpJ9IVR9wFRWWFo5SSOZpEW5xsl+n2Aph4XHkuEKxc2TnqXHA4fdgM=; Domain=.accuweather.com; Path=/; Expires=Tue, 24 Mar 2026 00:37:34 GMT; Max-Age=7200; HttpOnly
+#* Added cookie bm_mi="F052B40D9957D87932CF91B3BCD53103~YAAQfOIlF3pI//WcAQAAZqrYHB8MhsqiidkryWWG/FELf+Jop+KjoERXKsZW/oxZ+c6ldIx5C8iwD7ReaDYhYufdjAYrxGXN6LkLRd17iwN/5USm1sOBD3V1XD9K4ftXO6eBsjIxI9lfZvY8KN/HCAMLPn68AbLWCDNyNuku9oOc4cr4CqrTVdoz73o4crl1BVwm2bIxeXGnG5FhznRy3+99KgY6IjinBcHKaUIATLOgrvjwkTKB19/m4DWOpp805vVbaa6EdhuTAM2KjaNK6DUx9WR+GVWBQ63X0SJ+4lAT2qVWCWrfVWmDijgunHoTmQvbJHliBpapOvUe3ShoZOMromAbzvfuSO//PIwGNPEgvq8FDD19nNyZCAArgTkg11pXAgH8jaZRon811vKVu3+nyNM=~1" for domain accuweather.com, path /, expire 1
+#< set-cookie: bm_mi=F052B40D9957D87932CF91B3BCD53103~YAAQfOIlF3pI//WcAQAAZqrYHB8MhsqiidkryWWG/FELf+Jop+KjoERXKsZW/oxZ+c6ldIx5C8iwD7ReaDYhYufdjAYrxGXN6LkLRd17iwN/5USm1sOBD3V1XD9K4ftXO6eBsjIxI9lfZvY8KN/HCAMLPn68AbLWCDNyNuku9oOc4cr4CqrTVdoz73o4crl1BVwm2bIxeXGnG5FhznRy3+99KgY6IjinBcHKaUIATLOgrvjwkTKB19/m4DWOpp805vVbaa6EdhuTAM2KjaNK6DUx9WR+GVWBQ63X0SJ+4lAT2qVWCWrfVWmDijgunHoTmQvbJHliBpapOvUe3ShoZOMromAbzvfuSO//PIwGNPEgvq8FDD19nNyZCAArgTkg11pXAgH8jaZRon811vKVu3+nyNM=~1; Domain=.accuweather.com; Path=/; Expires=Mon, 23 Mar 2026 22:37:34 GMT; Max-Age=0; Secure
+#set-cookie: bm_mi=F052B40D9957D87932CF91B3BCD53103~YAAQfOIlF3pI//WcAQAAZqrYHB8MhsqiidkryWWG/FELf+Jop+KjoERXKsZW/oxZ+c6ldIx5C8iwD7ReaDYhYufdjAYrxGXN6LkLRd17iwN/5USm1sOBD3V1XD9K4ftXO6eBsjIxI9lfZvY8KN/HCAMLPn68AbLWCDNyNuku9oOc4cr4CqrTVdoz73o4crl1BVwm2bIxeXGnG5FhznRy3+99KgY6IjinBcHKaUIATLOgrvjwkTKB19/m4DWOpp805vVbaa6EdhuTAM2KjaNK6DUx9WR+GVWBQ63X0SJ+4lAT2qVWCWrfVWmDijgunHoTmQvbJHliBpapOvUe3ShoZOMromAbzvfuSO//PIwGNPEgvq8FDD19nNyZCAArgTkg11pXAgH8jaZRon811vKVu3+nyNM=~1; Domain=.accuweather.com; Path=/; Expires=Mon, 23 Mar 2026 22:37:34 GMT; Max-Age=0; Secure
+#
+#<
 					],
 					//Enable cookie
-					CURLOPT_COOKIEFILE => '',
+					CURLOPT_COOKIEFILE => $tmpdir.'/cookies.txt',
 					//Disable location following
 					CURLOPT_FOLLOWLOCATION => false,
 					//Set url
