@@ -59,7 +59,11 @@ class AirFixtures extends Fixture {
 		//Dance tree
 		$danceTree = [
 			'Argentine Tango' => [
-			   'Milonga', 'Class and milonga', 'Public class', 'Private class'
+				'Ball',
+				'Ball and class',
+				'Ball and concert',
+				'Public class',
+				'Private class'
 			]
 		];
 
@@ -71,6 +75,23 @@ class AirFixtures extends Fixture {
 				$manager->persist($dance);
 				unset($dance);
 			}
+		}
+
+		//Letter tree
+		$letterTree = [
+			'Ball',
+			'Ball and class',
+			'Ball and concert',
+			'Public class',
+			'Private class'
+		];
+
+		//Create letters
+		$letters = [];
+		foreach($letterTree as $letterTitle) {
+			$letter = new Letter($letterTitle);
+			$manager->persist($letter);
+			unset($letter);
 		}
 
 		//Group tree
