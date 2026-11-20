@@ -385,7 +385,8 @@ services:
     # Register facebook util service
     rapsysair.facebook_util:
         class: 'Rapsys\PackBundle\Util\FacebookUtil'
-        arguments: [ '@router',  '%kernel.project_dir%/var/cache', '%rapsyspack.path%', 'facebook', '%rapsysair.path%/png/facebook.png', { irishgrover: '%rapsysair.path%/ttf/irishgrover.v10.ttf', labelleaurore: '%rapsysair.path%/ttf/labelleaurore.v10.ttf', dejavusans: '%rapsysair.path%/ttf/dejavusans.2.37.ttf', droidsans: '%rapsysair.path%/ttf/droidsans.regular.ttf' } ]
+        arguments: [ '@service_container', '@router', '@rapsyspack.slugger_util' ]
+        #arguments: [ '@router',  '%kernel.project_dir%/var/cache', '%rapsyspack.path%', 'facebook', '%rapsysair.path%/png/facebook.png', { irishgrover: '%rapsysair.path%/ttf/irishgrover.v10.ttf', labelleaurore: '%rapsysair.path%/ttf/labelleaurore.v10.ttf', dejavusans: '%rapsysair.path%/ttf/dejavusans.2.37.ttf', droidsans: '%rapsysair.path%/ttf/droidsans.regular.ttf' } ]
         public: true
     # Register security password_hasher_factory as public
     # XXX: required for command `php bin/console doctrine:`
