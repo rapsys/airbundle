@@ -19,6 +19,14 @@ Rapsys\AirBundle\Entity\User:
             type: string
             length: 5
             nullable: true
+        mid:
+            type: string
+            length: 254
+            nullable: true
+        mip:
+            type: string
+            length: 39
+            nullable: true
     oneToMany:
         applications:
             targetEntity: Rapsys\AirBundle\Entity\Application
