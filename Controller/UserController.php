@@ -618,12 +618,27 @@ class UserController extends BaseUserController {
 			$this->addFlash('notice', $this->translator->trans('To change your password login with your mail and any password then follow the procedure'));
 		}
 
+		#XXX: TODO: voir si c'est pas plus logique de mettre en place la sélection de dance pour tout le monde et utiliser ça comme source de donnée pour les ml auxquelles on souscrit ???
+
+		#if ($this->checker->isGranted('ROLE_ADMIN')) {
+		//Create the DanceType form and give the proper parameters
+		$dance = $this->factory->create('Rapsys\AirBundle\Form\DanceType', $user, [
+			//Set dance choices
+			'dance_choices' => $danceChoices,
+			//Set dance favorites
+			'dance_favorites' => $this->doctrine->getRepository($this->config['class']['dance'])->findIdByNameTypeAsArray($this->config['default']['dance_favorites']),
+		]);
+
 		//Render view
 		return $this->render(
 			//Template
 			$this->config['edit']['view']['name'],
 			//Context
-			['edit' => $edit->createView(), 'sent' => $request->query->get('sent', 0)]+$this->config['edit']['view']['context']
+			[
+				'dance' => $dance->createView(),
+				'edit' => $edit->createView(),
+				'sent' => $request->query->get('sent', 0)
+			]+$this->config['edit']['view']['context']
 		);
 	}
 
