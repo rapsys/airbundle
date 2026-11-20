@@ -290,6 +290,9 @@ class CalendarCommand extends Command {
 						}
 					//Catch exception
 					} catch(\Google\Service\Exception $e) {
+						//Sleep
+						usleep(500000);
+
 						//Identifier already exists
 						if ($e->getCode() == 409) {
 							//Get calendar event
@@ -307,13 +310,19 @@ class CalendarCommand extends Command {
 						//TODO: handle other codes gracefully ? (503 & co)
 						//Other errors
 						} else {
+							//XXX: with a 400 code and too low sequence number, it may be solved by reseting cache key
+							#"reason": "invalid",
+							#"message": "Invalid sequence value. The specified sequence number is be
+							#low the current sequence number of the resource. Re-fetch the resource and
+							#use its sequence number on the following request."
+							#$this->cache->delete($cacheKey);
 							//Throw error
 							throw new \LogicException(sprintf('Calendar %s event %s operation failed', $calendar, $this->prefix.$session['id']), 0, $e);
 						}
 					}
 
 					//Sleep
-					usleep(300000);
+					usleep(500000);
 				}
 
 				//Get all sessions
@@ -339,6 +348,9 @@ class CalendarCommand extends Command {
 							//Drop from events array
 							unset($events[$sid]);
 						}
+
+						//Sleep
+						usleep(500000);
 					}
 				}
 
