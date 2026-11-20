@@ -136,6 +136,23 @@
 		<header>
 			<h2><a href="{{ app.request.requesturi }}">{% trans %}Newsletter{% endtrans %}</a></h2>
 		</header>
-		<p class="center"><span>TODO: add newsletter stuff here ?</span></p>
+		{#
+		<section>
+			{{ form_start(dance) }}
+				<div>
+					{% if dance.dances is defined %}
+						{{ form_row(dance.dances) }}
+					{% endif %}
+
+					{{ form_row(dance.submit) }}
+				</div>
+
+				{ # Render CSRF token etc .# }
+				<footer style="display:none">{{ form_rest(dance) }}</footer>
+			{{ form_end(dance) }}
+		</section>
+		#}
+		<p>TODO: use dances in user profile already using dance.{name,type} combo ???</p>
+		<p class="center"><span>TODO: newsletter configuration here (TBD: winter 2024)</span></p>
 	</article>
 {% endblock %}
