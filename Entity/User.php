@@ -47,6 +47,16 @@ class User extends BaseUser {
 	private ?string $zipcode = null;
 
 	/**
+	 * Mail id
+	 */
+	private ?string $mid = null;
+
+	/**
+	 * Mail ip
+	 */
+	private ?string $mip = null;
+
+	/**
 	 * Applications collection
 	 */
 	private Collection $applications;
@@ -214,6 +224,50 @@ class User extends BaseUser {
 	 */
 	public function getZipcode(): ?string {
 		return $this->zipcode;
+	}
+
+	/**
+	 * Set mail id
+	 *
+	 * @param string $mid
+	 *
+	 * @return User
+	 */
+	public function setMid(?string $mid): User {
+		$this->mid = $mid;
+
+		return $this;
+	}
+
+	/**
+	 * Get mail id
+	 *
+	 * @return string
+	 */
+	public function getMid(): ?string {
+		return $this->mid;
+	}
+
+	/**
+	 * Set mail ip
+	 *
+	 * @param string $mip
+	 *
+	 * @return User
+	 */
+	public function setMip(?string $mip): User {
+		$this->mip = $mip;
+
+		return $this;
+	}
+
+	/**
+	 * Get mail ip
+	 *
+	 * @return string
+	 */
+	public function getMip(): ?string {
+		return $this->mip;
 	}
 
 	/**
