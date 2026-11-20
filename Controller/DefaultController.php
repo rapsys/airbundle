@@ -218,17 +218,23 @@ class DefaultController extends AbstractController {
 			//Set locations
 			$locations = [];
 
+			//Set coordinates
+			$coordinates = [];
+
 			//Iterate on each cities
 			foreach($this->context['cities'] as $city) {
 				//Iterate on each locations
 				foreach($city['locations'] as $location) {
 					//Add location
 					$locations[$location['id']] = $location;
+					//Add coordinates
+					$coordinates[] = [ $location['latitude'], $location['longitude'] ];
 				}
 			}
 
 			//Add multi
-			$this->context['multimap'] = $this->map->getMultiMap($this->translator->trans('Libre Air cities sector map'), $this->modified->getTimestamp(), $locations);
+			$this->context['multimap'] = $this->image->getMulti($coordinates);
+			#$this->translator->trans('Libre Air cities sector map'), $this->modified->getTimestamp(), $locations
 
 			//Set cities
 			$cities = array_map(function ($v) { return $v['in']; }, $this->context['cities']);
