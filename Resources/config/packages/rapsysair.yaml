@@ -5,6 +5,8 @@ parameters:
     # Hostname
     env(RAPSYSAIR_HOSTNAME): "Ch4ng3m3!"
     # Scheme
+    #XXX: TODO: replace with: parameters:router.request_context.scheme: 'https'+parameters:asset.request_context.secure: true or framework:router:default_uri: 'https://airlibre.localhost/'
+    #XXX: TODO: or SITE_BASE_SCHEME + SITE_BASE_HOST ?
     env(RAPSYSAIR_SCHEME): "https"
 
 # RapsysAir configuration
@@ -331,6 +333,10 @@ services:
     # Register application form
     Rapsys\AirBundle\Form\ApplicationType:
         arguments: [ '@doctrine', '@translator' ]
+        tags: [ 'form.type' ]
+    # Register dance form
+    Rapsys\AirBundle\Form\DanceType:
+        arguments: [ '@doctrine.orm.entity_manager', '@translator' ]
         tags: [ 'form.type' ]
     # Register location form
     Rapsys\AirBundle\Form\LocationType:
